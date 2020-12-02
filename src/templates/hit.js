@@ -1,5 +1,5 @@
 Vue.component('hit', {
- template:`<div><a v-bind:href="href">{{title}}</a><br><small>{{exerpt}}</small></div>`,
+ template:`<div><a v-bind:href="href">{{title}}</a><br><small v-html="exerpt"></small></div>`,
    props:{
      hit:Object
    },
@@ -18,6 +18,27 @@ Vue.component('hit', {
          }
      },
      exerpt:function(){
+
+       console.log(this.hit.highlight);
+
+       if(this.hit.highlight){
+
+         if(this.hit.highlight['P:'+ this.$root.exerptID + '.txtField']){
+            return this.hit.highlight['P:'+ this.$root.exerptID + '.txtField'][0];
+          }else if(this.hit.highlight['P:'+ this.$root.exerptID + '.wpgField']){
+            return this.hit.highlight['P:'+ this.$root.exerptID + '.wpgField'][0];
+          }else{
+             return '?';
+           }
+
+
+
+
+
+       }else{
+
+
+
  if(this.hit._source['P:'+ this.$root.exerptID]){
     if(this.hit._source['P:'+ this.$root.exerptID].txtField){
        return this.hit._source['P:'+ this.$root.exerptID].txtField[0]
@@ -29,6 +50,7 @@ Vue.component('hit', {
    }else{
      return '?';
    }
+ }
      },
      href:function(){
        return this.hit._source.subject.title

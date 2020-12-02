@@ -86,6 +86,7 @@ root.aggs = JSON.parse(data.result.aggs);
 },
 computed:{
   pagers:function(e){
+  if(this.total >= this.size){
     if(this.from == 0){
       var pages = [];
     }else{
@@ -98,10 +99,12 @@ computed:{
     }
     if(this.from + this.size >=  this.total - this.size){
 
-  }else{
-    pages.push('>');
-  }
-    return pages;
+    }else{
+      pages.push('>');
+    }
+
+      return pages;
+    }
   },
 
 

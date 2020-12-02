@@ -97,7 +97,17 @@ if($paramz['from']){
 		                     ]
 									 ]
 		             ],
+								 "highlight" => [
+									 "pre_tags" => ["<b>"],
+                   "post_tags" => ["</b>"],
+									   "require_field_match" => false,
+											"fields" => [
+													'P:' . '540' . '.txtField' => ["fragment_size" => 50, "number_of_fragments" => 1]
+
+											]
+										],
 		             'aggs' => $filters
+
 		         ]
 		     ];
 
@@ -177,7 +187,7 @@ array_push($params['body']['query']['bool']['must'], $sterm );
 		        $aggs = json_encode($results['aggregations']);
 
 
-
+// $total = json_encode($results);
 		$this->getResult()->addValue( 'result', 'total' , $total );
 		$this->getResult()->addValue( 'result', 'hits' , $hits );
 		$this->getResult()->addValue( 'result', 'aggs' , $aggs );
