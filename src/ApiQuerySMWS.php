@@ -23,30 +23,7 @@ class ApiQuerySMWS extends ApiQueryBase {
 		$paramz = $this->extractRequestParams();
 
 
-		if($paramz['scroll']){
 
-
-
-			$hosts = [
-					'localhost:9200',         // IP + Port
-			];
-			$client = ClientBuilder::create()           // Instantiate a new ClientBuilder
-													->setHosts($hosts)      // Set the hosts
-													->build();              // Build the client object
-
-
-
-			$params = [
-					"scroll" => "5m",
-					"scroll_id" => $paramz['scroll']
-			];
-
-
-
-$results = $client->scroll($params);
-
-
-		}else{
 
 
 
@@ -103,10 +80,15 @@ $results = $client->scroll($params);
 		                         ->build();              // Build the client object
 
 
+if($paramz['from']){
+	$from = $paramz['from'];
+}else{
+	$from = 0;
+}
 
 		     $params = [
 		         'index' => 'smw-data-' . strtolower( wfWikiID() ),
-						 "scroll" => "5m",
+						 "from" => $from,
 	           "size" => 2,
 		         'body' => [
 		             'query' => [
@@ -185,7 +167,7 @@ array_push($params['body']['query']['bool']['must'], $sterm );
 
 		     $results = $client->search($params);
 
-				 }
+
 
 
 
@@ -224,7 +206,7 @@ array_push($params['body']['query']['bool']['must'], $sterm );
 			'term' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
-			'scroll' => [
+			'from' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
 			'features' => [

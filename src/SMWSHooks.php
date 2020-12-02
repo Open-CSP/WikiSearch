@@ -73,7 +73,7 @@ class SMWSHooks {
 
      $params = [
          'index' => 'smw-data-' . strtolower( wfWikiID() ),
-         "scroll" => "5m",
+         "from" => 0,
          "size" => 2,
          'body' => [
              'query' => [
@@ -116,7 +116,8 @@ class SMWSHooks {
     $output .= 'total: "' . $total . '",';
     $output .= 'hits: ' . $hits . ',';
     $output .= 'aggs: ' . $aggs . ',';
-    $output .= 'scroll: ' .  $scrollID . ',';
+    $output .= 'size: ' .  '2' . ',';
+    $output .= 'from: ' .  '0' . ',';
     $output .= 'selected: [] ,';
     $output .= 'term: "" ,';
     $output .= 'main: "' . $param1 . '",';

@@ -8,5 +8,17 @@
 </ul>
 </div>
 <hit v-for="hit in hits" v-bind:hit="hit" ></hit>
-<div @click="nextz" >Next></div>
+<div  >
+<span v-for="pager in pagers" @click="nextz" v-bind:class="activepage(pager)">
+  <b v-if="activepage(pager)">
+    {{pager}}
+  </b>
+  <span v-else>
+    {{pager}}
+  </span>
+</span>
+
+
+
+</div>
 </div>
