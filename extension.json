@@ -1,0 +1,28 @@
+{
+	"name": "ExampleExtension",
+	"author": "Me",
+	"version": "1.0.0",
+	"url": "https://www.mediawiki.org/wiki/Extension:SMWS",
+	"descriptionmsg": "swms-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "parserhook",
+	"MessagesDirs": {
+		"SMWS": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"SMWSHooks": "src/SMWSHooks.php",
+		"ApiQuerySMWS": "src/ApiQuerySMWS.php"
+	},
+	"ExtensionMessagesFiles": {
+		"SMWSMagic": "SMWS.i18n.php"
+	},
+	"APIMetaModules": {
+	  "smws": "ApiQuerySMWS"
+  },
+	"Hooks": {
+		"ParserFirstCallInit": "SMWSHooks::onParserFirstCallInit"
+	},
+	"manifest_version": 1
+}
