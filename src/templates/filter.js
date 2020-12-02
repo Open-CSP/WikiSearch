@@ -24,7 +24,7 @@ Vue.component('agg', {
            format: 'json',
            smfilter: JSON.stringify(root.selected),
            smtitle: root.titleID,
-           smexerpt: root.exerptID,
+           smexerpt: root.exerpt,
            smaggs: Object.keys(root.aggs).join(),
            smclass:root.main,
           smterm:root.term

@@ -9,7 +9,7 @@ methods:{
         format: 'json',
         smfilter: JSON.stringify(root.selected),
         smtitle: root.titleID,
-        smexerpt: root.exerptID,
+        smexerpt: root.exerpt,
         smaggs: Object.keys(root.aggs).join(),
         smclass:root.main,
         smterm:e.target.value
@@ -59,7 +59,7 @@ var params = {
     format: 'json',
     smfilter: JSON.stringify(root.selected),
     smtitle: root.titleID,
-    smexerpt: root.exerptID,
+    smexerpt: root.exerpt,
     smaggs: Object.keys(root.aggs).join(),
     smclass:root.main,
     smfrom:this.from

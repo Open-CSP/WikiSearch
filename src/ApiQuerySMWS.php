@@ -45,6 +45,12 @@ class ApiQuerySMWS extends ApiQueryBase {
 
 		     $exerptIDProperty = new DIProperty( $param_exerpt );
 		     $exerptID = $store->getObjectIds()->getSMWPropertyID($exerptIDProperty);
+				 $exerptType = $exerptIDProperty->findPropertyValueType();
+				 if($exerptType == "_txt"){
+					 $extype = "txtField";
+				 }else{
+					 $extype = "wpgField";
+				 }
 
 
 		     $filters = [];
@@ -102,7 +108,7 @@ if($paramz['from']){
                    "post_tags" => ["</b>"],
 									   "require_field_match" => false,
 											"fields" => [
-													'P:' . '540' . '.txtField' => ["fragment_size" => 50, "number_of_fragments" => 1]
+													'P:' . $exerptID . '.' . $extype => ["fragment_size" => 50, "number_of_fragments" => 1]
 
 											]
 										],
@@ -187,7 +193,7 @@ array_push($params['body']['query']['bool']['must'], $sterm );
 		        $aggs = json_encode($results['aggregations']);
 
 
-// $total = json_encode($results);
+// $total = $param_exerpt;
 		$this->getResult()->addValue( 'result', 'total' , $total );
 		$this->getResult()->addValue( 'result', 'hits' , $hits );
 		$this->getResult()->addValue( 'result', 'aggs' , $aggs );

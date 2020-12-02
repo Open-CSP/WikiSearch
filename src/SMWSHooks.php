@@ -103,6 +103,7 @@ class SMWSHooks {
 
 
     $output .= str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . '/templates/app.app'));
+    $output .= '<style>' . str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . '/smws.css')) . '</style>';
 
 
     $output .= '<script>' . str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . '/templates/filter.js')) . '</script>';
@@ -122,6 +123,7 @@ class SMWSHooks {
     $output .= 'main: "' . $param1 . '",';
     $output .= 'filterIDs:' . json_encode($filtersIDs) . ',';
     $output .= 'exerptID: ' . $exerptID . ',';
+    $output .= 'exerpt: "' . $param_exerpt . '",';
     $output .= 'titleID: ' . $titleID ;
     $output .= '}, ' . str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . "/templates/main.js") ) . ' });</script>';
 
