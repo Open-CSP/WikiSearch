@@ -1,11 +1,11 @@
 <div id="app">
-  <input type="text" placeholder="search" @change="search" >  Found <b>{{total}}</b> results
+
   <div class="smws">
 
 
   <div class="smws--filter">
 
-
+ <input type="text" placeholder="search" @change="search" >
   <h2>Filters</h2>
   <div v-for="(ag, name, index) in aggs">
     <h3>{{name}}</h3>
@@ -16,6 +16,7 @@
   </div>
   </div>
   <div class="smws--hits">
+    Found <b>{{total}}</b> results<br>
   <hit v-for="hit in hits" v-bind:hit="hit" ></hit>
   <div  >
     <span v-for="pager in pagers" @click="nextz" v-bind:class="activepage(pager)">

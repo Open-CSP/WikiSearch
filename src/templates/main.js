@@ -62,7 +62,9 @@ var params = {
     smexerpt: root.exerpt,
     smaggs: Object.keys(root.aggs).join(),
     smclass:root.main,
-    smfrom:this.from
+    smfrom:this.from,
+    smterm:root.term
+
 
 
    },

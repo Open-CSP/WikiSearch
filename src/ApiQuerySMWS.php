@@ -108,7 +108,7 @@ if($paramz['from']){
                    "post_tags" => ["</b>"],
 									   "require_field_match" => false,
 											"fields" => [
-													'P:' . $exerptID . '.' . $extype => ["fragment_size" => 50, "number_of_fragments" => 1]
+													'P:' . $exerptID . '.' . $extype => ["fragment_size" => 150, "number_of_fragments" => 1]
 
 											]
 										],

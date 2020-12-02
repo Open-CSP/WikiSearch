@@ -37,19 +37,6 @@ Vue.component('hit', {
 
        }else{
 
-
-
- if(this.hit._source['P:'+ this.$root.exerptID]){
-    if(this.hit._source['P:'+ this.$root.exerptID].txtField){
-       return this.hit._source['P:'+ this.$root.exerptID].txtField[0]
-     }else if(this.hit._source['P:'+ this.$root.exerptID].wpgField) {
-       return this.hit._source['P:'+ this.$root.exerptID].wpgField[0]
-     }else{
-        return 'set exerpt property'
-     }
-   }else{
-     return '?';
-   }
  }
      },
      href:function(){
