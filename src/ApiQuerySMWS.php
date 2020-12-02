@@ -89,7 +89,7 @@ if($paramz['from']){
 		     $params = [
 		         'index' => 'smw-data-' . strtolower( wfWikiID() ),
 						 "from" => $from,
-	           "size" => 2,
+	           "size" => 10,
 		         'body' => [
 		             'query' => [
 		                 'bool' => [

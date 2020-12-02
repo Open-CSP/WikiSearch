@@ -1,6 +1,7 @@
 methods:{
   search:function(e){
     var root = this;
+    this.from = 0;
    this.term = e.target.value;
     var params = {
         action: 'query',
@@ -36,14 +37,19 @@ activepage:function(pager){
 nextz:function(e){
   var root = this;
 
-  if(e.target.innerText == '<' || e.target.innerText == '>'){
-   if(e.target.innerText == '<'){
+
+
+
+
+   if(e.target.innerText.trim() == '<'){
+     console.log('back');
+
     this.from = this.from - this.size;
+  }else if(e.target.innerText.trim() == '>'){
+        this.from = this.from + this.size;
   }else{
-      this.from = this.from + this.size;
-  }
-}else{
-  this.from = this.size * (e.target.innerText - 1);
+     console.log('nr');
+  this.from = Math.ceil(this.size * (e.target.innerText - 1));
 }
 
 
@@ -86,13 +92,15 @@ computed:{
       var pages = ['<'];
     }
     var i;
-    var step = this.total / this.size;
+    var step = Math.ceil(this.total / this.size);
     for (i = 0; i < step; i++) {
       pages.push(i + 1)
     }
-    if(this.from + this.size ==  this.total - this.size){
+    if(this.from + this.size >=  this.total - this.size){
+
+  }else{
     pages.push('>');
-    }
+  }
     return pages;
   },
 

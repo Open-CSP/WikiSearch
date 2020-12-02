@@ -74,7 +74,7 @@ class SMWSHooks {
      $params = [
          'index' => 'smw-data-' . strtolower( wfWikiID() ),
          "from" => 0,
-         "size" => 2,
+         "size" => 10,
          'body' => [
              'query' => [
                  'bool' => [
@@ -94,7 +94,6 @@ class SMWSHooks {
 
 
 
-        $scrollID = json_encode($results['_scroll_id']);
        $total = json_encode($results['hits']['total']);
        $hits =  json_encode($results['hits']['hits']);
         $aggs = json_encode($results['aggregations']);
@@ -116,7 +115,7 @@ class SMWSHooks {
     $output .= 'total: "' . $total . '",';
     $output .= 'hits: ' . $hits . ',';
     $output .= 'aggs: ' . $aggs . ',';
-    $output .= 'size: ' .  '2' . ',';
+    $output .= 'size: ' .  '10' . ',';
     $output .= 'from: ' .  '0' . ',';
     $output .= 'selected: [] ,';
     $output .= 'term: "" ,';

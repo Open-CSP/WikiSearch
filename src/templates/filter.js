@@ -17,6 +17,7 @@ Vue.component('agg', {
    methods:{
      filter:function(e){
        var root = this.$root;
+           root.from = 0;
        var params = {
            action: 'query',
            meta: 'smws',
