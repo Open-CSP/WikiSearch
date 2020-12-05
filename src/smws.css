@@ -4,6 +4,7 @@
     grid-gap: 2em;
 }
 .smws--main {
+    transition: filter .2s ease-in-out;
     display: grid;
     grid-gap: 2em;
     grid-template-rows: auto 1fr auto;
@@ -13,6 +14,32 @@
 
 }
 
+.smws--filter ul {
+    list-style: none;
+    padding: 0;
+    margin-left: 0;
+}
+.smws--filter label {
+cursor: pointer;
+margin: 0;
+}
+
+.smws--filter input[type="checkbox"] {
+    cursor: pointer;
+}
 .smws--hits{
 
+}
+.smws--loading{
+  filter: blur(1px);
+}
+.smws--pager {
+    justify-self: end;
+}
+.smws--pager span {
+    cursor: pointer;
+    padding: 7px 4px;
+}
+.smws--pager span:hover {
+    background: lightgray;
 }

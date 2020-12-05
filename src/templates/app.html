@@ -12,12 +12,15 @@
     <h3>{{name}}</h3>
     <ul>
       <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:index="i" v-bind:name="name"></agg>
-      <li v-if="aggs[name].buckets.length > 5 && !open.includes(name)" @click="more(name)">More ><li>
+      <li v-if="aggs[name].buckets.length > 5" @click="more(name)">
+        <span v-if="open.includes(name)" >Less ></span>
+        <span v-else >More ></span>
+        <li>
     </ul>
   </div>
   </div>
   </div>
-  <div class="smws--main">
+  <div v-bind:class="mainloading">
     <div class="smws--results">
     Found <b>{{total}}</b> results<br>
     </div>

@@ -1,6 +1,15 @@
 methods:{
+  more:function(prop){
+var index = this.open.indexOf(prop);
+  if (index > -1) {
+    this.open.splice(index, 1);
+  }else{
+    this.open.push(prop);
+     }
+  },
   search:function(e){
     var root = this;
+    root.loading = true;
     this.from = 0;
    this.term = e.target.value;
     var params = {
@@ -12,7 +21,8 @@ methods:{
         smexerpt: root.exerpt,
         smaggs: Object.keys(root.aggs).join(),
         smclass:root.main,
-        smterm:e.target.value
+        smterm:e.target.value,
+          smdates:JSON.stringify(root.dates)
 
 
        },
@@ -23,6 +33,7 @@ methods:{
     root.total = data.result.total;
     root.hits = JSON.parse(data.result.hits);
     root.aggs = JSON.parse(data.result.aggs);
+    root.loading = false;
 
 
 
@@ -36,7 +47,7 @@ activepage:function(pager){
 },
 nextz:function(e){
   var root = this;
-
+ root.loading = true;
 
 
 
@@ -63,7 +74,9 @@ var params = {
     smaggs: Object.keys(root.aggs).join(),
     smclass:root.main,
     smfrom:this.from,
-    smterm:root.term
+    smterm:root.term,
+    smdates:JSON.stringify(root.dates)
+
 
 
 
@@ -75,7 +88,7 @@ console.log( data );
 root.total = data.result.total;
 root.hits = JSON.parse(data.result.hits);
 root.aggs = JSON.parse(data.result.aggs);
-
+root.loading = false;
 
 
 });
@@ -87,6 +100,25 @@ root.aggs = JSON.parse(data.result.aggs);
 
 },
 computed:{
+  mainloading:function(){
+    if(this.loading){
+      return 'smws--main smws--loading';
+    }else{
+      return 'smws--main';
+    }
+
+  },
+  sort:function(){
+    this.aggs.Date.buckets = this.aggs.Date.buckets.filter(function(el){
+
+      if(el.doc_count > 0){
+        console.log(el);
+        return el;
+      }
+    }).reverse();
+
+
+  },
   pagers:function(e){
   if(this.total >= this.size){
     if(this.from == 0){

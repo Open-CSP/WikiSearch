@@ -1,4 +1,4 @@
-<div id="app">
+<?php echo`<div id="app">
 
   <div class="smws">
 
@@ -39,4 +39,4 @@
   </div>
 
     </div>
-</div>
+</div>`;

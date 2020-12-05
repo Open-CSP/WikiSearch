@@ -91,6 +91,15 @@ if($paramz['from']){
 	$from = 0;
 }
 
+$filters['Date'] =  [
+"date_range" => [
+		"field" => "P:29.datField",
+		"ranges" => json_decode($paramz['dates'], true)
+]
+];
+
+
+
 		     $params = [
 		         'index' => 'smw-data-' . strtolower( wfWikiID() ),
 						 "from" => $from,
@@ -122,12 +131,12 @@ if($paramz['filter']){
 
 	$infilters = json_decode($paramz['filter'], true);
 
-	$infilters_key = $infilters[0]['key'];
-	$infilters_val = $infilters[0]['value'];
+
 
 $nar = [];
 foreach ($infilters as $key => $value) {
 
+if($value['key']){
 
 	$zzIDProperty = new DIProperty( $value['key'] );
 	$zzID = $store->getObjectIds()->getSMWPropertyID($zzIDProperty);
@@ -145,8 +154,19 @@ foreach ($infilters as $key => $value) {
 		 ]
 	 ];
 	 array_push($nar, $ara);
+}else{
+
+ array_push($nar, $value);
 
 }
+}
+
+
+
+
+
+
+//{ "range": { "P:29.datField": { "gte": 2459176.0000000, "lte": 2459182.0000000}}}
 
 
 $params['body']['query']['bool']['filter'] = $nar;
@@ -193,7 +213,12 @@ array_push($params['body']['query']['bool']['must'], $sterm );
 		        $aggs = json_encode($results['aggregations']);
 
 
-// $total = $param_exerpt;
+//$total = $paramz['range'];
+
+//json_decode($paramz['dates'], true);
+
+
+
 		$this->getResult()->addValue( 'result', 'total' , $total );
 		$this->getResult()->addValue( 'result', 'hits' , $hits );
 		$this->getResult()->addValue( 'result', 'aggs' , $aggs );
@@ -209,7 +234,13 @@ array_push($params['body']['query']['bool']['must'], $sterm );
 			'filter' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
+			'range' => [
+				ApiBase::PARAM_TYPE => 'string',
+			],
 			'title' => [
+				ApiBase::PARAM_TYPE => 'string',
+			],
+			'dates' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
 			'exerpt' => [
