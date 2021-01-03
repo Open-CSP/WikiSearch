@@ -2,6 +2,7 @@
 
 class ApiQuerySMWS extends ApiQueryBase {
 
+
 	/**
 	 * @param ApiQuery $query
 	 * @param string $moduleName
@@ -14,20 +15,12 @@ class ApiQuerySMWS extends ApiQueryBase {
 	public function execute() {
 		$paramz = $this->extractRequestParams();
 
-  $classIDProperty_params = explode("=", $paramz['class']);
-
-
 		$search_params = [
- 			 class1 => $classIDProperty_params[0],
- 			 class2 => $classIDProperty_params[1],
- 			 facets => $paramz['aggs'],
- 			 title  => $paramz['title'],
- 			 exerpt => $paramz['exerpt'],
 			 term   => $paramz['term'],
 			 from   => $paramz['from'],
 			 dates => json_decode($paramz['dates']),
-			 filters => $paramz['filter']
-
+			 filters => $paramz['filter'],
+			 page => $paramz['page']
  		 ];
 
 
@@ -35,33 +28,21 @@ class ApiQuerySMWS extends ApiQueryBase {
 
 
 		$this->getResult()->addValue( 'result', 'total' , $output['total'] );
-		$this->getResult()->addValue( 'result', 'hits' , $output['hits'] );
-		$this->getResult()->addValue( 'result', 'aggs' , $output['aggs'] );
+		$this->getResult()->addValue( 'result', 'hits' , json_encode($output['hits']) );
+		$this->getResult()->addValue( 'result', 'aggs' , json_encode($output['aggs']) );
 
 	}
 
 	/** @inheritDoc */
 	public function getAllowedParams() {
 		return [
-			'class' => [
+			'page' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
 			'filter' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
-			'range' => [
-				ApiBase::PARAM_TYPE => 'string',
-			],
-			'title' => [
-				ApiBase::PARAM_TYPE => 'string',
-			],
 			'dates' => [
-				ApiBase::PARAM_TYPE => 'string',
-			],
-			'exerpt' => [
-				ApiBase::PARAM_TYPE => 'string',
-			],
-			'aggs' => [
 				ApiBase::PARAM_TYPE => 'string',
 			],
 			'term' => [
@@ -69,11 +50,7 @@ class ApiQuerySMWS extends ApiQueryBase {
 			],
 			'from' => [
 				ApiBase::PARAM_TYPE => 'string',
-			],
-			'features' => [
-				ApiBase::PARAM_TYPE => 'string',
-				ApiBase::PARAM_ISMULTI => true,
-			],
+			]
 		];
 	}
 

@@ -31,7 +31,7 @@
   <hit v-for="(hit, i) in hits" v-bind:hit="hit" v-bind:key="i"></hit>
   </div>
   <div  class="smws--pager">
-    <span v-for="pager in pagers" @click="nextz" v-bind:class="activepage(pager)">
+    <span v-for="pager in pagers" @click="next" v-bind:class="activepage(pager)">
       <b v-if="activepage(pager)">
         {{pager}}
       </b>

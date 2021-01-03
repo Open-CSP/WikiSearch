@@ -2,8 +2,7 @@
 
 class SMWSHooks {
 
- public static $smwsloaded = "false";
-
+  public static $smwsloaded = "false";
 
   public static function onParserFirstCallInit( Parser $parser ) {
 
@@ -12,51 +11,47 @@ class SMWSHooks {
 
   public static function renderSMWS( Parser $parser, $param1 = '', $param_filters = '', $param_title = '', $param_exerpt = '') {
 
-self::$smwsloaded = "true";
+    //set true for onBeforePageDisplay hook
+    self::$smwsloaded = "true";
 
-//create date range
-
+    //create date range
 
     // 2451544 = 2000- 1- 1
-    $tim = date("Y") - 2000;
-
-    //print_r($tim * 365);
-
+    $timestamp = 2451544;
+    $date_start = date("Y") - 2000;
     $origin = new DateTime('2000/01/01');
     $target = new DateTime(date("Y/m/d"));
     $interval = $origin->diff($target)->format('%R%a');
-    //  Print_r($interval->format('%R%a') - 7);
 
+    $date_ranges = [];
 
-    $ranzes = [];
-
-    array_push($ranzes, [
+    array_push($date_ranges, [
       "key" => "Last Week",
-      "from" => ($interval -7) + 2451544,
-      "to" => $interval + 2451544
+      "from" => ($interval -7) + $timestamp,
+      "to" => $interval + $timestamp
     ]);
 
-    array_push($ranzes, [
+    array_push($date_ranges, [
       "key" => "Last month",
-      "from" => ($interval - 31) + 2451544,
-      "to" => $interval + 2451544
+      "from" => ($interval - 31) + $timestamp,
+      "to" => $interval + $timestamp
     ]);
 
-    array_push($ranzes, [
+    array_push($date_ranges, [
       "key" => "Last Quarter",
-      "from" => ($interval - 92) + 2451544,
-      "to" => $interval + 2451544
+      "from" => ($interval - 92) + $timestamp,
+      "to" => $interval + $timestamp
     ]);
 
-    for ($i=0; $i < $tim; $i++) {
-      $days = $tim - ($i - 1);
+    for ($i=0; $i < $date_start; $i++) {
+      $days = $date_start - ($i - 1);
       $to = $days * 365;
       $from = $to - 365;
       $key = date("Y") - $i;
-      array_push($ranzes, [
+      array_push($date_ranges, [
         "key" => strval($key),
-        "from" => $from + 2451544,
-        "to" => $to + 2451544
+        "from" => $from + $timestamp,
+        "to" => $to + $timestamp
       ]);
     };
 
@@ -69,51 +64,26 @@ self::$smwsloaded = "true";
       facets => $param_filters,
       title  => $param_title,
       exerpt => $param_exerpt,
-      dates => $ranzes,
-      config => true
+      dates => $date_ranges,
     ];
 
 
-    $dno = WSSearch::dosearch($search_params);
-
-
-    $total = $dno['total'];
-    $hits =  $dno['hits'];
-    $aggs = $dno['aggs'];
+    $output_params = WSSearch::dosearch($search_params);
+    $output_params['exerpt'] = $param_exerpt;
+    $output_params['dates'] = $date_ranges;
 
 
 
-
-  //  $output = '<script src="https://cdn.jsdelivr.net/npm/vue"></script>';
-
-
-
-    //  $content = return_output('some/file.php');
-      $output .= "<script>var vueinitdata = { total: " . $total ;
-      $output .= ", hits: ". $hits ;
-      $output .= ", aggs: " . $aggs ;
-      $output .= ", orgaggs: '" . $param_filters ;
-      $output .= "', dates:" . json_encode($ranzes) ;
-      $output .= ",  main: '" . $param1 ;
-      $output .= "',  filterIDs:" . $dno['filterids'] ;
-      $output .= ",  exerptID: '" . $dno['exerptid'] ;
-      $output .= "',    exerpt: '" . $param_exerpt ;
-      $output .= "',   titleID: '" . $dno['titleid'] . "'}</script>";
-
-
-
+    $output .= "<script>var vueinitdata = " . json_encode($output_params) . "</script>";
     $output .= str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . '/templates/app.html'));
 
-      return [ $output, 'noparse' => true, 'isHTML' => true ];
-    }
-
-
-
+    return [ $output, 'noparse' => true, 'isHTML' => true ];
+  }
 
   public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
     if(self::$smwsloaded == "true"){
-   $out->addModules( 'ext.app' );
- }
-}
+      $out->addModules( 'ext.app' );
+    }
+  }
 
 }
