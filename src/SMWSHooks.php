@@ -14,6 +14,9 @@ class SMWSHooks {
     //set true for onBeforePageDisplay hook
     self::$smwsloaded = "true";
 
+
+
+
     //create date range
 
     // 2451544 = 2000- 1- 1
@@ -59,12 +62,12 @@ class SMWSHooks {
 
 
     $search_params = [
-      class1 => $classIDProperty_params[0],
-      class2 => $classIDProperty_params[1],
-      facets => $param_filters,
-      title  => $param_title,
-      exerpt => $param_exerpt,
-      dates => $date_ranges,
+      "class1" => $classIDProperty_params[0],
+      "class2" => $classIDProperty_params[1],
+      "facets" => $param_filters,
+      "title"  => $param_title,
+      "exerpt" => $param_exerpt,
+      "dates" => $date_ranges,
     ];
 
 
@@ -72,9 +75,9 @@ class SMWSHooks {
     $output_params['exerpt'] = $param_exerpt;
     $output_params['dates'] = $date_ranges;
 
+  //  print_r($output_params['aggs']);
 
-
-    $output .= "<script>var vueinitdata = " . json_encode($output_params) . "</script>";
+    $output = "<script>var vueinitdata = " . json_encode($output_params) . "</script>";
     $output .= str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . '/templates/app.html'));
 
     return [ $output, 'noparse' => true, 'isHTML' => true ];

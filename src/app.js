@@ -89,8 +89,8 @@ Vue.component('agg', {
   }
 });
 
-
-var app = new Vue({ el: "#app",
+// dev mode, replace with "var app ="
+window.app = new Vue({ el: "#app",
   data:{
     total: vueinitdata.total,
     hits: vueinitdata.hits,

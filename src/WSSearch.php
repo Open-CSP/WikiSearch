@@ -6,27 +6,28 @@ use SMW\ApplicationFactory;
 
 class WSSearch{
 
+  //function to translate SMW properties to interal ids, and get the property type
+
+  private static function buildPropertyObject($input, $store){
+    $IDProperty = new DIProperty( $input );
+    $ID = $store->getObjectIds()->getSMWPropertyID($IDProperty);
+    $Type = $IDProperty->findPropertyValueType();
+
+    if($Type == "_txt"){
+      $ftype = "txtField";
+    }else{
+      $ftype = "wpgField";
+    }
+    return ["id" => $ID, "type" => $ftype, "name" => $input];
+  }
+
+
   public static function dosearch($search_params) {
 
     $store = ApplicationFactory::getInstance()->getStore();
 
-    //function to translate SMW properties to interal ids, and get the property type
-    function buildPropertyObject($input, $store){
-      $IDProperty = new DIProperty( $input );
-      $ID = $store->getObjectIds()->getSMWPropertyID($IDProperty);
-      $Type = $IDProperty->findPropertyValueType();
-
-      if($Type == "_txt"){
-        $ftype = "txtField";
-      }else{
-        $ftype = "wpgField";
-      }
-      return [id => $ID, type => $ftype, name => $input];
-    }
-
-
-    // if from api call get original parser function parameters from the page
-    if($search_params['page']){
+    // if from api  get original parser function parameters from the page
+    if(isset($search_params['page'])){
 
       $pagetitle = Title::newfromText($search_params['page']);
       $revision = Revision::newFromTitle( $pagetitle );
@@ -36,7 +37,7 @@ class WSSearch{
       $content = $revision->getContent( Revision::RAW );
       $text = $content->getNativeData();
 
-      //add regex for matching parser function {{#WSSearch:}}
+      //FUTURE add regex for matching parser function {{#WSSearch:}}
 
       $search_params['facets'] = explode("|", $text)[1];
       $search_params['title'] = explode("|", $text)[2];
@@ -48,9 +49,9 @@ class WSSearch{
     }
 
 
-    $_class = buildPropertyObject($search_params['class1'] , $store);
-    $_title = buildPropertyObject($search_params['title'] , $store);
-    $_exerpt = buildPropertyObject($search_params['exerpt'] , $store);
+    $_class = self::buildPropertyObject($search_params['class1'] , $store);
+    $_title = self::buildPropertyObject($search_params['title'] , $store);
+    $_exerpt = self::buildPropertyObject($search_params['exerpt'] , $store);
 
     $filters = [];
     $filtersIDs = [];
@@ -60,10 +61,10 @@ class WSSearch{
     foreach (explode(",", $search_params['facets']) as $key => $value) {
       $vars = explode("=", $value);
       $val = $vars[0];
-      if($vars[1]){
+      if(isset($vars[1])){
         $translations[$val] = $vars[1];
       }
-      $_filter = buildPropertyObject($val , $store);
+      $_filter = self::buildPropertyObject($val , $store);
 
       array_unshift($filtersIDs, $_filter['id'] );
 
@@ -74,14 +75,14 @@ class WSSearch{
       ];
     }
 
-    if($search_params['from']){
+    if(isset($search_params['from'])){
       $from = $search_params['from'];
     }else{
       $from = 0;
     }
 
     //create date aggs query
-    if($search_params['dates']){
+    if(isset($search_params['dates'])){
       $filters['Date'] =  [
         "date_range" => [
           "field" => "P:29.datField",
@@ -125,12 +126,12 @@ class WSSearch{
       ];
 
 
-     //create active filters query
-      if($search_params['filters']){
+      //create active filters query
+      if(isset($search_params['filters'])){
         $infilters = json_decode($search_params['filters'], true);
         foreach ($infilters as $key => $value) {
           if($value['key']){
-            $activefilter = buildPropertyObject($value['key'] , $store);
+            $activefilter = self::buildPropertyObject($value['key'] , $store);
             $termfield = [
               "term" => [
                 "P:" . $activefilter['id'] . "." . $activefilter['type'] . ".keyword" => $value['value']
@@ -143,8 +144,8 @@ class WSSearch{
         }
       }
 
-      //create search term query
-      if($search_params['term']){
+      //create search term query if search term is not empty
+      if(isset($search_params['term']) && $search_params['term']){
 
         $sterm = [
           "bool" => [
@@ -176,70 +177,33 @@ class WSSearch{
       $client = ClientBuilder::create()->setHosts($hosts)->build();
       $results = $client->search($params);
 
+      //join facet translations
 
-
-      // ugly code for property translation
-
-      if($_SERVER['SERVER_NAME'] == 'localhost'){
-        $endPoint = 'http://localhost/wiki1.31/api.php';
-      }else{
-        $endPoint = 'https://' . $_SERVER['SERVER_NAME'] . '/api.php';
-      }
-
-
-      foreach ($translations as $key => $value) {
-        $vars = explode(":", $value);
-
-        $params4 = [
-          "action" => "ask",
-          "query" => "[[Class::" . $vars[0] . "]]|?" . $key . "|?" . $vars[1] ."|sort=" . $vars[1] . "|order=asc|link=none",
-          "format" => "json"
-        ];
-
-        $ch = curl_init();
-
-        curl_setopt( $ch, CURLOPT_URL, $endPoint );
-        curl_setopt( $ch, CURLOPT_POST, true );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $params4 ) );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt( $ch, CURLOPT_COOKIEJAR, "cookie.txt" );
-        curl_setopt( $ch, CURLOPT_COOKIEFILE, "cookie.txt" );
-
-        $outputs = curl_exec( $ch );
-        curl_close( $ch );
-        $list = [];
-        $d = $vars[1];
-
-        foreach (json_decode($outputs)->query->results as $key2 => $value2) {
-          if($value2->printouts->$d[0]->fulltext){
-            if($value2->printouts->$key[0]->fulltext){
-              $list[$value2->printouts->$key[0]->fulltext] = $value2->printouts->$d[0]->fulltext;
-            }else{
-              $list[$value2->printouts->$key[0]] = $value2->printouts->$d[0]->fulltext;
-            }
-          }else{
-            if($value2->printouts->$key[0]->fulltext){
-              $list[$value2->printouts->$key[0]->fulltext] = $value2->printouts->$d[0];
-            }else{
-              $list[$value2->printouts->$key[0]] = $value2->printouts->$d[0];
+      foreach ($results['aggregations'] as $key => $value) {
+        if(isset($translations[$key])){
+          $vars = explode(":", $translations[$key]);
+          //  translate namsepace id
+          if($vars[0] = "namespace"){
+            foreach ($results['aggregations'][$key]['buckets'] as $key3 => $value3) {
+              $namespace = MWNamespace::getCanonicalName($value3['key']);
+              $results['aggregations'][$key]['buckets'][$key3]['name'] = $namespace;
             }
           }
-        }
-        //add translations to the aggrigation buckets
-        foreach ($results['aggregations'][$key]['buckets'] as $key3 => $value3) {
-          $results['aggregations'][$key]['buckets'][$key3]['name'] = $list[$value3['key'] ];
+          //add future translations here
         }
       }
-      //end ugly code
 
 
-    $output = [ total => $results['hits']['total'],
-      hits => $results['hits']['hits'],
-      aggs => $results['aggregations']
+      //output
+
+
+      $output = [ "total" => $results['hits']['total'],
+      "hits" => $results['hits']['hits'],
+      "aggs" => $results['aggregations']
     ];
 
     // extra data for vue init
-    if(!$search_params['page']){
+    if(!isset($search_params['page'])){
       $output['filterIDs'] = $filtersIDs;
       $output['titleID'] =  $_title['id'];
       $output['exerptID'] =  $_exerpt['id'];

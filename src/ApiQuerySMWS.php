@@ -16,11 +16,11 @@ class ApiQuerySMWS extends ApiQueryBase {
 		$paramz = $this->extractRequestParams();
 
 		$search_params = [
-			 term   => $paramz['term'],
-			 from   => $paramz['from'],
-			 dates => json_decode($paramz['dates']),
-			 filters => $paramz['filter'],
-			 page => $paramz['page']
+			 "term"   => $paramz['term'],
+			 "from"   => $paramz['from'],
+			 "dates" => json_decode($paramz['dates']),
+			 "filters" => $paramz['filter'],
+			 "page" => $paramz['page']
  		 ];
 
 
