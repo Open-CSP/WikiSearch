@@ -96,23 +96,30 @@ class WSSearch{
       "size" => 10,
       'body' => [
         'query' => [
-          'bool' => [
-            'must' => [
-              [ 'match' => [ 'P:' . $_class['id'] . '.txtField' => $search_params['class2'] ] ],
+          "constant_score"=> [
+            "filter"=> [
+              'bool' => [
+                'must' => [[
+                  'bool' => [
+                    'filter' => [
+                      [ 'term' => [ 'P:' . $_class['id'] . '.txtField.keyword' => $search_params['class2'] ] ],
+                    ]
+                  ]
+                ]
+              ]]
             ]
+
           ]
         ],
         "highlight" => [
           "pre_tags" => ["<b>"],
           "post_tags" => ["</b>"],
-          "require_field_match" => false,
           "fields" => [
-            'P:' . $_exerpt['id'] . '.' . $_exerpt['type'] => ["fragment_size" => 150, "number_of_fragments" => 1]
+            'text_raw' => ["fragment_size" => 150, "number_of_fragments" => 1]
 
           ]
         ],
         'aggs' => $filters
-
       ]
     ];
 
@@ -134,15 +141,15 @@ class WSSearch{
               "P:" . $activefilter['id'] . "." . $activefilter['type'] . ".keyword" => $value['value']
             ]
           ];
-          array_push($nar, $ara);
+          array_push($params['body']['query']["constant_score"]['filter']['bool']['must'][0]['bool']['filter'], $ara);
         }else{
 
-          array_push($nar, $value);
+          array_push($params['body']['query']["constant_score"]['filter']['bool']['must'][0]['bool']['filter'], $value);
 
         }
       }
 
-      $params['body']['query']['bool']['filter'] = $nar;
+
 
     }
 
@@ -166,7 +173,7 @@ class WSSearch{
         ]
       ];
 
-      array_push($params['body']['query']['bool']['must'], $sterm );
+      array_push($params['body']['query']["constant_score"]['filter']['bool']['must'], $sterm );
 
     }
 

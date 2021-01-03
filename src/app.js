@@ -28,7 +28,9 @@ Vue.component('hit', {
         }else if(this.hit.highlight['P:'+ this.$root.exerptID + '.wpgField']){
           return this.hit.highlight['P:'+ this.$root.exerptID + '.wpgField'][0];
         }else{
-          return '?';
+            if(this.hit.highlight['text_raw']){
+          return this.hit.highlight['text_raw'][0];
+        }
         }
       }else{
       }
