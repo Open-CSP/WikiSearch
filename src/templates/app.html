@@ -7,11 +7,14 @@
 
  <input type="text" placeholder="search" @change="search" class="form-control">
   <h2>Filters</h2>
+  <ul>
+    <li v-for="drop in dropdown"></li>
+  <ul/>
   <div class="smws--filter">{{sort}}
   <div v-for="(name, index) in Object.keys(aggs).sort()">
     <h3>{{name}}</h3>
     <ul>
-      <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:index="i" v-bind:name="name"></agg>
+      <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:key="i" v-bind:index="i" v-bind:name="name"></agg>
       <li v-if="aggs[name].buckets.length > 5" @click="more(name)">
         <span v-if="open.includes(name)" >Less ></span>
         <span v-else >More ></span>
@@ -25,7 +28,7 @@
     Found <b>{{total}}</b> results<br>
     </div>
     <div class="smws--hits">
-  <hit v-for="hit in hits" v-bind:hit="hit" ></hit>
+  <hit v-for="(hit, i) in hits" v-bind:hit="hit" v-bind:key="i"></hit>
   </div>
   <div  class="smws--pager">
     <span v-for="pager in pagers" @click="nextz" v-bind:class="activepage(pager)">
@@ -36,7 +39,6 @@
         {{pager}}
       </span>
     </span>
-
 
     </div>
   </div>

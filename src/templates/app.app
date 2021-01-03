@@ -39,4 +39,5 @@
   </div>
 
     </div>
+    <input type="range">
 </div>

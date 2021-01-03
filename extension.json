@@ -1,5 +1,5 @@
 {
-	"name": "ExampleExtension",
+	"name": "SMWS",
 	"author": "Me",
 	"version": "1.0.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:SMWS",
@@ -11,9 +11,32 @@
 			"i18n"
 		]
 	},
+	"ResourceModules": {
+		"ext.app": {
+			"dependencies": [
+				"ext.vue"
+			],
+			"scripts": [
+						"app.js"
+					],
+					"styles": [
+						"app.css"
+					]
+			},
+			"ext.vue": {
+				"scripts": [
+							"vue.js"
+						]
+			}
+	},
+		"ResourceFileModulePaths": {
+		"localBasePath": "src",
+		"remoteExtPath": "SMWS/src"
+	},
 	"AutoloadClasses": {
 		"SMWSHooks": "src/SMWSHooks.php",
-		"ApiQuerySMWS": "src/ApiQuerySMWS.php"
+		"ApiQuerySMWS": "src/ApiQuerySMWS.php",
+		"WSSearch": "src/WSSearch.php"
 	},
 	"ExtensionMessagesFiles": {
 		"SMWSMagic": "SMWS.i18n.php"
@@ -22,7 +45,10 @@
 	  "smws": "ApiQuerySMWS"
   },
 	"Hooks": {
-		"ParserFirstCallInit": "SMWSHooks::onParserFirstCallInit"
+		"ParserFirstCallInit": "SMWSHooks::onParserFirstCallInit",
+		"BeforePageDisplay": [
+			"SMWSHooks::onBeforePageDisplay"
+		]
 	},
 	"manifest_version": 1
 }

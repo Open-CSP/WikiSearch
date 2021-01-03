@@ -1,11 +1,18 @@
 Vue.component('agg', {
- template:`<li v-show="show" ><label><input type="checkbox"  @change="filter" v-model="$root.selected" v-bind:value="val"> {{agg.key}} ({{agg.doc_count}})</label></li>`,
+ template:`<li v-show="show" ><label><input type="checkbox"  @change="filter" v-model="$root.selected" v-bind:value="val"> {{title}} ({{agg.doc_count}})</label></li>`,
    props:{
      agg:Object,
      name:String,
      index:Number
    },
    computed:{
+     title:function(){
+       if(this.agg.name){
+         return this.agg.name;
+       }else{
+         return this.agg.key;
+       }
+     },
      show:function(){
        if(this.index < 5 || this.$root.open.includes(this.name)){
           if(this.agg.doc_count > 0){
