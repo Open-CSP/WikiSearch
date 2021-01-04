@@ -84,7 +84,7 @@ Vue.component('agg', {
   },
   methods:{
     filter:function(e){
-      this.$root.api(0);
+      this.$root.api(0, this.$root.term);
     }
   }
 });
