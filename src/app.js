@@ -48,7 +48,7 @@ Vue.component('hit', {
 
 
 Vue.component('agg', {
-  template:`<li v-show="show" ><label><input type="checkbox"  @change="filter" v-model="$root.selected" v-bind:value="val"> {{title}} ({{agg.doc_count}})</label></li>`,
+  template:`<li v-show="show" ><label><input type="checkbox" v-bind:id="name + agg.key" @change="filter" v-model="$root.selected" v-bind:value="val"> {{title}} ({{agg.doc_count}})</label></li>`,
   props:{
     agg:Object,
     name:String,
@@ -71,7 +71,7 @@ Vue.component('agg', {
     },
     val:function(){
       if(this.name == 'Date' ){
-        return  { "range": { "P:29.datField": { "gte": Number(this.agg.from+'.0000000'), "lte": Number(this.agg.to+'.0000000')}}};
+        return  { "value" : this.agg.key , "key": this.name,  "range": { "P:29.datField": { "gte": Number(this.agg.from+'.0000000'), "lte": Number(this.agg.to+'.0000000')}}};
       }else{
         return {value:this.agg.key, key:this.name};
       }
@@ -97,12 +97,12 @@ window.app = new Vue({ el: "#app",
     aggs: vueinitdata.aggs ,
     size:10,
     from: 0,
-    selected: [],
+    selected: vueinitdata.selected ,
     open: [],
     rangeFrom: 0,
     rangeTo: 80,
     dropdown: [],
-    term: "" ,
+    term: vueinitdata.term ,
     loading: false ,
     dates:vueinitdata.dates,
     filterIDs:vueinitdata.filterIDs,
@@ -110,12 +110,18 @@ window.app = new Vue({ el: "#app",
     exerpt: vueinitdata.exerpt,
     titleID: vueinitdata.titleID
   },
+
   methods:{
     api:function(from, term){
+
       var root = this;
       root.loading = true;
       root.from = from;
       root.term = term
+
+
+      history.pushState({page: 1}, "title 1", this.urlstring() );
+
       var params = {
         action: 'query',
         meta: 'smws',
@@ -136,6 +142,36 @@ window.app = new Vue({ el: "#app",
         root.loading = false;
 
       })
+    },
+    urlstring:function(){
+
+      var url = "?";
+
+      if(this.from > 0){
+        url += "&offset="+ this.from;
+      }
+
+      if(this.term){
+        url += "&term="+ this.term;
+      }
+
+     if(this.selected.length){
+       url += "&filters=";
+       var filtersarray = [];
+      this.selected.forEach(function(item, i){
+        if(item.range){
+          filtersarray.push("range:"+item.range["P:29.datField"].gte+"|"+item.range["P:29.datField"].lte);
+        }else{
+          filtersarray.push(""+item.key+":"+item.value+"");
+        }
+      });
+      url += filtersarray.join();
+    }
+      return encodeURI(url);
+    },
+    clearfilters:function(e){
+      this.selected = [];
+      this.api(0, this.term);
     },
     more:function(prop){
       var index = this.open.indexOf(prop);

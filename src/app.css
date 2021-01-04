@@ -9,7 +9,24 @@
     grid-gap: 2em;
     grid-template-rows: auto 1fr auto;
 }
+.smws--selectedfilters:hover {
+    background: #efefef;
+}
 
+.smws--selectedfilters:after {
+    content: "×";
+    position: absolute;
+    color: #767676;
+    right: 4px;
+}
+.smws--selectedfilters {
+    border: 1px solid #767676;
+    padding: 0 1em 0 .5em;
+    box-sizing: border-box;
+    border-radius: 10px;
+    position: relative;
+    margin: .1em;
+}
 .smws--filter {
 
 }

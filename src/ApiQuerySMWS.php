@@ -19,7 +19,7 @@ class ApiQuerySMWS extends ApiQueryBase {
 			 "term"   => $paramz['term'],
 			 "from"   => $paramz['from'],
 			 "dates" => json_decode($paramz['dates']),
-			 "filters" => $paramz['filter'],
+			 "filters" => json_decode($paramz['filter'], true),
 			 "page" => $paramz['page']
  		 ];
 

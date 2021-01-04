@@ -1,8 +1,10 @@
 <div id="app">
   <div class="smws" >
     <div class="smws--side">
-      <input type="text" placeholder="search" @change="search" class="form-control">
+      <input type="text" placeholder="search" @change="search" class="form-control" v-bind:value="term" />
       <h2>Filters</h2>
+      <label class="smws--selectedfilters" v-for="activefilter in selected" v-bind:for="activefilter.key + '' + activefilter.value">{{activefilter.value ?  activefilter.value : activefilter.name }}</label>
+      <button v-if="selected.length" @click="clearfilters">Clear all</button>
       <ul>
         <li v-for="drop in dropdown"></li>
       <ul/>
@@ -39,4 +41,3 @@
     </div>
     </div>
   </div>
-</div>

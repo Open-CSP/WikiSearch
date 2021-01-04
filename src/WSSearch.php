@@ -128,9 +128,9 @@ class WSSearch{
 
       //create active filters query
       if(isset($search_params['filters'])){
-        $infilters = json_decode($search_params['filters'], true);
+        $infilters = $search_params['filters'];
         foreach ($infilters as $key => $value) {
-          if($value['key']){
+          if(!isset($value['range'])){
             $activefilter = self::buildPropertyObject($value['key'] , $store);
             $termfield = [
               "term" => [
@@ -139,6 +139,9 @@ class WSSearch{
             ];
             array_push($params['body']['query']["constant_score"]['filter']['bool']['must'][0]['bool']['filter'], $termfield );
           }else{
+
+             unset($value["value"] );
+              unset($value["key"] );
             array_push($params['body']['query']["constant_score"]['filter']['bool']['must'][0]['bool']['filter'], $value);
           }
         }

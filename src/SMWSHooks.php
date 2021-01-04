@@ -16,7 +16,6 @@ class SMWSHooks {
 
 
 
-
     //create date range
 
     // 2451544 = 2000- 1- 1
@@ -70,10 +69,40 @@ class SMWSHooks {
       "dates" => $date_ranges,
     ];
 
+    //check url parameters
+    if(isset($_GET["term"])){
+      $search_params["term"] = $_GET["term"];
+    }
+
+    if(isset($_GET["filters"])){
+      $urlfilters = [];
+      $activefilters =  explode(",", $_GET["filters"]);
+      foreach ($activefilters as $key => $value) {
+          $filteritem = explode(":", $value);
+          if($filteritem[0] == "range"){
+           $ranges = explode("|", $filteritem[1]);
+            array_push($urlfilters,   ["range" => ["P:29.datField" => ["gte" => $ranges[0], "lte" => $ranges[1] ] ] ]);
+          }else{
+            array_push($urlfilters,   ["value" => $filteritem[1], "key" => $filteritem[0] ]);
+        }
+      }
+     $search_params["filters"] = $urlfilters;
+    }
 
     $output_params = WSSearch::dosearch($search_params);
     $output_params['exerpt'] = $param_exerpt;
     $output_params['dates'] = $date_ranges;
+
+    if(isset($_GET["term"])){
+      $output_params['term'] = $_GET["term"];
+    }
+
+    if(isset($_GET["filters"])){
+        $output_params['selected'] = $urlfilters;
+    }else{
+        $output_params['selected'] = [];
+    }
+
 
   //  print_r($output_params['aggs']);
 
