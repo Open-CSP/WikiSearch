@@ -1,5 +1,5 @@
 Vue.component('hit', {
-  template:'<div class="wssearch--hit" ><div class="wssearch--hit--info"><span>Page:{{hit._source.subject.title}}</span>•<span>{{date}}</span></div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href" class="wssearch--hit--link">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><div class="wssearch--hit--body" v-html="exerpt"></div></div>',
+  template:'<div class="wssearch--hit" ><div class="wssearch--hit--info"><span>{{hit._source.subject.namespacename ? "Page|"+ hit._source.subject.namespacename + ":" : "Page|" }}{{hit._source.subject.title}}</span>•<span>{{date}}</span></div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href" class="wssearch--hit--link">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><div class="wssearch--hit--body" v-html="exerpt"></div></div>',
   props:{
     hit:Object
   },
@@ -85,11 +85,11 @@ window.app = new Vue({ el: "#app",
     total: vueinitdata.total,
     hits: vueinitdata.hits,
     aggs: vueinitdata.aggs,
-    size:10,
+    size:1,
     from: 0,
     selected: vueinitdata.selected ,
     open: [],
-    monthnames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Nov","Dec"],
+    monthnames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep", "Oct","Nov","Dec"],
     rangeFrom: 0,
     rangeTo: 80,
     dropdown: [],
@@ -117,6 +117,7 @@ window.app = new Vue({ el: "#app",
         format: 'json',
         smfilter: JSON.stringify(root.selected),
         smterm:root.term,
+        smfrom:root.from,
         smpage:mw.config.values.wgPageName,
         smdates:JSON.stringify(root.dates)
       },

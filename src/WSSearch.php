@@ -86,6 +86,7 @@ class WSSearch{
       $from = 0;
     }
 
+
     //create date aggs query
     if(isset($search_params['dates'])){
       $filters['Date'] =  [
