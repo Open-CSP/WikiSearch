@@ -15,15 +15,6 @@ class SMWSHooks {
     self::$smwsloaded = "true";
 
 
-// {{#wssearch:class=page
-//   |group
-//   |tag
-//   |space=namespace
-//   |?Title
-//   |?Exerpt
-//   |?Modification date
-// }}
-
 if(isset($args[0])) {
   $param1 =   trim( $frame->expand($args[0]));
   unset($args[0]);
@@ -37,10 +28,6 @@ if(isset($args[0])) {
      array_push($param_filters,  $p_val);
     }
   }
-  $param_title = $param_results[0];
-  $param_exerpt = $param_results[1];
-//print_r($param_filters);
-//  return;
 }
 
 
@@ -94,8 +81,6 @@ if(isset($args[0])) {
       "class2" => $classIDProperty_params[1],
       "facets" => $param_filters,
       "outputs" =>  $param_results,
-      "title"  => $param_title,
-      "exerpt" => $param_exerpt,
       "dates" => $date_ranges,
     ];
 
@@ -124,7 +109,6 @@ if(isset($args[0])) {
     }
 
     $output_params = WSSearch::dosearch($search_params);
-    $output_params['exerpt'] = $param_exerpt;
     $output_params['dates'] = $date_ranges;
 
     if(isset($_GET["term"])){

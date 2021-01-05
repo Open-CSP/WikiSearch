@@ -46,27 +46,17 @@ class WSSearch{
       $search_params['class2'] = $exploood[1];
 
       unset($args[0]);
-      $param_results2 = [];
-      $param_filters2 = [];
+      $param_filterlist = [];
       foreach ($args as $key => $value) {
         $p_val = trim($value);
-        if($p_val[0] == "?"){
-         array_push($param_results2,  substr($p_val, 1));
-        }else{
-         array_push($param_filters2,  $p_val);
+        if($p_val[0] != "?"){
+         array_push($param_filterlist,  $p_val);
         }
       }
-
-
-      $search_params['title'] = $param_results2[0];
-      $search_params['exerpt']= $param_results2[1];
-      $search_params['facets'] = $param_filters2;
+      $search_params['facets'] = $param_filterlist;
     }
 
-
     $_class = self::buildPropertyObject($search_params['class1'] , $store);
-    $_title = self::buildPropertyObject($search_params['title'] , $store);
-    $_exerpt = self::buildPropertyObject($search_params['exerpt'] , $store);
 
     $filters = [];
     $filtersIDs = [];
@@ -215,8 +205,6 @@ class WSSearch{
           //add future translations here
         }
       }
-
-
       //output
 
 
@@ -227,10 +215,14 @@ class WSSearch{
 
     // extra data for vue init
     if(!isset($search_params['page'])){
+      $outputs = [];
+      foreach ($search_params['outputs'] as $key => $value) {
+         $_output = self::buildPropertyObject($value , $store);
+         $outputs[$_output["id"]] = $_output["type"];
+      }
+
       $output['filterIDs'] = $filtersIDs;
-      $output['titleID'] =  $_title['id'];
-      $output['exerptID'] =  $_exerpt['id'];
-      $output['hitIDs'] = [$_title['id'] => $_title['type'], $_exerpt['id'] => $_exerpt['type'] ];
+      $output['hitIDs'] = $outputs;
     };
     return $output;
   }

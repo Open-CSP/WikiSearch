@@ -6,18 +6,10 @@ Vue.component('hit', {
   computed:{
     exerpt:function(){
       if(this.hit.highlight){
-        if(this.hit.highlight['P:'+ this.$root.exerptID + '.txtField']){
-          return this.hit.highlight['P:'+ this.$root.exerptID + '.txtField'][0];
-        }else if(this.hit.highlight['P:'+ this.$root.exerptID + '.wpgField']){
-          return this.hit.highlight['P:'+ this.$root.exerptID + '.wpgField'][0];
-        }else{
           if(this.hit.highlight['text_raw']){
             return this.hit.highlight['text_raw'][0];
           }
         }
-      }else{
-
-      }
     },
     href:function(){
       return this.hit._source.subject.title;
@@ -93,11 +85,8 @@ window.app = new Vue({ el: "#app",
     loading: false ,
     dates:vueinitdata.dates,
     filterIDs:vueinitdata.filterIDs,
-    hitIDs:vueinitdata.hitIDs,
-    exerptID: vueinitdata.exerptID,
-    exerpt: vueinitdata.exerpt,
-    titleID: vueinitdata.titleID
-  },
+    hitIDs:vueinitdata.hitIDs
+    },
 
   methods:{
     api:function(from, term){
