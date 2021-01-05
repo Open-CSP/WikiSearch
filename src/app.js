@@ -13,9 +13,9 @@ Vue.component('hit', {
     },
     href:function(){
     if(this.hit._source.subject.namespacename){
-       return this.hit._source.subject.namespacename + ":" + this.hit._source.subject.title;
+       return "/" + this.hit._source.subject.namespacename + ":" + this.hit._source.subject.title;
      }else{
-       return this.hit._source.subject.title;
+       return "/" + this.hit._source.subject.title;
      }
     }
   },
