@@ -10,7 +10,7 @@
     <div class="wssearch--filters">
       <h2>Filters</h2>
       <div >{{sort}}
-        <div v-for="(name, index) in Object.keys(aggs).sort()">
+        <div v-for="(name, index) in Object.keys(aggs).sort()" v-bind:key="index">
           <h3 v-if="aggs[name].buckets.length" >{{name}}</h3>
           <ul>
             <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:key="i" v-bind:index="i" v-bind:name="name"></agg>

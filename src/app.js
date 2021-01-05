@@ -1,9 +1,16 @@
 Vue.component('hit', {
-  template:'<div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><br><small v-html="exerpt"></small></div>',
+  template:'<div class="wssearch--hit" ><div class="wssearch--hit--info"><span>Page:{{hit._source.subject.title}}</span>•<span>{{date}}</span></div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><br><div class="wssearch--hit--body" v-html="exerpt"></div></div>',
   props:{
     hit:Object
   },
-  computed:{
+    computed:{
+      date:function(){
+        var unsplit = this.hit._source["P:29"].dat_raw[0];
+        var rawz = unsplit.split("/");
+        var ndate = rawz[3] + ' ' + this.$root.monthnames[rawz[2] - 1] + ', ' + rawz[1];
+        return ndate;
+
+      },
     exerpt:function(){
       if(this.hit.highlight){
           if(this.hit.highlight['text_raw']){
@@ -82,6 +89,7 @@ window.app = new Vue({ el: "#app",
     from: 0,
     selected: vueinitdata.selected ,
     open: [],
+    monthnames: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Nov","Dec"],
     rangeFrom: 0,
     rangeTo: 80,
     dropdown: [],

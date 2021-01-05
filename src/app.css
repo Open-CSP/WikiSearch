@@ -2,7 +2,7 @@
 .wssearch {
   display: grid;
   grid-template-columns: 20ch 1fr;
-  grid-template-rows:    auto 
+  grid-template-rows:    auto
                          auto
                          auto
                          1fr;
@@ -67,8 +67,8 @@
   cursor: pointer;
 }
 
-.wssearch--hits{
-
+.wssearch--hit--info{
+  text-transform: uppercase;
 }
 
 .wssearch--pager {
