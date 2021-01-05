@@ -1,62 +1,83 @@
+/* layout */
 .wssearch {
-    display: grid;
-    grid-template-columns: 25ch 1fr;
-    grid-gap: 2em;
+  display: grid;
+  grid-template-columns: 20ch 1fr;
+  grid-template-rows:    auto 
+                         auto
+                         auto
+                         1fr;
+  grid-template-areas:'search search'
+                      'selected selected'
+                      'filters total'
+                      'filters main';
+  grid-gap: .5em 2em;
+}
+.wssearch--search {
+  grid-area: search;
+}
+.wssearch--total {
+  grid-area: total;
+}
+.wssearch--selected {
+  grid-area: selected;
+}
+.wssearch--filters {
+  grid-area: filters;
 }
 .wssearch--main {
-    transition: filter .2s ease-in-out;
-    display: grid;
-    grid-gap: 2em;
-    grid-template-rows: auto 1fr auto;
+  grid-area: main;
+
+  transition: filter .2s ease-in-out;
 }
+.wssearch--main__loading{
+  filter: blur(1px);
+}
+
 .wssearch--selectedfilters:hover {
-    background: #efefef;
+  background: #efefef;
 }
 
 .wssearch--selectedfilters:after {
-    content: "×";
-    position: absolute;
-    color: #767676;
-    right: 4px;
+  content: "×";
+  position: absolute;
+  color: #767676;
+  right: 4px;
 }
 .wssearch--selectedfilters {
-    border: 1px solid #767676;
-    padding: 0 1em 0 .5em;
-    box-sizing: border-box;
-    border-radius: 10px;
-    position: relative;
-    margin: .1em;
-}
-.wssearch--filter {
-
+  border: 1px solid #767676;
+  padding: 0 1em 0 .5em;
+  box-sizing: border-box;
+  border-radius: 10px;
+  position: relative;
+  margin: .1em;
 }
 
-.wssearch--filter ul {
-    list-style: none;
-    padding: 0;
-    margin-left: 0;
+
+.wssearch--filters ul {
+  list-style: none;
+  padding: 0;
+  margin-left: 0;
 }
-.wssearch--filter label {
-cursor: pointer;
-margin: 0;
+.wssearch--filters label {
+  cursor: pointer;
+  margin: 0;
 }
 
-.wssearch--filter input[type="checkbox"] {
-    cursor: pointer;
+.wssearch--filters input[type="checkbox"] {
+  cursor: pointer;
 }
+
 .wssearch--hits{
 
 }
-.wssearch--loading{
-  filter: blur(1px);
-}
+
 .wssearch--pager {
-    justify-self: end;
+  justify-self: end;
 }
 .wssearch--pager span {
-    cursor: pointer;
-    padding: 7px 4px;
+  cursor: pointer;
+  padding: 7px 4px;
 }
 .wssearch--pager span:hover {
-    background: lightgray;
+  background: lightgray;
 }

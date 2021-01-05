@@ -1,11 +1,15 @@
 <div id="app">
   <div class="wssearch" >
-    <div class="wssearch--side">
+    <div class="wssearch--search">
       <input type="text" placeholder="search" @change="search" class="form-control" v-bind:value="term" />
-      <h2>Filters</h2>
+    </div>
+    <div class="wssearch--selected">
       <label class="wssearch--selectedfilters" v-for="activefilter in selected" v-bind:for="activefilter.key + '' + activefilter.value">{{activefilter.value ?  activefilter.value : activefilter.name }}</label>
       <button v-if="selected.length" @click="clearfilters">Clear all</button>
-      <div class="wssearch--filter">{{sort}}
+    </div>
+    <div class="wssearch--filters">
+      <h2>Filters</h2>
+      <div >{{sort}}
         <div v-for="(name, index) in Object.keys(aggs).sort()">
           <h3 v-if="aggs[name].buckets.length" >{{name}}</h3>
           <ul>
@@ -18,10 +22,10 @@
         </div>
       </div>
     </div>
+    <div class="wssearch--total">
+      Found <b>{{total}}</b> results
+    </div>
     <div v-bind:class="mainloading">
-      <div class="wssearch--results">
-        Found <b>{{total}}</b> results<br>
-      </div>
       <div class="wssearch--hits">
         <hit v-for="(hit, i) in hits" v-bind:hit="hit" v-bind:key="i"></hit>
       </div>

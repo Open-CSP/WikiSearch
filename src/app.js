@@ -182,9 +182,9 @@ window.app = new Vue({ el: "#app",
   computed:{
     mainloading:function(){
       if(this.loading){
-        return 'smws--main smws--loading';
+        return 'wssearch--main wssearch--main__loading';
       }else{
-        return 'smws--main';
+        return 'wssearch--main';
       }
 
     },
