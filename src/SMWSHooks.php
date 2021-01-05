@@ -6,13 +6,42 @@ class SMWSHooks {
 
   public static function onParserFirstCallInit( Parser $parser ) {
 
-    $parser->setFunctionHook( 'smws', [ self::class, 'renderSMWS' ] );
+    $parser->setFunctionHook( 'smws', [ self::class, 'renderSMWS' ], Parser::SFH_OBJECT_ARGS );
   }
-
-  public static function renderSMWS( Parser $parser, $param1 = '', $param_filters = '', $param_title = '', $param_exerpt = '') {
+//$parser, $param1 = '', $param_filters = '', $param_title = '', $param_exerpt = ''
+  public static function renderSMWS( Parser $parser, PPFrame $frame, array $args) { //array $args
 
     //set true for onBeforePageDisplay hook
     self::$smwsloaded = "true";
+
+
+// {{#wssearch:class=page
+//   |group
+//   |tag
+//   |space=namespace
+//   |?Title
+//   |?Exerpt
+//   |?Modification date
+// }}
+
+if(isset($args[0])) {
+  $param1 =   trim( $frame->expand($args[0]));
+  unset($args[0]);
+  $param_results = [];
+  $param_filters = [];
+  foreach ($args as $key => $value) {
+    $p_val = trim( $frame->expand($value));
+    if($p_val[0] == "?"){
+     array_push($param_results,  substr($p_val, 1));
+    }else{
+     array_push($param_filters,  $p_val);
+    }
+  }
+  $param_title = $param_results[0];
+  $param_exerpt = $param_results[1];
+//print_r($param_filters);
+//  return;
+}
 
 
 
@@ -64,6 +93,7 @@ class SMWSHooks {
       "class1" => $classIDProperty_params[0],
       "class2" => $classIDProperty_params[1],
       "facets" => $param_filters,
+      "outputs" =>  $param_results,
       "title"  => $param_title,
       "exerpt" => $param_exerpt,
       "dates" => $date_ranges,
@@ -76,14 +106,18 @@ class SMWSHooks {
 
     if(isset($_GET["filters"])){
       $urlfilters = [];
-      $activefilters =  explode(",", $_GET["filters"]);
+      $urlfiltersout = [];
+      $activefilters =  explode("~", $_GET["filters"]);
       foreach ($activefilters as $key => $value) {
-          $filteritem = explode(":", $value);
-          if($filteritem[0] == "range"){
-           $ranges = explode("|", $filteritem[1]);
+          $filteritem = explode("-", $value);
+           $rangeitem = explode("_", $filteritem[0]);
+          if($rangeitem[0] == "range"){ //hier bezig
+           $ranges = explode("_", $filteritem[1]);
             array_push($urlfilters,   ["range" => ["P:29.datField" => ["gte" => $ranges[0], "lte" => $ranges[1] ] ] ]);
+            array_push($urlfiltersout,   ["key" => $rangeitem[2], "value" => $rangeitem[1], "range" => ["P:29.datField" => ["gte" => $ranges[0], "lte" => $ranges[1] ] ] ]);
           }else{
             array_push($urlfilters,   ["value" => $filteritem[1], "key" => $filteritem[0] ]);
+            array_push($urlfiltersout,  ["value" => $filteritem[1], "key" => $filteritem[0] ]);
         }
       }
      $search_params["filters"] = $urlfilters;
@@ -98,7 +132,7 @@ class SMWSHooks {
     }
 
     if(isset($_GET["filters"])){
-        $output_params['selected'] = $urlfilters;
+        $output_params['selected'] = $urlfiltersout ;
     }else{
         $output_params['selected'] = [];
     }

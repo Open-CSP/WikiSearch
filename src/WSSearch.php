@@ -35,17 +35,32 @@ class WSSearch{
         return '';
       }
       $content = $revision->getContent( Revision::RAW );
-      $text = $content->getNativeData();
+      $pageparams = $content->getNativeData();
 
       //FUTURE add regex for matching parser function {{#WSSearch:}}
+      $args = explode("|", $pageparams);
+      $param12 =   trim( $args[0]);
 
-      $search_params['facets'] = explode("|", $text)[1];
-      $search_params['title'] = explode("|", $text)[2];
-      $search_params['exerpt'] = explode("|", $text)[3];
-
-      $exploood =  explode("=", explode(":", explode("|", $text)[0])[1]);
+      $exploood =  explode("=", explode(":", $param12)[1]);
       $search_params['class1'] = $exploood[0];
       $search_params['class2'] = $exploood[1];
+
+      unset($args[0]);
+      $param_results2 = [];
+      $param_filters2 = [];
+      foreach ($args as $key => $value) {
+        $p_val = trim($value);
+        if($p_val[0] == "?"){
+         array_push($param_results2,  substr($p_val, 1));
+        }else{
+         array_push($param_filters2,  $p_val);
+        }
+      }
+
+
+      $search_params['title'] = $param_results2[0];
+      $search_params['exerpt']= $param_results2[1];
+      $search_params['facets'] = $param_filters2;
     }
 
 
@@ -58,7 +73,7 @@ class WSSearch{
     $translations = [];
 
     //create aggs query
-    foreach (explode(",", $search_params['facets']) as $key => $value) {
+    foreach ($search_params['facets'] as $key => $value) {
       $vars = explode("=", $value);
       $val = $vars[0];
       if(isset($vars[1])){
@@ -149,6 +164,11 @@ class WSSearch{
 
       //create search term query if search term is not empty
       if(isset($search_params['term']) && $search_params['term']){
+        if(preg_match('/"/', $search_params['term'])){
+          $star = "";
+        }else{
+          $star = "*";
+        }
 
         $sterm = [
           "bool" => [
@@ -161,7 +181,7 @@ class WSSearch{
                   "attachment.title^3",
                   "attachment.content"
                 ],
-                "query" => "*" . $search_params['term'] . "*",
+                "query" => $star . $search_params['term'] . $star,
                 "minimum_should_match" => 1
               ]
             ]
@@ -210,6 +230,7 @@ class WSSearch{
       $output['filterIDs'] = $filtersIDs;
       $output['titleID'] =  $_title['id'];
       $output['exerptID'] =  $_exerpt['id'];
+      $output['hitIDs'] = [$_title['id'] => $_title['type'], $_exerpt['id'] => $_exerpt['type'] ];
     };
     return $output;
   }

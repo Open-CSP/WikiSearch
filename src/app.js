@@ -1,22 +1,9 @@
 Vue.component('hit', {
-  template:'<div><a v-bind:href="href">{{title}}</a><br><small v-html="exerpt"></small></div>',
+  template:'<div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><br><small v-html="exerpt"></small></div>',
   props:{
     hit:Object
   },
   computed:{
-    title:function(){
-      if(this.$root.titleID && this.hit._source['P:'+ this.$root.titleID]){
-        if(this.hit._source['P:'+ this.$root.titleID].txtField){
-          return this.hit._source['P:'+ this.$root.titleID].txtField[0]
-        }else if(this.hit._source['P:'+ this.$root.titleID].wpgField) {
-          return this.hit._source['P:'+ this.$root.titleID].wpgField[0]
-        }else{
-          return 'set title property'
-        }
-      }else{
-        return '?';
-      }
-    },
     exerpt:function(){
       if(this.hit.highlight){
         if(this.hit.highlight['P:'+ this.$root.exerptID + '.txtField']){
@@ -94,7 +81,7 @@ window.app = new Vue({ el: "#app",
   data:{
     total: vueinitdata.total,
     hits: vueinitdata.hits,
-    aggs: vueinitdata.aggs ,
+    aggs: vueinitdata.aggs,
     size:10,
     from: 0,
     selected: vueinitdata.selected ,
@@ -106,6 +93,7 @@ window.app = new Vue({ el: "#app",
     loading: false ,
     dates:vueinitdata.dates,
     filterIDs:vueinitdata.filterIDs,
+    hitIDs:vueinitdata.hitIDs,
     exerptID: vueinitdata.exerptID,
     exerpt: vueinitdata.exerpt,
     titleID: vueinitdata.titleID
@@ -160,12 +148,12 @@ window.app = new Vue({ el: "#app",
        var filtersarray = [];
       this.selected.forEach(function(item, i){
         if(item.range){
-          filtersarray.push("range:"+item.range["P:29.datField"].gte+"|"+item.range["P:29.datField"].lte);
+          filtersarray.push("range_"+item.value+"_"+item.key+"-"+item.range["P:29.datField"].gte+"_"+item.range["P:29.datField"].lte);
         }else{
-          filtersarray.push(""+item.key+":"+item.value+"");
+          filtersarray.push(""+item.key+"-"+item.value+"");
         }
       });
-      url += filtersarray.join();
+      url += filtersarray.join("~");
     }
       return encodeURI(url);
     },
