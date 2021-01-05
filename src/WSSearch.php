@@ -206,7 +206,9 @@ class WSSearch{
         }
       }
       //output
-
+      foreach ($results['hits']['hits'] as $key => $value) {
+        $results['hits']['hits'][$key]['_source']['subject']['namespacename'] =  MWNamespace::getCanonicalName($value['_source']['subject']['namespace']);
+      }
 
       $output = [ "total" => $results['hits']['total'],
       "hits" => $results['hits']['hits'],
