@@ -10,5 +10,5 @@ $magicWords = [];
  * @author Your Name (YourUserName)
  */
 $magicWords['en'] = [
-   'smws' => [ 0, 'smws' ],
+   'wssearch' => [ 0, 'wssearch' ],
 ];

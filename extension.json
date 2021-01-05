@@ -1,13 +1,13 @@
 {
-	"name": "SMWS",
+	"name": "WSSearch",
 	"author": "Me",
 	"version": "1.0.0",
-	"url": "https://www.mediawiki.org/wiki/Extension:SMWS",
-	"descriptionmsg": "swms-desc",
+	"url": "https://www.mediawiki.org/wiki/Extension:WSSearch",
+	"descriptionmsg": "wssearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"MessagesDirs": {
-		"SMWS": [
+		"WSSearch": [
 			"i18n"
 		]
 	},
@@ -31,23 +31,23 @@
 	},
 		"ResourceFileModulePaths": {
 		"localBasePath": "src",
-		"remoteExtPath": "SMWS/src"
+		"remoteExtPath": "WSSearch/src"
 	},
 	"AutoloadClasses": {
-		"SMWSHooks": "src/SMWSHooks.php",
-		"ApiQuerySMWS": "src/ApiQuerySMWS.php",
+		"WSSearchHooks": "src/WSSearchHooks.php",
+		"ApiQueryWSSearch": "src/ApiQueryWSSearch.php",
 		"WSSearch": "src/WSSearch.php"
 	},
 	"ExtensionMessagesFiles": {
-		"SMWSMagic": "SMWS.i18n.php"
+		"WSSearchMagic": "WSSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  "smws": "ApiQuerySMWS"
+	  "WSSearch": "ApiQueryWSSearch"
   },
 	"Hooks": {
-		"ParserFirstCallInit": "SMWSHooks::onParserFirstCallInit",
+		"ParserFirstCallInit": "WSSearchHooks::onParserFirstCallInit",
 		"BeforePageDisplay": [
-			"SMWSHooks::onBeforePageDisplay"
+			"WSSearchHooks::onBeforePageDisplay"
 		]
 	},
 	"manifest_version": 1

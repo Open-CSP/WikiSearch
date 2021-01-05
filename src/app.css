@@ -1,25 +1,25 @@
-.smws {
+.wssearch {
     display: grid;
     grid-template-columns: 25ch 1fr;
     grid-gap: 2em;
 }
-.smws--main {
+.wssearch--main {
     transition: filter .2s ease-in-out;
     display: grid;
     grid-gap: 2em;
     grid-template-rows: auto 1fr auto;
 }
-.smws--selectedfilters:hover {
+.wssearch--selectedfilters:hover {
     background: #efefef;
 }
 
-.smws--selectedfilters:after {
+.wssearch--selectedfilters:after {
     content: "×";
     position: absolute;
     color: #767676;
     right: 4px;
 }
-.smws--selectedfilters {
+.wssearch--selectedfilters {
     border: 1px solid #767676;
     padding: 0 1em 0 .5em;
     box-sizing: border-box;
@@ -27,36 +27,36 @@
     position: relative;
     margin: .1em;
 }
-.smws--filter {
+.wssearch--filter {
 
 }
 
-.smws--filter ul {
+.wssearch--filter ul {
     list-style: none;
     padding: 0;
     margin-left: 0;
 }
-.smws--filter label {
+.wssearch--filter label {
 cursor: pointer;
 margin: 0;
 }
 
-.smws--filter input[type="checkbox"] {
+.wssearch--filter input[type="checkbox"] {
     cursor: pointer;
 }
-.smws--hits{
+.wssearch--hits{
 
 }
-.smws--loading{
+.wssearch--loading{
   filter: blur(1px);
 }
-.smws--pager {
+.wssearch--pager {
     justify-self: end;
 }
-.smws--pager span {
+.wssearch--pager span {
     cursor: pointer;
     padding: 7px 4px;
 }
-.smws--pager span:hover {
+.wssearch--pager span:hover {
     background: lightgray;
 }

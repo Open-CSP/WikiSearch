@@ -1,6 +1,6 @@
 <?php
 
-class ApiQuerySMWS extends ApiQueryBase {
+class ApiQueryWSSearch extends ApiQueryBase {
 
 
 	/**
@@ -57,7 +57,7 @@ class ApiQuerySMWS extends ApiQueryBase {
 	/** @inheritDoc */
 	protected function getExamplesMessages() {
 		return [
-			'action=query&meta=smws'
+			'action=query&meta=wssearch'
 				=> 'apihelp-query+featureusage-example-simple',
 		];
 	}

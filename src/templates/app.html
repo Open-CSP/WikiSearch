@@ -1,16 +1,13 @@
 <div id="app">
-  <div class="smws" >
-    <div class="smws--side">
+  <div class="wssearch" >
+    <div class="wssearch--side">
       <input type="text" placeholder="search" @change="search" class="form-control" v-bind:value="term" />
       <h2>Filters</h2>
-      <label class="smws--selectedfilters" v-for="activefilter in selected" v-bind:for="activefilter.key + '' + activefilter.value">{{activefilter.value ?  activefilter.value : activefilter.name }}</label>
+      <label class="wssearch--selectedfilters" v-for="activefilter in selected" v-bind:for="activefilter.key + '' + activefilter.value">{{activefilter.value ?  activefilter.value : activefilter.name }}</label>
       <button v-if="selected.length" @click="clearfilters">Clear all</button>
-      <ul>
-        <li v-for="drop in dropdown"></li>
-      <ul/>
-      <div class="smws--filter">{{sort}}
+      <div class="wssearch--filter">{{sort}}
         <div v-for="(name, index) in Object.keys(aggs).sort()">
-          <h3>{{name}}</h3>
+          <h3 v-if="aggs[name].buckets.length" >{{name}}</h3>
           <ul>
             <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:key="i" v-bind:index="i" v-bind:name="name"></agg>
             <li v-if="aggs[name].buckets.length > 5" @click="more(name)">
@@ -22,13 +19,13 @@
       </div>
     </div>
     <div v-bind:class="mainloading">
-      <div class="smws--results">
+      <div class="wssearch--results">
         Found <b>{{total}}</b> results<br>
       </div>
-      <div class="smws--hits">
+      <div class="wssearch--hits">
         <hit v-for="(hit, i) in hits" v-bind:hit="hit" v-bind:key="i"></hit>
       </div>
-      <div  class="smws--pager">
+      <div  class="wssearch--pager">
         <span v-for="pager in pagers" @click="next" v-bind:class="activepage(pager)">
           <b v-if="activepage(pager)">
             {{pager}}

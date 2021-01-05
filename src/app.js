@@ -101,7 +101,7 @@ window.app = new Vue({ el: "#app",
 
       var params = {
         action: 'query',
-        meta: 'smws',
+        meta: 'WSSearch',
         format: 'json',
         smfilter: JSON.stringify(root.selected),
         smterm:root.term,

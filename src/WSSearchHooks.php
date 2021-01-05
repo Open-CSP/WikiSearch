@@ -1,18 +1,18 @@
 <?php
 
-class SMWSHooks {
+class WSSearchHooks {
 
-  public static $smwsloaded = "false";
+  public static $wssearchloaded = "false";
 
   public static function onParserFirstCallInit( Parser $parser ) {
 
-    $parser->setFunctionHook( 'smws', [ self::class, 'renderSMWS' ], Parser::SFH_OBJECT_ARGS );
+    $parser->setFunctionHook( 'wssearch', [ self::class, 'renderWSSearch' ], Parser::SFH_OBJECT_ARGS );
   }
 //$parser, $param1 = '', $param_filters = '', $param_title = '', $param_exerpt = ''
-  public static function renderSMWS( Parser $parser, PPFrame $frame, array $args) { //array $args
+  public static function renderWSSearch( Parser $parser, PPFrame $frame, array $args) { //array $args
 
     //set true for onBeforePageDisplay hook
-    self::$smwsloaded = "true";
+    self::$wssearchloaded = "true";
 
 
 if(isset($args[0])) {
@@ -131,7 +131,7 @@ if(isset($args[0])) {
   }
 
   public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
-    if(self::$smwsloaded == "true"){
+    if(self::$wssearchloaded == "true"){
       $out->addModules( 'ext.app' );
     }
   }
