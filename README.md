@@ -1,46 +1,31 @@
-# SMWS
+# WSSearch
 
 Creates a search app using Semantic MediaWiki and Elasticsearch and renders with Vue.js
 
 features
 
-*facets, highlighted results, pagers*
+*facets, highlighted results, pagers, date rage filter*
 
 to do
 
-*extend condition, allow number and date filters, add extra parser parameters*
+*extend condition, allow more range filters*
 
 ## Parser function:
 ```
-{{#SMWS: <condition> | <filters>|<output title>|<output snippet>}}
+{{#WSSearch: <condition>
+  |<facet property>
+  |?<result property>
+  }}
 ```
 
 example
 
 ```
-{{#SMWS:Class=Article|Author,Tag,Type|Title|Content}}
+{{#WSSearch: <condition>
+  |Version
+  |Tag
+  |Space
+  |?Title  //first result property will be used as title
+  |?Version
+  }}
 ```
-
-## MW.Api
-
-```
- var params = {
-           action: 'query',
-           meta: 'smws',
-           format: 'json',
-           smfilter: [<active filters>],
-           smtitle: <ouptput title property id>,
-           smexerpt: <output snippet>,
-           smaggs: <filters>,
-           smclass:<condition>,
-           smterm:<search term>
-
-
-          },
-      api = new mw.Api();
-
-      api.post(  params ).done( function ( data ) {
-
-      //do stuff with data
-
-      })
