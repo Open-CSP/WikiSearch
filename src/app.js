@@ -1,5 +1,5 @@
 Vue.component('hit', {
-  template:'<div class="wssearch--hit" ><div class="wssearch--hit--info"><span>Page:{{hit._source.subject.title}}</span>•<span>{{date}}</span></div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><br><div class="wssearch--hit--body" v-html="exerpt"></div></div>',
+  template:'<div class="wssearch--hit" ><div class="wssearch--hit--info"><span>Page:{{hit._source.subject.title}}</span>•<span>{{date}}</span></div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href" class="wssearch--hit--link">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><div class="wssearch--hit--body" v-html="exerpt"></div></div>',
   props:{
     hit:Object
   },
