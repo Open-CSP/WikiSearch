@@ -7,7 +7,7 @@ Vue.component('hit', {
       date:function(){
         var unsplit = this.hit._source["P:29"].dat_raw[0];
         var rawz = unsplit.split("/");
-        var ndate = rawz[3] + ' ' + this.$root.monthnames[rawz[2] - 1] + ', ' + rawz[1];
+        var ndate = this.$root.monthnames[rawz[2] - 1] + ' ' + rawz[3] + ', ' + rawz[1];
         return ndate;
 
       },
