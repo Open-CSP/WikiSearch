@@ -9,12 +9,12 @@
     </div>
     <div class="wssearch--filters">{{sort}}
         <div v-for="(name, index) in Object.keys(aggs).sort()" v-bind:key="index" v-bind:class="'wssearch--filter wssearch--filter__' + name.toLowerCase()">
-          <h2 v-if="aggs[name].buckets.length" >{{name}}</h2>
+          <h2 v-if="aggs[name].buckets.length" >{{name.replace("_", " ")}}</h2>
           <ul>
             <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:key="i" v-bind:index="i" v-bind:name="name"></agg>
-            <li v-if="aggs[name].buckets.length > 5" @click="more(name)">
-              <span v-if="open.includes(name)" >Less ></span>
-              <span v-else >More ></span>
+            <li class="wssearch--filter-showmore" v-if="aggs[name].buckets.length > 5" @click="more(name)">
+              <span class="wssearch--filter-less" v-if="open.includes(name)" ></span>
+              <span class="wssearch--filter-more" v-else ></span>
             <li>
           </ul>
       </div>
