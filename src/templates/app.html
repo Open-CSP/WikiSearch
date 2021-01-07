@@ -4,12 +4,11 @@
       <input type="text" placeholder="search" @change="search" class="form-control" v-bind:value="term" />
     </div>
     <div class="wssearch--selected">
-      <label class="wssearch--selectedfilters" v-for="activefilter in selected" v-bind:for="activefilter.key + '' + activefilter.value">{{activefilter.value ?  activefilter.value : activefilter.name }}</label>
+      <label class="wssearch--selectedfilters" v-for="activefilter in selected" v-bind:for="activefilter.key.toLowerCase().replace(' ', '_') + '--' + activefilter.value.toLowerCase().replace(' ', '_')">{{activefilter.value ?  activefilter.value : activefilter.name }}</label>
       <button v-if="selected.length" @click="clearfilters">Clear all</button>
     </div>
-    <div class="wssearch--filters">
-      <div >{{sort}}
-        <div v-for="(name, index) in Object.keys(aggs).sort()" v-bind:key="index">
+    <div class="wssearch--filters">{{sort}}
+        <div v-for="(name, index) in Object.keys(aggs).sort()" v-bind:key="index" v-bind:class="'wssearch--filter wssearch--filter__' + name.toLowerCase()">
           <h2 v-if="aggs[name].buckets.length" >{{name}}</h2>
           <ul>
             <agg v-for="(agg, i) in aggs[name].buckets" v-bind:agg="agg"  v-bind:key="i" v-bind:index="i" v-bind:name="name"></agg>
@@ -18,7 +17,6 @@
               <span v-else >More ></span>
             <li>
           </ul>
-        </div>
       </div>
     </div>
     <div class="wssearch--total">

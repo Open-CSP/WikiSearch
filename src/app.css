@@ -67,9 +67,19 @@
   cursor: pointer;
 }
 
-.wssearch--hit--info{
-  text-transform: uppercase;
+.wssearch--filter-count:after {
+    content: ")";
 }
+
+.wssearch--filter-count:before {
+    content: "(";
+}
+
+.wssearch--hit__link, .wssearch--hit__body {
+    display: block;
+}
+
+
 
 .wssearch--pager {
   justify-self: end;

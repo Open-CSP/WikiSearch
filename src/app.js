@@ -1,5 +1,14 @@
 Vue.component('hit', {
-  template:'<div class="wssearch--hit" ><div class="wssearch--hit--info"><span>{{hit._source.subject.namespacename ? "Page|"+ hit._source.subject.namespacename + ":" : "Page|" }}{{hit._source.subject.title}}</span>•<span>{{date}}</span></div><span v-for="(hitID, key) in $root.hitIDs"><a v-if="Object.keys($root.hitIDs)[0] == key" v-bind:href="href" class="wssearch--hit--link">{{hit._source["P:" + key ][hitID][0]}}</a><span v-else>{{hit._source["P:" + key ][hitID][0]}}</span></span><div class="wssearch--hit--body" v-html="exerpt"></div></div>',
+  template:'<div class="wssearch--hit" >'+
+               '<span class="wssearch--hit__namespace" v-if="hit._source.subject.namespacename" >{{hit._source.subject.namespacename}}</span>'+
+               '<span class="wssearch--hit__pagetitle" >{{hit._source.subject.title}}</span>'+
+               '<span class="wssearch--hit__date" >{{date}}</span>'+
+               '<template v-for="(hitID, key) in $root.hitIDs">'+
+                  '<span class="wssearch--hit__link" v-if="Object.keys($root.hitIDs)[0] == key"><a  v-bind:href="href" >{{hit._source["P:" + key ][hitID][0]}}</a></span>'+
+                  '<span v-bind:class="\'wssearch--hit__property\' + key" v-else >{{hit._source["P:" + key ][hitID][0]}}</span>'+
+               '</template>'+
+               '<span class="wssearch--hit__body" v-html="exerpt"></span>'+
+             '</div>',
   props:{
     hit:Object
   },
@@ -38,19 +47,31 @@ Vue.component('hit', {
 
 
 Vue.component('agg', {
-  template:`<li v-show="show" ><label><input type="checkbox" v-bind:id="name + agg.key" @change="filter" v-model="$root.selected" v-bind:value="val"> {{title}} ({{agg.doc_count}})</label></li>`,
+  template:'<li v-show="show" >'+
+              '<label v-bind:class="labelclass" >'+
+                  '<input type="checkbox" v-bind:id="createid" @change="filter" v-model="$root.selected" v-bind:value="val">'+
+                  '<span class="wssearch--filter-title" >{{title}}</span>'+
+                  '<span class="wssearch--filter-count" >{{agg.doc_count}}</span>'+
+               '</label>'+
+            '</li>',
   props:{
     agg:Object,
     name:String,
     index:Number
   },
   computed:{
+    labelclass:function(){
+      return "wssearch--filter__" + this.name.toLowerCase() +"--"+ this.agg.key.toLowerCase().replace(" ", "_")
+    },
     title:function(){
       if(this.agg.name){
         return this.agg.name;
       }else{
         return this.agg.key;
       }
+    },
+    createid:function(){
+      return this.name.toLowerCase().replace(" ", "_") +"--"+ this.agg.key.toLowerCase().replace(" ", "_")
     },
     show:function(){
       if(this.index < 5 || this.$root.open.includes(this.name)){
