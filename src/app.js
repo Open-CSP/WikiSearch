@@ -7,12 +7,22 @@ Vue.component('hit', {
                   '<span class="wssearch--hit__link" v-if="Object.keys($root.hitIDs)[0] == key"><a  v-bind:href="href" >{{hit._source["P:" + key ][hitID][0]}}</a></span>'+
                   '<span v-bind:class="\'wssearch--hit__property\' + key" v-else >{{hit._source["P:" + key ][hitID][0]}}</span>'+
                '</template>'+
+               '<img v-if="img" class="wssearch--hit__img" v-bind:src="img"/>'+
                '<span class="wssearch--hit__body" v-html="exerpt"></span>'+
              '</div>',
   props:{
     hit:Object
   },
     computed:{
+      img:function(){
+        if(this.hit._source.file_path){
+          if(this.hit._source.attachment && this.hit._source.attachment.type == "application/pdf"){
+              return '/img_auth.php/thumb/'+ this.hit._source.subject.title +'/page1-600px-'+ this.hit._source.subject.title +'.jpg';
+          }else{
+              return this.hit._source.file_path;
+          }
+        }
+      },
       date:function(){
         var unsplit = this.hit._source["P:29"].dat_raw[0];
         var rawz = unsplit.split("/");
