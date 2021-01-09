@@ -24,6 +24,8 @@ Vue.component('hit', {
       if(this.hit.highlight){
           if(this.hit.highlight['text_raw']){
             return this.hit.highlight['text_raw'][0];
+          }else if(this.hit.highlight['attachment.content']){
+            return this.hit.highlight['attachment.content'][0];
           }
         }
     },
