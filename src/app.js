@@ -16,7 +16,7 @@ Vue.component('hit', {
     computed:{
       img:function(){
         if(this.hit._source.file_path){
-          if(this.hit._source.attachment && this.hit._source.attachment.type == "application/pdf"){
+          if(this.hit._source.attachment && this.hit._source.attachment.content_type == "application/pdf"){
               return '/img_auth.php/thumb/'+ this.hit._source.subject.title +'/page1-600px-'+ this.hit._source.subject.title +'.jpg';
           }else{
               return this.hit._source.file_path;
