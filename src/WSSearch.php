@@ -123,7 +123,8 @@ class WSSearch{
             "pre_tags" => ["<b>"],
             "post_tags" => ["</b>"],
             "fields" => [
-              'text_raw' => ["fragment_size" => 150, "number_of_fragments" => 1]
+              'text_raw' => ["fragment_size" => 150, "number_of_fragments" => 1],
+              'attachment.content'=> ["fragment_size" => 150, "number_of_fragments" => 1]
 
             ]
           ],
