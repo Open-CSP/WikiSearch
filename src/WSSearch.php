@@ -110,7 +110,7 @@ class WSSearch{
                 'must' => [[
                   'bool' => [
                     'filter' => [
-                      [ 'term' => [ 'P:' . $_class['id'] . '.txtField.keyword' => $search_params['class2'] ] ],
+                      [ 'term' => [ 'P:' . $_class['id']  . '.' . $_class['type'] . '.keyword' => $search_params['class2'] ] ],
                     ]
                   ]
                 ]
