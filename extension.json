@@ -1,6 +1,9 @@
 {
 	"name": "WSSearch",
-	"author": "Me",
+	"author": [
+		"Marijn van Wezel",
+		"Robis Koopmans"
+	],
 	"version": "1.0.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WSSearch",
 	"descriptionmsg": "wssearch-desc",
@@ -11,44 +14,19 @@
 			"i18n"
 		]
 	},
-	"ResourceModules": {
-		"ext.app": {
-			"dependencies": [
-				"ext.vue"
-			],
-			"scripts": [
-						"app.js"
-					],
-					"styles": [
-						"app.css"
-					]
-			},
-			"ext.vue": {
-				"scripts": [
-							"vue.js"
-						]
-			}
-	},
-		"ResourceFileModulePaths": {
-		"localBasePath": "src",
-		"remoteExtPath": "WSSearch/src"
-	},
-	"AutoloadClasses": {
-		"WSSearchHooks": "src/WSSearchHooks.php",
-		"ApiQueryWSSearch": "src/ApiQueryWSSearch.php",
-		"WSSearch": "src/WSSearch.php"
+	"AutoloadNamespaces": {
+		"WSSearch\\": "src/"
 	},
 	"ExtensionMessagesFiles": {
-		"WSSearchMagic": "WSSearch.i18n.php"
+		"WSSearchMagic": "i18n/WSSearch.i18n.php"
 	},
 	"APIMetaModules": {
 	  "WSSearch": "ApiQueryWSSearch"
-  },
+  	},
 	"Hooks": {
 		"ParserFirstCallInit": "WSSearchHooks::onParserFirstCallInit",
-		"BeforePageDisplay": [
-			"WSSearchHooks::onBeforePageDisplay"
-		]
+		"ArticleDeleteComplete": "WSSearchHooks::onArticleDeleteComplete",
+		"PageContentSaveComplete": "WSSearchHooks::onPageContentSaveComplete"
 	},
 	"manifest_version": 1
 }
