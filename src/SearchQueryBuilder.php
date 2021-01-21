@@ -54,6 +54,11 @@ class SearchQueryBuilder {
     private $search_term;
 
     /**
+     * @var array
+     */
+    private $aggregate_date_ranges;
+
+    /**
      * Creates a new canonical SearchQueryBuilder from default values and configuration
      * variables.
      *
@@ -181,6 +186,15 @@ class SearchQueryBuilder {
     }
 
     /**
+     * Sets the date ranges to use as aggregate filters.
+     *
+     * @param array $date_ranges
+     */
+    public function setAggregateDateRanges( array $date_ranges ) {
+        $this->aggregate_date_ranges = $date_ranges;
+    }
+
+    /**
      * Builds the query.
      *
      * @return array
@@ -213,22 +227,22 @@ class SearchQueryBuilder {
         ];
 
         // Set the aggregate filters
-        $body["aggs"] = $this->aggregate_filters;
+        $body["aggs"] = $this->buildAggregateFilters();
 
         // Get a reference to the main part of the Elastic Search query
         $query =& $body["query"];
         $constant_score =& $query["constant_score"];
         $filter =& $constant_score["filter"];
 
-        $filter = $this->getMainFilter();
+        $filter = $this->buildMainFilter();
 
         return $main_query;
     }
 
     /**
-     * Creates the "main filter" query that filters on the main property condition (i.e. "Class=Handboek").
+     * Builds the "main filter" that filters on the main property condition (i.e. "Class=Handboek") and the search term.
      */
-    private function getMainFilter(): array {
+    private function buildMainFilter(): array {
         $filter["bool"]["must"][] = [
             'bool' => [
                 'filter' => $this->active_filters
@@ -256,6 +270,26 @@ class SearchQueryBuilder {
         }
 
         return $filter;
+    }
+
+    /**
+     * Builds the aggregate filters for the query.
+     *
+     * @return array
+     */
+    private function buildAggregateFilters(): array {
+        $filters = $this->aggregate_filters;
+
+        if ( isset( $this->aggregate_date_ranges ) ) {
+            $filters["Date"] = [
+                "date_range" => [
+                    "field" => "P:29.datField",
+                    "ranges" => $this->aggregate_date_ranges
+                ]
+            ];
+        }
+
+        return $filters;
     }
 
     /**

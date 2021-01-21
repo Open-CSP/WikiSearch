@@ -40,9 +40,9 @@ class Search {
     private $limit;
 
     /**
-     * @var DateRange
+     * @var array
      */
-    private $date_range;
+    private $date_ranges;
 
     /**
      * @var array
@@ -67,12 +67,7 @@ class Search {
     /**
      * @var array
      */
-    private $filter_ids = [];
-
-    /**
-     * @var array
-     */
-    private $outputs = [];
+    private $facet_property_ids = [];
 
     /**
      * Search constructor.
@@ -103,13 +98,12 @@ class Search {
     }
 
     /**
-     * Sets the date range for the results. This allows the user to filter based on when the result was
-     * added to the ElasticSearch index.
+     * Sets the available date ranges.
      *
-     * @param DateRange $range
+     * @param array $range
      */
-    public function setDateRange( DateRange $range ) {
-        $this->date_range = $range;
+    public function setAggregateDateRanges(array $range ) {
+        $this->date_ranges = $range;
     }
 
     /**
@@ -128,15 +122,6 @@ class Search {
      */
     public function setLimit( int $limit ) {
         $this->limit = $limit;
-    }
-
-    /**
-     * Sets the Properties to output during Vue init.
-     *
-     * @param array $outputs
-     */
-    public function setVueInitOutputs( array $outputs ) {
-        $this->outputs = $outputs;
     }
 
     /**
@@ -162,19 +147,11 @@ class Search {
             $results['hits']['hits'][$key]['_source']['subject']['namespacename'] = MWNamespace::getCanonicalName( $value['_source']['subject']['namespace'] );
         }
 
-        // Create a KV-map of property ID's with their property names for Vue
-        $hit_ids = [];
-        foreach ( $this->outputs as $output_property_name ) {
-            $property = new PropertyInfo( $output_property_name );
-            $hit_ids[$property->getPropertyID()] = $property->getPropertyType();
-        }
-
         return [
             "total" => $results["hits"]["total"],
-            "hits" => $results["hits"]["hits"],
-            "aggs" => $results["aggregations"],
-            "filterIDs" => $this->filter_ids,
-            "hitIDs" => $hit_ids
+            "hits"  => $results["hits"]["hits"],
+            "aggs"  => $results["aggregations"],
+            "facetPropertyIDS" => $this->facet_property_ids
         ];
     }
 
@@ -217,6 +194,10 @@ class Search {
             $query_builder->setLimit( $this->limit );
         }
 
+        if ( isset( $this->date_ranges ) ) {
+            $query_builder->setAggregateDateRanges( $this->date_ranges );
+        }
+
         return $query_builder->buildQuery();
     }
 
@@ -236,14 +217,10 @@ class Search {
                 $this->translations[$property_name] = $translation_pair[1];
             }
 
-            $filter_property = new PropertyInfo( $property_name );
-            $filters[$property_name] = [ "terms" => [ "field" => "P:" . $filter_property->getPropertyID() . "." . $filter_property->getPropertyType() . ".keyword" ] ];
+            $facet_property = new PropertyInfo( $property_name );
+            $filters[$property_name] = [ "terms" => [ "field" => "P:" . $facet_property->getPropertyID() . "." . $facet_property->getPropertyType() . ".keyword" ] ];
 
-            $this->filter_ids[] = $filter_property->getPropertyID();
-        }
-
-        if ( isset( $this->date_range ) ) {
-            // TODO
+            $this->facet_property_ids[] = $facet_property->getPropertyID();
         }
 
         return $filters;

@@ -122,6 +122,7 @@ abstract class WSSearchHooks {
     public static function onParserFirstCallInit( Parser $parser ) {
         try {
             $parser->setFunctionHook("searchEngineConfig", [self::class, "searchEngineConfigCallback"]);
+            $parser->setFunctionHook( "loadSearchEngine", [self::class, "loadSearchEngineCallback"] );
         } catch (\MWException $e) {
             // @FIXME: Handle this exception
         }
@@ -167,6 +168,22 @@ abstract class WSSearchHooks {
         }
 
         return "";
+    }
+
+    /**
+     * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
+     * of the extension.
+     *
+     * @return string
+     * @throws MWException
+     * @throws \FatalError
+     */
+    public static function loadSearchEngineCallback() {
+        $result = self::error( "wssearch-missing-frontend" );
+
+        \Hooks::run( "WSSearchOnLoadFrontend", [ &$result ] );
+
+        return $result;
     }
 
     /**

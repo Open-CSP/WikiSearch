@@ -25,5 +25,6 @@ $magicWords = [];
  * @author Robis Koopmans
  */
 $magicWords['en'] = [
-   'searchEngineConfig' => [ 1, 'searchEngineConfig' ]
+    'searchEngineConfig' => [ 1, 'searchEngineConfig' ],
+    'loadSearchEngine' => [ 0, 'loadSearchEngine' ]
 ];

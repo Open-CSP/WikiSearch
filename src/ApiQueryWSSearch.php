@@ -38,22 +38,14 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		parent::__construct( $query, $moduleName, 'sm' );
 	}
 
-	/**
-	 * @inheritDoc
-	 * @throws ApiUsageException
-	 */
+    /**
+     * @inheritDoc
+     * @throws ApiUsageException
+     * @throws \FatalError
+     * @throws \MWException
+     */
 	public function execute() {
 		#$this->checkUserRightsAny( "wssearch-execute-api" );
-
-		/*
-		$search_params = [
-			 "term"     => $this->getParameter( "term" ), // The search "term" from the search field
-			 "from"     => $this->getParameter( "from" ), // Offset
-			 "dates"    => json_decode( $this->getParameter( "dates" ) ), // Date filters
-			 "filters"  => json_decode( $this->getParameter( "filter" ), true ), // Active facet filters (empty = everything)
-			 "page"     => $this->getParameter( "page" ) // The page to get the info
-		];
-		*/
 
 		$page_id = $this->getParameter( "pageid" );
 
@@ -79,10 +71,6 @@ class ApiQueryWSSearch extends ApiQueryBase {
             $search->setSearchTerm( $this->getParameter( "term" ) );
         }
 
-		if ( $this->getParameter( "filter" ) ) {
-            $search->setActiveFilters( json_decode( $this->getParameter( "filter" ) ) );
-        }
-
 		if ( $this->getParameter( "from" ) ) {
             $search->setOffset( $this->getParameter( "from" ) );
         }
@@ -91,17 +79,32 @@ class ApiQueryWSSearch extends ApiQueryBase {
             $search->setLimit( $this->getParameter( "limit" ) );
         }
 
-		// $search->setDateRange( $this->getParameter( "dates" ) );
+        if ( $this->getParameter( "filter" ) ) {
+            $filters = json_decode( $this->getParameter( "filter" ), true );
 
-        $output = $search->doSearch();
+            if ( !is_array( $filters ) ) {
+                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
+            }
 
-		$this->getResult()->addValue( 'result', 'output', $output );
+            $search->setActiveFilters( $filters );
+        }
 
-		/*
-		$this->getResult()->addValue( 'result', 'total', $output['total'] );
-		$this->getResult()->addValue( 'result', 'hits', json_encode( $output['hits'] ) );
-		$this->getResult()->addValue( 'result', 'aggs', json_encode( $output['aggs'] ) );
-		*/
+		if ( $this->getParameter( "dates" ) ) {
+            $dates = json_decode( $this->getParameter( "dates" ), true );
+
+            if ( !is_array( $dates ) ) {
+                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "dates", json_last_error_msg() ) );
+            }
+
+            $search->setAggregateDateRanges( $dates );
+        }
+
+        try {
+		    $result = $search->doSearch();
+            $this->getResult()->addValue( null, 'result', $result );
+        } catch ( \Exception $e ) {
+		    $this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
+        }
 	}
 
 	/**
