@@ -5,8 +5,10 @@ namespace WSSearch;
 
 use Content;
 use ContentHandler;
+use DatabaseUpdater;
 use LogEntry;
 use MediaWiki\MediaWikiServices;
+use MWException;
 use Parser;
 use Title;
 use User;
@@ -17,20 +19,7 @@ use WikiPage;
  *
  * @package WSSearch
  */
-abstract class SearchHooks {
-    /**
-     * Called when the parser initializes for the first time.
-     *
-     * @param Parser $parser Parser object being initialized
-     */
-    public static function onParserFirstCallInit( Parser $parser ) {
-        try {
-            $parser->setFunctionHook("searchEngineConfig", [self::class, "searchEngineConfigCallback"]);
-        } catch (\MWException $e) {
-            // @FIXME: Handle this exception
-        }
-    }
-
+abstract class WSSearchHooks {
     /**
      * Occurs after the delete article request has been processed.
      *
@@ -87,15 +76,55 @@ abstract class SearchHooks {
         $undid_revision_id
     ) {
         $parser = MediaWikiServices::getInstance()->getParser();
-        $parser->setOptions($parser->getOptions() ?? \ParserOptions::newFromUserAndLang(
+        $parser->mOptions = $parser->getOptions() ?? \ParserOptions::newFromUserAndLang(
             \RequestContext::getMain()->getUser(),
             \RequestContext::getMain()->getLanguage()
-        ) );
+        );
 
         $parser->setTitle( $parser->mTitle ?? Title::newMainPage() );
         $parser->clearState();
 
         $parser->recursiveTagParse( ContentHandler::getContentText( $main_content ) );
+    }
+
+    /**
+     * Called whenever schema updates are required. Updates the database schema.
+     *
+     * @param DatabaseUpdater $updater
+     * @throws MWException
+     */
+    public static function onLoadExtensionSchemaUpdates( DatabaseUpdater $updater ) {
+        $directory = $GLOBALS['wgExtensionDirectory'] . '/WSSearch/sql';
+        $type = $updater->getDB()->getType();
+
+        $tables = [
+            "search_condition"      => sprintf( "%s/%s/table_search_condition.sql", $directory, $type ),
+            "search_facets"         => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
+            "search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type )
+        ];
+
+        foreach ( $tables as $table ) {
+            if ( !file_exists( $table ) ) {
+                throw new MWException( wfMessage( 'wssearch-invalid-dbms', $type )->parse() );
+            }
+        }
+
+        foreach ( $tables as $table_name => $sql_path ) {
+            $updater->addExtensionTable( $table_name, $sql_path );
+        }
+    }
+
+    /**
+     * Called when the parser initializes for the first time.
+     *
+     * @param Parser $parser Parser object being initialized
+     */
+    public static function onParserFirstCallInit( Parser $parser ) {
+        try {
+            $parser->setFunctionHook("searchEngineConfig", [self::class, "searchEngineConfigCallback"]);
+        } catch (\MWException $e) {
+            // @FIXME: Handle this exception
+        }
     }
 
     /**

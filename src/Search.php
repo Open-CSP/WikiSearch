@@ -22,165 +22,262 @@
 namespace WSSearch;
 
 use Elasticsearch\ClientBuilder;
-use SMW\ApplicationFactory;
-use SMW\DIProperty;
+use FatalError;
+use Hooks;
+use MediaWiki\MediaWikiServices;
+use MWException;
+use MWNamespace;
 
 class Search {
+    /**
+     * @var SearchEngineConfig
+     */
+    private $config;
+
+    /**
+     * @var int
+     */
+    private $limit;
+
+    /**
+     * @var DateRange
+     */
+    private $date_range;
+
+    /**
+     * @var array
+     */
+    private $translations = [];
+
+    /**
+     * @var int
+     */
+    private $offset = 0;
+
+    /**
+     * @var array
+     */
+    private $active_filters = [];
+
+    /**
+     * @var string
+     */
+    private $search_term = "";
+
+    /**
+     * @var array
+     */
+    private $filter_ids = [];
+
+    /**
+     * @var array
+     */
+    private $outputs = [];
+
+    /**
+     * Search constructor.
+     *
+     * @param SearchEngineConfig $config
+     */
+    public function __construct( SearchEngineConfig $config ) {
+        $this->config = $config;
+    }
+
+    /**
+     * Sets the offset for the query. An offset of 10 means the first 10 results will not
+     * be returned. Useful for paged searches.
+     *
+     * @param int $offset
+     */
+    public function setOffset( int $offset ) {
+        $this->offset = $offset;
+    }
+
+    /**
+     * Sets the currently active filters.
+     *
+     * @param array $active_filters
+     */
+    public function setActiveFilters( array $active_filters ) {
+        $this->active_filters = $active_filters;
+    }
+
+    /**
+     * Sets the date range for the results. This allows the user to filter based on when the result was
+     * added to the ElasticSearch index.
+     *
+     * @param DateRange $range
+     */
+    public function setDateRange( DateRange $range ) {
+        $this->date_range = $range;
+    }
+
+    /**
+     * Sets the search term.
+     *
+     * @param string $search_term
+     */
+    public function setSearchTerm( string $search_term ) {
+        $this->search_term = $search_term;
+    }
+
+    /**
+     * Limit the number of results returned.
+     *
+     * @param int $limit
+     */
+    public function setLimit( int $limit ) {
+        $this->limit = $limit;
+    }
+
+    /**
+     * Sets the Properties to output during Vue init.
+     *
+     * @param array $outputs
+     */
+    public function setVueInitOutputs( array $outputs ) {
+        $this->outputs = $outputs;
+    }
+
+    /**
+     * @return array
+     * @throws FatalError
+     * @throws MWException
+     */
     public function doSearch() {
-        $store = ApplicationFactory::getInstance()->getStore();
+        $elastic_query = $this->buildElasticQuery();
 
-        // if from api  get original parser function parameters from the page
-        if ( isset( $search_params['page'] ) ) {
+        // Allow other extensions to modify the query
+        Hooks::run("WSSearchBeforeElasticQuery", [ &$elastic_query ] );
 
-            $pagetitle = Title::newfromText( $search_params['page'] );
-            $revision = Revision::newFromTitle( $pagetitle );
-            if ( $revision == null ) {
-                return '';
-            }
-            $content = $revision->getContent( Revision::RAW );
-            $pageparams = $content->getNativeData();
+        $results = $this->doQuery( $elastic_query );
 
-            // FUTURE add regex for matching parser function {{#Search:}}
-            $args = explode( "|", $pageparams );
-            $param12 = trim( $args[0] );
+        // Allow other extensions to modify the result
+        Hooks::run("WSSearchAfterElasticQueryComplete", [ &$results ] );
 
-            $exploood = explode( "=", explode( ":", $param12 ) [1] );
-            $search_params['class1'] = $exploood[0];
-            $search_params['class2'] = $exploood[1];
+        $results = $this->doFacetTranslations( $results );
 
-            unset( $args[0] );
-            $param_filterlist = [];
-            foreach ( $args as $key => $value ) {
-                $p_val = trim( $value );
-                if ( $p_val[0] != "?" ) {
-                    array_push( $param_filterlist, $p_val );
-                }
-            }
-            $search_params['facets'] = $param_filterlist;
-        }
-
-        $_class = self::buildPropertyObject( $search_params['class1'], $store );
-
-        $filters = [];
-        $filtersIDs = [];
-        $translations = [];
-
-        // create aggs query
-        foreach ( $search_params['facets'] as $key => $value ) {
-            $vars = explode( "=", $value );
-            $val = $vars[0];
-            if ( isset( $vars[1] ) ) {
-                $translations[$val] = $vars[1];
-            }
-            $_filter = self::buildPropertyObject( $val, $store );
-
-            array_unshift( $filtersIDs, $_filter['id'] );
-
-            $filters[$val] = [ 'terms' => [ 'field' => 'P:' . $_filter['id'] . '.' . $_filter['type'] . '.keyword' ] ];
-        }
-
-        if ( isset( $search_params['from'] ) ) {
-            $from = $search_params['from'];
-        } else {
-            $from = 0;
-        }
-
-        // create date aggs query
-        if ( isset( $search_params['dates'] ) ) {
-            $filters['Date'] = [ "date_range" => [ "field" => "P:29.datField", "ranges" => $search_params['dates'] ] ];
-        }
-
-        // create elastic query
-        $params = [ 'index' => 'smw-data-' . strtolower( wfWikiID() ) , "from" => $from, "size" => 10, 'body' => [ 'query' => [ "constant_score" => [ "filter" => [ 'bool' => [ 'must' => [ [ 'bool' => [ 'filter' => [ [ 'term' => [ 'P:' . $_class['id'] . '.' . $_class['type'] . '.keyword' => $search_params['class2'] ] ], ] ] ] ] ] ]
-
-        ] ], "highlight" => [ "pre_tags" => [ "<b>" ], "post_tags" => [ "</b>" ], "fields" => [ 'text_raw' => [ "fragment_size" => 150, "number_of_fragments" => 1 ], 'attachment.content' => [ "fragment_size" => 150, "number_of_fragments" => 1 ]
-
-        ] ], 'aggs' => $filters ] ];
-
-        // create active filters query
-        if ( isset( $search_params['filters'] ) ) {
-            $infilters = $search_params['filters'];
-            foreach ( $infilters as $key => $value ) {
-                if ( !isset( $value['range'] ) ) {
-                    $activefilter = self::buildPropertyObject( $value['key'], $store );
-                    $termfield = [ "term" => [ "P:" . $activefilter['id'] . "." . $activefilter['type'] . ".keyword" => $value['value'] ] ];
-                    array_push( $params['body']['query']["constant_score"]['filter']['bool']['must'][0]['bool']['filter'], $termfield );
-                } else {
-
-                    unset( $value["value"] );
-                    unset( $value["key"] );
-                    array_push( $params['body']['query']["constant_score"]['filter']['bool']['must'][0]['bool']['filter'], $value );
-                }
-            }
-        }
-
-        // create search term query if search term is not empty
-        if ( isset( $search_params['term'] ) && $search_params['term'] ) {
-            if ( preg_match( '/"/', $search_params['term'] ) ) {
-                $star = "";
-            } else {
-                $star = "*";
-            }
-
-            $sterm = [ "bool" => [ "must" => [ "query_string" => [ "fields" => [ "subject.title^8", "text_copy^5", "text_raw", "attachment.title^3", "attachment.content" ], "query" => $star . $search_params['term'] . $star, "minimum_should_match" => 1 ] ] ] ];
-
-            array_push( $params['body']['query']["constant_score"]['filter']['bool']['must'], $sterm );
-
-        }
-
-        // do the Elasticsearch
-        $hosts = [ 'localhost:9200', ];
-        $client = ClientBuilder::create()->setHosts( $hosts )->build();
-        $results = $client->search( $params );
-
-        // join facet translations
-        foreach ( $results['aggregations'] as $key => $value ) {
-            if ( isset( $translations[$key] ) ) {
-                $vars = explode( ":", $translations[$key] );
-                // translate namsepace id
-                if ( $vars[0] = "namespace" ) {
-                    foreach ( $results['aggregations'][$key]['buckets'] as $key3 => $value3 ) {
-                        $namespace = MWNamespace::getCanonicalName( $value3['key'] );
-                        $results['aggregations'][$key]['buckets'][$key3]['name'] = $namespace;
-                    }
-                }
-                // add future translations here
-
-            }
-        }
-        // output
+        // Translate namespace IDs to their canonical name
         foreach ( $results['hits']['hits'] as $key => $value ) {
             $results['hits']['hits'][$key]['_source']['subject']['namespacename'] = MWNamespace::getCanonicalName( $value['_source']['subject']['namespace'] );
         }
 
-        $output = [ "total" => $results['hits']['total'], "hits" => $results['hits']['hits'], "aggs" => $results['aggregations'] ];
-
-        // extra data for vue init
-        if ( !isset( $search_params['page'] ) ) {
-            $outputs = [];
-            foreach ( $search_params['outputs'] as $key => $value ) {
-                $_output = self::buildPropertyObject( $value, $store );
-                $outputs[$_output["id"]] = $_output["type"];
-            }
-
-            $output['filterIDs'] = $filtersIDs;
-            $output['hitIDs'] = $outputs;
+        // Create a KV-map of property ID's with their property names for Vue
+        $hit_ids = [];
+        foreach ( $this->outputs as $output_property_name ) {
+            $property = new PropertyInfo( $output_property_name );
+            $hit_ids[$property->getPropertyID()] = $property->getPropertyType();
         }
-        return $output;
+
+        return [
+            "total" => $results["hits"]["total"],
+            "hits" => $results["hits"]["hits"],
+            "aggs" => $results["aggregations"],
+            "filterIDs" => $this->filter_ids,
+            "hitIDs" => $hit_ids
+        ];
     }
 
-	// function to translate SMW properties to interal ids, and get the property type
-	private function buildPropertyObject( $input, $store ) {
-		$IDProperty = new DIProperty( $input );
-		$ID = $store->getObjectIds()
-			->getSMWPropertyID( $IDProperty );
-		$Type = $IDProperty->findPropertyValueType();
+    /**
+     * Executes the given ElasticSearch query and returns the result.
+     *
+     * @param array $query
+     * @return array
+     */
+    private function doQuery( array $query ) {
+        $config = MediaWikiServices::getInstance()->getMainConfig();
 
-		if ( $Type == "_txt" ) {
-			$ftype = "txtField";
-		} else {
-			$ftype = "wpgField";
-		}
-		return [ "id" => $ID, "type" => $ftype, "name" => $input ];
-	}
+        try {
+            $hosts = $config->get( "WSSearchElasticSearchHosts" );
+        } catch ( \ConfigException $e ) {
+            $hosts = [ "localhost:9200" ];
+        }
+
+        return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
+    }
+
+    /**
+     * Builds the main ElasticSearch query.
+     *
+     * @return array
+     */
+    private function buildElasticQuery() {
+        $query_builder = SearchQueryBuilder::newCanonical();
+
+        $query_builder->setOffset( $this->offset );
+        $query_builder->setMainCondition( $this->config->getConditionProperty(), $this->config->getConditionValue() );
+        $query_builder->setAggregateFilters( $this->buildAggregateFilters() );
+        $query_builder->setActiveFilters( $this->active_filters );
+
+        if ( $this->search_term !== "" ) {
+            $query_builder->setSearchTerm( $this->search_term );
+        }
+
+        if ( isset( $this->limit ) ) {
+            $query_builder->setLimit( $this->limit );
+        }
+
+        return $query_builder->buildQuery();
+    }
+
+    /**
+     * Helper function to build the aggregate filters from the current config.
+     *
+     * @return array
+     */
+    private function buildAggregateFilters() {
+        $filters = [];
+
+        foreach ( $this->config->getFacetProperties() as $facet ) {
+            $translation_pair = explode( "=", $facet );
+            $property_name = $translation_pair[0];
+
+            if ( isset( $translation_pair[1] ) ) {
+                $this->translations[$property_name] = $translation_pair[1];
+            }
+
+            $filter_property = new PropertyInfo( $property_name );
+            $filters[$property_name] = [ "terms" => [ "field" => "P:" . $filter_property->getPropertyID() . "." . $filter_property->getPropertyType() . ".keyword" ] ];
+
+            $this->filter_ids[] = $filter_property->getPropertyID();
+        }
+
+        if ( isset( $this->date_range ) ) {
+            // TODO
+        }
+
+        return $filters;
+    }
+
+    /**
+     * Does facet translations.
+     *
+     * @param array $results
+     * @return array
+     */
+    private function doFacetTranslations( array $results ) {
+        if ( !isset( $results["aggregations"] ) ) {
+            return $results;
+        }
+
+        $aggregations = $results["aggregations"];
+
+        foreach ( $aggregations as $property_name => $aggregate_data ) {
+            if ( !isset( $this->translations[$property_name] ) ) {
+                // No translation available
+                continue;
+            }
+
+            $parts = explode( ":", $this->translations[$property_name] );
+
+            if ( $parts[0] = "namespace" ) {
+                foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
+                    $namespace = MWNamespace::getCanonicalName( $bucket_value['key'] );
+                    $results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
+                }
+            }
+        }
+
+        return $results;
+    }
 }

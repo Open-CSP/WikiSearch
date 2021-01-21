@@ -21,12 +21,32 @@
 		"WSSearchMagic": "i18n/WSSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  "WSSearch": "ApiQueryWSSearch"
+	  "WSSearch": "WSSearch\\ApiQueryWSSearch"
   	},
 	"Hooks": {
-		"ParserFirstCallInit": "WSSearchHooks::onParserFirstCallInit",
-		"ArticleDeleteComplete": "WSSearchHooks::onArticleDeleteComplete",
-		"PageContentSaveComplete": "WSSearchHooks::onPageContentSaveComplete"
+		"ParserFirstCallInit": "WSSearch\\WSSearchHooks::onParserFirstCallInit",
+		"ArticleDeleteComplete": "WSSearch\\WSSearchHooks::onArticleDeleteComplete",
+		"PageContentSaveComplete": "WSSearch\\WSSearchHooks::onPageContentSaveComplete",
+		"LoadExtensionSchemaUpdates": "WSSearch\\WSSearchHooks::onLoadExtensionSchemaUpdates"
 	},
-	"manifest_version": 1
+	"config": {
+		"WSSearchElasticStoreIndex": {
+			"value": false
+		},
+		"WSSearchDefaultResultLimit": {
+			"value": 10
+		},
+		"WSSearchHighlightFragmentSize": {
+			"value": 150
+		},
+		"WSSearchHighlightNumberOfFragments": {
+			"value": 1
+		},
+		"WSSearchElasticSearchHosts": {
+			"value": [
+				"localhost:9200"
+			]
+		}
+	},
+	"manifest_version": 2
 }

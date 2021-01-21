@@ -43,7 +43,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	 * @throws ApiUsageException
 	 */
 	public function execute() {
-		$this->checkUserRightsAny( "wssearch-execute-api" );
+		#$this->checkUserRightsAny( "wssearch-execute-api" );
 
 		/*
 		$search_params = [
@@ -73,14 +73,35 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		    $this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
         }
 
-		$search = new Search( $engine_config );
+        $search = new Search( $engine_config );
 
-		$search->setSearchTerm( $this->getParameter( "term" ) );
+		if ( $this->getParameter( "term" ) ) {
+            $search->setSearchTerm( $this->getParameter( "term" ) );
+        }
 
+		if ( $this->getParameter( "filter" ) ) {
+            $search->setActiveFilters( json_decode( $this->getParameter( "filter" ) ) );
+        }
 
+		if ( $this->getParameter( "from" ) ) {
+            $search->setOffset( $this->getParameter( "from" ) );
+        }
+
+		if ( $this->getParameter( "limit" ) ) {
+            $search->setLimit( $this->getParameter( "limit" ) );
+        }
+
+		// $search->setDateRange( $this->getParameter( "dates" ) );
+
+        $output = $search->doSearch();
+
+		$this->getResult()->addValue( 'result', 'output', $output );
+
+		/*
 		$this->getResult()->addValue( 'result', 'total', $output['total'] );
 		$this->getResult()->addValue( 'result', 'hits', json_encode( $output['hits'] ) );
 		$this->getResult()->addValue( 'result', 'aggs', json_encode( $output['aggs'] ) );
+		*/
 	}
 
 	/**
@@ -88,8 +109,8 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	 */
 	public function getAllowedParams() {
 		return [
-			'page' => [
-				ApiBase::PARAM_TYPE => 'string',
+			'pageid' => [
+				ApiBase::PARAM_TYPE => 'integer',
 			],
 			'filter' => [
 				ApiBase::PARAM_TYPE => 'string',
@@ -101,8 +122,11 @@ class ApiQueryWSSearch extends ApiQueryBase {
 				ApiBase::PARAM_TYPE => 'string',
 			],
 			'from' => [
-				ApiBase::PARAM_TYPE => 'string',
-			]
+				ApiBase::PARAM_TYPE => 'integer',
+			],
+            'limit' => [
+                ApiBase::PARAM_TYPE => 'integer'
+            ]
 		];
 	}
 }

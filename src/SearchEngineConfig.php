@@ -3,6 +3,7 @@
 
 namespace WSSearch;
 
+use Database;
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
 
@@ -13,7 +14,7 @@ class SearchEngineConfig {
     private $title;
 
     /**
-     * @var string
+     * @var PropertyInfo
      */
     private $condition_property;
 
@@ -113,8 +114,8 @@ class SearchEngineConfig {
 
         $this->title = $title;
 
+        $this->condition_property = new PropertyInfo( $condition_property );
         $this->condition_value = $condition_value;
-        $this->condition_property = $condition_property;
         $this->facet_properties = $facet_properties;
         $this->result_properties = $result_properties;
     }
@@ -131,9 +132,9 @@ class SearchEngineConfig {
     /**
      * Returns the condition property name.
      *
-     * @return string
+     * @return PropertyInfo
      */
-    public function getConditionProperty(): string {
+    public function getConditionProperty(): PropertyInfo {
         return $this->condition_property;
     }
 
@@ -168,9 +169,9 @@ class SearchEngineConfig {
     /**
      * Updates/adds this SearchEngineConfig object in the database with the current values.
      *
-     * @param DBConnRef $database
+     * @param Database $database
      */
-    public function update( DBConnRef $database ) {
+    public function update( $database ) {
         $this->delete( $database, $this->title->getArticleID() );
         $this->insert( $database );
     }
@@ -180,9 +181,9 @@ class SearchEngineConfig {
      * into account whether the current object might already have been saved and may throw an error if the object
      * is saved twice. Use $this->update() instead.
      *
-     * @param DBConnRef $database
+     * @param Database $database
      */
-    public function insert( DBConnRef $database ) {
+    public function insert( $database ) {
         $page_id = $this->title->getArticleID();
 
         // Insert this object's search condition
@@ -190,7 +191,7 @@ class SearchEngineConfig {
             "search_condition",
             [
                 "page_id" => $page_id,
-                "condition_property" => $this->condition_property,
+                "condition_property" => $this->condition_property->getPropertyName(),
                 "condition_value" => $this->condition_value
             ]
         );
@@ -224,9 +225,10 @@ class SearchEngineConfig {
     /**
      * Deletes the SearchEngineConfig object associated with the given $page_id from the database.
      *
-     * @param DBConnRef $database
+     * @param Database $database
+     * @param int $page_id
      */
-    public static function delete( DBConnRef $database, int $page_id ) {
+    public static function delete( $database, int $page_id ) {
         $database->delete(
             "search_condition",
             [ "page_id" => $page_id ]
