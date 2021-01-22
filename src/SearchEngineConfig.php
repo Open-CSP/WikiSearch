@@ -61,6 +61,11 @@ class SearchEngineConfig {
     private $facet_property_ids = [];
 
     /**
+     * @var array
+     */
+    private $result_property_ids = [];
+
+    /**
 	 * Constructs a new SearchEngineConfig object from the values in the database identified by $page. If no
 	 * SearchEngineConfig object exists in the database for the given $page, NULL will be returned.
 	 *
@@ -154,6 +159,10 @@ class SearchEngineConfig {
 
             $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
         }
+
+        foreach ( $result_properties as $property ) {
+            $this->result_property_ids[$property] = (new PropertyInfo( $property ))->getPropertyID();
+        }
 	}
 
 	/**
@@ -211,6 +220,15 @@ class SearchEngineConfig {
 	public function getResultProperties(): array {
 		return $this->result_properties;
 	}
+
+    /**
+     * Returns the IDs for the result properties.
+     *
+     * @return array
+     */
+	public function getResultPropertyIDs(): array {
+
+    }
 
 	/**
 	 * Updates/adds this SearchEngineConfig object in the database with the current values.
