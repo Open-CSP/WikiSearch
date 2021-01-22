@@ -23,6 +23,9 @@
 	"APIMetaModules": {
 	  "WSSearch": "WSSearch\\ApiQueryWSSearch"
   	},
+	"AvailableRights": [
+		"wssearch-execute-api"
+	],
 	"Hooks": {
 		"ParserFirstCallInit": "WSSearch\\WSSearchHooks::onParserFirstCallInit",
 		"ArticleDeleteComplete": "WSSearch\\WSSearchHooks::onArticleDeleteComplete",
@@ -45,6 +48,12 @@
 		"WSSearchElasticSearchHosts": {
 			"value": [
 				"localhost:9200"
+			]
+		},
+		"WSSearchAPIRequiredRights": {
+			"value": [
+				"read",
+				"wssearch-execute-api"
 			]
 		}
 	},
