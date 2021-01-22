@@ -1,42 +1,5 @@
 # WSSearch
 
-Creates a search app using Semantic MediaWiki and Elasticsearch and renders with Vue.js
-
-features
-
-*facets, highlighted results, pagers, date rage filter*
-
-to do
-
-*extend condition, allow more range filters*
-
-## Parser function:
-```
-{{#WSSearch: <condition>
-  |<facet property>
-  |?<result property>
-  }}
-```
-
-example
-
-```
-{{#WSSearch: <condition>
-  |Version
-  |Tag
-  |Space
-  |?Title  //first result property will be used as title
-  |?Version
-  }}
-```
-
-The WSSearch extension acts as a direct link between any search frontend, and 
-the Semantic MediaWiki ElasticSearch index.
-
-The extension itself is not very useful and requires a separate frontend extension
-to be installed. To make it easy to develop a frontend, WSSearch exposes several
-hooks that can be used to alter the behaviour of WSSearch and load a proper frontend.
-
 ## Hooks
 
 ### `WSSearchBeforeElasticQuery`
