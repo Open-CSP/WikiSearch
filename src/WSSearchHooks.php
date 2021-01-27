@@ -265,8 +265,6 @@ abstract class WSSearchHooks {
             ]
         ];
 
-        var_dump($filter);
-
         $search_engine = new SearchEngine();
         $search_engine->setLimit(0);
         $search_engine->setAdditionalAggregateFilters( $filter );
