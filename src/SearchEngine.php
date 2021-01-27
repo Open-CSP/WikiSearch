@@ -142,8 +142,8 @@ class SearchEngine {
 		$results = $this->applyResultTranslations( $results );
 
 		return [
+            "hits"  => json_encode( $results["hits"]["hits"] ), // TODO: Do not encode this (but not encoding breaks it for some reason)
 			"total" => $results["hits"]["total"],
-			"hits"  => $results["hits"]["hits"],
 			"aggs"  => $results["aggregations"]
 		];
 	}
@@ -197,7 +197,6 @@ class SearchEngine {
 	private function applyResultTranslations( array $results ): array {
 		$results = $this->doFacetTranslations( $results );
 		$results = $this->doNamespaceTranslations( $results );
-		$results = $this->doHitTranslations( $results );
 
 		// Allow other extensions to modify the result
 		Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
@@ -247,36 +246,6 @@ class SearchEngine {
         // Translate namespace IDs to their canonical name
         foreach ( $results['hits']['hits'] as $key => $value ) {
             $results['hits']['hits'][$key]['_source']['subject']['namespacename'] = MWNamespace::getCanonicalName( $value['_source']['subject']['namespace'] );
-        }
-
-        return $results;
-    }
-
-    /**
-     * Removes any results the user is not allowed to view.
-     *
-     * @param array $results
-     * @return array
-     */
-    private function doHitTranslations( array $results ): array {
-        if ( !isset( $results["hits"]["hits"] ) ) {
-            return $results;
-        }
-
-        $hits =& $results["hits"]["hits"];
-
-        foreach ( $hits as $key => $hit ) {
-            $revision_id = $hit["_source"]["subject"]["rev_id"];
-            $revision = \Revision::newFromId( $revision_id );
-            $title = $revision->getTitle();
-
-            if ( !$title->userCan( "view" ) ) {
-                unset( $hits[$key] );
-            }
-
-            if ( isset( $hit["_type"] ) ) {
-                unset( $hits[$key]["_type"] );
-            }
         }
 
         return $results;
