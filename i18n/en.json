@@ -10,5 +10,8 @@
   "wssearch-api-invalid-query": "Invalid query: $1",
   "wssearch-api-invalid-json": "The parameter '$1' expected a valid JSON object: $2",
   "wssearch-api-invalid-pageid": "The given page ID is invalid: the page does not exist or has no config associated with it",
-  "wssearch-api-missing-pageid": "Missing required parameter 'pageid'"
+  "wssearch-api-missing-pageid": "Missing required parameter 'pageid'",
+  "wssearch-invalid-dbms": "WSSearch does not support database type `$1`",
+  "right-wssearch-execute-api": "Query the WSSearch API",
+  "action-wssearch-execute-api": "query the WSSearch API"
 }

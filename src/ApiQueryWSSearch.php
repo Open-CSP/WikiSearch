@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Search MediaWiki extension
+ * WSSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -25,8 +25,15 @@ use ApiBase;
 use ApiQuery;
 use ApiQueryBase;
 use ApiUsageException;
+use MediaWiki\MediaWikiServices;
+use MWException;
 use Title;
 
+/**
+ * Class ApiQueryWSSearch
+ *
+ * @package WSSearch
+ */
 class ApiQueryWSSearch extends ApiQueryBase {
 	/**
 	 * ApiQueryWSSearch constructor.
@@ -35,76 +42,27 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	 * @param string $moduleName
 	 */
 	public function __construct( ApiQuery $query, string $moduleName ) {
-		parent::__construct( $query, $moduleName, 'sm' );
+		parent::__construct( $query, $moduleName );
 	}
 
-    /**
-     * @inheritDoc
-     * @throws ApiUsageException
-     * @throws \FatalError
-     * @throws \MWException
-     */
+	/**
+	 * @inheritDoc
+	 * @throws ApiUsageException
+	 * @throws MWException
+	 */
 	public function execute() {
-		#$this->checkUserRightsAny( "wssearch-execute-api" );
+		$this->checkUserRights();
 
-		$page_id = $this->getParameter( "pageid" );
+		$title = $this->getTitleFromRequest();
+		$engine_config = $this->getEngineConfigFromTitle( $title );
+		$engine = $this->getEngine( $engine_config );
 
-		if ( !$page_id ) {
-            $this->dieWithError( wfMessage( "wssearch-api-missing-pageid" ) );
-        }
-
-		$title = Title::newFromID( $page_id );
-
-		if ( !$title || !$title instanceof Title ) {
-		    $this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
-        }
-
-		$engine_config = SearchEngineConfig::newFromDatabase( $title );
-
-		if ( $engine_config === null ) {
-		    $this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
-        }
-
-        $search = new Search( $engine_config );
-
-		if ( $this->getParameter( "term" ) ) {
-            $search->setSearchTerm( $this->getParameter( "term" ) );
-        }
-
-		if ( $this->getParameter( "from" ) ) {
-            $search->setOffset( $this->getParameter( "from" ) );
-        }
-
-		if ( $this->getParameter( "limit" ) ) {
-            $search->setLimit( $this->getParameter( "limit" ) );
-        }
-
-        if ( $this->getParameter( "filter" ) ) {
-            $filters = json_decode( $this->getParameter( "filter" ), true );
-
-            if ( !is_array( $filters ) ) {
-                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
-            }
-
-            $search->setActiveFilters( $filters );
-        }
-
-		if ( $this->getParameter( "dates" ) ) {
-            $dates = json_decode( $this->getParameter( "dates" ), true );
-
-            if ( !is_array( $dates ) ) {
-                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "dates", json_last_error_msg() ) );
-            }
-
-            $search->setAggregateDateRanges( $dates );
-        }
-
-        try {
-		    $result = $search->doSearch();
-            $this->getResult()->addValue( null, 'result', $result );
-        } catch ( \Exception $e ) {
-		    $this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
-        }
+		try {
+			$result = $engine->doSearch();
+			$this->getResult()->addValue( null, 'result', $result );
+		} catch ( \Exception $e ) {
+			$this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
+		}
 	}
 
 	/**
@@ -127,9 +85,115 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			'from' => [
 				ApiBase::PARAM_TYPE => 'integer',
 			],
-            'limit' => [
-                ApiBase::PARAM_TYPE => 'integer'
-            ]
+			'limit' => [
+				ApiBase::PARAM_TYPE => 'integer'
+			]
 		];
+	}
+
+	/**
+	 * Checks applicable user rights.
+	 *
+	 * @throws ApiUsageException
+	 */
+	private function checkUserRights() {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+
+		try {
+			$required_rights = $config->get( "WSSearchAPIRequiredRights" );
+			$this->checkUserRightsAny( $required_rights );
+		} catch ( \ConfigException $e ) {
+			// Something went wrong; to be safe we block the access
+			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
+		}
+	}
+
+	/**
+	 * Returns the Title object associated with this request if it is available.
+	 *
+	 * @throws ApiUsageException
+	 */
+	private function getTitleFromRequest(): Title {
+		$page_id = $this->getParameter( "pageid" );
+
+		if ( !$page_id ) {
+			$this->dieWithError( wfMessage( "wssearch-api-missing-pageid" ) );
+		}
+
+		$title = Title::newFromID( $page_id );
+
+		if ( !$title || !$title instanceof Title ) {
+			$this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
+		}
+
+		return $title;
+	}
+
+	/**
+	 * Returns the EngineConfig associated with the given Title if possible.
+	 *
+	 * @param Title $title
+	 * @return SearchEngineConfig
+	 * @throws ApiUsageException
+	 */
+	private function getEngineConfigFromTitle( Title $title ): SearchEngineConfig {
+		$engine_config = SearchEngineConfig::newFromDatabase( $title );
+
+		if ( $engine_config === null ) {
+			$this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
+		}
+
+		return $engine_config;
+	}
+
+	/**
+	 * Creates the SearchEngine from the current request.
+	 *
+	 * @param SearchEngineConfig $engine_config
+	 * @return SearchEngine
+	 * @throws ApiUsageException
+	 */
+	private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
+		$engine = new SearchEngine( $engine_config );
+
+		$term = $this->getParameter( "term" );
+		$from = $this->getParameter( "from" );
+		$limit = $this->getParameter( "limit" );
+		$filter = $this->getParameter( "filter" );
+		$dates = $this->getParameter( "dates" );
+
+		if ( $term !== null ) {
+			$engine->setSearchTerm( $term );
+		}
+
+		if ( $from !== null ) {
+			$engine->setOffset( $from );
+		}
+
+		if ( $limit !== null ) {
+			$engine->setLimit( $limit );
+		}
+
+		if ( $filter !== null ) {
+			$filters = json_decode( $filter, true );
+
+			if ( is_array( $filters ) ) {
+				$engine->setActiveFilters( $filters );
+			} else {
+				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
+			}
+		}
+
+		if ( $dates !== null ) {
+			$data = json_decode( $dates, true );
+
+			if ( is_array( $data ) ) {
+				$engine->setAggregateDateRanges( $data );
+			} else {
+				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "dates", json_last_error_msg() ) );
+			}
+		}
+
+		return $engine;
 	}
 }
