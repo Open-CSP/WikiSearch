@@ -49,12 +49,17 @@ class SearchEngine {
 	 */
 	private $translations = [];
 
-	/**
+    /**
+     * @var array
+     */
+    private $aggregate_filters = [];
+
+    /**
 	 * Search constructor.
 	 *
 	 * @param SearchEngineConfig $config
 	 */
-	public function __construct( SearchEngineConfig $config ) {
+	public function __construct( SearchEngineConfig $config = null ) {
 		$this->config = $config;
 		$this->query_builder = SearchQueryBuilder::newCanonical();
 	}
@@ -100,6 +105,16 @@ class SearchEngine {
 	public function setActiveFilters( array $active_filters ) {
 		$this->query_builder->setActiveFilters( $active_filters );
 	}
+
+    /**
+     * Allows the user to add additional aggregate filters on top of those provided by the
+     * facet properties from the config.
+     *
+     * @param array $aggregate_filters
+     */
+	public function setAdditionalAggregateFilters( array $aggregate_filters ) {
+	    $this->aggregate_filters = $aggregate_filters;
+    }
 
 	/**
 	 * Sets the available date ranges.
@@ -154,10 +169,12 @@ class SearchEngine {
 	 * @return array
 	 */
 	private function buildElasticQuery(): array {
-		$this->query_builder->setMainCondition(
-		    $this->config->getConditionProperty(),
-            $this->config->getConditionValue()
-        );
+	    if ( isset( $this->config ) ) {
+            $this->query_builder->setMainCondition(
+                $this->config->getConditionProperty(),
+                $this->config->getConditionValue()
+            );
+        }
 
 		$this->query_builder->setAggregateFilters( $this->buildAggregateFilters() );
 
@@ -170,7 +187,11 @@ class SearchEngine {
 	 * @return array
 	 */
 	private function buildAggregateFilters(): array {
-		$filters = [];
+        if ( !isset( $this->config ) ) {
+            return $this->aggregate_filters;
+        }
+
+        $filters = [];
 
 		foreach ( $this->config->getFacetProperties() as $facet ) {
 			$translation_pair = explode( "=", $facet );
@@ -184,7 +205,7 @@ class SearchEngine {
 			$filters[$property_name] = [ "terms" => [ "field" => "P:" . $facet_property->getPropertyID() . "." . $facet_property->getPropertyType() . ".keyword" ] ];
 		}
 
-		return $filters;
+		return array_merge( $filters, $this->aggregate_filters );
 	}
 
 	/**

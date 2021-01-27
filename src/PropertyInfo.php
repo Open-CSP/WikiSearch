@@ -62,10 +62,18 @@ class PropertyInfo {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
-		$property = new DIProperty( $property_name );
+		$property_name = $this->translateSpecialPropertyNames( $property_name );
 
-		$this->id   = $store->getObjectIds()->getSMWPropertyID( $property );
-		$this->type = $property->findPropertyValueType() === "_txt" ? "txtField" : "wpgField";
+		$property = new DIProperty( $property_name );
+		$this->id = $store->getObjectIds()->getSMWPropertyID( $property );
+
+		// TODO: Make this work for any property value type
+		switch ( $property->findPropertyValueType() ) {
+            case "_txt": $this->type = "txtField"; break;
+            case "_dat": $this->type = "datField"; break;
+            default: $this->type = "wpgField";
+        }
+
 		$this->name = $property_name;
 	}
 
@@ -102,6 +110,20 @@ class PropertyInfo {
      * @return string
      */
 	public function getPropertyField(): string {
-	    return "P:" . $this->getPropertyID() . "." . $this->getPropertyType() . ".keyword";
+	    return "P:" . $this->getPropertyID() . "." . $this->getPropertyType();
+    }
+
+    /**
+     * Translates the given property name to a special property key if it is a special property.
+     *
+     * @param string $property_name
+     * @return string
+     */
+    private function translateSpecialPropertyNames( string $property_name ) {
+        // TODO: Add more
+        switch ( $property_name ) {
+            case "Modification date": return "_MDAT";
+            default: return $property_name;
+        }
     }
 }

@@ -150,6 +150,7 @@ abstract class WSSearchHooks {
 		try {
 			$parser->setFunctionHook( "searchEngineConfig", [ self::class, "searchEngineConfigCallback" ] );
 			$parser->setFunctionHook( "loadSearchEngine", [ self::class, "loadSearchEngineCallback" ] );
+			$parser->setFunctionHook( "verwijzingen", [ self::class, "verwijzingenCallback" ] );
 		} catch ( MWException $e ) {
 			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
 		}
@@ -197,17 +198,17 @@ abstract class WSSearchHooks {
 		return "";
 	}
 
-	/**
-	 * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
-	 * of the extension.
-	 *
-	 * @param Parser $parser
-	 * @param string ...$parameters
-	 *
-	 * @return string
-	 * @throws MWException
-	 * @throws FatalError
-	 */
+    /**
+     * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
+     * of the extension.
+     *
+     * @param Parser $parser
+     * @param string ...$parameters
+     *
+     * @return string
+     * @throws FatalError
+     * @throws MWException
+     */
 	public static function loadSearchEngineCallback( Parser $parser, string ...$parameters ): string {
 	    $config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
 		$result = self::error( "wssearch-missing-frontend" );
@@ -215,6 +216,67 @@ abstract class WSSearchHooks {
 
 		return $result;
 	}
+
+    /**
+     * @param Parser $parser
+     * @return string
+     * @throws MWException
+     */
+	public static function verwijzingenCallback( Parser $parser ) {
+        $options = self::extractOptions( func_get_args() );
+
+        $limit = isset( $options["limit"] ) ? $options["limit"] : "100";
+        $property = isset( $options["property"] ) ? $options["property"] : "";
+        $array_name = isset( $options["array"] ) ? $options["array"] : "";
+        $date_property = isset( $options["date property"] ) ? $options["date property"] : "Modification date";
+
+        if ( !$property || !$array_name ) {
+            return "Missing `array` or `property` parameter";
+        }
+
+        if ( !isset( $options["from"] ) || !isset( $options["to"] ) ) {
+            return "Missing `from` or `to` parameter";
+        }
+
+        if ( !ctype_digit( $options["from"] ) || !ctype_digit( $options["to"] ) || !ctype_digit( $limit ) ) {
+            return "Invalid `from`, `limit` or `to` parameter";
+        }
+
+        list( $from, $to ) = self::convertDate( $options["from"], $options["to"] );
+
+        $filter = [
+            "verwijzingen" => [
+                "filter" => [
+                    "range" => [
+                        ( new PropertyInfo( $date_property ) )->getPropertyField() => [
+                            "to" => $to,
+                            "from" => $from
+                        ]
+                    ]
+                ],
+                "aggs" => [
+                    "aantal_verwijzingen" => [
+                        "terms" => [
+                            "field" => (new PropertyInfo($property))->getPropertyField()  . ".keyword",
+                            "size" => $limit
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        var_dump($filter);
+
+        $search_engine = new SearchEngine();
+        $search_engine->setLimit(0);
+        $search_engine->setAdditionalAggregateFilters( $filter );
+
+        $result = $search_engine->doSearch();
+
+        \WSArrays::$arrays[$array_name] = new \ComplexArray( $result["aggs"]["verwijzingen"]["aantal_verwijzingen"]["buckets"] );
+
+        return "";
+    }
 
 	/**
 	 * Returns a formatted error message.
@@ -228,4 +290,35 @@ abstract class WSSearchHooks {
 			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->toString()
 		);
 	}
+
+    /**
+     * Converts an array of values in form [0] => "name=value"
+     * into a real associative array in form [name] => value
+     * If no = is provided, true is assumed like this: [name] => true
+     *
+     * @param array string $options
+     * @return array $results
+     */
+    private static function extractOptions( array $options ) {
+        $results = [];
+        foreach ( $options as $option ) {
+            $pair = array_map( 'trim', explode( '=', $option, 2 ) );
+            if ( count( $pair ) === 2 ) {
+                $results[ $pair[0] ] = $pair[1];
+            }
+            if ( count( $pair ) === 1 ) {
+                $results[ $pair[0] ] = true;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @param string $from_year
+     * @param string $to_year
+     * @return array
+     */
+    private static function convertDate( int $from_year, int $to_year ) {
+        return [ gregoriantojd( 1, 1, $from_year ), gregoriantojd( 12, 31, $to_year ) ];
+    }
 }
