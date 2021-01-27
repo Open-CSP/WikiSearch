@@ -174,7 +174,8 @@ abstract class WSSearchHooks {
 		$result_properties = [];
 
 		foreach ( $parameters as $parameter ) {
-			if ( strlen( $parameter ) === 0 ) { continue;
+			if ( strlen( $parameter ) === 0 ) {
+			    continue;
 			}
 
 			if ( $parameter[0] === "?" ) {

@@ -59,6 +59,29 @@ class SearchEngine {
 		$this->query_builder = SearchQueryBuilder::newCanonical();
 	}
 
+    /**
+     * Executes the given ElasticSearch query and returns the result.
+     *
+     * @param array $query
+     * @return array
+     * @throws MWException
+     * @throws FatalError
+     */
+    public static function doQuery( array $query ): array {
+        $config = MediaWikiServices::getInstance()->getMainConfig();
+
+        try {
+            $hosts = $config->get( "WSSearchElasticSearchHosts" );
+        } catch ( \ConfigException $e ) {
+            $hosts = [ "localhost:9200" ];
+        }
+
+        // Allow other extensions to modify the query
+        Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+
+        return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
+    }
+
 	/**
 	 * Sets the offset for the query. An offset of 10 means the first 10 results will not
 	 * be returned. Useful for paged searches.
@@ -125,29 +148,6 @@ class SearchEngine {
 		];
 	}
 
-    /**
-     * Executes the given ElasticSearch query and returns the result.
-     *
-     * @param array $query
-     * @return array
-     * @throws MWException
-     * @throws FatalError
-     */
-	private function doQuery( array $query ): array {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-
-		try {
-			$hosts = $config->get( "WSSearchElasticSearchHosts" );
-		} catch ( \ConfigException $e ) {
-			$hosts = [ "localhost:9200" ];
-		}
-
-		// Allow other extensions to modify the query
-		Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
-
-		return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
-	}
-
 	/**
 	 * Builds the main ElasticSearch query.
 	 *
@@ -158,6 +158,7 @@ class SearchEngine {
 		    $this->config->getConditionProperty(),
             $this->config->getConditionValue()
         );
+
 		$this->query_builder->setAggregateFilters( $this->buildAggregateFilters() );
 
 		return $this->query_builder->buildQuery();
@@ -196,7 +197,7 @@ class SearchEngine {
 	private function applyResultTranslations( array $results ): array {
 		$results = $this->doFacetTranslations( $results );
 		$results = $this->doNamespaceTranslations( $results );
-		$results = $this->doPermissionCheckTranslations( $results );
+		$results = $this->doHitTranslations( $results );
 
 		// Allow other extensions to modify the result
 		Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
@@ -256,10 +257,12 @@ class SearchEngine {
      *
      * @param array $results
      * @return array
-     *
-     * @throws MWException
      */
-    private function doPermissionCheckTranslations( array $results ): array {
+    private function doHitTranslations( array $results ): array {
+        if ( !isset( $results["hits"]["hits"] ) ) {
+            return $results;
+        }
+
         $hits =& $results["hits"]["hits"];
 
         foreach ( $hits as $key => $hit ) {
@@ -267,11 +270,12 @@ class SearchEngine {
             $revision = \Revision::newFromId( $revision_id );
             $title = $revision->getTitle();
 
-            $is_allowed = true;
-            Hooks::run( "WSSearchPermissionCheck", [ $revision, $title, &$is_allowed ] );
-
-            if ( !($title->userCan( "view" ) && $is_allowed) ) {
+            if ( !$title->userCan( "view" ) ) {
                 unset( $hits[$key] );
+            }
+
+            if ( isset( $hit["_type"] ) ) {
+                unset( $hits[$key]["_type"] );
             }
         }
 

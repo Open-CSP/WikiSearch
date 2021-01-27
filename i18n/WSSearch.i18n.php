@@ -26,5 +26,6 @@ $magicWords = [];
  */
 $magicWords['en'] = [
 	'searchEngineConfig' => [ 1, 'searchEngineConfig' ],
-	'loadSearchEngine' => [ 0, 'loadSearchEngine' ]
+	'loadSearchEngine' => [ 1, 'loadSearchEngine' ],
+    'testVerwijzingen' => [ 0, 'testVerwijzingen' ]
 ];

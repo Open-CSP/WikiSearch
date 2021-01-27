@@ -227,7 +227,7 @@ class SearchEngineConfig {
      * @return array
      */
 	public function getResultPropertyIDs(): array {
-
+        return $this->result_property_ids;
     }
 
 	/**

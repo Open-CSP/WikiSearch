@@ -95,4 +95,13 @@ class PropertyInfo {
 	public function getPropertyName(): string {
 		return $this->name;
 	}
+
+    /**
+     * Returns the field associated with this property.
+     *
+     * @return string
+     */
+	public function getPropertyField(): string {
+	    return "P:" . $this->getPropertyID() . "." . $this->getPropertyType() . ".keyword";
+    }
 }

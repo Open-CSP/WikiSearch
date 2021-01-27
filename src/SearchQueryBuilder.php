@@ -341,7 +341,7 @@ class SearchQueryBuilder {
 	private function buildTermField( PropertyInfo $property, string $value ): array {
 		return [
 			"term" => [
-				"P:" . $property->getPropertyID() . "." . $property->getPropertyType() . ".keyword" => $value
+				$property->getPropertyField() => $value
 			]
 		];
 	}
