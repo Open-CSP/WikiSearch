@@ -121,11 +121,9 @@ abstract class WSSearchHooks {
      */
     public static function onParserFirstCallInit( Parser $parser ) {
         try {
-            $parser->setFunctionHook("searchEngineConfig", [self::class, "searchEngineConfigCallback"]);
+            $parser->setFunctionHook( "searchEngineConfig", [self::class, "searchEngineConfigCallback"] );
             $parser->setFunctionHook( "loadSearchEngine", [self::class, "loadSearchEngineCallback"] );
-        } catch (\MWException $e) {
-            // @FIXME: Handle this exception
-        }
+        } catch (\MWException $e) {}
     }
 
     /**
