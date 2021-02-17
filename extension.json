@@ -4,7 +4,7 @@
 		"Marijn van Wezel",
 		"Robis Koopmans"
 	],
-	"version": "2.0",
+	"version": "2.1",
 	"url": "https://www.mediawiki.org/wiki/Extension:WSSearch",
 	"descriptionmsg": "wssearch-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -30,7 +30,8 @@
 		"ParserFirstCallInit": "WSSearch\\WSSearchHooks::onParserFirstCallInit",
 		"ArticleDeleteComplete": "WSSearch\\WSSearchHooks::onArticleDeleteComplete",
 		"PageContentSaveComplete": "WSSearch\\WSSearchHooks::onPageContentSaveComplete",
-		"LoadExtensionSchemaUpdates": "WSSearch\\WSSearchHooks::onLoadExtensionSchemaUpdates"
+		"LoadExtensionSchemaUpdates": "WSSearch\\WSSearchHooks::onLoadExtensionSchemaUpdates",
+		"BeforePageDisplay": "WSSearch\\WSSearchHooks::onBeforePageDisplay"
 	},
 	"config": {
 		"WSSearchElasticStoreIndex": {
@@ -55,6 +56,9 @@
 				"read",
 				"wssearch-execute-api"
 			]
+		},
+		"WSSearchSearchFieldOverride": {
+			"value": false
 		}
 	},
 	"manifest_version": 2

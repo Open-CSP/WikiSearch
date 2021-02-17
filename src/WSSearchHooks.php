@@ -29,8 +29,10 @@ use LogEntry;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MWException;
+use OutputPage;
 use Parser;
 use Revision;
+use Skin;
 use Status;
 use Title;
 use User;
@@ -154,6 +156,44 @@ abstract class WSSearchHooks {
 		} catch ( MWException $e ) {
 			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
 		}
+	}
+
+    /**
+     * Allows last minute changes to the output page, e.g. adding of CSS or
+     * JavaScript by extensions.
+     *
+     * @param OutputPage $out
+     * @param Skin $skin
+     */
+	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+	    if ( $out->getTitle()->getFullText() !== "Special:Search" ) {
+	        return;
+        }
+
+	    $config = MediaWikiServices::getInstance()->getMainConfig();
+	    $search_field_override = $config->get( "WSSearchSearchFieldOverride" );
+
+	    if ( $search_field_override === false ) {
+	        return;
+        }
+
+	    // Create Title object to get the full URL
+	    $title = Title::newFromText( $search_field_override );
+
+	    // The search page redirect is invalid
+	    if ( !$title instanceof Title ) {
+	        return;
+        }
+
+	    // Get the current search query
+	    $search_query = $out->getRequest()->getval( "search", "" );
+
+	    // Get the full URL to redirect to
+	    $redirect_url = $title->getFullUrlForRedirect( [ "search_query" => $search_query ] );
+
+	    // Perform the redirect
+        header( "Location: $redirect_url" );
+        exit();
 	}
 
 	/**
