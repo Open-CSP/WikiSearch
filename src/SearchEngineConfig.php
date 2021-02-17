@@ -148,10 +148,7 @@ class SearchEngineConfig {
 
 		$this->condition_property = new PropertyInfo( $condition_property );
 		$this->condition_value = $condition_value;
-
-		$this->facet_properties = array_map( function( string $property_name ): PropertyInfo {
-		    return new PropertyInfo( $property_name );
-        }, $facet_properties );
+		$this->facet_properties = $facet_properties;
 
 		$this->result_properties = array_map( function( string $property_name ): PropertyInfo {
             return new PropertyInfo( $property_name );
@@ -166,8 +163,8 @@ class SearchEngineConfig {
             $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
         }
 
-        foreach ( $result_properties as $property ) {
-            $this->result_property_ids[$property] = (new PropertyInfo( $property ))->getPropertyID();
+        foreach ( $this->result_properties as $property ) {
+            $this->result_property_ids[$property->getPropertyName()] = $property->getPropertyID();
         }
 	}
 
@@ -199,9 +196,10 @@ class SearchEngineConfig {
 	}
 
 	/**
-	 * Returns the facet properties (properties that are not prefixed with "?").
+	 * Returns the facet properties (properties that are not prefixed with "?"). This may be
+     * the name of the facet property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar").
 	 *
-	 * @return PropertyInfo[]
+	 * @return string[]
 	 */
 	public function getFacetProperties(): array {
 		return $this->facet_properties;

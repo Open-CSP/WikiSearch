@@ -52,7 +52,8 @@ function onWSSearchOnLoadFrontend( string &$result, \WSSearch\SearchEngineConfig
             * `getPropertyType(): string`: Returns the property type (e.g. `txtField` or `wpgField`)
             * `getPropertyName(): string`: Returns the name of the property (e.g. `Class`)
     * `getConditionValue(): string`: Returns the value in the condition (e.g. `Foobar` in `Class=Foobar`)
-    * `getFacetProperties(): array`: Returns the facet properties in the config as PropertyInfo objects (facet properties are the properties that are **not** prefixed with `?`)
+    * `getFacetProperties(): array`: Returns the facet properties in the config (facet properties are the properties that are **not** prefixed with `?`). May be the
+      name of a property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar")
     * `getFacetPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the facet property and the value the ID of that property
     * `getResultProperties(): array`: Returns the result properties in the config as PropertyInfo objects (result properties are the properties prefixed with `?`)
     * `getResultPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the result property and the value the ID of that property
