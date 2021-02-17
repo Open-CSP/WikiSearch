@@ -148,8 +148,14 @@ class SearchEngineConfig {
 
 		$this->condition_property = new PropertyInfo( $condition_property );
 		$this->condition_value = $condition_value;
-		$this->facet_properties = $facet_properties;
-		$this->result_properties = $result_properties;
+
+		$this->facet_properties = array_map( function( string $property_name ): PropertyInfo {
+		    return new PropertyInfo( $property_name );
+        }, $facet_properties );
+
+		$this->result_properties = array_map( function( string $property_name ): PropertyInfo {
+            return new PropertyInfo( $property_name );
+        }, $result_properties );
 
 		foreach ( $facet_properties as $property ) {
             $translation_pair = explode( "=", $property );
@@ -195,7 +201,7 @@ class SearchEngineConfig {
 	/**
 	 * Returns the facet properties (properties that are not prefixed with "?").
 	 *
-	 * @return string[]
+	 * @return PropertyInfo[]
 	 */
 	public function getFacetProperties(): array {
 		return $this->facet_properties;
@@ -215,7 +221,7 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
      * are the properties prefixed with a "?".
 	 *
-	 * @return array
+	 * @return PropertyInfo[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;
@@ -224,7 +230,7 @@ class SearchEngineConfig {
     /**
      * Returns the IDs for the result properties.
      *
-     * @return array
+     * @return int[]
      */
 	public function getResultPropertyIDs(): array {
         return $this->result_property_ids;
