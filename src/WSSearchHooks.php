@@ -193,6 +193,7 @@ abstract class WSSearchHooks {
 
 	    // Perform the redirect
         header( "Location: $redirect_url" );
+
         exit();
 	}
 
@@ -246,12 +247,17 @@ abstract class WSSearchHooks {
      * @param string ...$parameters
      *
      * @return string
-     * @throws FatalError
-     * @throws MWException
+     * @throws \Exception
      */
 	public static function loadSearchEngineCallback( Parser $parser, string ...$parameters ): string {
 	    $config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
-		$result = self::error( "wssearch-missing-frontend" );
+
+	    if ( $config === null ) {
+		    return self::error( "wssearch-invalid-engine-config" );
+        }
+
+        $result = self::error( "wssearch-missing-frontend" );
+
 		\Hooks::run( "WSSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
 
 		return $result;
@@ -263,6 +269,10 @@ abstract class WSSearchHooks {
      * @throws MWException
      */
 	public static function verwijzingenCallback( Parser $parser ) {
+        if ( !class_exists( "\WSArrays" ) ) {
+            return "WSArrays must be installed.";
+        }
+
         $options = self::extractOptions( func_get_args() );
 
         $limit = isset( $options["limit"] ) ? $options["limit"] : "100";

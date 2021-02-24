@@ -265,7 +265,11 @@ class SearchEngineConfig {
 		);
 
 		$facet_properties = array_unique( $this->facet_properties );
-		$result_properties = array_unique( $this->result_properties );
+
+		$result_properties = array_map( function( PropertyInfo $property ): string {
+		    return $property->getPropertyName();
+        }, $this->result_properties );
+		$result_properties = array_unique( $result_properties );
 
 		// Insert this object's facet properties
 		foreach ( $facet_properties as $property ) {
