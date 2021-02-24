@@ -3,7 +3,7 @@
 namespace WSSearch\Tests\Phpunit\Unit;
 
 use MediaWiki\MediaWikiServices;
-use WSSearch\PropertyInfo;
+use WSSearch\QueryEngine\Property;
 use WSSearch\SearchQueryBuilder;
 
 class SearchQueryBuilderTest extends \MediaWikiTestCase {
@@ -132,10 +132,10 @@ class SearchQueryBuilderTest extends \MediaWikiTestCase {
      * Tests the "setMainCondition" function of the query builder.
      *
      * @dataProvider mainCondition
-     * @param PropertyInfo $prop
+     * @param Property $prop
      * @param string $val
      */
-    public function testSetMainCondition(PropertyInfo $prop, string $val) {
+    public function testSetMainCondition(Property $prop, string $val) {
         // Set the condition
         $this->builder->setMainCondition($prop, $val);
 
@@ -193,7 +193,7 @@ class SearchQueryBuilderTest extends \MediaWikiTestCase {
         $values = [];
 
         for ( $i = 0; $i < 100; $i++ ) {
-            $property_info_mock = $this->createMock( PropertyInfo::class );
+            $property_info_mock = $this->createMock( Property::class );
 
             $property_info_mock->method("getPropertyID")->willReturn($i);
             $property_info_mock->method("getPropertyType")->willReturn(md5(rand()));

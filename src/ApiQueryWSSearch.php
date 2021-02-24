@@ -178,7 +178,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			$filters = json_decode( $filter, true );
 
 			if ( is_array( $filters ) ) {
-				$engine->setActiveFilters( $filters );
+				$engine->setFilters( $filters );
 			} else {
 				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
 			}

@@ -3,17 +3,23 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
-
-use ONGR\ElasticsearchDSL\BuilderInterface;
 use WSSearch\QueryEngine\Property;
 
-class ModificationDatePropertyDateRangeFilter extends PropertyDateRangeFilter {
+/**
+ * Class ModificationDatePropertyRangeFilter
+ *
+ * Filter pages based on their modification date.
+ *
+ * @package WSSearch\QueryEngine\Filter
+ */
+class ModificationDatePropertyRangeFilter extends PropertyRangeFilter {
     /**
-     * Returns the property to which the filter applies.
+     * ModificationDatePropertyRangeFilter constructor.
      *
-     * @return Property
+     * @param int $gte The minimum modification date of pages to include in the results
+     * @param int $lte The maximum modification date of pages to include in the results
      */
-    protected function getProperty(): Property {
-        return new Property( "Modification date" );
+    public function __construct( int $gte, int $lte ) {
+        parent::__construct( new Property( "Modification date" ), $gte, $lte );
     }
 }

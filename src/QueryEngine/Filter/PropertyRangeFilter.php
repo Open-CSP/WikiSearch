@@ -14,45 +14,45 @@ use WSSearch\QueryEngine\Property;
  *
  * @package WSSearch\QueryEngine\Filter
  */
-abstract class PropertyDateRangeFilter extends Filter {
+abstract class PropertyRangeFilter extends Filter {
     /**
-     * @var int The Julian date from which the filter applies
+     * @var int The minimum value of the property
      */
-    private $from_date_julian;
+    private $gte;
 
     /**
-     * @var int The Julian date until which the filter applies
+     * @var int The maximum value of the property
      */
-    private $to_date_julian;
+    private $lte;
+
+    /**
+     * @var Property The property to apply the filter to
+     */
+    private $property;
 
     /**
      * DateRangeFilter constructor.
      *
-     * @param int $from_date_julian The Julian date from which the filter applies
-     * @param int $to_date_julian The Julian date until which the filter applies
+     * @param Property $property The property to apply the filter to
+     * @param int $gte The minimum value of the property
+     * @param int $lte The maximum value of the property
      */
-    public function __construct( int $from_date_julian, int $to_date_julian ) {
-        $this->from_date_julian = $from_date_julian;
-        $this->to_date_julian = $to_date_julian;
+    public function __construct( Property $property, int $gte, int $lte ) {
+        $this->property = $property;
+        $this->gte = $gte;
+        $this->lte = $lte;
     }
 
     /**
      * @inheritDoc
      */
-    public function toBuilderInterface(): BuilderInterface {
+    public function toQuery(): BuilderInterface {
         return new RangeQuery(
-            $this->getProperty()->getPropertyField(),
+            $this->property->getPropertyField(),
             [
-                RangeQuery::GTE => $this->from_date_julian,
-                RangeQuery::LTE => $this->to_date_julian
+                RangeQuery::GTE => $this->gte,
+                RangeQuery::LTE => $this->lte
             ]
         );
     }
-
-    /**
-     * Returns the property to which the filter applies.
-     *
-     * @return Property
-     */
-    protected abstract function getProperty(): Property;
 }

@@ -22,6 +22,7 @@
 namespace WSSearch;
 
 use MediaWiki\MediaWikiServices;
+use WSSearch\QueryEngine\Property;
 
 /**
  * Class SearchQueryBuilder
@@ -159,10 +160,10 @@ class SearchQueryBuilder {
 	/**
 	 * Sets the main filter (condition) for this search.
 	 *
-	 * @param PropertyInfo $property
+	 * @param Property $property
 	 * @param string $property_value
 	 */
-	public function setMainCondition( PropertyInfo $property, string $property_value ) {
+	public function setMainCondition(Property $property, string $property_value ) {
 		$this->active_filters[] = $this->buildTermField( $property, $property_value );
 	}
 
@@ -323,7 +324,7 @@ class SearchQueryBuilder {
 
 				$this->active_filters[] = $filter;
 			} else {
-				$filter_property = new PropertyInfo( $filter["key"] );
+				$filter_property = new Property( $filter["key"] );
 				$term_field = $this->buildTermField( $filter_property, $filter["value"] );
 				$this->active_filters[] = $term_field;
 			}
@@ -333,12 +334,12 @@ class SearchQueryBuilder {
 	/**
 	 * Builds a term field from the given property.
 	 *
-	 * @param PropertyInfo $property
+	 * @param Property $property
 	 * @param string $value
 	 *
 	 * @return array The built term field
 	 */
-	private function buildTermField( PropertyInfo $property, string $value ): array {
+	private function buildTermField(Property $property, string $value ): array {
 		return [
 			"term" => [
 				$property->getPropertyField()  . ".keyword" => $value

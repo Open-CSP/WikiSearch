@@ -1,9 +1,13 @@
 <?php
 
 
-namespace WSSearch\QueryEngine;
+namespace WSSearch\QueryEngine\Filter;
 
+use WSSearch\QueryEngine\QueryConvertable;
 
-abstract class Filter implements BuilderInterfaceConvertable {
-
-}
+/**
+ * Class Filter
+ *
+ * @package WSSearch\QueryEngine\Filter
+ */
+abstract class Filter implements QueryConvertable {}

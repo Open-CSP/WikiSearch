@@ -21,12 +21,14 @@
 
 namespace WSSearch;
 
+use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
-use FatalError;
 use Hooks;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use MWNamespace;
+use WSSearch\QueryEngine\Property;
+use WSSearch\QueryEngine\QueryEngine;
 
 /**
  * Class Search
@@ -40,11 +42,6 @@ class SearchEngine {
 	private $config;
 
 	/**
-	 * @var SearchQueryBuilder
-	 */
-	private $query_builder;
-
-	/**
 	 * @var array
 	 */
 	private $translations = [];
@@ -55,36 +52,41 @@ class SearchEngine {
     private $aggregate_filters = [];
 
     /**
+     * @var Client
+     */
+    private $elasticsearch_client;
+
+    /**
+     * @var QueryEngine
+     */
+    private $query_engine;
+
+    /**
 	 * Search constructor.
 	 *
 	 * @param SearchEngineConfig $config
 	 */
 	public function __construct( SearchEngineConfig $config = null ) {
 		$this->config = $config;
-		$this->query_builder = SearchQueryBuilder::newCanonical();
-	}
-
-    /**
-     * Executes the given ElasticSearch query and returns the result.
-     *
-     * @param array $query
-     * @return array
-     * @throws MWException
-     * @throws FatalError
-     */
-    public static function doQuery( array $query ): array {
-        $config = MediaWikiServices::getInstance()->getMainConfig();
 
         try {
-            $hosts = $config->get( "WSSearchElasticSearchHosts" );
+            $hosts = MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchElasticSearchHosts" );
         } catch ( \ConfigException $e ) {
             $hosts = [ "localhost:9200" ];
         }
 
-        // Allow other extensions to modify the query
-        Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+        $this->elasticsearch_client = ClientBuilder::create()->setHosts( $hosts )->build();
+        $this->query_engine = new QueryEngine();
+	}
 
-        return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
+    /**
+     * Executes the ElasticSearch query and returns the result.
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function doQuery(): array {
+        return $this->elasticsearch_client->search( $this->query_engine->toArray() );
     }
 
 	/**
@@ -94,7 +96,7 @@ class SearchEngine {
 	 * @param int $offset
 	 */
 	public function setOffset( int $offset ) {
-		$this->query_builder->setOffset( $offset );
+	    $this->query_engine->_()->setFrom( $offset );
 	}
 
 	/**
@@ -102,7 +104,9 @@ class SearchEngine {
 	 *
 	 * @param array $active_filters
 	 */
-	public function setActiveFilters( array $active_filters ) {
+	public function setFilters( array $active_filters ) {
+
+
 		$this->query_builder->setActiveFilters( $active_filters );
 	}
 
@@ -140,7 +144,7 @@ class SearchEngine {
 	 * @param int $limit
 	 */
 	public function setLimit( int $limit ) {
-		$this->query_builder->setLimit( $limit );
+	    $this->query_engine->_()->setSize( $limit );
 	}
 
 	/**
@@ -201,7 +205,7 @@ class SearchEngine {
 				$this->translations[$property_name] = $translation_pair[1];
 			}
 
-			$facet_property = new PropertyInfo( $property_name );
+			$facet_property = new Property( $property_name );
 			$filters[$property_name] = [ "terms" => [ "field" => "P:" . $facet_property->getPropertyID() . "." . $facet_property->getPropertyType() . ".keyword" ] ];
 		}
 

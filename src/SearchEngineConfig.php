@@ -23,6 +23,7 @@ namespace WSSearch;
 
 use Database;
 use Title;
+use WSSearch\QueryEngine\Property;
 
 /**
  * Class SearchEngineConfig
@@ -36,7 +37,7 @@ class SearchEngineConfig {
 	private $title;
 
 	/**
-	 * @var PropertyInfo
+	 * @var Property
 	 */
 	private $condition_property;
 
@@ -146,19 +147,19 @@ class SearchEngineConfig {
 
 		$this->title = $title;
 
-		$this->condition_property = new PropertyInfo( $condition_property );
+		$this->condition_property = new Property( $condition_property );
 		$this->condition_value = $condition_value;
 		$this->facet_properties = $facet_properties;
 
-		$this->result_properties = array_map( function( string $property_name ): PropertyInfo {
-            return new PropertyInfo( $property_name );
+		$this->result_properties = array_map( function( string $property_name ): Property {
+            return new Property( $property_name );
         }, $result_properties );
 
 		foreach ( $facet_properties as $property ) {
             $translation_pair = explode( "=", $property );
             $property_name = $translation_pair[0];
 
-            $facet_property = new PropertyInfo( $property_name );
+            $facet_property = new Property( $property_name );
 
             $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
         }
@@ -180,9 +181,9 @@ class SearchEngineConfig {
 	/**
 	 * Returns the condition property name.
 	 *
-	 * @return PropertyInfo
+	 * @return Property
 	 */
-	public function getConditionProperty(): PropertyInfo {
+	public function getConditionProperty(): Property {
 		return $this->condition_property;
 	}
 
@@ -219,7 +220,7 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
      * are the properties prefixed with a "?".
 	 *
-	 * @return PropertyInfo[]
+	 * @return Property[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;
@@ -266,7 +267,7 @@ class SearchEngineConfig {
 
 		$facet_properties = array_unique( $this->facet_properties );
 
-		$result_properties = array_map( function( PropertyInfo $property ): string {
+		$result_properties = array_map( function(Property $property ): string {
 		    return $property->getPropertyName();
         }, $this->result_properties );
 		$result_properties = array_unique( $result_properties );

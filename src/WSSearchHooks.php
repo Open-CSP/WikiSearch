@@ -24,7 +24,6 @@ namespace WSSearch;
 use Content;
 use ContentHandler;
 use DatabaseUpdater;
-use FatalError;
 use LogEntry;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
@@ -37,6 +36,7 @@ use Status;
 use Title;
 use User;
 use WikiPage;
+use WSSearch\QueryEngine\Property;
 
 /**
  * Class SearchHooks
@@ -298,7 +298,7 @@ abstract class WSSearchHooks {
             "verwijzingen" => [
                 "filter" => [
                     "range" => [
-                        ( new PropertyInfo( $date_property ) )->getPropertyField() => [
+                        ( new Property( $date_property ) )->getPropertyField() => [
                             "to" => $to,
                             "from" => $from
                         ]
@@ -307,7 +307,7 @@ abstract class WSSearchHooks {
                 "aggs" => [
                     "aantal_verwijzingen" => [
                         "terms" => [
-                            "field" => (new PropertyInfo($property))->getPropertyField()  . ".keyword",
+                            "field" => (new Property($property))->getPropertyField()  . ".keyword",
                             "size" => $limit
                         ]
                     ]
