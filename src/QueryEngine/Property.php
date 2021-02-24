@@ -34,7 +34,7 @@ use SMW\Elastic\ElasticStore;
  *
  * @package WSSearch
  */
-class PropertyInfo {
+class Property {
 	/**
 	 * @var int The unique ID of the property
 	 */
