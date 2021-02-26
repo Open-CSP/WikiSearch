@@ -317,7 +317,7 @@ abstract class WSSearchHooks {
 
         $search_engine = new SearchEngine();
         $search_engine->setLimit(0);
-        $search_engine->setAdditionalAggregateFilters( $filter );
+        $search_engine->addAggregations( $filter );
 
         $result = $search_engine->doSearch();
 

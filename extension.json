@@ -9,6 +9,12 @@
 	"descriptionmsg": "wssearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.31.0",
+		"extensions": {
+			"SemanticMediaWiki": ">= 3.0"
+		}
+	},
 	"MessagesDirs": {
 		"WSSearch": [
 			"i18n"
@@ -47,9 +53,7 @@
 			"value": 1
 		},
 		"WSSearchElasticSearchHosts": {
-			"value": [
-				"localhost:9200"
-			]
+			"value": []
 		},
 		"WSSearchAPIRequiredRights": {
 			"value": [

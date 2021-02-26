@@ -35,17 +35,7 @@ use Title;
  * @package WSSearch
  */
 class ApiQueryWSSearch extends ApiQueryBase {
-	/**
-	 * ApiQueryWSSearch constructor.
-	 *
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 */
-	public function __construct( ApiQuery $query, string $moduleName ) {
-		parent::__construct( $query, $moduleName );
-	}
-
-	/**
+    /**
 	 * @inheritDoc
 	 * @throws ApiUsageException
 	 * @throws MWException
@@ -154,7 +144,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	 * @throws ApiUsageException
 	 */
 	private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
-		$engine = new SearchEngine( $engine_config );
+	    $engine = new SearchEngine( $engine_config );
 
 		$term = $this->getParameter( "term" );
 		$from = $this->getParameter( "from" );
@@ -178,7 +168,8 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			$filters = json_decode( $filter, true );
 
 			if ( is_array( $filters ) ) {
-				$engine->setFilters( $filters );
+                // TODO: Convert to query engine
+				$engine->addFilters( $filters );
 			} else {
 				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
 			}
@@ -188,7 +179,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			$data = json_decode( $dates, true );
 
 			if ( is_array( $data ) ) {
-				$engine->setAggregateDateRanges( $data );
+				$engine->setModificationDateRangeAggregationRanges( $data );
 			} else {
 				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "dates", json_last_error_msg() ) );
 			}

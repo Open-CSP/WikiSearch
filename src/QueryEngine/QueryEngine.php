@@ -7,12 +7,10 @@ use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
+use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Filter\Filter;
-use WSSearch\QueryEngine\Filter\SearchTermFilter;
 
 class QueryEngine {
-    const TEXT_INDEX_NAME = "text_raw";
-
     /**
      * @var Search
      */
@@ -26,66 +24,73 @@ class QueryEngine {
     private $elasticsearch_index;
 
     /**
-     * @var BoolQuery The main filter query.
+     * The main boolean query filter.
+     *
+     * @var BoolQuery
      */
-    private $filter_query;
-
-    /**
-     * @var BoolQuery The main free text search term query.
-     */
-    private $search_term_query;
+    private BoolQuery $filters;
 
     /**
      * QueryEngine constructor.
+     *
+     * @param string $index The ElasticSearch index to create the queries for
      */
-    public function __construct() {
+    public function __construct( string $index ) {
+        $this->elasticsearch_index = $index;
         $this->elasticsearch_search = new Search();
 
         $config = MediaWikiServices::getInstance()->getMainConfig();
 
-        $this->elasticsearch_index = $config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
-        $this->elasticsearch_search->setSize( $config->get( "WSSearchDefaultResultLimit" ) );
-
         $highlight = new Highlight();
-        $highlight->addParameter( "pre_tags", "<b>" );
-        $highlight->addParameter( "post_tags", "</b>");
-        $highlight->addParameter( self::TEXT_INDEX_NAME, [
+        $highlight->setTags( ["<b>"], ["</b>"] );
+        $highlight->addField( "text_raw", [
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
-        ]);
+        ] );
 
+        $this->filters = new BoolQuery();
+        $constant_score_query = new ConstantScoreQuery( $this->filters );
+
+        $this->elasticsearch_search->setSize( $config->get( "WSSearchDefaultResultLimit" ) );
         $this->elasticsearch_search->addHighlight( $highlight );
-
-        // FIXME: Maybe refactor this
-        $this->filter_query = new BoolQuery();
-        $this->search_term_query = new BoolQuery();
-
-        $query = new BoolQuery();
-        $query->add( $this->filter_query, BoolQuery::MUST );
-        $query->add( $this->search_term_query, BoolQuery::MUST );
-
-        $this->elasticsearch_search->addQuery( new ConstantScoreQuery( $query ) );
+        $this->elasticsearch_search->addQuery( $constant_score_query );
     }
 
     /**
-     * Sets the main free text search term. This function essentially adds a filter that filters and sorts pages
-     * based on whether the search term appears in certain special Semantic MediaWiki properties, such as
-     * subject.title and text_raw.
+     * Adds aggregations to the query.
      *
-     * @param string $term
+     * @param Aggregation[] $aggregations
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
      */
-    public function setSearchTerm( string $term ) {
-        $this->search_term_query->add( ( new SearchTermFilter( $term ) )->toQuery() );
+    public function addAggregations( array $aggregations ) {
+        foreach ( $aggregations as $aggregation ) {
+            $this->addAggregation( $aggregation );
+        }
+    }
+
+    /**
+     * Adds an aggregation to the query.
+     *
+     * @param Aggregation $aggregation
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
+     */
+    public function addAggregation( Aggregation $aggregation ) {
+        $this->elasticsearch_search->addAggregation( $aggregation->toQuery() );
     }
 
     /**
      * Adds filters to apply to the query.
      *
      * @param Filter[] $filters
+     * @param string $occur The occurrence type for the added filters (should be a BoolQuery constant)
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
      */
-    public function addFilters( array $filters ) {
+    public function addFilters( array $filters, string $occur = BoolQuery::MUST ) {
         foreach ( $filters as $filter ) {
-            $this->addFilter( $filter );
+            $this->addFilter( $filter, $occur );
         }
     }
 
@@ -93,9 +98,39 @@ class QueryEngine {
      * Adds a filter to apply to the query.
      *
      * @param Filter $filter
+     * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
      */
-    public function addFilter( Filter $filter ) {
-        $this->filter_query->add( $filter->toQuery(), BoolQuery::FILTER );
+    public function addFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
+        $this->filters->add( $filter->toQuery(), $occur );
+    }
+
+    /**
+     * Sets the "index" to use for the ElasticSearch query.
+     *
+     * @param string $index
+     */
+    public function setIndex( string $index ) {
+        $this->elasticsearch_index = $index;
+    }
+
+    /**
+     * Sets the offset for the search (i.e. the first n results to discard).
+     *
+     * @param int $offset
+     */
+    public function setOffset( int $offset ) {
+        $this->elasticsearch_search->setFrom( $offset );
+    }
+
+    /**
+     * Sets the (maximum) number of results to return.
+     *
+     * @param int $limit
+     */
+    public function setLimit( int $limit ) {
+        $this->elasticsearch_search->setSize( $limit );
     }
 
     /**
@@ -108,14 +143,16 @@ class QueryEngine {
     }
 
     /**
-     * Converts this class into a full ElasticSearch query, that can be used like so:
+     * Converts this class into a full ElasticSearch query.
      *
-     * $this->elasticsearch_client->search( $this->query_engine->toArray() );
+     * @return array A complete ElasticSearch query
      */
     public function toArray(): array {
+        $body = $this->elasticsearch_search->toArray();
+
         return [
             "index" => $this->elasticsearch_index,
-            "body" => $this->elasticsearch_search->toArray()
+            "body" => $body
         ];
     }
 }

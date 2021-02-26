@@ -3,6 +3,7 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WSSearch\QueryEngine\QueryConvertable;
 
 /**
@@ -10,4 +11,6 @@ use WSSearch\QueryEngine\QueryConvertable;
  *
  * @package WSSearch\QueryEngine\Filter
  */
-abstract class Filter implements QueryConvertable {}
+abstract class Filter implements QueryConvertable {
+    abstract function toQuery(): BoolQuery;
+}
