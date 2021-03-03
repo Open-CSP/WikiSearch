@@ -178,6 +178,9 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		}
 
 		/*
+
+		TODO: What do we do with this, want what does it mean?
+
         $dates = $this->getParameter( "dates" );
 		if ( $dates !== null ) {
 			$data = json_decode( $dates, true );

@@ -188,7 +188,7 @@ abstract class WSSearchHooks {
 	    $search_query = $out->getRequest()->getval( "search", "" );
 
 	    // Get the full URL to redirect to
-	    $redirect_url = $title->getFullUrlForRedirect( [ "term" => $search_query ] );
+	    $redirect_url = $title->getFullUrlForRedirect( [ "search_query" => $search_query ] );
 
 	    // Perform the redirect
         header( "Location: $redirect_url" );
@@ -205,10 +205,10 @@ abstract class WSSearchHooks {
      * @return string
      */
 	public static function searchEngineConfigCallback( Parser $parser, string ...$parameters ): string {
-	    $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
-
-	    if ( $config === null ) {
-            return self::error( "wssearch-invalid-engine-config" );
+	    try {
+            $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
+        } catch( \InvalidArgumentException $exception ) {
+            return self::error( "wssearch-invalid-engine-config-detailed", [$exception->getMessage()] );
         }
 
 		$config->update( wfGetDB( DB_MASTER ) );

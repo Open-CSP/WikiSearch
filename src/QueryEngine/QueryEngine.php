@@ -185,7 +185,7 @@ class QueryEngine {
             return;
         }
 
-        $this->base_query = $elastic_search_query;
+        $this->base_query = $elastic_search_query[0];
     }
 
     /**
@@ -209,9 +209,9 @@ class QueryEngine {
             "body" => $this->elasticsearch_search->toArray()
         ];
 
-        if ( isset( $this->base_query[0] ) ) {
+        if ( isset( $this->base_query ) ) {
             $query_combinator = new QueryCombinator( $query );
-            return $query_combinator->add( $this->base_query[0] )->getQuery();
+            return $query_combinator->add( $this->base_query )->getQuery();
         }
 
         return $query;

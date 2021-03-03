@@ -54,9 +54,10 @@ function onWSSearchOnLoadFrontend( string &$result, \WSSearch\SearchEngineConfig
     * `getConditionValue(): string`: Returns the value in the condition (e.g. `Foobar` in `Class=Foobar`)
     * `getFacetProperties(): array`: Returns the facet properties in the config (facet properties are the properties that are **not** prefixed with `?`). May be the
       name of a property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar")
-    * `getFacetPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the facet property and the value the ID of that property
+    * `getFacetPropertyIDs(): array`: Returns a key-value pair list where the key is the ID of the facet property and the value the type of that property
     * `getResultProperties(): array`: Returns the result properties in the config as PropertyInfo objects (result properties are the properties prefixed with `?`)
     * `getResultPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the result property and the value the ID of that property
+    * `getSearchParameters(): array`: Returns a key-value pair list of additional search parameters
 * `Parser $parser`: The current Parser object
 * `array $parameters`: The parameters passed to the `#loadSearchEngine` call
 

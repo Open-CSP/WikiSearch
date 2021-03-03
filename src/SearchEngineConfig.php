@@ -24,6 +24,7 @@ namespace WSSearch;
 use Database;
 use Title;
 use WSSearch\SMW\Property;
+use WSSearch\SMW\SMWQueryProcessor;
 
 /**
  * Class SearchEngineConfig
@@ -131,9 +132,9 @@ class SearchEngineConfig {
      *
      * @param Title $title
      * @param array $parameters
-     * @return SearchEngineConfig|null
+     * @return SearchEngineConfig
      */
-    public static function newFromParameters( Title $title, array $parameters ) {
+    public static function newFromParameters( Title $title, array $parameters ): SearchEngineConfig {
         $facet_properties = $result_properties = $search_parameters = [];
 
         foreach ( $parameters as $parameter ) {
@@ -158,11 +159,7 @@ class SearchEngineConfig {
             $search_parameters[$key] = $value;
         }
 
-        try {
-            return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
-        } catch ( \InvalidArgumentException $exception ) {
-            return null;
-        }
+        return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
     }
 
     /**
@@ -199,11 +196,21 @@ class SearchEngineConfig {
             }
 
             $facet_property = new Property( $property_name );
-            $this->facet_property_ids[$facet_property->getPropertyID()] = $facet_property->getPropertyType();
+            $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
         }
 
         foreach ( $this->result_properties as $property ) {
             $this->result_property_ids[$property->getPropertyName()] = $property->getPropertyID();
+        }
+
+        if ( isset( $search_parameters["base query"] ) ) {
+            try {
+                $query_processor = new SMWQueryProcessor( $search_parameters["base query"] );
+                $query_processor->toElasticSearchQuery();
+            } catch( \MWException $exception ) {
+                // The query is invalid
+                throw new \InvalidArgumentException( "Invalid base query" );
+            }
         }
 	}
 

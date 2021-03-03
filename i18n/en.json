@@ -6,6 +6,7 @@
   },
   "wssearch-desc": "Faceted search for MediaWiki",
   "wssearch-invalid-engine-config": "This searchEngineConfiguration is not valid",
+  "wssearch-invalid-engine-config-detailed": "This searchEngineConfiguration is not valid: $1",
   "wssearch-missing-frontend": "No frontend has been configured for WSSearch",
   "wssearch-api-invalid-query": "Invalid query: $1",
   "wssearch-api-invalid-json": "The parameter '$1' expected a valid JSON object: $2",
