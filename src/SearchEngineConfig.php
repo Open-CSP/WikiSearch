@@ -44,16 +44,6 @@ class SearchEngineConfig {
     private $search_parameters;
 
 	/**
-	 * @var Property
-	 */
-	private $condition_property;
-
-	/**
-	 * @var string
-	 */
-	private $condition_value;
-
-	/**
 	 * @var array
 	 */
 	private $facet_properties;
@@ -88,18 +78,6 @@ class SearchEngineConfig {
 	public static function newFromDatabase( Title $page ) {
 		$database = wfGetDB( DB_MASTER );
 		$page_id = $page->getArticleID();
-
-		$db_condition = $database->select(
-			"search_condition",
-			[ "condition_property", "condition_value" ],
-			[ "page_id" => $page_id ]
-		);
-
-		if ( $db_condition->numRows() === 0 ) {
-			return null;
-		}
-
-		$condition = $db_condition->current()->condition_property . "=" . $db_condition->current()->condition_value;
 
 		$db_facets = $database->select(
 			"search_facets",
@@ -142,7 +120,7 @@ class SearchEngineConfig {
         }
 
 		try {
-			return new SearchEngineConfig( $page, $condition, $search_parameters, $facet_properties, $result_properties );
+			return new SearchEngineConfig( $page, $search_parameters, $facet_properties, $result_properties );
 		} catch ( \InvalidArgumentException $e ) {
 			return null;
 		}
@@ -156,11 +134,6 @@ class SearchEngineConfig {
      * @return SearchEngineConfig|null
      */
     public static function newFromParameters( Title $title, array $parameters ) {
-        if ( !isset( $parameters[0] ) || !$parameters[0] ) {
-            return null;
-        }
-
-        $main_condition = array_shift( $parameters );
         $facet_properties = $result_properties = $search_parameters = [];
 
         foreach ( $parameters as $parameter ) {
@@ -186,7 +159,7 @@ class SearchEngineConfig {
         }
 
         try {
-            return new SearchEngineConfig( $title, $main_condition, $search_parameters, $facet_properties, $result_properties );
+            return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
         } catch ( \InvalidArgumentException $exception ) {
             return null;
         }
@@ -196,12 +169,11 @@ class SearchEngineConfig {
      * SearchEngineConfig constructor.
      *
      * @param Title $title The page for which this config is applicable
-     * @param string $condition
      * @param array $search_parameters
      * @param array $facet_properties
      * @param array $result_properties
      */
-	public function __construct( Title $title, string $condition, array $search_parameters, array $facet_properties, array $result_properties ) {
+	public function __construct( Title $title, array $search_parameters, array $facet_properties, array $result_properties ) {
 		if ( empty( $facet_properties ) ) {
 			throw new \InvalidArgumentException( "Invalid facet properties array; at least one facet property is required." );
 		}
@@ -210,20 +182,7 @@ class SearchEngineConfig {
 			throw new \InvalidArgumentException( "Invalid result properties array; at least one result property is required." );
 		}
 
-		if ( strpos( $condition, "=" ) === false ) {
-			throw new \InvalidArgumentException( "Invalid condition; doesn't contain an equality symbol." );
-		}
-
-		list( $condition_property, $condition_value ) = explode( "=", $condition );
-
-		if ( !$condition_property || !$condition_value ) {
-			throw new \InvalidArgumentException( "Invalid condition; empty property or value" );
-		}
-
 		$this->title = $title;
-
-		$this->condition_property = new Property( $condition_property );
-		$this->condition_value = $condition_value;
 		$this->facet_properties = $facet_properties;
 		$this->search_parameters = $search_parameters;
 
@@ -274,24 +233,6 @@ class SearchEngineConfig {
 	public function getPropertyTranslations(): array {
         return $this->translations;
     }
-
-	/**
-	 * Returns the condition property name.
-	 *
-	 * @return \WSSearch\SMW\Property
-	 */
-	public function getConditionProperty(): Property {
-		return $this->condition_property;
-	}
-
-	/**
-	 * Returns the condition value.
-	 *
-	 * @return string
-	 */
-	public function getConditionValue(): string {
-		return $this->condition_value;
-	}
 
 	/**
 	 * Returns the facet properties (properties that are not prefixed with "?"). This may be
@@ -352,18 +293,7 @@ class SearchEngineConfig {
 	public function insert( $database ) {
 		$page_id = $this->title->getArticleID();
 
-		// Insert this object's search condition
-		$database->insert(
-			"search_condition",
-			[
-				"page_id" => $page_id,
-				"condition_property" => $this->condition_property->getPropertyName(),
-				"condition_value" => $this->condition_value
-			]
-		);
-
 		$facet_properties = array_unique( $this->facet_properties );
-
 		$result_properties = array_map( function(Property $property ): string {
 		    return $property->getPropertyName();
         }, $this->result_properties );
@@ -411,11 +341,6 @@ class SearchEngineConfig {
 	 * @param int $page_id
 	 */
 	public static function delete( $database, int $page_id ) {
-		$database->delete(
-			"search_condition",
-			[ "page_id" => $page_id ]
-		);
-
 		$database->delete(
 			"search_facets",
 			[ "page_id" => $page_id ]

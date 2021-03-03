@@ -86,13 +86,6 @@ class QueryEngine {
             $query_engine->addAggregation( new PropertyAggregation( $property_name ) );
         }
 
-        $main_property_filter = new PropertyFilter(
-            $config->getConditionProperty(),
-            $config->getConditionValue()
-        );
-
-        $query_engine->addFilter( $main_property_filter );
-
         $search_parameters = $config->getSearchParameters();
         if ( isset( $search_parameters["base query"] ) ) {
             $query_engine->setBaseQuery( $search_parameters["base query"] );

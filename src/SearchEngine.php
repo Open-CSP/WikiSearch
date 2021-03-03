@@ -146,7 +146,7 @@ class SearchEngine {
         $results = $this->applyResultTranslations( $results );
 
         return [
-            "hits"  => json_encode( $results["hits"]["hits"] ), // TODO: Do not encode this (but not encoding breaks it for some reason)
+            "hits"  => json_encode( $results["hits"]["hits"] ),
             "total" => $results["hits"]["total"],
             "aggs"  => $results["aggregations"]
         ];

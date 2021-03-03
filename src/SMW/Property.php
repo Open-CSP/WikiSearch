@@ -62,6 +62,7 @@ class Property {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
+		$property_name = str_replace(" ", "_", $property_name);
 		$property_name = $this->translateSpecialPropertyNames( $property_name );
 
 		$property = new DIProperty( $property_name );
@@ -122,7 +123,7 @@ class Property {
     private function translateSpecialPropertyNames( string $property_name ) {
         // TODO: Add more
         switch ( $property_name ) {
-            case "Modification date": return "_MDAT";
+            case "Modification_date": return "_MDAT";
             default: return $property_name;
         }
     }

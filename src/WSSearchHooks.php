@@ -126,7 +126,6 @@ abstract class WSSearchHooks {
 		$type = $updater->getDB()->getType();
 
 		$tables = [
-			"search_condition"      => sprintf( "%s/%s/table_search_condition.sql", $directory, $type ),
 			"search_facets"         => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
 			"search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type ),
             "search_parameters"     => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type )
