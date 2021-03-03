@@ -199,7 +199,7 @@ class SearchEngineConfig {
             }
 
             $facet_property = new Property( $property_name );
-            $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
+            $this->facet_property_ids[$facet_property->getPropertyID()] = $facet_property->getPropertyType();
         }
 
         foreach ( $this->result_properties as $property ) {
@@ -245,7 +245,12 @@ class SearchEngineConfig {
 	}
 
     /**
-     * Returns the IDs for the facet properties.
+     * Returns key-value pairs of the property ID with the corresponding property type:
+     *
+     * [
+     *      745 => "txtField",
+     *      752 => "txtField"
+     * ]
      *
      * @return array
      */
