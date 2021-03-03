@@ -22,11 +22,17 @@
 namespace WSSearch;
 
 use Elasticsearch\ClientBuilder;
-use FatalError;
 use Hooks;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use MWNamespace;
+use WSSearch\QueryEngine\Aggregation\Aggregation;
+use WSSearch\QueryEngine\Aggregation\ModificationDatePropertyDateRangeAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\PropertyFilter;
+use WSSearch\QueryEngine\Filter\SearchTermFilter;
+use WSSearch\QueryEngine\QueryEngine;
 
 /**
  * Class Search
@@ -34,52 +40,43 @@ use MWNamespace;
  * @package WSSearch
  */
 class SearchEngine {
-	/**
-	 * @var SearchEngineConfig
-	 */
-	private $config;
-
-	/**
-	 * @var SearchQueryBuilder
-	 */
-	private $query_builder;
-
-	/**
-	 * @var array
-	 */
-	private $translations = [];
-
     /**
      * @var array
      */
-    private $aggregate_filters = [];
+    private $translations = [];
 
     /**
-	 * Search constructor.
-	 *
-	 * @param SearchEngineConfig $config
-	 */
-	public function __construct( SearchEngineConfig $config = null ) {
-		$this->config = $config;
-		$this->query_builder = SearchQueryBuilder::newCanonical();
-	}
+     * @var QueryEngine
+     */
+    private $query_engine;
+
+    /**
+     * Search constructor.
+     *
+     * @param SearchEngineConfig|null $config
+     */
+    public function __construct( SearchEngineConfig $config = null ) {
+        $this->translations = $config->getPropertyTranslations();
+
+        if ( $config !== null ) {
+            $this->query_engine = QueryEngine::newFromConfig( $config );
+        } else {
+            $mw_config = MediaWikiServices::getInstance()->getMainConfig();
+            $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+
+            $this->query_engine = new QueryEngine( $index );
+        }
+    }
 
     /**
      * Executes the given ElasticSearch query and returns the result.
      *
      * @param array $query
      * @return array
-     * @throws MWException
-     * @throws FatalError
+     * @throws \Exception
      */
-    public static function doQuery( array $query ): array {
-        $config = MediaWikiServices::getInstance()->getMainConfig();
-
-        try {
-            $hosts = $config->get( "WSSearchElasticSearchHosts" );
-        } catch ( \ConfigException $e ) {
-            $hosts = [ "localhost:9200" ];
-        }
+    public function doQuery( array $query ): array {
+        $hosts = SearchEngine::getElasticSearchHosts();
 
         // Allow other extensions to modify the query
         Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
@@ -87,175 +84,122 @@ class SearchEngine {
         return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
     }
 
-	/**
-	 * Sets the offset for the query. An offset of 10 means the first 10 results will not
-	 * be returned. Useful for paged searches.
-	 *
-	 * @param int $offset
-	 */
-	public function setOffset( int $offset ) {
-		$this->query_builder->setOffset( $offset );
-	}
+    /**
+     * Sets the offset for the query. An offset of 10 means the first 10 results will not
+     * be returned. Useful for paged searches.
+     *
+     * @param int $offset
+     */
+    public function setOffset( int $offset ) {
+        $this->query_engine->setOffset( $offset );
+    }
 
-	/**
-	 * Sets the currently active filters.
-	 *
-	 * @param array $active_filters
-	 */
-	public function setActiveFilters( array $active_filters ) {
-		$this->query_builder->setActiveFilters( $active_filters );
-	}
+    /**
+     * Adds the given filters to the query.
+     *
+     * @param Filter[] $filters
+     */
+    public function addFilters( array $filters ) {
+        $this->query_engine->addFilters( $filters );
+    }
 
     /**
      * Allows the user to add additional aggregate filters on top of those provided by the
      * facet properties from the config.
      *
-     * @param array $aggregate_filters
+     * @param Aggregation[] $aggregations
      */
-	public function setAdditionalAggregateFilters( array $aggregate_filters ) {
-	    $this->aggregate_filters = $aggregate_filters;
+    public function addAggregations( array $aggregations ) {
+        $this->query_engine->addAggregations( $aggregations );
     }
 
-	/**
-	 * Sets the available date ranges.
-	 *
-	 * @param array $ranges
-	 */
-	public function setAggregateDateRanges( array $ranges ) {
-		$this->query_builder->setAggregateDateRanges( $ranges );
-	}
+    /**
+     * Sets the search term.
+     *
+     * @param string $search_term
+     */
+    public function setSearchTerm( string $search_term ) {
+        $search_term_filter = new SearchTermFilter( $search_term );
+        $this->query_engine->addFilter( $search_term_filter );
+    }
 
-	/**
-	 * Sets the search term.
-	 *
-	 * @param string $search_term
-	 */
-	public function setSearchTerm( string $search_term ) {
-		$this->query_builder->setSearchTerm( $search_term );
-	}
+    /**
+     * Limit the number of results returned.
+     *
+     * @param int $limit
+     */
+    public function setLimit( int $limit ) {
+        $this->query_engine->setLimit( $limit );
+    }
 
-	/**
-	 * Limit the number of results returned.
-	 *
-	 * @param int $limit
-	 */
-	public function setLimit( int $limit ) {
-		$this->query_builder->setLimit( $limit );
-	}
+    /**
+     * Performs an ElasticSearch query.
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public function doSearch(): array {
+        $elastic_query = $this->query_engine->toArray();
 
-	/**
-	 * Performs an ElasticSearch query.
-	 *
-	 * @return array
-	 *
-	 * @throws MWException
-	 */
-	public function doSearch(): array {
-		$elastic_query = $this->buildElasticQuery();
+        $results = $this->doQuery( $elastic_query );
+        $results = $this->applyResultTranslations( $results );
 
-		$results = $this->doQuery( $elastic_query );
-		$results = $this->applyResultTranslations( $results );
+        return [
+            "hits"  => json_encode( $results["hits"]["hits"] ),
+            "total" => $results["hits"]["total"],
+            "aggs"  => $results["aggregations"]
+        ];
+    }
 
-		return [
-            "hits"  => json_encode( $results["hits"]["hits"] ), // TODO: Do not encode this (but not encoding breaks it for some reason)
-			"total" => $results["hits"]["total"],
-			"aggs"  => $results["aggregations"]
-		];
-	}
+    /**
+     * Applies necessary translations to the ElasticSearch query result.
+     *
+     * @param array $results
+     * @return array
+     * @throws \Exception
+     */
+    private function applyResultTranslations( array $results ): array {
+        $results = $this->doFacetTranslations( $results );
+        $results = $this->doNamespaceTranslations( $results );
 
-	/**
-	 * Builds the main ElasticSearch query.
-	 *
-	 * @return array
-	 */
-	private function buildElasticQuery(): array {
-	    if ( isset( $this->config ) ) {
-            $this->query_builder->setMainCondition(
-                $this->config->getConditionProperty(),
-                $this->config->getConditionValue()
-            );
+        // Allow other extensions to modify the result
+        Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
+
+        return $results;
+    }
+
+    /**
+     * Does facet translations.
+     *
+     * @param array $results
+     * @return array
+     */
+    private function doFacetTranslations( array $results ): array {
+        if ( !isset( $results["aggregations"] ) ) {
+            return $results;
         }
 
-		$this->query_builder->setAggregateFilters( $this->buildAggregateFilters() );
+        $aggregations = $results["aggregations"];
 
-		return $this->query_builder->buildQuery();
-	}
+        foreach ( $aggregations as $property_name => $aggregate_data ) {
+            if ( !isset( $this->translations[$property_name] ) ) {
+                // No translation available
+                continue;
+            }
 
-	/**
-	 * Helper function to build the aggregate filters from the current config.
-	 *
-	 * @return array
-	 */
-	private function buildAggregateFilters(): array {
-        if ( !isset( $this->config ) ) {
-            return $this->aggregate_filters;
+            $parts = explode( ":", $this->translations[$property_name] );
+
+            if ( $parts[0] = "namespace" ) {
+                foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
+                    $namespace = MWNamespace::getCanonicalName( $bucket_value['key'] );
+                    $results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
+                }
+            }
         }
 
-        $filters = [];
-
-		foreach ( $this->config->getFacetProperties() as $facet ) {
-			$translation_pair = explode( "=", $facet );
-			$property_name = $translation_pair[0];
-
-			if ( isset( $translation_pair[1] ) ) {
-				$this->translations[$property_name] = $translation_pair[1];
-			}
-
-			$facet_property = new PropertyInfo( $property_name );
-			$filters[$property_name] = [ "terms" => [ "field" => "P:" . $facet_property->getPropertyID() . "." . $facet_property->getPropertyType() . ".keyword" ] ];
-		}
-
-		return array_merge( $filters, $this->aggregate_filters );
-	}
-
-	/**
-	 * Applies necessary translations to the ElasticSearch query result.
-	 *
-	 * @param array $results
-	 * @return array
-	 * @throws MWException
-	 */
-	private function applyResultTranslations( array $results ): array {
-		$results = $this->doFacetTranslations( $results );
-		$results = $this->doNamespaceTranslations( $results );
-
-		// Allow other extensions to modify the result
-		Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
-
-		return $results;
-	}
-
-	/**
-	 * Does facet translations.
-	 *
-	 * @param array $results
-	 * @return array
-	 */
-	private function doFacetTranslations( array $results ): array {
-		if ( !isset( $results["aggregations"] ) ) {
-			return $results;
-		}
-
-		$aggregations = $results["aggregations"];
-
-		foreach ( $aggregations as $property_name => $aggregate_data ) {
-			if ( !isset( $this->translations[$property_name] ) ) {
-				// No translation available
-				continue;
-			}
-
-			$parts = explode( ":", $this->translations[$property_name] );
-
-			if ( $parts[0] = "namespace" ) {
-				foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
-					$namespace = MWNamespace::getCanonicalName( $bucket_value['key'] );
-					$results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
-				}
-			}
-		}
-
-		return $results;
-	}
+        return $results;
+    }
 
     /**
      * Translates namespace IDs to their canonical name.
@@ -270,5 +214,46 @@ class SearchEngine {
         }
 
         return $results;
+    }
+
+    /**
+     * Returns the configured ElasticSearch hosts.
+     *
+     * @return array
+     */
+    private static function getElasticSearchHosts(): array {
+        $config = MediaWikiServices::getInstance()->getMainConfig();
+
+        try {
+            $hosts = $config->get( "WSSearchElasticSearchHosts" );
+        } catch ( \ConfigException $e ) {
+            $hosts = [];
+        }
+
+        if ( $hosts !== [] ) {
+            return $hosts;
+        }
+
+        global $smwgElasticsearchEndpoints;
+
+        if ( !isset( $smwgElasticsearchEndpoints ) || $smwgElasticsearchEndpoints === [] ) {
+            return [ "localhost:9200" ];
+        }
+
+        // @see https://doc.semantic-mediawiki.org/md_content_extensions_SemanticMediaWiki_src_Elastic_docs_config.html
+        foreach ( $smwgElasticsearchEndpoints as $endpoint ) {
+            if ( is_string( $endpoint ) ) {
+                $hosts[] = $endpoint;
+                continue;
+            }
+
+            $scheme = $endpoint["scheme"];
+            $host = $endpoint["host"];
+            $port = $endpoint["port"];
+
+            $hosts[] = implode( ":", [ $scheme, "//$host", $port ] );
+        }
+
+        return $hosts;
     }
 }

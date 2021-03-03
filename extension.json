@@ -4,11 +4,17 @@
 		"Marijn van Wezel",
 		"Robis Koopmans"
 	],
-	"version": "2.1",
+	"version": "3.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WSSearch",
 	"descriptionmsg": "wssearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.31.0",
+		"extensions": {
+			"SemanticMediaWiki": ">= 3.0"
+		}
+	},
 	"MessagesDirs": {
 		"WSSearch": [
 			"i18n"
@@ -21,7 +27,7 @@
 		"WSSearchMagic": "i18n/WSSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  "WSSearch": "WSSearch\\ApiQueryWSSearch"
+	  "WSSearch": "WSSearch\\API\\ApiQueryWSSearch"
   	},
 	"AvailableRights": [
 		"wssearch-execute-api"
@@ -47,9 +53,7 @@
 			"value": 1
 		},
 		"WSSearchElasticSearchHosts": {
-			"value": [
-				"localhost:9200"
-			]
+			"value": []
 		},
 		"WSSearchAPIRequiredRights": {
 			"value": [
@@ -61,5 +65,6 @@
 			"value": false
 		}
 	},
+	"load_composer_autoloader": true,
 	"manifest_version": 2
 }

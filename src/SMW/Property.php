@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WSSearch\SMW;
 
 use BadMethodCallException;
 use SMW\ApplicationFactory;
@@ -34,7 +34,7 @@ use SMW\Elastic\ElasticStore;
  *
  * @package WSSearch
  */
-class PropertyInfo {
+class Property {
 	/**
 	 * @var int The unique ID of the property
 	 */
@@ -62,6 +62,7 @@ class PropertyInfo {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
+		$property_name = str_replace(" ", "_", $property_name);
 		$property_name = $this->translateSpecialPropertyNames( $property_name );
 
 		$property = new DIProperty( $property_name );
@@ -122,7 +123,7 @@ class PropertyInfo {
     private function translateSpecialPropertyNames( string $property_name ) {
         // TODO: Add more
         switch ( $property_name ) {
-            case "Modification date": return "_MDAT";
+            case "Modification_date": return "_MDAT";
             default: return $property_name;
         }
     }
