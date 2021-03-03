@@ -188,7 +188,7 @@ abstract class WSSearchHooks {
 	    $search_query = $out->getRequest()->getval( "search", "" );
 
 	    // Get the full URL to redirect to
-	    $redirect_url = $title->getFullUrlForRedirect( [ "search_query" => $search_query ] );
+	    $redirect_url = $title->getFullUrlForRedirect( [ "term" => $search_query ] );
 
 	    // Perform the redirect
         header( "Location: $redirect_url" );
