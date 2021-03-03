@@ -3,6 +3,7 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
 
@@ -60,7 +61,7 @@ class SearchTermFilter extends Filter {
      * @inheritdoc
      */
     public function toQuery(): BoolQuery {
-        $query_string_query = new QueryStringQuery( $this->search_term );
+        $query_string_query = new QueryStringQuery( "*" . $this->search_term . "*" );
         $query_string_query->setParameters( [
             "fields" => $this->fields,
             "minimum_should_match" => 1

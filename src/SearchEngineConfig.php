@@ -23,7 +23,7 @@ namespace WSSearch;
 
 use Database;
 use Title;
-use WSSearch\QueryEngine\Property;
+use WSSearch\SMW\Property;
 
 /**
  * Class SearchEngineConfig
@@ -31,10 +31,17 @@ use WSSearch\QueryEngine\Property;
  * @package WSSearch
  */
 class SearchEngineConfig {
+    const SEARCH_PARAMETER_KEYS = [ "base query" ];
+
 	/**
 	 * @var Title
 	 */
 	private $title;
+
+    /**
+     * @var array
+     */
+    private $search_parameters;
 
 	/**
 	 * @var Property
@@ -65,6 +72,11 @@ class SearchEngineConfig {
      * @var array
      */
     private $result_property_ids = [];
+
+    /**
+     * @var array
+     */
+    private $translations = [];
 
     /**
 	 * Constructs a new SearchEngineConfig object from the values in the database identified by $page. If no
@@ -111,22 +123,85 @@ class SearchEngineConfig {
 			$result_properties[] = $property->property;
 		}
 
+		$db_search_parameters = $database->select(
+		    "search_parameters",
+            [ "parameter_key", "parameter_value" ],
+            [ "page_id" => $page_id ]
+        );
+
+		$search_parameters = [];
+		foreach ( $db_search_parameters as $search_parameter ) {
+		    $key = $search_parameter->parameter_key;
+		    $value = $search_parameter->parameter_value;
+
+		    if ( $value === "" ) {
+		        $value = true;
+            }
+
+		    $search_parameters[$key] = $value;
+        }
+
 		try {
-			return new SearchEngineConfig( $page, $condition, $facet_properties, $result_properties );
+			return new SearchEngineConfig( $page, $condition, $search_parameters, $facet_properties, $result_properties );
 		} catch ( \InvalidArgumentException $e ) {
 			return null;
 		}
 	}
 
-	/**
-	 * SearchEngineConfig constructor.
-	 *
-	 * @param Title $title The page for which this config is applicable
-	 * @param string $condition
-	 * @param array $facet_properties
-	 * @param array $result_properties
-	 */
-	public function __construct( Title $title, string $condition, array $facet_properties, array $result_properties ) {
+    /**
+     * Returns a new SearchEngineConfig from the given parser function parameters, or null on failure.
+     *
+     * @param Title $title
+     * @param array $parameters
+     * @return SearchEngineConfig|null
+     */
+    public static function newFromParameters( Title $title, array $parameters ) {
+        if ( !isset( $parameters[0] ) || !$parameters[0] ) {
+            return null;
+        }
+
+        $main_condition = array_shift( $parameters );
+        $facet_properties = $result_properties = $search_parameters = [];
+
+        foreach ( $parameters as $parameter ) {
+            if ( strlen( $parameter ) === 0 ) continue;
+
+            if ( $parameter[0] === "?" ) {
+                // This is a "result property"
+                $result_properties[] = ltrim( $parameter, "?" );
+                continue;
+            }
+
+            $key_value_pair = explode( "=", $parameter );
+            $key = $key_value_pair[0];
+
+            if ( !in_array( $key_value_pair[0], self::SEARCH_PARAMETER_KEYS ) ) {
+                // This is a "facet property", since its key is not a valid search parameter
+                $facet_properties[] = $parameter;
+                continue;
+            }
+
+            $value = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
+            $search_parameters[$key] = $value;
+        }
+
+        try {
+            return new SearchEngineConfig( $title, $main_condition, $search_parameters, $facet_properties, $result_properties );
+        } catch ( \InvalidArgumentException $exception ) {
+            return null;
+        }
+    }
+
+    /**
+     * SearchEngineConfig constructor.
+     *
+     * @param Title $title The page for which this config is applicable
+     * @param string $condition
+     * @param array $search_parameters
+     * @param array $facet_properties
+     * @param array $result_properties
+     */
+	public function __construct( Title $title, string $condition, array $search_parameters, array $facet_properties, array $result_properties ) {
 		if ( empty( $facet_properties ) ) {
 			throw new \InvalidArgumentException( "Invalid facet properties array; at least one facet property is required." );
 		}
@@ -150,6 +225,7 @@ class SearchEngineConfig {
 		$this->condition_property = new Property( $condition_property );
 		$this->condition_value = $condition_value;
 		$this->facet_properties = $facet_properties;
+		$this->search_parameters = $search_parameters;
 
 		$this->result_properties = array_map( function( string $property_name ): Property {
             return new Property( $property_name );
@@ -159,8 +235,11 @@ class SearchEngineConfig {
             $translation_pair = explode( "=", $property );
             $property_name = $translation_pair[0];
 
-            $facet_property = new Property( $property_name );
+            if ( isset( $translation_pair[1] ) ) {
+                $this->translations[$property_name] = $translation_pair[1];
+            }
 
+            $facet_property = new Property( $property_name );
             $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
         }
 
@@ -169,7 +248,7 @@ class SearchEngineConfig {
         }
 	}
 
-	/**
+    /**
 	 * Returns the page for which this config is applicable as a Title object.
 	 *
 	 * @return Title
@@ -178,10 +257,28 @@ class SearchEngineConfig {
 		return $this->title;
 	}
 
+    /**
+     * Returns all search parameters given to the parser function.
+     *
+     * @return array
+     */
+	public function getSearchParameters(): array {
+	    return $this->search_parameters;
+    }
+
+    /**
+     * Returns the array of property translations.
+     *
+     * @return string[]
+     */
+	public function getPropertyTranslations(): array {
+        return $this->translations;
+    }
+
 	/**
 	 * Returns the condition property name.
 	 *
-	 * @return Property
+	 * @return \WSSearch\SMW\Property
 	 */
 	public function getConditionProperty(): Property {
 		return $this->condition_property;
@@ -220,7 +317,7 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
      * are the properties prefixed with a "?".
 	 *
-	 * @return Property[]
+	 * @return \WSSearch\SMW\Property[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;
@@ -293,6 +390,18 @@ class SearchEngineConfig {
 				]
 			);
 		}
+
+		// Insert this object's search parameters
+        foreach ( $this->search_parameters as $key => $value ) {
+            $database->insert(
+                "search_parameters",
+                [
+                    "parameter_key" => $key,
+                    "parameter_value" => $value === true ? "" : $value,
+                    "page_id" => $page_id
+                ]
+            );
+        }
 	}
 
 	/**
@@ -316,5 +425,10 @@ class SearchEngineConfig {
 			"search_properties",
 			[ "page_id" => $page_id ]
 		);
+
+		$database->delete(
+		    "search_parameters",
+            [ "page_id" => $page_id ]
+        );
 	}
 }

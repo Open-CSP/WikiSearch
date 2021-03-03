@@ -2,8 +2,9 @@
 
 namespace WSSearch\QueryEngine\Aggregation;
 
+use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
-use WSSearch\QueryEngine\Property;
+use WSSearch\SMW\Property;
 
 /**
  * Class PropertyAggregation
@@ -15,17 +16,16 @@ use WSSearch\QueryEngine\Property;
  */
 class PropertyAggregation extends Aggregation {
     /**
-     * @var Property
+     * @var \WSSearch\SMW\Property
      */
     private Property $property;
 
     /**
      * PropertyAggregation constructor.
      *
-     * @param string $aggregation_name The name of the aggregation, must be unique per query
-     * @param Property|string $property The property object or name for the aggregation
+     * @param \WSSearch\SMW\Property|string $property The property object or name for the aggregation
      */
-    public function __construct( string $aggregation_name, $property ) {
+    public function __construct( $property ) {
         if ( is_string( $property ) ) {
             $property = new Property( $property );
         }
@@ -36,7 +36,7 @@ class PropertyAggregation extends Aggregation {
 
         $this->property = $property;
 
-        parent::__construct( $aggregation_name );
+        parent::__construct( $property->getPropertyName() );
     }
 
     /**
@@ -51,7 +51,7 @@ class PropertyAggregation extends Aggregation {
     /**
      * @inheritDoc
      */
-    public function toQuery(): TermsAggregation {
+    public function toQuery(): AbstractAggregation {
         return new TermsAggregation(
             $this->aggregation_name,
             "{$this->property->getPropertyField()}.keyword"

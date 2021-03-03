@@ -6,7 +6,7 @@ namespace WSSearch\QueryEngine\Filter;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
-use WSSearch\QueryEngine\Property;
+use WSSearch\SMW\Property;
 
 /**
  * Class DateRangeFilter
@@ -16,7 +16,7 @@ use WSSearch\QueryEngine\Property;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
  */
-abstract class PropertyRangeFilter extends Filter {
+class PropertyRangeFilter extends Filter {
     /**
      * @var int The minimum value of the property
      */
@@ -28,7 +28,7 @@ abstract class PropertyRangeFilter extends Filter {
     private $lte;
 
     /**
-     * @var Property The property to apply the filter to
+     * @var \WSSearch\SMW\Property The property to apply the filter to
      */
     private $property;
 
@@ -40,11 +40,19 @@ abstract class PropertyRangeFilter extends Filter {
     /**
      * DateRangeFilter constructor.
      *
-     * @param Property $property The property to apply the filter to
+     * @param \WSSearch\SMW\Property|string $property The property to apply the filter to
      * @param int $gte The minimum value of the property
      * @param int $lte The maximum value of the property
      */
-    public function __construct( Property $property, int $gte, int $lte, float $boost = 1.0 ) {
+    public function __construct( $property, int $gte, int $lte, float $boost = 1.0 ) {
+        if ( is_string( $property ) ) {
+            $property = new Property( $property );
+        }
+
+        if ( !($property instanceof Property)) {
+            throw new \InvalidArgumentException();
+        }
+
         $this->property = $property;
         $this->gte = $gte;
         $this->lte = $lte;

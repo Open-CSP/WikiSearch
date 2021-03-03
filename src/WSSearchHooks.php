@@ -36,7 +36,6 @@ use Status;
 use Title;
 use User;
 use WikiPage;
-use WSSearch\QueryEngine\Property;
 
 /**
  * Class SearchHooks
@@ -129,7 +128,8 @@ abstract class WSSearchHooks {
 		$tables = [
 			"search_condition"      => sprintf( "%s/%s/table_search_condition.sql", $directory, $type ),
 			"search_facets"         => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
-			"search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type )
+			"search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type ),
+            "search_parameters"     => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type )
 		];
 
 		foreach ( $tables as $table ) {
@@ -197,44 +197,22 @@ abstract class WSSearchHooks {
         exit();
 	}
 
-	/**
-	 * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
-	 * appropriate SearchEngineConfig object and for storing that object in the database.
-	 *
-	 * @param Parser $parser
-	 * @param string ...$parameters
-	 * @return string
-	 */
+    /**
+     * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
+     * appropriate SearchEngineConfig object and for storing that object in the database.
+     *
+     * @param Parser $parser
+     * @param string ...$parameters
+     * @return string
+     */
 	public static function searchEngineConfigCallback( Parser $parser, string ...$parameters ): string {
-		if ( !isset( $parameters[0] ) || !$parameters[0] ) {
-			return self::error( "wssearch-invalid-engine-config" );
-		}
+	    $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
 
-		$condition = array_shift( $parameters );
+	    if ( $config === null ) {
+            return self::error( "wssearch-invalid-engine-config" );
+        }
 
-		$facet_properties = [];
-		$result_properties = [];
-
-		foreach ( $parameters as $parameter ) {
-			if ( strlen( $parameter ) === 0 ) {
-			    continue;
-			}
-
-			if ( $parameter[0] === "?" ) {
-				// This is a "result property"
-				$result_properties[] = ltrim( $parameter, "?" );
-			} else {
-				// This is a "facet property"
-				$facet_properties[] = $parameter;
-			}
-		}
-
-		try {
-			$config = new SearchEngineConfig( $parser->getTitle(), $condition, $facet_properties, $result_properties );
-			$config->update( wfGetDB( DB_MASTER ) );
-		} catch ( \InvalidArgumentException $exception ) {
-			return self::error( "wssearch-invalid-engine-config" );
-		}
+		$config->update( wfGetDB( DB_MASTER ) );
 
 		return "";
 	}
@@ -273,6 +251,7 @@ abstract class WSSearchHooks {
             return "WSArrays must be installed.";
         }
 
+        /*
         $options = self::extractOptions( func_get_args() );
 
         $limit = isset( $options["limit"] ) ? $options["limit"] : "100";
@@ -317,13 +296,18 @@ abstract class WSSearchHooks {
 
         $search_engine = new SearchEngine();
         $search_engine->setLimit(0);
-        $search_engine->addAggregations( $filter );
+        $search_engine->addAggregations( [ new VerwijzingenAggregation( $property, $date_property ) ] );
 
         $result = $search_engine->doSearch();
 
         \WSArrays::$arrays[$array_name] = new \ComplexArray( $result["aggs"]["verwijzingen"]["aantal_verwijzingen"]["buckets"] );
 
         return "";
+        */
+
+        // TODO: To query engine
+
+        return "Not implemented in new version yet (ask Marijn)";
     }
 
 	/**

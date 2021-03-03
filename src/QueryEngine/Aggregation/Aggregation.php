@@ -3,6 +3,7 @@
 namespace WSSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
+use ONGR\ElasticsearchDSL\BuilderInterface;
 use WSSearch\QueryEngine\QueryConvertable;
 
 abstract class Aggregation implements QueryConvertable {

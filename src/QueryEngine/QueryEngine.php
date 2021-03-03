@@ -8,7 +8,11 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\PropertyFilter;
+use WSSearch\SearchEngineConfig;
+use WSSearch\SMW\SMWQueryProcessor;
 
 class QueryEngine {
     /**
@@ -28,7 +32,14 @@ class QueryEngine {
      *
      * @var BoolQuery
      */
-    private BoolQuery $filters;
+    private $filters;
+
+    /**
+     * The base ElasticSearch query.
+     *
+     * @var array|null
+     */
+    private $base_query = null;
 
     /**
      * QueryEngine constructor.
@@ -54,6 +65,40 @@ class QueryEngine {
         $this->elasticsearch_search->setSize( $config->get( "WSSearchDefaultResultLimit" ) );
         $this->elasticsearch_search->addHighlight( $highlight );
         $this->elasticsearch_search->addQuery( $constant_score_query );
+    }
+
+    /**
+     * Constructs a new QueryEngine from the given SearchEngineConfig.
+     *
+     * @param SearchEngineConfig $config
+     * @return QueryEngine
+     */
+    public static function newFromConfig( SearchEngineConfig $config ) {
+        $mw_config = MediaWikiServices::getInstance()->getMainConfig();
+        $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+
+        $query_engine = new QueryEngine( $index );
+
+        foreach ( $config->getFacetProperties() as $facet_property ) {
+            $translation_pair = explode( "=", $facet_property );
+            $property_name = $translation_pair[0];
+
+            $query_engine->addAggregation( new PropertyAggregation( $property_name ) );
+        }
+
+        $main_property_filter = new PropertyFilter(
+            $config->getConditionProperty(),
+            $config->getConditionValue()
+        );
+
+        $query_engine->addFilter( $main_property_filter );
+
+        $search_parameters = $config->getSearchParameters();
+        if ( isset( $search_parameters["base query"] ) ) {
+            $query_engine->setBaseQuery( $search_parameters["base query"] );
+        }
+
+        return $query_engine;
     }
 
     /**
@@ -134,6 +179,23 @@ class QueryEngine {
     }
 
     /**
+     * Sets the base Semantic MediaWiki query.
+     *
+     * @param $base_query
+     */
+    private function setBaseQuery( string $base_query ) {
+        try {
+            $query_processor = new SMWQueryProcessor( $base_query );
+            $elastic_search_query = $query_processor->toElasticSearchQuery();
+        } catch( \MWException $exception ) {
+            // The query is invalid
+            return;
+        }
+
+        $this->base_query = $elastic_search_query;
+    }
+
+    /**
      * Returns the "Search" object. Can be used to alter the query directly.
      *
      * @return Search
@@ -146,13 +208,19 @@ class QueryEngine {
      * Converts this class into a full ElasticSearch query.
      *
      * @return array A complete ElasticSearch query
+     * @throws \MWException
      */
     public function toArray(): array {
-        $body = $this->elasticsearch_search->toArray();
-
-        return [
+        $query = [
             "index" => $this->elasticsearch_index,
-            "body" => $body
+            "body" => $this->elasticsearch_search->toArray()
         ];
+
+        if ( isset( $this->base_query[0] ) ) {
+            $query_combinator = new QueryCombinator( $query );
+            return $query_combinator->add( $this->base_query[0] )->getQuery();
+        }
+
+        return $query;
     }
 }

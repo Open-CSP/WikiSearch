@@ -2,9 +2,10 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
-use WSSearch\QueryEngine\Property;
+use WSSearch\SMW\Property;
 
 /**
  * Class PropertyFilter
@@ -16,7 +17,7 @@ use WSSearch\QueryEngine\Property;
  */
 class PropertyFilter extends Filter {
     /**
-     * @var Property The property to filter on
+     * @var \WSSearch\SMW\Property The property to filter on
      */
     private $property;
 
@@ -47,7 +48,7 @@ class PropertyFilter extends Filter {
     /**
      * Sets the property this filter will filter on.
      *
-     * @param Property $property_name
+     * @param \WSSearch\SMW\Property $property_name
      */
     public function setPropertyName( Property $property_name ) {
         $this->property_name = $property_name;

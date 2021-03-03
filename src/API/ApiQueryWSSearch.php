@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WSSearch\API;
 
 use ApiBase;
 use ApiQuery;
@@ -28,6 +28,10 @@ use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
+use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\FilterFactory;
+use WSSearch\SearchEngine;
+use WSSearch\SearchEngineConfig;
 
 /**
  * Class ApiQueryWSSearch
@@ -62,18 +66,19 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		return [
 			'pageid' => [
 				ApiBase::PARAM_TYPE => 'integer',
+                ApiBase::PARAM_REQUIRED => true
 			],
 			'filter' => [
-				ApiBase::PARAM_TYPE => 'string',
+				ApiBase::PARAM_TYPE => 'string'
 			],
 			'dates' => [
-				ApiBase::PARAM_TYPE => 'string',
+				ApiBase::PARAM_TYPE => 'string'
 			],
 			'term' => [
-				ApiBase::PARAM_TYPE => 'string',
+				ApiBase::PARAM_TYPE => 'string'
 			],
 			'from' => [
-				ApiBase::PARAM_TYPE => 'integer',
+				ApiBase::PARAM_TYPE => 'integer'
 			],
 			'limit' => [
 				ApiBase::PARAM_TYPE => 'integer'
@@ -105,11 +110,6 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	 */
 	private function getTitleFromRequest(): Title {
 		$page_id = $this->getParameter( "pageid" );
-
-		if ( !$page_id ) {
-			$this->dieWithError( wfMessage( "wssearch-api-missing-pageid" ) );
-		}
-
 		$title = Title::newFromID( $page_id );
 
 		if ( !$title || !$title instanceof Title ) {
@@ -146,35 +146,42 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
 	    $engine = new SearchEngine( $engine_config );
 
-		$term = $this->getParameter( "term" );
-		$from = $this->getParameter( "from" );
-		$limit = $this->getParameter( "limit" );
-		$filter = $this->getParameter( "filter" );
-		$dates = $this->getParameter( "dates" );
-
+	    $term = $this->getParameter( "term" );
 		if ( $term !== null ) {
 			$engine->setSearchTerm( $term );
 		}
 
+        $from = $this->getParameter( "from" );
 		if ( $from !== null ) {
 			$engine->setOffset( $from );
 		}
 
+        $limit = $this->getParameter( "limit" );
 		if ( $limit !== null ) {
 			$engine->setLimit( $limit );
 		}
 
+        $filter = $this->getParameter( "filter" );
 		if ( $filter !== null ) {
 			$filters = json_decode( $filter, true );
 
-			if ( is_array( $filters ) ) {
-                // TODO: Convert to query engine
-				$engine->addFilters( $filters );
-			} else {
-				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
-			}
+			if ( !is_array( $filters ) ) {
+                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
+            }
+
+			$filters = array_map( [ FilterFactory::class, "fromArray" ], $filters );
+			$filters = array_filter( $filters, function( $filter ): bool {
+			    return ($filter instanceof Filter);
+            } );
+
+			$engine->addFilters( $filters );
 		}
 
+		/*
+
+		TODO:
+
+        $dates = $this->getParameter( "dates" );
 		if ( $dates !== null ) {
 			$data = json_decode( $dates, true );
 
@@ -183,7 +190,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			} else {
 				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "dates", json_last_error_msg() ) );
 			}
-		}
+		}*/
 
 		return $engine;
 	}

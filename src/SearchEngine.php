@@ -28,6 +28,7 @@ use MWException;
 use MWNamespace;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\ModificationDatePropertyDateRangeAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
@@ -40,24 +41,9 @@ use WSSearch\QueryEngine\QueryEngine;
  */
 class SearchEngine {
     /**
-     * @var SearchEngineConfig
-     */
-    private $config;
-
-    /**
-     * @var SearchQueryBuilder
-     */
-    private $query_builder;
-
-    /**
      * @var array
      */
     private $translations = [];
-
-    /**
-     * @var array
-     */
-    private $aggregate_filters = [];
 
     /**
      * @var QueryEngine
@@ -70,18 +56,16 @@ class SearchEngine {
      * @param SearchEngineConfig|null $config
      */
     public function __construct( SearchEngineConfig $config = null ) {
-        $this->config = $config;
-        $this->query_builder = SearchQueryBuilder::newCanonical();
+        $this->translations = $config->getPropertyTranslations();
 
+        if ( $config !== null ) {
+            $this->query_engine = QueryEngine::newFromConfig( $config );
+        } else {
+            $mw_config = MediaWikiServices::getInstance()->getMainConfig();
+            $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
 
-
-
-
-
-        $config = MediaWikiServices::getInstance()->getMainConfig();
-        $index = $config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
-
-        $this->query_engine = new QueryEngine( $index );
+            $this->query_engine = new QueryEngine( $index );
+        }
     }
 
     /**
@@ -92,7 +76,7 @@ class SearchEngine {
      * @throws \Exception
      */
     public function doQuery( array $query ): array {
-        $hosts = $this->getElasticSearchHosts();
+        $hosts = SearchEngine::getElasticSearchHosts();
 
         // Allow other extensions to modify the query
         Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
@@ -130,15 +114,6 @@ class SearchEngine {
     }
 
     /**
-     * Sets the available date ranges.
-     *
-     * @param array $ranges
-     */
-    public function setModificationDateRangeAggregationRanges( array $ranges ) {
-        $this->query_engine->addAggregation( new ModificationDatePropertyDateRangeAggregation( $ranges ) );
-    }
-
-    /**
      * Sets the search term.
      *
      * @param string $search_term
@@ -162,10 +137,10 @@ class SearchEngine {
      *
      * @return array
      *
-     * @throws MWException
+     * @throws \Exception
      */
     public function doSearch(): array {
-        $elastic_query = $this->buildElasticQuery();
+        $elastic_query = $this->query_engine->toArray();
 
         $results = $this->doQuery( $elastic_query );
         $results = $this->applyResultTranslations( $results );
@@ -175,51 +150,6 @@ class SearchEngine {
             "total" => $results["hits"]["total"],
             "aggs"  => $results["aggregations"]
         ];
-    }
-
-    /**
-     * Builds the main ElasticSearch query.
-     *
-     * @return array
-     */
-    private function buildElasticQuery(): array {
-        if ( isset( $this->config ) ) {
-            $property_filter = new PropertyFilter(
-                $this->config->getConditionProperty(),
-                $this->config->getConditionValue()
-            );
-
-            $this->query_engine->addFilter( $property_filter );
-        }
-
-        // TODO: Convert to query engine
-        $this->query_builder->setAggregateFilters( $this->buildAggregateFilters() );
-
-        return $this->query_builder->buildQuery();
-    }
-
-    /**
-     * Helper function to build the aggregate filters from the current config.
-     *
-     * @return array
-     */
-    private function buildAggregateFilters(): array {
-        // TODO: Convert to query engine
-        $filters = [];
-
-        foreach ( $this->config->getFacetProperties() as $facet ) {
-            $translation_pair = explode( "=", $facet );
-            $property_name = $translation_pair[0];
-
-            if ( isset( $translation_pair[1] ) ) {
-                $this->translations[$property_name] = $translation_pair[1];
-            }
-
-            $facet_property = new PropertyInfo( $property_name );
-            $filters[$property_name] = [ "terms" => [ "field" => "P:" . $facet_property->getPropertyID() . "." . $facet_property->getPropertyType() . ".keyword" ] ];
-        }
-
-        return $filters;
     }
 
     /**
@@ -291,7 +221,7 @@ class SearchEngine {
      *
      * @return array
      */
-    private function getElasticSearchHosts(): array {
+    private static function getElasticSearchHosts(): array {
         $config = MediaWikiServices::getInstance()->getMainConfig();
 
         try {

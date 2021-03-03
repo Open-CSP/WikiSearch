@@ -3,8 +3,9 @@
 
 namespace WSSearch\QueryEngine\Aggregation;
 
+use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\DateRangeAggregation;
-use WSSearch\QueryEngine\Property;
+use WSSearch\SMW\Property;
 
 /**
  * Class PropertyDateRangeAggregation
@@ -19,7 +20,7 @@ class PropertyDateRangeAggregation extends Aggregation {
     private $ranges;
 
     /**
-     * @var Property The property to apply the filter to
+     * @var \WSSearch\SMW\Property The property to apply the filter to
      */
     private $property;
 
@@ -27,7 +28,7 @@ class PropertyDateRangeAggregation extends Aggregation {
      * DateRangeFilter constructor.
      *
      * @param string $aggregation_name
-     * @param Property|string $property The property to apply the filter to
+     * @param \WSSearch\SMW\Property|string $property The property to apply the filter to
      * @param array $ranges The date ranges to aggregate
      */
     public function __construct( string $aggregation_name, $property, array $ranges ) {
@@ -48,7 +49,7 @@ class PropertyDateRangeAggregation extends Aggregation {
     /**
      * Sets the property object to use for the aggregation.
      *
-     * @param Property $property
+     * @param \WSSearch\SMW\Property $property
      */
     public function setProperty( Property $property ) {
         $this->property = $property;
@@ -66,7 +67,7 @@ class PropertyDateRangeAggregation extends Aggregation {
     /**
      * @inheritDoc
      */
-    public function toQuery(): DateRangeAggregation {
+    public function toQuery(): AbstractAggregation {
         return new DateRangeAggregation(
             $this->aggregation_name,
             $this->property->getPropertyField(),
