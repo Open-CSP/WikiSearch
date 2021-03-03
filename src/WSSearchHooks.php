@@ -1,139 +1,355 @@
 <?php
 
-class WSSearchHooks {
+/**
+ * WSSearch MediaWiki extension
+ * Copyright (C) 2021  Wikibase Solutions
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 
-  public static $wssearchloaded = "false";
+namespace WSSearch;
 
-  public static function onParserFirstCallInit( Parser $parser ) {
+use Content;
+use ContentHandler;
+use DatabaseUpdater;
+use LogEntry;
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use MWException;
+use OutputPage;
+use Parser;
+use Revision;
+use Skin;
+use Status;
+use Title;
+use User;
+use WikiPage;
 
-    $parser->setFunctionHook( 'wssearch', [ self::class, 'renderWSSearch' ], Parser::SFH_OBJECT_ARGS );
-  }
-//$parser, $param1 = '', $param_filters = '', $param_title = '', $param_exerpt = ''
-  public static function renderWSSearch( Parser $parser, PPFrame $frame, array $args) { //array $args
+/**
+ * Class SearchHooks
+ *
+ * @package WSSearch
+ */
+abstract class WSSearchHooks {
+	/**
+	 * Occurs after the delete article request has been processed.
+	 *
+	 * @param WikiPage $article The article that was deleted
+	 * @param User $user The user that deleted the article
+	 * @param string $reason The reason the article was deleted
+	 * @param int $id ID of the article that was deleted
+	 * @param Content|null $content The content of the deleted article, or null in case of an error
+	 * @param LogEntry $log_entry The log entry used to record the deletion
+	 * @param int $archived_revision_count The number of revisions archived during the page delete
+	 */
+	public static function onArticleDeleteComplete(
+		WikiPage $article,
+		User $user,
+		string $reason,
+		int $id,
+		$content,
+		LogEntry $log_entry,
+		int $archived_revision_count
+	) {
+		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $id );
+	}
 
-    //set true for onBeforePageDisplay hook
-    self::$wssearchloaded = "true";
+	/**
+	 * Occurs after the save page request has been processed.
+	 *
+	 * @param WikiPage $article WikiPage modified
+	 * @param User $user User performing the modification
+	 * @param Content $main_content New content, as a Content object
+	 * @param string $summary Edit summary/comment
+	 * @param bool $is_minor Whether or not the edit was marked as minor
+	 * @param mixed $is_watch
+	 * @param mixed $section
+	 * @param mixed $flags
+	 * @param Revision|null $revision Revision object of the saved content
+	 * @param Status $status Status object about to be returned by doEditContent()
+	 * @param mixed $original_revision_id
+	 * @param mixed $undid_revision_id
+	 *
+	 * @throws MWException
+	 */
+	public static function onPageContentSaveComplete(
+		WikiPage $article,
+		User $user,
+		Content $main_content,
+		string $summary,
+		bool $is_minor,
+		$is_watch,
+		$section,
+		$flags,
+		$revision,
+		Status $status,
+		$original_revision_id,
+		$undid_revision_id
+	) {
+		// Delete any "searchEngineConfig"'s on this page
+		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $article->getId() );
 
+		// Create an appropriate parser
+		$parser = MediaWikiServices::getInstance()->getParser();
+		$parser->mOptions = $parser->getOptions() ?? \ParserOptions::newFromUserAndLang(
+			\RequestContext::getMain()->getUser(),
+			\RequestContext::getMain()->getLanguage()
+		);
 
-if(isset($args[0])) {
-  $param1 =   trim( $frame->expand($args[0]));
-  unset($args[0]);
-  $param_results = [];
-  $param_filters = [];
-  foreach ($args as $key => $value) {
-    $p_val = trim( $frame->expand($value));
-    if($p_val[0] == "?"){
-     array_push($param_results,  substr($p_val, 1));
-    }else{
-     array_push($param_filters,  $p_val);
-    }
-  }
-}
+		$parser->setTitle( $parser->mTitle ?? Title::newMainPage() );
+		$parser->clearState();
 
+		// Reparse the wikitext upon safe with the parser
+		$parser->recursiveTagParse( ContentHandler::getContentText( $main_content ) );
+	}
 
+	/**
+	 * Called whenever schema updates are required. Updates the database schema.
+	 *
+	 * @param DatabaseUpdater $updater
+	 * @throws MWException
+	 */
+	public static function onLoadExtensionSchemaUpdates( DatabaseUpdater $updater ) {
+		$directory = $GLOBALS['wgExtensionDirectory'] . '/WSSearch/sql';
+		$type = $updater->getDB()->getType();
 
-    //create date range
+		$tables = [
+			"search_facets"         => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
+			"search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type ),
+            "search_parameters"     => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type )
+		];
 
-    // 2451544 = 2000- 1- 1
-    $timestamp = 2451544;
-    $date_start = date("Y") - 2000;
-    $origin = new DateTime('2000/01/01');
-    $target = new DateTime(date("Y/m/d"));
-    $interval = $origin->diff($target)->format('%R%a');
+		foreach ( $tables as $table ) {
+			if ( !file_exists( $table ) ) {
+				throw new MWException( wfMessage( 'wssearch-invalid-dbms', $type )->parse() );
+			}
+		}
 
-    $date_ranges = [];
+		foreach ( $tables as $table_name => $sql_path ) {
+			$updater->addExtensionTable( $table_name, $sql_path );
+		}
+	}
 
-    array_push($date_ranges, [
-      "key" => "Last Week",
-      "from" => ($interval -7) + $timestamp,
-      "to" => $interval + $timestamp
-    ]);
+	/**
+	 * Called when the parser initializes for the first time.
+	 *
+	 * @param Parser $parser Parser object being initialized
+	 */
+	public static function onParserFirstCallInit( Parser $parser ) {
+		try {
+			$parser->setFunctionHook( "searchEngineConfig", [ self::class, "searchEngineConfigCallback" ] );
+			$parser->setFunctionHook( "loadSearchEngine", [ self::class, "loadSearchEngineCallback" ] );
+			$parser->setFunctionHook( "verwijzingen", [ self::class, "verwijzingenCallback" ] );
+		} catch ( MWException $e ) {
+			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
+		}
+	}
 
-    array_push($date_ranges, [
-      "key" => "Last month",
-      "from" => ($interval - 31) + $timestamp,
-      "to" => $interval + $timestamp
-    ]);
-
-    array_push($date_ranges, [
-      "key" => "Last Quarter",
-      "from" => ($interval - 92) + $timestamp,
-      "to" => $interval + $timestamp
-    ]);
-
-    for ($i=0; $i < $date_start; $i++) {
-      $days = $date_start - ($i - 1);
-      $to = $days * 365;
-      $from = $to - 365;
-      $key = date("Y") - $i;
-      array_push($date_ranges, [
-        "key" => strval($key),
-        "from" => $from + $timestamp,
-        "to" => $to + $timestamp
-      ]);
-    };
-
-    $classIDProperty_params = explode("=", $param1);
-
-
-    $search_params = [
-      "class1" => $classIDProperty_params[0],
-      "class2" => $classIDProperty_params[1],
-      "facets" => $param_filters,
-      "outputs" =>  $param_results,
-      "dates" => $date_ranges,
-    ];
-
-    //check url parameters
-    if(isset($_GET["term"])){
-      $search_params["term"] = $_GET["term"];
-    }
-
-    if(isset($_GET["filters"])){
-      $urlfilters = [];
-      $urlfiltersout = [];
-      $activefilters =  explode("~", $_GET["filters"]);
-      foreach ($activefilters as $key => $value) {
-          $filteritem = explode("-", $value);
-           $rangeitem = explode("_", $filteritem[0]);
-          if($rangeitem[0] == "range"){ //hier bezig
-           $ranges = explode("_", $filteritem[1]);
-            array_push($urlfilters,   ["range" => ["P:29.datField" => ["gte" => $ranges[0], "lte" => $ranges[1] ] ] ]);
-            array_push($urlfiltersout,   ["key" => $rangeitem[2], "value" => $rangeitem[1], "range" => ["P:29.datField" => ["gte" => $ranges[0], "lte" => $ranges[1] ] ] ]);
-          }else{
-            array_push($urlfilters,   ["value" => $filteritem[1], "key" => $filteritem[0] ]);
-            array_push($urlfiltersout,  ["value" => $filteritem[1], "key" => $filteritem[0] ]);
+    /**
+     * Allows last minute changes to the output page, e.g. adding of CSS or
+     * JavaScript by extensions.
+     *
+     * @param OutputPage $out
+     * @param Skin $skin
+     */
+	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+	    if ( $out->getTitle()->getFullText() !== "Special:Search" ) {
+	        return;
         }
-      }
-     $search_params["filters"] = $urlfilters;
+
+	    $config = MediaWikiServices::getInstance()->getMainConfig();
+	    $search_field_override = $config->get( "WSSearchSearchFieldOverride" );
+
+	    if ( $search_field_override === false ) {
+	        return;
+        }
+
+	    // Create Title object to get the full URL
+	    $title = Title::newFromText( $search_field_override );
+
+	    // The search page redirect is invalid
+	    if ( !$title instanceof Title ) {
+	        return;
+        }
+
+	    // Get the current search query
+	    $search_query = $out->getRequest()->getval( "search", "" );
+
+	    // Get the full URL to redirect to
+	    $redirect_url = $title->getFullUrlForRedirect( [ "term" => $search_query ] );
+
+	    // Perform the redirect
+        header( "Location: $redirect_url" );
+
+        exit();
+	}
+
+    /**
+     * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
+     * appropriate SearchEngineConfig object and for storing that object in the database.
+     *
+     * @param Parser $parser
+     * @param string ...$parameters
+     * @return string
+     */
+	public static function searchEngineConfigCallback( Parser $parser, string ...$parameters ): string {
+	    $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
+
+	    if ( $config === null ) {
+            return self::error( "wssearch-invalid-engine-config" );
+        }
+
+		$config->update( wfGetDB( DB_MASTER ) );
+
+		return "";
+	}
+
+    /**
+     * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
+     * of the extension.
+     *
+     * @param Parser $parser
+     * @param string ...$parameters
+     *
+     * @return string
+     * @throws \Exception
+     */
+	public static function loadSearchEngineCallback( Parser $parser, string ...$parameters ): string {
+	    $config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
+
+	    if ( $config === null ) {
+		    return self::error( "wssearch-invalid-engine-config" );
+        }
+
+        $result = self::error( "wssearch-missing-frontend" );
+
+		\Hooks::run( "WSSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
+
+		return $result;
+	}
+
+    /**
+     * @param Parser $parser
+     * @return string
+     * @throws MWException
+     */
+	public static function verwijzingenCallback( Parser $parser ) {
+        if ( !class_exists( "\WSArrays" ) ) {
+            return "WSArrays must be installed.";
+        }
+
+        /*
+        $options = self::extractOptions( func_get_args() );
+
+        $limit = isset( $options["limit"] ) ? $options["limit"] : "100";
+        $property = isset( $options["property"] ) ? $options["property"] : "";
+        $array_name = isset( $options["array"] ) ? $options["array"] : "";
+        $date_property = isset( $options["date property"] ) ? $options["date property"] : "Modification date";
+
+        if ( !$property || !$array_name ) {
+            return "Missing `array` or `property` parameter";
+        }
+
+        if ( !isset( $options["from"] ) || !isset( $options["to"] ) ) {
+            return "Missing `from` or `to` parameter";
+        }
+
+        if ( !ctype_digit( $options["from"] ) || !ctype_digit( $options["to"] ) || !ctype_digit( $limit ) ) {
+            return "Invalid `from`, `limit` or `to` parameter";
+        }
+
+        list( $from, $to ) = self::convertDate( $options["from"], $options["to"] );
+
+        $filter = [
+            "verwijzingen" => [
+                "filter" => [
+                    "range" => [
+                        ( new Property( $date_property ) )->getPropertyField() => [
+                            "to" => $to,
+                            "from" => $from
+                        ]
+                    ]
+                ],
+                "aggs" => [
+                    "aantal_verwijzingen" => [
+                        "terms" => [
+                            "field" => (new Property($property))->getPropertyField()  . ".keyword",
+                            "size" => $limit
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $search_engine = new SearchEngine();
+        $search_engine->setLimit(0);
+        $search_engine->addAggregations( [ new VerwijzingenAggregation( $property, $date_property ) ] );
+
+        $result = $search_engine->doSearch();
+
+        \WSArrays::$arrays[$array_name] = new \ComplexArray( $result["aggs"]["verwijzingen"]["aantal_verwijzingen"]["buckets"] );
+
+        return "";
+        */
+
+        // TODO: To query engine
+
+        return "Not implemented in new version yet (ask Marijn)";
     }
 
-    $output_params = WSSearch::dosearch($search_params);
-    $output_params['dates'] = $date_ranges;
+	/**
+	 * Returns a formatted error message.
+	 *
+	 * @param string $message
+	 * @param array $params
+	 * @return string
+	 */
+	private static function error( string $message, array $params = [] ): string {
+		return \Html::rawElement(
+			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->toString()
+		);
+	}
 
-    if(isset($_GET["term"])){
-      $output_params['term'] = $_GET["term"];
+    /**
+     * Converts an array of values in form [0] => "name=value"
+     * into a real associative array in form [name] => value
+     * If no = is provided, true is assumed like this: [name] => true
+     *
+     * @param array string $options
+     * @return array $results
+     */
+    private static function extractOptions( array $options ) {
+        $results = [];
+        foreach ( $options as $option ) {
+            $pair = array_map( 'trim', explode( '=', $option, 2 ) );
+            if ( count( $pair ) === 2 ) {
+                $results[ $pair[0] ] = $pair[1];
+            }
+            if ( count( $pair ) === 1 ) {
+                $results[ $pair[0] ] = true;
+            }
+        }
+        return $results;
     }
 
-    if(isset($_GET["filters"])){
-        $output_params['selected'] = $urlfiltersout ;
-    }else{
-        $output_params['selected'] = [];
+    /**
+     * @param string $from_year
+     * @param string $to_year
+     * @return array
+     */
+    private static function convertDate( int $from_year, int $to_year ) {
+        return [ gregoriantojd( 1, 1, $from_year ), gregoriantojd( 12, 31, $to_year ) ];
     }
-
-
-  //  print_r($output_params['aggs']);
-
-    $output = "<script>var vueinitdata = " . json_encode($output_params) . "</script>";
-    $output .= str_replace( array("\r", "\n"),"", file_get_contents(__DIR__ . '/templates/app.html'));
-
-    return [ $output, 'noparse' => true, 'isHTML' => true ];
-  }
-
-  public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
-    if(self::$wssearchloaded == "true"){
-      $out->addModules( 'ext.app' );
-    }
-  }
-
 }
