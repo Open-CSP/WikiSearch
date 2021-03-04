@@ -18,7 +18,7 @@ class PropertyAggregation extends Aggregation {
     /**
      * @var \WSSearch\SMW\Property
      */
-    private Property $property;
+    private $property;
 
     /**
      * PropertyAggregation constructor.
