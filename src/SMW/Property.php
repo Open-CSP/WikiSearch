@@ -124,7 +124,7 @@ class Property {
         // TODO: Add more
         switch ( $property_name ) {
             case "Modification_date": return "_MDAT";
-			case "Average_rating": return "__rp_average";
+            case "Average_rating": return "__rp_average";
             default: return $property_name;
         }
     }
