@@ -53,8 +53,6 @@ class ApiQueryWSSearch extends ApiQueryBase {
 
 		try {
 			$result = $engine->doSearch();
-
-			die();
 			$this->getResult()->addValue( null, 'result', $result );
 		} catch ( \Exception $e ) {
 			$this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
