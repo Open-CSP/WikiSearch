@@ -52,9 +52,22 @@ class PropertyAggregation extends Aggregation {
      * @inheritDoc
      */
     public function toQuery(): AbstractAggregation {
+        $property_type = $this->property->getPropertyType();
+
+        // TODO: Make this more general
+        switch ($property_type) {
+            case "numField":
+                // numField properties do not have a ".keyword"
+                $suffix = "";
+                break;
+            default:
+                $suffix = ".keyword";
+                break;
+        }
+
         return new TermsAggregation(
             $this->aggregation_name,
-            "{$this->property->getPropertyField()}.keyword"
+            "{$this->property->getPropertyField()}$suffix"
         );
     }
 }

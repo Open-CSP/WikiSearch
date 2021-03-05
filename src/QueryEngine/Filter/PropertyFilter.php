@@ -69,8 +69,21 @@ class PropertyFilter extends Filter {
      * @return BoolQuery
      */
     public function toQuery(): BoolQuery {
+        $property_type = $this->property->getPropertyType();
+
+        // TODO: Make this more general
+        switch ($property_type) {
+            case "numField":
+                // numField properties do not have a ".keyword"
+                $suffix = "";
+                break;
+            default:
+                $suffix = ".keyword";
+                break;
+        }
+
         $term_query = new TermQuery(
-            "{$this->property->getPropertyField()}.keyword",
+            "{$this->property->getPropertyField()}$suffix",
             $this->property_value
         );
 
