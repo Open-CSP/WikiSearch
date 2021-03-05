@@ -61,7 +61,9 @@ class SearchTermFilter extends Filter {
      * @inheritdoc
      */
     public function toQuery(): BoolQuery {
-        $query_string_query = new QueryStringQuery( "*" . $this->search_term . "*" );
+        $search_term = $this->prepareSearchTerm( $this->search_term );
+
+        $query_string_query = new QueryStringQuery( $search_term );
         $query_string_query->setParameters( [
             "fields" => $this->fields,
             "minimum_should_match" => 1
@@ -71,5 +73,25 @@ class SearchTermFilter extends Filter {
         $bool_query->add( $query_string_query, BoolQuery::MUST );
 
         return $bool_query;
+    }
+
+    /**
+     * Prepares the search term for use with ElasticSearch.
+     *
+     * @param string $search_term
+     * @return string
+     */
+    private function prepareSearchTerm( string $search_term ): string {
+        $term_length = strlen( $search_term );
+
+        if ( $term_length === 0 ) {
+            return "*";
+        }
+
+        if ( $search_term[0] === '"' && $search_term[$term_length - 1] === '"' ) {
+            return $search_term;
+        }
+
+        return "*$search_term*";
     }
 }
