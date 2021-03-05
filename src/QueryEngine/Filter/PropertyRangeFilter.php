@@ -18,33 +18,29 @@ use WSSearch\SMW\Property;
  */
 class PropertyRangeFilter extends Filter {
     /**
-     * @var int The minimum value of the property
-     */
-    private $gte;
-
-    /**
-     * @var int The maximum value of the property
-     */
-    private $lte;
-
-    /**
      * @var \WSSearch\SMW\Property The property to apply the filter to
      */
     private $property;
 
     /**
-     * @var float The boost value of the query
+     * @var array The options for this filter
      */
-    private $boost;
+    private $options;
 
     /**
      * DateRangeFilter constructor.
      *
      * @param \WSSearch\SMW\Property|string $property The property to apply the filter to
-     * @param int $gte The minimum value of the property
-     * @param int $lte The maximum value of the property
+     * @param array $options The options for this filter, for instance:
+     *  [
+     *      RangeQuery::GTE => 10,
+     *      RangeQuery::LT => 20
+     *  ]
+     *
+     *  to filter out everything that is not greater or equal to ten and less than twenty.
+     * @param float $boost
      */
-    public function __construct( $property, int $gte, int $lte, float $boost = 1.0 ) {
+    public function __construct( $property, array $options, float $boost = 1.0 ) {
         if ( is_string( $property ) ) {
             $property = new Property( $property );
         }
@@ -54,9 +50,8 @@ class PropertyRangeFilter extends Filter {
         }
 
         $this->property = $property;
-        $this->gte = $gte;
-        $this->lte = $lte;
-        $this->boost = $boost;
+        $this->options = $options;
+        $this->options["boost"] = $boost;
     }
 
     /**
@@ -65,11 +60,7 @@ class PropertyRangeFilter extends Filter {
     public function toQuery(): BoolQuery {
         $range_query = new RangeQuery(
             $this->property->getPropertyField(),
-            [
-                RangeQuery::GTE => $this->gte,
-                RangeQuery::LTE => $this->lte,
-                "boost" => $this->boost
-            ]
+            $this->options
         );
 
         $bool_query = new BoolQuery();

@@ -2,6 +2,8 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
+
 class FilterFactory {
     /**
      * Constructs a new Filter class from the given array. The given array directly corresponds to the array given by
@@ -20,18 +22,13 @@ class FilterFactory {
         if ( isset( $array["range"] ) ) {
             $range = $array["range"];
 
-            if ( !isset( $range["lte"] ) ) {
-                return null;
-            }
-
-            if ( !isset( $range["gte"] ) ) {
-                return null;
-            }
+            $options = [];
+            $options[RangeQuery::LTE] = isset( $range["lte"] ) ? $range["lte"] : PHP_INT_MAX;
+            $options[RangeQuery::GTE] = isset( $range["gte"] ) ? $range["gte"] : PHP_INT_MIN;
 
             return new PropertyRangeFilter(
                 $array["key"],
-                $range["gte"],
-                $range["lte"]
+                $options
             );
         } else {
             // This is a "regular" property
