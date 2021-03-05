@@ -65,9 +65,14 @@ class PropertyAggregation extends Aggregation {
                 break;
         }
 
+        $field = "{$this->property->getPropertyField()}$suffix";
+        var_dump($field);
+
+        die();
+
         return new TermsAggregation(
             $this->aggregation_name,
-            "{$this->property->getPropertyField()}$suffix"
+            $field
         );
     }
 }
