@@ -149,8 +149,8 @@ abstract class WSSearchHooks {
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
 		try {
-			$parser->setFunctionHook( "searchEngineConfig", [ self::class, "searchEngineConfigCallback" ] );
-			$parser->setFunctionHook( "loadSearchEngine", [ self::class, "loadSearchEngineCallback" ] );
+			$parser->setFunctionHook( "WSSearchConfig", [ self::class, "searchConfigCallback"] );
+			$parser->setFunctionHook( "WSSearchFrontend", [ self::class, "searchEngineFrontendCallback"] );
 			$parser->setFunctionHook( "verwijzingen", [ self::class, "verwijzingenCallback" ] );
 		} catch ( MWException $e ) {
 			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
@@ -204,7 +204,7 @@ abstract class WSSearchHooks {
      * @param string ...$parameters
      * @return string
      */
-	public static function searchEngineConfigCallback( Parser $parser, string ...$parameters ): string {
+	public static function searchConfigCallback(Parser $parser, string ...$parameters ): string {
 	    try {
             $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
         } catch( \InvalidArgumentException $exception ) {
@@ -226,7 +226,7 @@ abstract class WSSearchHooks {
      * @return string
      * @throws \Exception
      */
-	public static function loadSearchEngineCallback( Parser $parser, string ...$parameters ): string {
+	public static function searchEngineFrontendCallback(Parser $parser, string ...$parameters ): string {
 	    $config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
 
 	    if ( $config === null ) {
