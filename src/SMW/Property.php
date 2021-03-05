@@ -72,6 +72,7 @@ class Property {
 		switch ( $property->findPropertyValueType() ) {
             case "_txt": $this->type = "txtField"; break;
             case "_dat": $this->type = "datField"; break;
+            case "_num": $this->type = "numField"; break;
             default: $this->type = "wpgField";
         }
 
