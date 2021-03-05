@@ -1,7 +1,7 @@
 {
     "require": {
-        "elasticsearch/elasticsearch": "~5.5.0",
-        "ongr/elasticsearch-dsl": "~5.0"
+        "elasticsearch/elasticsearch": "~6.5.0",
+        "ongr/elasticsearch-dsl": "~6.0"
     },
     "require-dev": {
         "mediawiki/mediawiki-codesniffer": "34.0.0",
