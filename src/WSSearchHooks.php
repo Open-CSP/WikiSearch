@@ -321,35 +321,4 @@ abstract class WSSearchHooks {
 			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->toString()
 		);
 	}
-
-    /**
-     * Converts an array of values in form [0] => "name=value"
-     * into a real associative array in form [name] => value
-     * If no = is provided, true is assumed like this: [name] => true
-     *
-     * @param array string $options
-     * @return array $results
-     */
-    private static function extractOptions( array $options ) {
-        $results = [];
-        foreach ( $options as $option ) {
-            $pair = array_map( 'trim', explode( '=', $option, 2 ) );
-            if ( count( $pair ) === 2 ) {
-                $results[ $pair[0] ] = $pair[1];
-            }
-            if ( count( $pair ) === 1 ) {
-                $results[ $pair[0] ] = true;
-            }
-        }
-        return $results;
-    }
-
-    /**
-     * @param string $from_year
-     * @param string $to_year
-     * @return array
-     */
-    private static function convertDate( int $from_year, int $to_year ) {
-        return [ gregoriantojd( 1, 1, $from_year ), gregoriantojd( 12, 31, $to_year ) ];
-    }
 }
