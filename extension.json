@@ -63,6 +63,9 @@
 		},
 		"WSSearchSearchFieldOverride": {
 			"value": false
+		},
+		"WSSearchEnableDebugMode": {
+			"value": false
 		}
 	},
 	"load_composer_autoloader": true,

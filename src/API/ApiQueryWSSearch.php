@@ -54,6 +54,19 @@ class ApiQueryWSSearch extends ApiQueryBase {
 
         try {
             $result = $engine->doSearch();
+
+            $config = MediaWikiServices::getInstance()->getMainConfig();
+
+            try {
+                $in_debug_mode = $config->get( "WSSearchEnableDebugMode" );
+            } catch( \ConfigException $exception ) {
+                $in_debug_mode = false;
+            }
+
+            if ( $in_debug_mode === true ) {
+                $this->getResult()->addValue( null, 'query', $engine->getQuery());
+            }
+
             $this->getResult()->addValue( null, 'result', $result );
         } catch ( \Exception $e ) {
             $this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
