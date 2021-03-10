@@ -29,6 +29,7 @@ class DefaultHighlighter implements Highlighter {
         ];
 
         $highlight->addField( "text_raw", $field_settings );
+        $highlight->addField( "text_copy", $field_settings );
         $highlight->addField( "attachment.content", $field_settings );
 
         return $highlight;
