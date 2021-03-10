@@ -97,7 +97,9 @@ class SearchEngine {
      * @param Filter[] $filters
      */
     public function addFilters( array $filters ) {
-        $this->query_engine->addConstantScoreFilters( $filters );
+        foreach ( $filters as $filter ) {
+            $this->query_engine->addConstantScoreFilter($filter);
+        }
     }
 
     /**

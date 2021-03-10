@@ -13,6 +13,8 @@ use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
+use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
+use WSSearch\QueryEngine\Highlighter\Highlighter;
 use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\SMWQueryProcessor;
 
@@ -57,27 +59,14 @@ class QueryEngine {
      */
     public function __construct( string $index ) {
         $this->elasticsearch_index = $index;
+
         $this->elasticsearch_search = new Search();
 
-        $config = MediaWikiServices::getInstance()->getMainConfig();
-
-        $highlight = new Highlight();
-        $highlight->setTags( ["<b class='wssearch-search-term-highligh'>"], ["</b>"] );
-        $highlight->addField( "text_raw", [
-            "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
-            "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" ),
-            "boundary_scanner" => "sentence"
-        ] );
-        $highlight->addField( "attachment.content", [
-            "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
-            "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
-        ] );
+        $this->elasticsearch_search->setSize( MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" ) );
+        $this->elasticsearch_search->addHighlight( ( new DefaultHighlighter() )->toQuery() );
 
         $this->constant_score_filters = new BoolQuery();
         $this->function_score_filters = new BoolQuery();
-
-        $this->elasticsearch_search->setSize( $config->get( "WSSearchDefaultResultLimit" ) );
-        $this->elasticsearch_search->addHighlight( $highlight );
 
         $this->elasticsearch_search->addQuery( new ConstantScoreQuery( $this->constant_score_filters ) );
         $this->elasticsearch_search->addQuery( new FunctionScoreQuery( $this->function_score_filters ) );
@@ -135,36 +124,6 @@ class QueryEngine {
     }
 
     /**
-     * Adds filters to the constant-score fragment of the query.
-     *
-     * @param Filter[] $filters
-     * @param string $occur The occurrence type for the added filters (should be a BoolQuery constant)
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
-     */
-    public function addConstantScoreFilters( array $filters, string $occur = BoolQuery::MUST ) {
-        foreach ( $filters as $filter ) {
-            $this->addConstantScoreFilter( $filter, $occur );
-        }
-    }
-
-    /**
-     * Adds filters to the function-score fragment of the query.
-     *
-     * @param array $filters
-     * @param string $occur
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
-     */
-    public function addFunctionScoreFilters( array $filters, string $occur = BoolQuery::MUST ) {
-        foreach ( $filters as $filter ) {
-            $this->addFunctionScoreFilter( $filter, $occur );
-        }
-    }
-
-    /**
      * Adds a filter to the constant-score fragment of the query.
      *
      * @param Filter $filter
@@ -174,7 +133,7 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
      */
     public function addConstantScoreFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
-        $this->constant_score_filters->add( $filter->toQuery(), $occur );
+        $this->constant_score_filters->add($filter->toQuery(), $occur);
     }
 
     /**
@@ -188,6 +147,15 @@ class QueryEngine {
      */
     public function addFunctionScoreFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
         $this->function_score_filters->add( $filter->toQuery(), $occur );
+    }
+
+    /**
+     * Adds a highlighter to the query.
+     *
+     * @param Highlighter $highlighter
+     */
+    public function addHighlighter( Highlighter $highlighter ) {
+        $this->elasticsearch_search->addHighlight( $highlighter->toQuery() );
     }
 
     /**
