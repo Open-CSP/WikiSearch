@@ -6,7 +6,9 @@ use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
+use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
+use ONGR\ElasticsearchDSL\SearchEndpoint\SortEndpoint;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
@@ -28,11 +30,18 @@ class QueryEngine {
     private $elasticsearch_index;
 
     /**
-     * The main boolean query filter.
+     * The main constant score boolean query filter.
      *
      * @var BoolQuery
      */
-    private $filters;
+    private $constant_score_filters;
+
+    /**
+     * The main function score boolean query filter.
+     *
+     * @var BoolQuery
+     */
+    private $function_score_filters;
 
     /**
      * The base ElasticSearch query.
@@ -54,24 +63,24 @@ class QueryEngine {
 
         $highlight = new Highlight();
         $highlight->setTags( ["<b class='wssearch-search-term-highligh'>"], ["</b>"] );
-
         $highlight->addField( "text_raw", [
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" ),
             "boundary_scanner" => "sentence"
         ] );
-
         $highlight->addField( "attachment.content", [
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
         ] );
 
-        $this->filters = new BoolQuery();
-        $constant_score_query = new ConstantScoreQuery( $this->filters );
+        $this->constant_score_filters = new BoolQuery();
+        $this->function_score_filters = new BoolQuery();
 
         $this->elasticsearch_search->setSize( $config->get( "WSSearchDefaultResultLimit" ) );
         $this->elasticsearch_search->addHighlight( $highlight );
-        $this->elasticsearch_search->addQuery( $constant_score_query );
+
+        $this->elasticsearch_search->addQuery( new ConstantScoreQuery( $this->constant_score_filters ) );
+        $this->elasticsearch_search->addQuery( new FunctionScoreQuery( $this->function_score_filters ) );
     }
 
     /**
@@ -126,29 +135,59 @@ class QueryEngine {
     }
 
     /**
-     * Adds filters to apply to the query.
+     * Adds filters to the constant-score fragment of the query.
      *
      * @param Filter[] $filters
      * @param string $occur The occurrence type for the added filters (should be a BoolQuery constant)
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
      */
-    public function addFilters( array $filters, string $occur = BoolQuery::MUST ) {
+    public function addConstantScoreFilters( array $filters, string $occur = BoolQuery::MUST ) {
         foreach ( $filters as $filter ) {
-            $this->addFilter( $filter, $occur );
+            $this->addConstantScoreFilter( $filter, $occur );
         }
     }
 
     /**
-     * Adds a filter to apply to the query.
+     * Adds filters to the function-score fragment of the query.
+     *
+     * @param array $filters
+     * @param string $occur
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
+     */
+    public function addFunctionScoreFilters( array $filters, string $occur = BoolQuery::MUST ) {
+        foreach ( $filters as $filter ) {
+            $this->addFunctionScoreFilter( $filter, $occur );
+        }
+    }
+
+    /**
+     * Adds a filter to the constant-score fragment of the query.
      *
      * @param Filter $filter
      * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
      */
-    public function addFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
-        $this->filters->add( $filter->toQuery(), $occur );
+    public function addConstantScoreFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
+        $this->constant_score_filters->add( $filter->toQuery(), $occur );
+    }
+
+    /**
+     * Adds a filter to the function-score fragment of the query.
+     *
+     * @param Filter $filter
+     * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
+     */
+    public function addFunctionScoreFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
+        $this->function_score_filters->add( $filter->toQuery(), $occur );
     }
 
     /**
@@ -217,8 +256,7 @@ class QueryEngine {
         ];
 
         if ( isset( $this->base_query ) ) {
-            $query_combinator = new QueryCombinator( $query );
-            return $query_combinator->add( $this->base_query )->getQuery();
+            $query = ( new QueryCombinator( $query ) )->add( $this->base_query )->getQuery();
         }
 
         return $query;

@@ -97,7 +97,7 @@ class SearchEngine {
      * @param Filter[] $filters
      */
     public function addFilters( array $filters ) {
-        $this->query_engine->addFilters( $filters );
+        $this->query_engine->addConstantScoreFilters( $filters );
     }
 
     /**
@@ -117,7 +117,7 @@ class SearchEngine {
      */
     public function setSearchTerm( string $search_term ) {
         $search_term_filter = new SearchTermFilter( $search_term );
-        $this->query_engine->addFilter( $search_term_filter );
+        $this->query_engine->addFunctionScoreFilter( $search_term_filter );
     }
 
     /**
@@ -147,6 +147,16 @@ class SearchEngine {
             "total" => $results["hits"]["total"],
             "aggs"  => $results["aggregations"]
         ];
+    }
+
+    /**
+     * Returns the query used in this search.
+     *
+     * @return array
+     * @throws \MWException
+     */
+    public function getQuery(): array {
+        return $this->query_engine->toArray();
     }
 
     /**
