@@ -307,7 +307,7 @@ class SearchEngineConfig {
 
 		$facet_properties = array_unique( $this->facet_properties );
 		$result_properties = array_map( function(Property $property ): string {
-		    return $property->getPropertyName();
+		    return $property->getPropertyKey();
         }, $this->result_properties );
 		$result_properties = array_unique( $result_properties );
 

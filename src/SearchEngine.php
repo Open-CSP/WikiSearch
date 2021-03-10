@@ -25,6 +25,7 @@ use Elasticsearch\ClientBuilder;
 use Hooks;
 use MediaWiki\MediaWikiServices;
 use MWNamespace;
+use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;

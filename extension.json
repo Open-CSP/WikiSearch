@@ -47,7 +47,7 @@
 			"value": 10
 		},
 		"WSSearchHighlightFragmentSize": {
-			"value": 150
+			"value": 250
 		},
 		"WSSearchHighlightNumberOfFragments": {
 			"value": 1

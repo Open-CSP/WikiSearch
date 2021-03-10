@@ -82,6 +82,7 @@ class SearchTermFilter implements Filter {
      * @return string
      */
     private function prepareSearchTerm( string $search_term ): string {
+        $search_term = trim( $search_term );
         $term_length = strlen( $search_term );
 
         if ( $term_length === 0 ) {

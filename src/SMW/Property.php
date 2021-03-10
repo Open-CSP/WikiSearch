@@ -46,11 +46,16 @@ class Property {
 	private $type;
 
 	/**
-	 * @var string The name of the property as a string
+	 * @var string The key of the property as a string
 	 */
-	private $name;
+	private $key;
 
-	/**
+    /**
+     * @var string The human-readable name of the property as a string
+     */
+    private $name;
+
+    /**
 	 * PropertyInfo constructor.
 	 *
 	 * @param string $property_name The name of the property
@@ -62,11 +67,12 @@ class Property {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
-		$property_name = str_replace(" ", "_", $property_name);
-		$property_name = $this->translateSpecialPropertyNames( $property_name );
+        $this->name = $property_name;
 
-		$property = new DIProperty( $property_name );
-		$this->id = $store->getObjectIds()->getSMWPropertyID( $property );
+        $this->key = str_replace(" ", "_", $property_name);
+        $this->key = $this->translateSpecialProperties( $this->key );
+
+		$property = new DIProperty( $this->key );
 
 		// TODO: Make this work for any property value type
 		switch ( $property->findPropertyValueType() ) {
@@ -76,7 +82,7 @@ class Property {
             default: $this->type = "wpgField";
         }
 
-		$this->name = $property_name;
+        $this->id = $store->getObjectIds()->getSMWPropertyID( $property );
 	}
 
 	/**
@@ -98,13 +104,22 @@ class Property {
 	}
 
 	/**
-	 * Returns the name of this property.
+	 * Returns the key of this property.
 	 *
 	 * @return string
 	 */
-	public function getPropertyName(): string {
-		return $this->name;
+	public function getPropertyKey(): string {
+		return $this->key;
 	}
+
+    /**
+     * Returns the human-readable name of this property.
+     *
+     * @return string
+     */
+    public function getPropertyName(): string {
+        return $this->name;
+    }
 
     /**
      * Returns the field associated with this property.
@@ -121,7 +136,7 @@ class Property {
      * @param string $property_name
      * @return string
      */
-    private function translateSpecialPropertyNames( string $property_name ) {
+    private function translateSpecialProperties( string $property_name ) {
         // TODO: Add more
         switch ( $property_name ) {
             case "Modification_date": return "_MDAT";

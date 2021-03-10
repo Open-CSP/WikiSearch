@@ -54,10 +54,13 @@ class QueryEngine {
 
         $highlight = new Highlight();
         $highlight->setTags( ["<b class='wssearch-search-term-highligh'>"], ["</b>"] );
+
         $highlight->addField( "text_raw", [
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
-            "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
+            "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" ),
+            "boundary_scanner" => "sentence"
         ] );
+
         $highlight->addField( "attachment.content", [
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
