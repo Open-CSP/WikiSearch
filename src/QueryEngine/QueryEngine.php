@@ -53,7 +53,7 @@ class QueryEngine {
         $config = MediaWikiServices::getInstance()->getMainConfig();
 
         $highlight = new Highlight();
-        $highlight->setTags( ["<b>"], ["</b>"] );
+        $highlight->setTags( ["<b class='wssearch-search-term-highligh'>"], ["</b>"] );
         $highlight->addField( "text_raw", [
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
