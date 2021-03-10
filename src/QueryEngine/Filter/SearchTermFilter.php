@@ -13,7 +13,7 @@ use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-query-string-query.html
  */
-class SearchTermFilter extends Filter {
+class SearchTermFilter implements Filter {
     /**
      * @var string The search term to filter on
      */

@@ -15,7 +15,7 @@ use WSSearch\SMW\Property;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-term-query.html
  */
-class PropertyFilter extends Filter {
+class PropertyValueFilter implements Filter {
     /**
      * @var \WSSearch\SMW\Property The property to filter on
      */

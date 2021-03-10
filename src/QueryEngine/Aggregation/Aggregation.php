@@ -6,32 +6,14 @@ use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use WSSearch\QueryEngine\QueryConvertable;
 
-abstract class Aggregation implements QueryConvertable {
-    /**
-     * @var string
-     */
-    protected $aggregation_name;
-
-    /**
-     * Aggregation constructor.
-     *
-     * @param string $aggregation_name
-     */
-    public function __construct( string $aggregation_name ) {
-        $this->aggregation_name = $aggregation_name;
-    }
-
-    /**
-     * Sets the aggregation name. This name must be unique for each aggregation in a query.
-     *
-     * @param string $aggregation_name
-     */
-    public function setAggregationName( string $aggregation_name ) {
-        $this->aggregation_name = $aggregation_name;
-    }
-
+/**
+ * Interface Aggregation
+ *
+ * @package WSSearch\QueryEngine\Aggregation
+ */
+interface Aggregation extends QueryConvertable {
     /**
      * @inheritDoc
      */
-    public abstract function toQuery(): AbstractAggregation;
+    public function toQuery(): AbstractAggregation;
 }

@@ -10,7 +10,7 @@ use ONGR\ElasticsearchDSL\Search;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
-use WSSearch\QueryEngine\Filter\PropertyFilter;
+use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\SMWQueryProcessor;
 

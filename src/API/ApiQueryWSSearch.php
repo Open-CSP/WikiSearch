@@ -22,14 +22,15 @@
 namespace WSSearch\API;
 
 use ApiBase;
-use ApiQuery;
 use ApiQueryBase;
 use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
+use WSSearch\QueryEngine\Aggregation\Aggregation;
+use WSSearch\QueryEngine\Factory\AggregationFactory;
+use WSSearch\QueryEngine\Factory\FilterFactory;
 use WSSearch\QueryEngine\Filter\Filter;
-use WSSearch\QueryEngine\Filter\FilterFactory;
 use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;
 
@@ -40,158 +41,174 @@ use WSSearch\SearchEngineConfig;
  */
 class ApiQueryWSSearch extends ApiQueryBase {
     /**
-	 * @inheritDoc
-	 * @throws ApiUsageException
-	 * @throws MWException
-	 */
-	public function execute() {
-		$this->checkUserRights();
+     * @inheritDoc
+     * @throws ApiUsageException
+     * @throws MWException
+     */
+    public function execute() {
+        $this->checkUserRights();
 
-		$title = $this->getTitleFromRequest();
-		$engine_config = $this->getEngineConfigFromTitle( $title );
-		$engine = $this->getEngine( $engine_config );
+        $title = $this->getTitleFromRequest();
+        $engine_config = $this->getEngineConfigFromTitle( $title );
+        $engine = $this->getEngine( $engine_config );
 
-		try {
-			$result = $engine->doSearch();
-			$this->getResult()->addValue( null, 'result', $result );
-		} catch ( \Exception $e ) {
-			$this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
-		}
-	}
+        try {
+            $result = $engine->doSearch();
+            $this->getResult()->addValue( null, 'result', $result );
+        } catch ( \Exception $e ) {
+            $this->dieWithError( wfMessage( "wssearch-api-invalid-query", $e->getMessage() ) );
+        }
+    }
 
-	/**
-	 * @inheritDoc
-	 */
-	public function getAllowedParams() {
-		return [
-			'pageid' => [
-				ApiBase::PARAM_TYPE => 'integer',
+    /**
+     * @inheritDoc
+     */
+    public function getAllowedParams() {
+        return [
+            'pageid' => [
+                ApiBase::PARAM_TYPE => 'integer',
                 ApiBase::PARAM_REQUIRED => true
-			],
-			'filter' => [
-				ApiBase::PARAM_TYPE => 'string'
-			],
-			'dates' => [
-				ApiBase::PARAM_TYPE => 'string'
-			],
-			'term' => [
-				ApiBase::PARAM_TYPE => 'string'
-			],
-			'from' => [
-				ApiBase::PARAM_TYPE => 'integer'
-			],
-			'limit' => [
-				ApiBase::PARAM_TYPE => 'integer'
-			]
-		];
-	}
+            ],
+            'filter' => [
+                ApiBase::PARAM_TYPE => 'string'
+            ],
+            'aggregations' => [
+                ApiBase::PARAM_TYPE => 'string'
+            ],
+            'term' => [
+                ApiBase::PARAM_TYPE => 'string'
+            ],
+            'from' => [
+                ApiBase::PARAM_TYPE => 'integer'
+            ],
+            'limit' => [
+                ApiBase::PARAM_TYPE => 'integer'
+            ]
+        ];
+    }
 
-	/**
-	 * Checks applicable user rights.
-	 *
-	 * @throws ApiUsageException
-	 */
-	private function checkUserRights() {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
+    /**
+     * Checks applicable user rights.
+     *
+     * @throws ApiUsageException
+     */
+    private function checkUserRights() {
+        $config = MediaWikiServices::getInstance()->getMainConfig();
 
-		try {
-			$required_rights = $config->get( "WSSearchAPIRequiredRights" );
-			$this->checkUserRightsAny( $required_rights );
-		} catch ( \ConfigException $e ) {
-			// Something went wrong; to be safe we block the access
-			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
-		}
-	}
+        try {
+            $required_rights = $config->get( "WSSearchAPIRequiredRights" );
+            $this->checkUserRightsAny( $required_rights );
+        } catch ( \ConfigException $e ) {
+            // Something went wrong; to be safe we block the access
+            $this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
+        }
+    }
 
-	/**
-	 * Returns the Title object associated with this request if it is available.
-	 *
-	 * @throws ApiUsageException
-	 */
-	private function getTitleFromRequest(): Title {
-		$page_id = $this->getParameter( "pageid" );
-		$title = Title::newFromID( $page_id );
+    /**
+     * Returns the Title object associated with this request if it is available.
+     *
+     * @throws ApiUsageException
+     */
+    private function getTitleFromRequest(): Title {
+        $page_id = $this->getParameter( "pageid" );
+        $title = Title::newFromID( $page_id );
 
-		if ( !$title || !$title instanceof Title ) {
-			$this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
-		}
+        if ( !$title || !$title instanceof Title ) {
+            $this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
+        }
 
-		return $title;
-	}
+        return $title;
+    }
 
-	/**
-	 * Returns the EngineConfig associated with the given Title if possible.
-	 *
-	 * @param Title $title
-	 * @return SearchEngineConfig
-	 * @throws ApiUsageException
-	 */
-	private function getEngineConfigFromTitle( Title $title ): SearchEngineConfig {
-		$engine_config = SearchEngineConfig::newFromDatabase( $title );
+    /**
+     * Returns the EngineConfig associated with the given Title if possible.
+     *
+     * @param Title $title
+     * @return SearchEngineConfig
+     * @throws ApiUsageException
+     */
+    private function getEngineConfigFromTitle( Title $title ): SearchEngineConfig {
+        $engine_config = SearchEngineConfig::newFromDatabase( $title );
 
-		if ( $engine_config === null ) {
-			$this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
-		}
+        if ( $engine_config === null ) {
+            $this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
+        }
 
-		return $engine_config;
-	}
+        return $engine_config;
+    }
 
-	/**
-	 * Creates the SearchEngine from the current request.
-	 *
-	 * @param SearchEngineConfig $engine_config
-	 * @return SearchEngine
-	 * @throws ApiUsageException
-	 */
-	private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
-	    $engine = new SearchEngine( $engine_config );
+    /**
+     * Creates the SearchEngine from the current request.
+     *
+     * @param SearchEngineConfig $engine_config
+     * @return SearchEngine
+     * @throws ApiUsageException
+     */
+    private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
+        $engine = new SearchEngine( $engine_config );
 
-	    $term = $this->getParameter( "term" );
-		if ( $term !== null ) {
-			$engine->setSearchTerm( $term );
-		}
+        // Set the search term field
+        $term = $this->getParameter( "term" );
+        if ( $term !== null ) {
+            $engine->setSearchTerm( $term );
+        }
 
+        // Set the offset from which to include results
         $from = $this->getParameter( "from" );
-		if ( $from !== null ) {
-			$engine->setOffset( $from );
-		}
+        if ( $from !== null ) {
+            $engine->setOffset( $from );
+        }
 
+        // Set the limit for the number of results
         $limit = $this->getParameter( "limit" );
-		if ( $limit !== null ) {
-			$engine->setLimit( $limit );
-		}
+        if ( $limit !== null ) {
+            $engine->setLimit( $limit );
+        }
 
+        // Set the applied filters
         $filter = $this->getParameter( "filter" );
-		if ( $filter !== null ) {
-			$filters = json_decode( $filter, true );
+        if ( $filter !== null ) {
+            $filters = json_decode( $filter, true );
 
-			if ( !is_array( $filters ) ) {
+            if ( !is_array( $filters ) ) {
                 $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
             }
 
-			$filters = array_map( [ FilterFactory::class, "fromArray" ], $filters );
-			$filters = array_filter( $filters, function( $filter ): bool {
-			    return ($filter instanceof Filter);
-            } );
+            $filters = array_map( [ FilterFactory::class, "fromArray" ], $filters );
 
-			$engine->addFilters( $filters );
-		}
+            foreach ( $filters as $filter ) {
+                $is_filter = $filter instanceof Filter;
 
-		/*
+                if ( $is_filter === false ) {
+                    $this->dieWithError( wfMessage( "wssearch-invalid-filter" ) );
+                }
+            }
 
-		TODO: What do we do with this, want what does it mean?
+            $engine->addFilters( $filters );
+        }
 
-        $dates = $this->getParameter( "dates" );
-		if ( $dates !== null ) {
-			$data = json_decode( $dates, true );
+        // Set the applied aggregations
+        $aggregations = $this->getParameter( "aggregations" );
+        if ( $aggregations !== null ) {
+            $aggregations = json_decode( $filter, true );
 
-			if ( is_array( $data ) ) {
-				$engine->setModificationDateRangeAggregationRanges( $data );
-			} else {
-				$this->dieWithError( wfMessage( "wssearch-api-invalid-json", "dates", json_last_error_msg() ) );
-			}
-		}*/
+            if ( !is_array( $aggregations ) ) {
+                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() ) );
+            }
 
-		return $engine;
-	}
+            $aggregations = array_map( [ AggregationFactory::class, "fromArray" ], $aggregations );
+
+            foreach ( $aggregations as $aggregation ) {
+                $is_aggregation = $aggregation instanceof Aggregation;
+
+                if ( !$is_aggregation ) {
+                    $this->dieWithError( wfMessage( "wssearch-invalid-aggregation" ) );
+                }
+            }
+
+            $engine->addAggregations( $aggregations );
+        }
+
+        return $engine;
+    }
 }

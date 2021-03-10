@@ -7,10 +7,10 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WSSearch\QueryEngine\QueryConvertable;
 
 /**
- * Class Filter
+ * Interface Filter
  *
  * @package WSSearch\QueryEngine\Filter
  */
-abstract class Filter implements QueryConvertable {
-    abstract function toQuery(): BoolQuery;
+interface Filter extends QueryConvertable {
+    function toQuery(): BoolQuery;
 }

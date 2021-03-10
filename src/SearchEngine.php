@@ -24,13 +24,9 @@ namespace WSSearch;
 use Elasticsearch\ClientBuilder;
 use Hooks;
 use MediaWiki\MediaWikiServices;
-use MWException;
 use MWNamespace;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\ModificationDatePropertyDateRangeAggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
-use WSSearch\QueryEngine\Filter\PropertyFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\QueryEngine;
 
