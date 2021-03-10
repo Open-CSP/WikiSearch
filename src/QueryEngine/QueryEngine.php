@@ -58,6 +58,10 @@ class QueryEngine {
             "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
         ] );
+        $highlight->addField( "attachment.content", [
+            "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
+            "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
+        ] );
 
         $this->filters = new BoolQuery();
         $constant_score_query = new ConstantScoreQuery( $this->filters );
