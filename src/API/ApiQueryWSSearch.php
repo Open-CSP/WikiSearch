@@ -190,7 +190,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
         // Set the applied aggregations
         $aggregations = $this->getParameter( "aggregations" );
         if ( $aggregations !== null ) {
-            $aggregations = json_decode( $filter, true );
+            $aggregations = json_decode( $aggregations, true );
 
             if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
                 $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() ) );
