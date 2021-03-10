@@ -109,14 +109,14 @@ The API has the following parameters:
 
 * `pageid`: The page ID to use for retrieving the appropriate `searchEngineConfig`
 * `filter`: The ElasticSearch filters to apply
-* `dates`: The aggregate date ranges to allow
+* `aggregations`: The aggregations to add to the query
 * `term`: The term to search for
 * `from`: The result offset
 * `limit`: The maximum number of results to return
 
 An example API call looks like this:
 
-`https://pidsdev02.wikibase.nl/api.php?action=query&format=json&meta=WSSearch&pageid=1&filter=[{%22value%22:%222021%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459209,%22lte%22:2459574}}},{%22value%22:%22Last+month%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459205,%22lte%22:2459236}}},{%22value%22:%223500%22,%22key%22:%22Namespace%22},{%22value%22:%22Admin%22,%22key%22:%22User%22}]&term=e&from=0&dates=[{%22key%22:%22Last+Week%22,%22from%22:2459229,%22to%22:2459236},{%22key%22:%22Last+month%22,%22from%22:2459205,%22to%22:2459236},{%22key%22:%22Last+Quarter%22,%22from%22:2459144,%22to%22:2459236},{%22key%22:%222021%22,%22from%22:2459209,%22to%22:2459574},{%22key%22:%222020%22,%22from%22:2458844,%22to%22:2459209},{%22key%22:%222019%22,%22from%22:2458479,%22to%22:2458844},{%22key%22:%222018%22,%22from%22:2458114,%22to%22:2458479},{%22key%22:%222017%22,%22from%22:2457749,%22to%22:2458114},{%22key%22:%222016%22,%22from%22:2457384,%22to%22:2457749},{%22key%22:%222015%22,%22from%22:2457019,%22to%22:2457384},{%22key%22:%222014%22,%22from%22:2456654,%22to%22:2457019},{%22key%22:%222013%22,%22from%22:2456289,%22to%22:2456654},{%22key%22:%222012%22,%22from%22:2455924,%22to%22:2456289},{%22key%22:%222011%22,%22from%22:2455559,%22to%22:2455924},{%22key%22:%222010%22,%22from%22:2455194,%22to%22:2455559},{%22key%22:%222009%22,%22from%22:2454829,%22to%22:2455194},{%22key%22:%222008%22,%22from%22:2454464,%22to%22:2454829},{%22key%22:%222007%22,%22from%22:2454099,%22to%22:2454464},{%22key%22:%222006%22,%22from%22:2453734,%22to%22:2454099},{%22key%22:%222005%22,%22from%22:2453369,%22to%22:2453734},{%22key%22:%222004%22,%22from%22:2453004,%22to%22:2453369},{%22key%22:%222003%22,%22from%22:2452639,%22to%22:2453004},{%22key%22:%222002%22,%22from%22:2452274,%22to%22:2452639},{%22key%22:%222001%22,%22from%22:2451909,%22to%22:2452274}]`
+`https://pidsdev02.wikibase.nl/api.php?action=query&format=json&meta=WSSearch&pageid=1&filter=[{%22value%22:%222021%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459209,%22lte%22:2459574}}},{%22value%22:%22Last+month%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459205,%22lte%22:2459236}}},{%22value%22:%223500%22,%22key%22:%22Namespace%22},{%22value%22:%22Admin%22,%22key%22:%22User%22}]&term=e&from=0`
 
 This resulted in the following:
 
@@ -131,156 +131,41 @@ This resulted in the following:
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0,
         "buckets": []
-      },
-      "Date": {
-        "buckets": [
-          {
-            "key": "2001",
-            "from": 2451909,
-            "to": 2452274,
-            "doc_count": 0
-          },
-          {
-            "key": "2002",
-            "from": 2452274,
-            "to": 2452639,
-            "doc_count": 0
-          },
-          {
-            "key": "2003",
-            "from": 2452639,
-            "to": 2453004,
-            "doc_count": 0
-          },
-          {
-            "key": "2004",
-            "from": 2453004,
-            "to": 2453369,
-            "doc_count": 0
-          },
-          {
-            "key": "2005",
-            "from": 2453369,
-            "to": 2453734,
-            "doc_count": 0
-          },
-          {
-            "key": "2006",
-            "from": 2453734,
-            "to": 2454099,
-            "doc_count": 0
-          },
-          {
-            "key": "2007",
-            "from": 2454099,
-            "to": 2454464,
-            "doc_count": 0
-          },
-          {
-            "key": "2008",
-            "from": 2454464,
-            "to": 2454829,
-            "doc_count": 0
-          },
-          {
-            "key": "2009",
-            "from": 2454829,
-            "to": 2455194,
-            "doc_count": 0
-          },
-          {
-            "key": "2010",
-            "from": 2455194,
-            "to": 2455559,
-            "doc_count": 0
-          },
-          {
-            "key": "2011",
-            "from": 2455559,
-            "to": 2455924,
-            "doc_count": 0
-          },
-          {
-            "key": "2012",
-            "from": 2455924,
-            "to": 2456289,
-            "doc_count": 0
-          },
-          {
-            "key": "2013",
-            "from": 2456289,
-            "to": 2456654,
-            "doc_count": 0
-          },
-          {
-            "key": "2014",
-            "from": 2456654,
-            "to": 2457019,
-            "doc_count": 0
-          },
-          {
-            "key": "2015",
-            "from": 2457019,
-            "to": 2457384,
-            "doc_count": 0
-          },
-          {
-            "key": "2016",
-            "from": 2457384,
-            "to": 2457749,
-            "doc_count": 0
-          },
-          {
-            "key": "2017",
-            "from": 2457749,
-            "to": 2458114,
-            "doc_count": 0
-          },
-          {
-            "key": "2018",
-            "from": 2458114,
-            "to": 2458479,
-            "doc_count": 0
-          },
-          {
-            "key": "2019",
-            "from": 2458479,
-            "to": 2458844,
-            "doc_count": 0
-          },
-          {
-            "key": "2020",
-            "from": 2458844,
-            "to": 2459209,
-            "doc_count": 0
-          },
-          {
-            "key": "Last Quarter",
-            "from": 2459144,
-            "to": 2459236,
-            "doc_count": 0
-          },
-          {
-            "key": "Last month",
-            "from": 2459205,
-            "to": 2459236,
-            "doc_count": 0
-          },
-          {
-            "key": "2021",
-            "from": 2459209,
-            "to": 2459574,
-            "doc_count": 0
-          },
-          {
-            "key": "Last Week",
-            "from": 2459229,
-            "to": 2459236,
-            "doc_count": 0
-          }
-        ]
       }
     }
   }
 }
 ```
+
+### Aggregations syntax
+
+The `aggregations` parameter takes a list of objects. These objects have the following form:
+
+#### PropertyRangeAggregation
+
+```
+{
+    "type": "range",
+    "ranges": [
+        { "to": 50 },
+        { "from": 50, "to": 100 },
+        { "from": 100 }
+    ],
+    "property": "Price",
+    "name": "Prices" # Optional, property name when empty
+}
+```
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
+
+#### PropertyAggregation
+
+```
+{
+    "type": "property",
+    "property": "Genre",
+    "name": "Genres" # Optional, property name when empty
+}
+```
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
