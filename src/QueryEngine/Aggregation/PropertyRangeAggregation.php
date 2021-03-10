@@ -95,7 +95,8 @@ class PropertyRangeAggregation implements Aggregation {
         return new RangeAggregation(
             $this->aggregation_name,
             "{$this->property->getPropertyField()}$suffix",
-            $this->ranges
+            $this->ranges,
+            true
         );
     }
 }
