@@ -69,13 +69,13 @@ class ApiQueryWSSearch extends ApiQueryBase {
                 ApiBase::PARAM_TYPE => 'integer',
                 ApiBase::PARAM_REQUIRED => true
             ],
+            'term' => [
+                ApiBase::PARAM_TYPE => 'string'
+            ],
             'filter' => [
                 ApiBase::PARAM_TYPE => 'string'
             ],
             'aggregations' => [
-                ApiBase::PARAM_TYPE => 'string'
-            ],
-            'term' => [
                 ApiBase::PARAM_TYPE => 'string'
             ],
             'from' => [
@@ -170,7 +170,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
         if ( $filter !== null ) {
             $filters = json_decode( $filter, true );
 
-            if ( !is_array( $filters ) ) {
+            if ( !is_array( $filters ) || json_last_error() !== JSON_ERROR_NONE ) {
                 $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
             }
 
@@ -192,7 +192,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
         if ( $aggregations !== null ) {
             $aggregations = json_decode( $filter, true );
 
-            if ( !is_array( $aggregations ) ) {
+            if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
                 $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() ) );
             }
 
