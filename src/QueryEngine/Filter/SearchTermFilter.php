@@ -89,10 +89,6 @@ class SearchTermFilter implements Filter {
             return "*";
         }
 
-        if ( $search_term[0] === '"' && $search_term[$term_length - 1] === '"' ) {
-            return $search_term;
-        }
-
-        return "*$search_term*";
+        return $search_term;
     }
 }
