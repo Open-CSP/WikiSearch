@@ -156,6 +156,10 @@ The `aggregations` parameter takes a list of objects. These objects have the fol
 }
 ```
 
+> **Note:** The `from` parameter is inclusive, and the `to` parameter is
+> exclusive. This means that for an aggregation from (and including) `1` up to and
+> including `5`, the `from` and `to` parameters should be `1` and `6` (!) respectively.
+
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
 
 #### PropertyAggregation
