@@ -21,7 +21,7 @@ class FilterFactory {
      * @return Filter|null
      */
     public static function fromArray( array $array ) {
-        if ( !isset( $array["key"] ) || !isset( $array["value"] ) ) {
+        if ( !isset( $array["key"] ) ) {
             return null;
         }
 
@@ -32,12 +32,14 @@ class FilterFactory {
                 $array["key"],
                 $array["range"]
             );
-        } else {
+        } else if ( isset( $array["value"] ) ) {
             // This is a "regular" property
             return new PropertyValueFilter(
                 $array["key"],
                 $array["value"]
             );
+        } else {
+            return null;
         }
     }
 }

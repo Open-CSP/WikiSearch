@@ -137,9 +137,50 @@ This resulted in the following:
 }
 ```
 
+### Filters syntax
+
+The `filters` parameter takes a list of objects. These objects have the following form:
+
+#### PropertyRangeFilter
+
+```
+{
+    "key": "Age",
+    "range": {
+        "gte": 0,
+        "lt": 100
+    }
+}
+```
+
+The above filter only includes pages where property `Age` has a value that is greater than
+or equal to `0`, but strictly less than `100`.
+
+The `range` parameter takes an object that allows the following properties:
+
+- `gte`: Greater-than or equal to
+- `gt`: Strictly greater-than
+- `lte`: Less-than or equal to
+- `lt`: Strictly less-than
+
+#### PropertyValueFilter
+
+```
+{
+    "key": "Class",
+    "value": "Manual"
+}
+```
+
+The above filter only includes pages where the property `Class` has the value `Manual`.
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
+
 ### Aggregations syntax
 
 The `aggregations` parameter takes a list of objects. These objects have the following form:
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-term-query.html
 
 #### PropertyRangeAggregation
 
