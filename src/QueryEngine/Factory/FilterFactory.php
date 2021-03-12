@@ -28,15 +28,9 @@ class FilterFactory {
         // TODO: Make this more general
 
         if ( isset( $array["range"] ) ) {
-            $range = $array["range"];
-
-            $options = [];
-            $options[RangeQuery::LTE] = isset( $range["lte"] ) ? $range["lte"] : PHP_INT_MAX;
-            $options[RangeQuery::GTE] = isset( $range["gte"] ) ? $range["gte"] : PHP_INT_MIN;
-
             return new PropertyRangeFilter(
                 $array["key"],
-                $options
+                $array["range"]
             );
         } else {
             // This is a "regular" property

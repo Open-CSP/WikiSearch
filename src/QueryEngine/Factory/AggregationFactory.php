@@ -28,10 +28,8 @@ class AggregationFactory {
         switch ( $array["type"] ) {
             case "range":
                 return self::propertyRangeAggregationFromArray( $array );
-                break;
             case "property":
                 return self::propertyAggregationFromArray( $array );
-                break;
             default:
                 return null;
         }
