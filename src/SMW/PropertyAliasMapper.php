@@ -1,5 +1,6 @@
 <?php
 
+
 namespace WSSearch\SMW;
 
 use SMW\PropertyRegistry;
@@ -29,6 +30,12 @@ class PropertyAliasMapper {
      * @return string
      */
     public static function findPropertyKey( string $property_label ): string {
-        return ( PropertyRegistry::getInstance() )->findPropertyIdByLabel( $property_label );
+        $property_key = ( PropertyRegistry::getInstance() )->findPropertyIdByLabel( $property_label );
+
+        if ( $property_key === false ) {
+            return $property_label;
+        }
+
+        return $property_key;
     }
 }
