@@ -6,6 +6,7 @@ use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class FilterFactory
@@ -25,14 +26,26 @@ class FilterFactory {
             return null;
         }
 
+        if ( !is_string( $array["key"] ) && !($array["key"] instanceof PropertyFieldMapper) ) {
+            return null;
+        }
+
         // TODO: Make this more general
 
         if ( isset( $array["range"] ) ) {
+            if ( !is_array( $array["range"] ) ) {
+                return null;
+            }
+
             return new PropertyRangeFilter(
                 $array["key"],
                 $array["range"]
             );
         } else if ( isset( $array["value"] ) ) {
+            if ( !is_string( $array["value"] ) ) {
+                return null;
+            }
+
             // This is a "regular" property
             return new PropertyValueFilter(
                 $array["key"],

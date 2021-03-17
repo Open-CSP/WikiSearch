@@ -40,7 +40,7 @@ class PropertyRangeFilter implements Filter {
      *  to filter out everything that is not greater or equal to ten and less than twenty.
      * @param float $boost
      */
-    public function __construct( $property, array $options, float $boost = 1.0 ) {
+    public function __construct( $property, array $options, float $boost = null ) {
         if ( is_string( $property ) ) {
             $property = new PropertyFieldMapper( $property );
         }
@@ -51,7 +51,12 @@ class PropertyRangeFilter implements Filter {
 
         $this->property = $property;
         $this->options = $options;
-        $this->options["boost"] = $boost;
+
+        if ( $boost !== null ) {
+            $this->options["boost"] = $boost;
+        } else if ( !isset( $this->options["boost"] ) ) {
+            $this->options["boost"] = 1.0;
+        }
     }
 
     /**
