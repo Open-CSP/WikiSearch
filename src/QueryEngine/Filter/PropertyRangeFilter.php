@@ -6,7 +6,7 @@ namespace WSSearch\QueryEngine\Filter;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
-use WSSearch\SMW\Property;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DateRangeFilter
@@ -18,7 +18,7 @@ use WSSearch\SMW\Property;
  */
 class PropertyRangeFilter implements Filter {
     /**
-     * @var \WSSearch\SMW\Property The property to apply the filter to
+     * @var \WSSearch\SMW\PropertyFieldMapper The property to apply the filter to
      */
     private $property;
 
@@ -30,7 +30,7 @@ class PropertyRangeFilter implements Filter {
     /**
      * DateRangeFilter constructor.
      *
-     * @param \WSSearch\SMW\Property|string $property The property to apply the filter to
+     * @param \WSSearch\SMW\PropertyFieldMapper|string $property The property to apply the filter to
      * @param array $options The options for this filter, for instance:
      *  [
      *      RangeQuery::GTE => 10,
@@ -42,10 +42,10 @@ class PropertyRangeFilter implements Filter {
      */
     public function __construct( $property, array $options, float $boost = 1.0 ) {
         if ( is_string( $property ) ) {
-            $property = new Property( $property );
+            $property = new PropertyFieldMapper( $property );
         }
 
-        if ( !($property instanceof Property)) {
+        if ( !($property instanceof PropertyFieldMapper)) {
             throw new \InvalidArgumentException();
         }
 

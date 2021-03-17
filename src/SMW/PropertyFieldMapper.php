@@ -23,18 +23,18 @@ namespace WSSearch\SMW;
 
 use BadMethodCallException;
 use SMW\ApplicationFactory;
+use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
 
 /**
- * Class PropertyInfo
+ * Class PropertyFieldMapper
  *
- * Queries the SemanticMediaWiki property store and stores information about the given property
- * name.
+ * @see https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/1f4bbda9bb8f7826ffabf00159cfdc0760043ca3/src/Elastic/docs/technical.md#field-mapping
  *
  * @package WSSearch
  */
-class Property {
+class PropertyFieldMapper {
 	/**
 	 * @var int The unique ID of the property
 	 */
@@ -56,6 +56,11 @@ class Property {
     private $name;
 
     /**
+     * @var string The Elastic field for this property
+     */
+    private $field;
+
+    /**
 	 * PropertyInfo constructor.
 	 *
 	 * @param string $property_name The name of the property
@@ -67,22 +72,15 @@ class Property {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
-        $this->name = $property_name;
-
-        $this->key = str_replace(" ", "_", $property_name);
-        $this->key = $this->translateSpecialProperties( $this->key );
+		$this->key = str_replace( " ", "_", $this->translateSpecialProperties( $this->key ) );
 
 		$property = new DIProperty( $this->key );
 
-		// TODO: Make this work for any property value type
-		switch ( $property->findPropertyValueType() ) {
-            case "_txt": $this->type = "txtField"; break;
-            case "_dat": $this->type = "datField"; break;
-            case "_num": $this->type = "numField"; break;
-            default: $this->type = "wpgField";
-        }
-
+        $this->name = $property_name;
         $this->id = $store->getObjectIds()->getSMWPropertyID( $property );
+        $this->type = $this->translatePropertyValueType( $property->findPropertyValueType() );
+        $this->field = "P:" . $this->id . "." . $this->type;
+
 	}
 
 	/**
@@ -127,7 +125,7 @@ class Property {
      * @return string
      */
 	public function getPropertyField(): string {
-	    return "P:" . $this->getPropertyID() . "." . $this->getPropertyType();
+	    return $this->field;
     }
 
     /**
@@ -136,12 +134,20 @@ class Property {
      * @param string $property_name
      * @return string
      */
-    private function translateSpecialProperties( string $property_name ) {
-        // TODO: Add more
-        switch ( $property_name ) {
-            case "Modification_date": return "_MDAT";
-            case "Average_rating": return "__rp_average";
-            default: return $property_name;
-        }
+    private function translateSpecialProperties( string $property_name ): string {
+        return PropertyAliasMapper::findPropertyKey( $property_name );
+    }
+
+    /**
+     * Translates the given property value type to the corresponding Elastic property value type (including the
+     * Field affix).
+     *
+     * @param string $type
+     * @return string
+     *
+     * @see https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/1f4bbda9bb8f7826ffabf00159cfdc0760043ca3/src/Elastic/docs/technical.md#field-mapping
+     */
+    private function translatePropertyValueType( string $type ): string {
+        return trim( $type, "_" ) . "Field";
     }
 }

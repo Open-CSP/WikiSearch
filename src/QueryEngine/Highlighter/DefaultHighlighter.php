@@ -15,6 +15,26 @@ use ONGR\ElasticsearchDSL\Highlight\Highlight;
  */
 class DefaultHighlighter implements Highlighter {
     /**
+     * @var array The fields to apply the highlight to
+     */
+    private $fields = [
+        "text_raw",
+        "text_copy",
+        "attachment.content"
+    ];
+
+    /**
+     * DefaultHighlighter constructor.
+     *
+     * @param array|null $fields The fields to apply the highlight to, or null to highlight the default fields
+     */
+    public function __construct( array $fields = null ) {
+        if ( $fields !== null ) {
+            $this->fields = $fields;
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function toQuery(): Highlight {
@@ -28,9 +48,9 @@ class DefaultHighlighter implements Highlighter {
             "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
         ];
 
-        $highlight->addField( "text_raw", $field_settings );
-        $highlight->addField( "text_copy", $field_settings );
-        $highlight->addField( "attachment.content", $field_settings );
+        foreach ( $this->fields as $field ) {
+            $highlight->addField( $field, $field_settings );
+        }
 
         return $highlight;
     }

@@ -5,7 +5,7 @@ namespace WSSearch\QueryEngine\Filter;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
-use WSSearch\SMW\Property;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyFilter
@@ -17,7 +17,7 @@ use WSSearch\SMW\Property;
  */
 class PropertyValueFilter implements Filter {
     /**
-     * @var \WSSearch\SMW\Property The property to filter on
+     * @var \WSSearch\SMW\PropertyFieldMapper The property to filter on
      */
     private $property;
 
@@ -29,15 +29,15 @@ class PropertyValueFilter implements Filter {
     /**
      * PropertyFilter constructor.
      *
-     * @param Property|string $property The name or object of the property to filter on
+     * @param PropertyFieldMapper|string $property The name or object of the property to filter on
      * @param string $property_value The value the property to filter on
      */
     public function __construct( $property, string $property_value ) {
         if ( is_string( $property ) ) {
-            $property = new Property( $property );
+            $property = new PropertyFieldMapper( $property );
         }
 
-        if ( !($property instanceof Property)) {
+        if ( !($property instanceof PropertyFieldMapper)) {
             throw new \InvalidArgumentException();
         }
 
@@ -48,9 +48,9 @@ class PropertyValueFilter implements Filter {
     /**
      * Sets the property this filter will filter on.
      *
-     * @param \WSSearch\SMW\Property $property_name
+     * @param \WSSearch\SMW\PropertyFieldMapper $property_name
      */
-    public function setPropertyName( Property $property_name ) {
+    public function setPropertyName(PropertyFieldMapper $property_name ) {
         $this->property_name = $property_name;
     }
 

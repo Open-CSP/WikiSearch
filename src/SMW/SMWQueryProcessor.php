@@ -58,7 +58,6 @@ class SMWQueryProcessor {
         $query_info = $query_engine->getQueryInfo();
 
         if ( !isset( $query_info["elastic"] ) ) {
-            // The base query is invalid!
             throw new \MWException( "Invalid query" );
         }
 

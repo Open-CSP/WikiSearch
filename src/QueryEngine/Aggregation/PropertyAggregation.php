@@ -4,7 +4,7 @@ namespace WSSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
-use WSSearch\SMW\Property;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyAggregation
@@ -21,22 +21,22 @@ class PropertyAggregation implements Aggregation {
     private $aggregation_name;
 
     /**
-     * @var Property
+     * @var PropertyFieldMapper
      */
     private $property;
 
     /**
      * PropertyAggregation constructor.
      *
-     * @param Property|string $property The property object or name for the aggregation
+     * @param PropertyFieldMapper|string $property The property object or name for the aggregation
      * @param string|null $aggregation_name
      */
     public function __construct( $property, string $aggregation_name = null ) {
         if ( is_string( $property ) ) {
-            $property = new Property( $property );
+            $property = new PropertyFieldMapper( $property );
         }
 
-        if ( !($property instanceof Property)) {
+        if ( !($property instanceof PropertyFieldMapper)) {
             throw new \InvalidArgumentException();
         }
 
@@ -51,9 +51,9 @@ class PropertyAggregation implements Aggregation {
     /**
      * Sets the property object to use for the aggregation.
      *
-     * @param Property $property
+     * @param PropertyFieldMapper $property
      */
-    public function setProperty( Property $property ) {
+    public function setProperty(PropertyFieldMapper $property ) {
         $this->property = $property;
     }
 

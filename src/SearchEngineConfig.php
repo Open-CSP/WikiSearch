@@ -23,7 +23,7 @@ namespace WSSearch;
 
 use Database;
 use Title;
-use WSSearch\SMW\Property;
+use WSSearch\SMW\PropertyFieldMapper;
 use WSSearch\SMW\SMWQueryProcessor;
 
 /**
@@ -183,8 +183,8 @@ class SearchEngineConfig {
 		$this->facet_properties = $facet_properties;
 		$this->search_parameters = $search_parameters;
 
-		$this->result_properties = array_map( function( string $property_name ): Property {
-            return new Property( $property_name );
+		$this->result_properties = array_map( function( string $property_name ): PropertyFieldMapper {
+            return new PropertyFieldMapper( $property_name );
         }, $result_properties );
 
 		foreach ( $facet_properties as $property ) {
@@ -195,7 +195,7 @@ class SearchEngineConfig {
                 $this->translations[$property_name] = $translation_pair[1];
             }
 
-            $facet_property = new Property( $property_name );
+            $facet_property = new PropertyFieldMapper( $property_name );
             $this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
         }
 
@@ -270,7 +270,7 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
      * are the properties prefixed with a "?".
 	 *
-	 * @return \WSSearch\SMW\Property[]
+	 * @return \WSSearch\SMW\PropertyFieldMapper[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;
@@ -306,7 +306,7 @@ class SearchEngineConfig {
 		$page_id = $this->title->getArticleID();
 
 		$facet_properties = array_unique( $this->facet_properties );
-		$result_properties = array_map( function(Property $property ): string {
+		$result_properties = array_map( function(PropertyFieldMapper $property ): string {
 		    return $property->getPropertyKey();
         }, $this->result_properties );
 		$result_properties = array_unique( $result_properties );
