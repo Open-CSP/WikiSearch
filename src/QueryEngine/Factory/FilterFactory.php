@@ -21,29 +21,25 @@ class FilterFactory {
      * @return Filter|null
      */
     public static function fromArray( array $array ) {
-        if ( !isset( $array["key"] ) || !isset( $array["value"] ) ) {
+        if ( !isset( $array["key"] ) ) {
             return null;
         }
 
         // TODO: Make this more general
 
         if ( isset( $array["range"] ) ) {
-            $range = $array["range"];
-
-            $options = [];
-            $options[RangeQuery::LTE] = isset( $range["lte"] ) ? $range["lte"] : PHP_INT_MAX;
-            $options[RangeQuery::GTE] = isset( $range["gte"] ) ? $range["gte"] : PHP_INT_MIN;
-
             return new PropertyRangeFilter(
                 $array["key"],
-                $options
+                $array["range"]
             );
-        } else {
+        } else if ( isset( $array["value"] ) ) {
             // This is a "regular" property
             return new PropertyValueFilter(
                 $array["key"],
                 $array["value"]
             );
+        } else {
+            return null;
         }
     }
 }
