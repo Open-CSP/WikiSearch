@@ -63,18 +63,20 @@ class PropertyFieldMapper {
     /**
 	 * PropertyInfo constructor.
 	 *
-	 * @param string $property_name The name of the property
+	 * @param string|DIProperty $property_name The property
 	 */
-	public function __construct( string $property_name ) {
-		$store = ApplicationFactory::getInstance()->getStore();
+	public function __construct( $property_name ) {
+	    if ( !($property_name instanceof DIProperty) ) {
+            $store = ApplicationFactory::getInstance()->getStore();
 
-		if ( !$store instanceof ElasticStore ) {
-			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
-		}
+            if ( !$store instanceof ElasticStore ) {
+                throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
+            }
 
-		$this->key = str_replace( " ", "_", $this->translateSpecialProperties( $this->key ) );
+            $this->key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
 
-		$property = new DIProperty( $this->key );
+            $property = new DIProperty( $this->key );
+        }
 
         $this->name = $property_name;
         $this->id = $store->getObjectIds()->getSMWPropertyID( $property );
