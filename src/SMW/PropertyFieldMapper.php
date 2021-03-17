@@ -82,7 +82,6 @@ class PropertyFieldMapper {
         $this->id = $store->getObjectIds()->getSMWPropertyID( $property );
         $this->type = $this->translatePropertyValueType( $property->findPropertyValueType() );
         $this->field = "P:" . $this->id . "." . $this->type;
-
 	}
 
 	/**

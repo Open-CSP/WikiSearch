@@ -183,6 +183,10 @@ class SearchEngineConfig {
 		$this->facet_properties = $facet_properties;
 		$this->search_parameters = $search_parameters;
 
+		$result_properties = array_filter( $result_properties, function ( string $property_name ) {
+		    return !empty( $property_name );
+        } );
+
 		$this->result_properties = array_map( function( string $property_name ): PropertyFieldMapper {
             return new PropertyFieldMapper( $property_name );
         }, $result_properties );
