@@ -26,6 +26,7 @@ use Hooks;
 use MediaWiki\MediaWikiServices;
 use MWNamespace;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
+use Parser;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
@@ -298,8 +299,14 @@ class SearchEngine {
         // Configure the base query
         if ( $config->getSearchParameter( "base query" ) !== false ) {
             $parser = MediaWikiServices::getInstance()->getParser();
-            $expanded_query = $parser->recursiveTagParse( $config->getSearchParameter( "base query" ) );
+            $user = \RequestContext::getMain()->getUser();
 
+            $parser->setTitle( $config->getTitle() );
+            $parser->mOptions = \ParserOptions::newFromUser( $user );
+            $parser->setOutputType( Parser::OT_HTML );
+            $parser->clearState();
+
+            $expanded_query = $parser->recursiveTagParse( $config->getSearchParameter( "base query" ) );
             $this->query_engine->setBaseQuery( $expanded_query );
         }
 
