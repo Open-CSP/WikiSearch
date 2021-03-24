@@ -298,16 +298,7 @@ class SearchEngine {
 
         // Configure the base query
         if ( $config->getSearchParameter( "base query" ) !== false ) {
-            $parser = MediaWikiServices::getInstance()->getParser();
-            $user = \RequestContext::getMain()->getUser();
-
-            $parser->setTitle( $config->getTitle() );
-            $parser->mOptions = \ParserOptions::newFromUser( $user );
-            $parser->setOutputType( Parser::OT_HTML );
-            $parser->clearState();
-
-            $expanded_query = $parser->recursiveTagParse( $config->getSearchParameter( "base query" ) );
-            $query_engine->setBaseQuery( $expanded_query );
+            $query_engine->setBaseQuery( $config->getSearchParameter( "base query" ) );
         }
 
         // Configure the highlighter
