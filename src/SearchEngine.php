@@ -293,8 +293,8 @@ class SearchEngine {
         if ( $config->getSearchParameter( "search term properties" ) !== false ) {
             $fields = explode( ",", $config->getSearchParameter( "search term properties" ) );
             $fields = array_map( "trim", $fields );
-            $fields = array_map( function( $property ): PropertyFieldMapper {
-                return new PropertyFieldMapper( $property );
+            $fields = array_map( function( $property ): string {
+                return ( new PropertyFieldMapper( $property ) )->getPropertyField();
             }, $fields );
 
             $this->search_term_fields = $fields;
