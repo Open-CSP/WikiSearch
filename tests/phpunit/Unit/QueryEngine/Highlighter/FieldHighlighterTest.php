@@ -4,15 +4,15 @@
 namespace WSSearch\Tests\Phpunit\Unit\QueryEngine\Highlighter;
 
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
+use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
 use WSSearch\QueryEngine\Highlighter\Highlighter;
 
 /**
  * Class DefaultHighlighterTest
  * @package WSSearch\Tests\Phpunit\Unit\Highlighter
- * @covers \WSSearch\QueryEngine\Highlighter\DefaultHighlighter
+ * @covers \WSSearch\QueryEngine\Highlighter\FieldHighlighter
  */
-class DefaultHighlighterTest extends \MediaWikiUnitTestCase {
+class FieldHighlighterTest extends \MediaWikiUnitTestCase {
     /**
      * @var \Config
      */
@@ -31,14 +31,14 @@ class DefaultHighlighterTest extends \MediaWikiUnitTestCase {
     }
 
     public function testCanConstruct() {
-        $this->assertInstanceOf( Highlighter::class, new DefaultHighlighter( null, null, $this->mock_config ) );
+        $this->assertInstanceOf( Highlighter::class, new FieldHighlighter( null, null, $this->mock_config ) );
     }
 
     /**
      * @dataProvider highlighterFields
      */
     public function testFieldsAreCorrect( array $fields ) {
-        $highlighter = new DefaultHighlighter( $fields, null, $this->mock_config );
+        $highlighter = new FieldHighlighter( $fields, null, $this->mock_config );
         $this->assertArrayEquals( $fields, array_keys( $highlighter->toQuery()->toArray()["fields"] ) );
     }
 
@@ -55,7 +55,7 @@ class DefaultHighlighterTest extends \MediaWikiUnitTestCase {
             $expected_highlight->addField( $field, $field_settings );
         }
 
-        $highlighter = new DefaultHighlighter( $fields, $field_settings );
+        $highlighter = new FieldHighlighter( $fields, $field_settings );
 
         $this->assertEquals( $expected_highlight, $highlighter->toQuery() );
     }

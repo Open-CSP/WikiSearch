@@ -13,7 +13,7 @@ use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
-use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
+use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
 use WSSearch\QueryEngine\Highlighter\Highlighter;
 use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\SMWQueryProcessor;
@@ -63,7 +63,7 @@ class QueryEngine {
         $this->elasticsearch_search = new Search();
 
         $this->elasticsearch_search->setSize( MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" ) );
-        $this->elasticsearch_search->addHighlight( ( new DefaultHighlighter() )->toQuery() );
+        $this->elasticsearch_search->addHighlight( ( new FieldHighlighter() )->toQuery() );
 
         $this->constant_score_filters = new BoolQuery();
         $this->function_score_filters = new BoolQuery();

@@ -13,7 +13,7 @@ use ONGR\ElasticsearchDSL\Highlight\Highlight;
  *
  * @package WSSearch\QueryEngine\Highlighter
  */
-class DefaultHighlighter implements Highlighter {
+class FieldHighlighter implements Highlighter {
     /**
      * @var array The fields to apply the highlight to
      */
