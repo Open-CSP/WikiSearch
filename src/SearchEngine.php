@@ -33,6 +33,7 @@ use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class Search
@@ -292,6 +293,9 @@ class SearchEngine {
         if ( $config->getSearchParameter( "search term properties" ) !== false ) {
             $fields = explode( ",", $config->getSearchParameter( "search term properties" ) );
             $fields = array_map( "trim", $fields );
+            $fields = array_map( function( $property ): PropertyFieldMapper {
+                return new PropertyFieldMapper( $property );
+            }, $fields );
 
             $this->search_term_fields = $fields;
         }
@@ -306,6 +310,9 @@ class SearchEngine {
             // Specific properties need to be highlighted
             $fields = explode( ",", $config->getSearchParameter( "highlighted properties" ) );
             $fields = array_map( "trim", $fields );
+            $fields = array_map( function( $property ): PropertyFieldMapper {
+                return new PropertyFieldMapper( $property );
+            }, $fields );
 
             $highlighter = new FieldHighlighter( $fields );
             $query_engine->addHighlighter( $highlighter );

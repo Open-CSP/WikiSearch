@@ -5,6 +5,7 @@ namespace WSSearch\QueryEngine\Highlighter;
 
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
@@ -39,12 +40,16 @@ class FieldHighlighter implements Highlighter {
     /**
      * DefaultHighlighter constructor.
      *
-     * @param array|null $fields The fields to apply the highlight to, or null to highlight the default fields
+     * @param string[]|PropertyFieldMapper[]|null $fields The fields to apply the highlight to, or null to highlight the default fields
      */
     public function __construct( array $fields = null, array $field_settings = null, \Config $config = null ) {
         $this->config = $config === null ? MediaWikiServices::getInstance()->getMainConfig() : $config;
 
         if ( $fields !== null ) {
+            $fields = array_map( function ( $property ): string {
+                return ( $property instanceof PropertyFieldMapper ) ? $property->getPropertyField() : $property;
+            }, $fields );
+
             $this->fields = $fields;
         }
 
