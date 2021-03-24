@@ -307,7 +307,7 @@ class SearchEngine {
             $parser->clearState();
 
             $expanded_query = $parser->recursiveTagParse( $config->getSearchParameter( "base query" ) );
-            $this->query_engine->setBaseQuery( $expanded_query );
+            $query_engine->setBaseQuery( $expanded_query );
         }
 
         // Configure the highlighter
@@ -317,15 +317,15 @@ class SearchEngine {
             $fields = array_map( "trim", $fields );
 
             $highlighter = new FieldHighlighter( $fields );
-            $this->query_engine->addHighlighter( $highlighter );
+            $query_engine->addHighlighter( $highlighter );
         } else if( isset( $this->search_term_fields ) ) {
             // The given search term fields need to be highlighted
             $highlighter = new FieldHighlighter( $this->search_term_fields );
-            $this->query_engine->addHighlighter( $highlighter );
+            $query_engine->addHighlighter( $highlighter );
         } else {
             // Highlight the default search term fields
             $highlighter = new FieldHighlighter();
-            $this->query_engine->addHighlighter( $highlighter );
+            $query_engine->addHighlighter( $highlighter );
         }
 
         return $query_engine;
