@@ -163,7 +163,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
         // Set the search term field
         $term = $this->getParameter( "term" );
         if ( $term !== null ) {
-            $engine->setSearchTerm( $term );
+            $engine->addSearchTerm( $term );
         }
 
         // Set the offset from which to include results

@@ -3,21 +3,20 @@
 namespace WSSearch\QueryEngine;
 
 use MediaWiki\MediaWikiServices;
-use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
-use ONGR\ElasticsearchDSL\SearchEndpoint\SortEndpoint;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
-use WSSearch\QueryEngine\Filter\PropertyValueFilter;
-use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
 use WSSearch\QueryEngine\Highlighter\Highlighter;
-use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\SMWQueryProcessor;
 
+/**
+ * Class QueryEngine
+ *
+ * @package WSSearch\QueryEngine
+ */
 class QueryEngine {
     /**
      * @var Search
@@ -61,42 +60,13 @@ class QueryEngine {
         $this->elasticsearch_index = $index;
 
         $this->elasticsearch_search = new Search();
-
         $this->elasticsearch_search->setSize( MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" ) );
-        $this->elasticsearch_search->addHighlight( ( new FieldHighlighter() )->toQuery() );
 
         $this->constant_score_filters = new BoolQuery();
         $this->function_score_filters = new BoolQuery();
 
         $this->elasticsearch_search->addQuery( new ConstantScoreQuery( $this->constant_score_filters ) );
         $this->elasticsearch_search->addQuery( new FunctionScoreQuery( $this->function_score_filters ) );
-    }
-
-    /**
-     * Constructs a new QueryEngine from the given SearchEngineConfig.
-     *
-     * @param SearchEngineConfig $config
-     * @return QueryEngine
-     */
-    public static function newFromConfig( SearchEngineConfig $config ) {
-        $mw_config = MediaWikiServices::getInstance()->getMainConfig();
-        $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
-
-        $query_engine = new QueryEngine( $index );
-
-        foreach ( $config->getFacetProperties() as $facet_property ) {
-            $translation_pair = explode( "=", $facet_property );
-            $property_name = $translation_pair[0];
-
-            $query_engine->addAggregation( new PropertyAggregation( $property_name ) );
-        }
-
-        $search_parameters = $config->getSearchParameters();
-        if ( isset( $search_parameters["base query"] ) ) {
-            $query_engine->setBaseQuery( $search_parameters["base query"] );
-        }
-
-        return $query_engine;
     }
 
     /**
@@ -190,7 +160,7 @@ class QueryEngine {
      *
      * @param $base_query
      */
-    private function setBaseQuery( string $base_query ) {
+    public function setBaseQuery(string $base_query ) {
         try {
             $query_processor = new SMWQueryProcessor( $base_query );
             $elastic_search_query = $query_processor->toElasticSearchQuery();

@@ -27,8 +27,10 @@ use MediaWiki\MediaWikiServices;
 use MWNamespace;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
+use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 
 /**
@@ -40,12 +42,17 @@ class SearchEngine {
     /**
      * @var array
      */
-    private $translations = [];
+    private $translations;
 
     /**
      * @var QueryEngine
      */
     private $query_engine;
+
+    /**
+     * @var array|null
+     */
+    private $search_term_fields = null;
 
     /**
      * Search constructor.
@@ -54,15 +61,7 @@ class SearchEngine {
      */
     public function __construct( SearchEngineConfig $config = null ) {
         $this->translations = $config->getPropertyTranslations();
-
-        if ( $config !== null ) {
-            $this->query_engine = QueryEngine::newFromConfig( $config );
-        } else {
-            $mw_config = MediaWikiServices::getInstance()->getMainConfig();
-            $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
-
-            $this->query_engine = new QueryEngine( $index );
-        }
+        $this->query_engine = $this->newQueryEngine( $config );
     }
 
     /**
@@ -113,12 +112,12 @@ class SearchEngine {
     }
 
     /**
-     * Sets the search term.
+     * Adds the given search term.
      *
      * @param string $search_term
      */
-    public function setSearchTerm( string $search_term ) {
-        $search_term_filter = new SearchTermFilter( $search_term );
+    public function addSearchTerm( string $search_term ) {
+        $search_term_filter = new SearchTermFilter( $search_term, $this->search_term_fields );
         $this->query_engine->addFunctionScoreFilter( $search_term_filter );
     }
 
@@ -264,5 +263,64 @@ class SearchEngine {
         }
 
         return $hosts;
+    }
+
+    /**
+     * Constructs a new QueryEngine from the given SearchEngineConfig.
+     *
+     * @param SearchEngineConfig|null $config
+     * @return QueryEngine
+     */
+    private function newQueryEngine( SearchEngineConfig $config = null ): QueryEngine {
+        $mw_config = MediaWikiServices::getInstance()->getMainConfig();
+        $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+
+        $query_engine = new QueryEngine( $index );
+
+        if ( $config === null ) {
+            // Nothing to configure
+            return $query_engine;
+        }
+
+        foreach ( $config->getFacetProperties() as $facet_property ) {
+            $translation_pair = explode( "=", $facet_property );
+            $query_engine->addAggregation( new PropertyAggregation( $translation_pair[0] ) );
+        }
+
+        // Configure the search term properties
+        if ( $config->getSearchParameter( "search term properties" ) !== false ) {
+            $fields = explode( ",", $config->getSearchParameter( "search term properties" ) );
+            $fields = array_map( "trim", $fields );
+
+            $this->search_term_fields = $fields;
+        }
+
+        // Configure the base query
+        if ( $config->getSearchParameter( "base query" ) !== false ) {
+            $parser = MediaWikiServices::getInstance()->getParser();
+            $expanded_query = $parser->recursiveTagParse( $config->getSearchParameter( "base query" ) );
+
+            $this->query_engine->setBaseQuery( $expanded_query );
+        }
+
+        // Configure the highlighter
+        if ( $config->getSearchParameter( "highlighted properties" ) !== false ) {
+            // Specific properties need to be highlighted
+            $fields = explode( ",", $config->getSearchParameter( "highlighted properties" ) );
+            $fields = array_map( "trim", $fields );
+
+            $highlighter = new FieldHighlighter( $fields );
+            $this->query_engine->addHighlighter( $highlighter );
+        } else if( isset( $this->search_term_fields ) ) {
+            // The given search term fields need to be highlighted
+            $highlighter = new FieldHighlighter( $this->search_term_fields );
+            $this->query_engine->addHighlighter( $highlighter );
+        } else {
+            // Highlight the default search term fields
+            $highlighter = new FieldHighlighter();
+            $this->query_engine->addHighlighter( $highlighter );
+        }
+
+        return $query_engine;
     }
 }

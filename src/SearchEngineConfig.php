@@ -237,6 +237,17 @@ class SearchEngineConfig {
     }
 
     /**
+     * Returns the value of the given search term parameter, or false when the parameter
+     * does not exist.
+     *
+     * @param string $parameter
+     * @return false|string
+     */
+    public function getSearchParameter( string $parameter ) {
+	    return isset( $this->search_parameters[$parameter] ) ? $this->search_parameters[$parameter] : false;
+    }
+
+    /**
      * Returns the array of property translations.
      *
      * @return string[]

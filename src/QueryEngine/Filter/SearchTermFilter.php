@@ -34,9 +34,14 @@ class SearchTermFilter implements Filter {
      * SearchTermFilter constructor.
      *
      * @param string $search_term
+     * @param array|null $fields
      */
-    public function __construct( string $search_term ) {
+    public function __construct( string $search_term, array $fields = null ) {
         $this->search_term = $search_term;
+
+        if ( is_array( $fields ) ) {
+            $this->fields = $fields;
+        }
     }
 
     /**
