@@ -10,6 +10,7 @@ use ONGR\ElasticsearchDSL\Search;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Highlighter\Highlighter;
+use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SMW\SMWQueryProcessor;
 
 /**
