@@ -50,11 +50,9 @@ class PropertyAggregationTest extends \MediaWikiUnitTestCase {
         $property_aggregation = new PropertyAggregation( $field_mapper );
         $abstract_aggregation = $property_aggregation->toQuery();
 
-        $suffix = $field_mapper->getPropertyType() === "numField" ? "" : ".keyword";
-
         $this->assertEquals( new TermsAggregation(
             $field_mapper->getPropertyName(),
-            "{$field_mapper->getPropertyField()}$suffix"
+            $field_mapper->getPropertyField()
         ), $abstract_aggregation );
     }
 
@@ -135,9 +133,18 @@ class PropertyAggregationTest extends \MediaWikiUnitTestCase {
 
         $mock_property_field_mapper->method( "getPropertyName" )->willReturn( $property_name );
         $mock_property_field_mapper->method( "getPropertyType" )->willReturn( $property_type );
-        $mock_property_field_mapper->method( "getPropertyField" )->willReturn( $property_field );
         $mock_property_field_mapper->method( "getPropertyKey" )->willReturn( $property_key );
         $mock_property_field_mapper->method( "getPropertyId" )->willReturn( $property_id );
+
+        $mock_property_field_mapper->method( "getPropertyField" )->willReturnCallback( function() use ($property_type, $property_field) {
+            if ( $property_type !== "numField" ) {
+                $suffix = ".keyword";
+            } else {
+                $suffix = "";
+            }
+
+            return $property_field . $suffix;
+        } );
 
         return $mock_property_field_mapper;
     }

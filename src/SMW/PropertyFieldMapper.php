@@ -123,10 +123,19 @@ class PropertyFieldMapper {
     /**
      * Returns the field associated with this property.
      *
+     * @param bool $keyword Give the keyword field for this property instead, if it is available
      * @return string
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
      */
-	public function getPropertyField(): string {
-	    return $this->field;
+	public function getPropertyField( bool $keyword = false ): string {
+	    if ( $keyword === true && $this->type !== "numField" ) {
+	        $suffix = ".keyword";
+        } else {
+	        $suffix = "";
+        }
+
+	    return $this->field . $suffix;
     }
 
     /**
