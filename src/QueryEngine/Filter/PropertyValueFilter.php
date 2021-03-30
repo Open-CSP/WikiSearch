@@ -10,14 +10,17 @@ use WSSearch\SMW\PropertyFieldMapper;
 /**
  * Class PropertyFilter
  *
- * Filters pages based on the values of their properties.
+ * Filters pages based on the values of their properties. This filter does not take
+ * property chains into account.
+ *
+ * @see ChainedPropertyValuesFilter for a filter that takes property chains into account
  *
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-term-query.html
  */
 class PropertyValueFilter implements Filter {
     /**
-     * @var \WSSearch\SMW\PropertyFieldMapper The property to filter on
+     * @var PropertyFieldMapper The property to filter on
      */
     private $property;
 
@@ -48,10 +51,10 @@ class PropertyValueFilter implements Filter {
     /**
      * Sets the property this filter will filter on.
      *
-     * @param \WSSearch\SMW\PropertyFieldMapper $property_name
+     * @param PropertyFieldMapper $property
      */
-    public function setPropertyName(PropertyFieldMapper $property_name ) {
-        $this->property_name = $property_name;
+    public function setPropertyName(PropertyFieldMapper $property ) {
+        $this->property = $property;
     }
 
     /**

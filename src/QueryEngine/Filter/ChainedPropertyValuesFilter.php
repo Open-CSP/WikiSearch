@@ -3,12 +3,9 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
-
 use Elasticsearch\ClientBuilder;
-use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -17,35 +14,47 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
  */
-class ChainedPropertyTermsFilter implements Filter {
-    /**
-     * @var string[] Terms to filter on
-     */
-    private $terms;
-
+class ChainedPropertyValuesFilter implements Filter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
     private $property;
 
     /**
+     * @var Filter The initial filter to use to get the terms for the to be constructed Terms filter
+     */
+    private $filter;
+
+    /**
      * ChainedPropertyTermsFilter constructor.
      *
-     * @param Filter $filter The filter to use to get the values for the to be constructed Terms filter
-     * @param PropertyFieldMapper $property The property to filter on
-     * @throws \MWException
+     * @param Filter $filter The initial filter to use to get the values for the to be constructed Terms filter
+     * @param PropertyFieldMapper $property The property to filter on; if this property is also a property
+     * chain, the class will return a ChainedPropertyTermsFilter containing the constructed TermsFilter
      */
     public function __construct( Filter $filter, PropertyFieldMapper $property ) {
-        $subquery = $this->constructSubqueryFromFilter( $filter );
-        $terms = $this->getTermsFromSubquery( $subquery );
-
-        $this->terms = $terms;
+        $this->filter = $filter;
         $this->property = $property;
     }
 
+    /**
+     * @return BoolQuery
+     * @throws \MWException
+     */
     public function toQuery(): BoolQuery {
-        // TODO: Implement toQuery() method.
-        return new BoolQuery();
+        $query = $this->constructSubqueryFromFilter( $this->filter );
+        $terms = $this->getTermsFromSubquery( $query );
+
+        $filter = new PropertyValuesFilter( $this->property, $terms );
+
+        if ( $this->property->getChainedPropertyFieldMapper() === null ) {
+            return $filter->toQuery();
+        }
+
+        return ( new ChainedPropertyValuesFilter(
+            $filter,
+            $this->property->getChainedPropertyFieldMapper()
+        ) )->toQuery();
     }
 
     /**
@@ -71,7 +80,8 @@ class ChainedPropertyTermsFilter implements Filter {
     private function getTermsFromSubquery( array $query ): array {
         $results = ClientBuilder::create()->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )->build()->search( $query );
 
-        var_dump($results);
+        // TODO
+        var_dump($results); die();
 
         return [];
     }

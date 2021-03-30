@@ -3,7 +3,7 @@
 namespace WSSearch\QueryEngine\Factory;
 
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
-use WSSearch\QueryEngine\Filter\ChainedPropertyTermsFilter;
+use WSSearch\QueryEngine\Filter\ChainedPropertyValuesFilter;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
@@ -62,6 +62,6 @@ class FilterFactory {
         }
 
         // This is a chained filter property
-        return new ChainedPropertyTermsFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
+        return new ChainedPropertyValuesFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
     }
 }
