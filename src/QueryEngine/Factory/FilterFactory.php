@@ -3,6 +3,7 @@
 namespace WSSearch\QueryEngine\Factory;
 
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
+use WSSearch\QueryEngine\Filter\ChainedPropertyTermsFilter;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
@@ -30,13 +31,15 @@ class FilterFactory {
             return null;
         }
 
+        $property_field_mapper = new PropertyFieldMapper( $array["key"] );
+
         if ( isset( $array["range"] ) ) {
             if ( !is_array( $array["range"] ) ) {
                 return null;
             }
 
-            return new PropertyRangeFilter(
-                $array["key"],
+            $filter = new PropertyRangeFilter(
+                $property_field_mapper,
                 $array["range"]
             );
         } else if ( isset( $array["value"] ) ) {
@@ -45,12 +48,20 @@ class FilterFactory {
             }
 
             // This is a "regular" property
-            return new PropertyValueFilter(
-                $array["key"],
+            $filter = new PropertyValueFilter(
+                $property_field_mapper,
                 $array["value"]
             );
         } else {
             return null;
         }
+
+        if ( $property_field_mapper->getChainedPropertyFieldMapper() === null ) {
+            // This is not a chained filter property, so simply return the constructed filter
+            return $filter;
+        }
+
+        // This is a chained filter property
+        return new ChainedPropertyTermsFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
     }
 }
