@@ -124,6 +124,15 @@ class QueryEngine {
     }
 
     /**
+     * Adds a sort to the query.
+     *
+     * @param Sort $sort
+     */
+    public function addSort( Sort $sort ) {
+        $this->elasticsearch_search->addSort( $sort->toQuery() );
+    }
+
+    /**
      * Sets the "index" to use for the ElasticSearch query.
      *
      * @param string $index

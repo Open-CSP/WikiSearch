@@ -30,7 +30,9 @@ use Title;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Factory\AggregationFactory;
 use WSSearch\QueryEngine\Factory\FilterFactory;
+use WSSearch\QueryEngine\Factory\SortFactory;
 use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;
 
@@ -89,6 +91,9 @@ class ApiQueryWSSearch extends ApiQueryBase {
                 ApiBase::PARAM_TYPE => 'string'
             ],
             'aggregations' => [
+                ApiBase::PARAM_TYPE => 'string'
+            ],
+            'sortings' => [
                 ApiBase::PARAM_TYPE => 'string'
             ],
             'from' => [
@@ -220,6 +225,27 @@ class ApiQueryWSSearch extends ApiQueryBase {
             }
 
             $engine->addAggregations( $aggregations );
+        }
+
+        $sortings = $this->getParameter( "sortings" );
+        if ( $sortings !== null ) {
+            $sortings = json_decode( $sortings, true );
+
+            if ( !is_array( $sortings ) || json_last_error() !== JSON_ERROR_NONE ) {
+                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "sortings", json_last_error_msg() ) );
+            }
+
+            $sortings = array_map( [ SortFactory::class, "fromArray" ], $sortings );
+
+            foreach ( $sortings as $sort ) {
+                $is_sort = $sort instanceof Sort;
+
+                if ( !$is_sort ) {
+                    $this->dieWithError( wfMessage( "wssearch-invalid-sort" ) );
+                }
+            }
+
+            $engine->addSortings( $sortings );
         }
 
         return $engine;

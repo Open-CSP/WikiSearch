@@ -30,8 +30,6 @@ class FilterFactory {
             return null;
         }
 
-        // TODO: Make this more general
-
         if ( isset( $array["range"] ) ) {
             if ( !is_array( $array["range"] ) ) {
                 return null;

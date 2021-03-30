@@ -112,6 +112,17 @@ class SearchEngine {
     }
 
     /**
+     * Adds the given sorts to the query.
+     *
+     * @param array $sortings
+     */
+    public function addSortings( array $sortings ) {
+        foreach ( $sortings as $sort ) {
+            $this->query_engine->addSort( $sort );
+        }
+    }
+
+    /**
      * Adds the given search term.
      *
      * @param string $search_term
