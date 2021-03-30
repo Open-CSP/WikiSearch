@@ -110,6 +110,7 @@ The API has the following parameters:
 * `pageid`: The page ID to use for retrieving the appropriate `searchEngineConfig`
 * `filter`: The ElasticSearch filters to apply
 * `aggregations`: The aggregations to add to the query
+* `sortings`: Sorting to add to the query
 * `term`: The term to search for
 * `from`: The result offset
 * `limit`: The maximum number of results to return
@@ -180,8 +181,6 @@ See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-
 
 The `aggregations` parameter takes a list of objects. These objects have the following form:
 
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-term-query.html
-
 #### PropertyRangeAggregation
 
 ```
@@ -214,3 +213,21 @@ See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-agg
 ```
 
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
+
+### Sortings syntax
+
+The `sortings` parameter takes a list of objects. These objects have the following form:
+
+#### PropertySort
+
+```
+{
+    "type": "property",
+    "property": "Genre",
+    "order": "asc" # Optional, undefined when empty
+}
+```
+
+The above filter sorts the results based on the value of the property `Genre` in an `asc`ending order. It is also possible to sort in a `desc`ending order.
+
+> **Note:** Sorting on a property that does not exist will result in an error.
