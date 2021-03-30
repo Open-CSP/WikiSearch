@@ -38,50 +38,68 @@ class PropertyFieldMapper {
 	/**
 	 * @var int The unique ID of the property
 	 */
-	private $id;
+	private $property_id;
 
 	/**
 	 * @var string The kind/datatype of the property
 	 */
-	private $type;
+	private $property_type;
 
 	/**
 	 * @var string The key of the property as a string
 	 */
-	private $key;
+	private $property_key;
 
     /**
      * @var string The human-readable name of the property as a string
      */
-    private $name;
+    private $property_name;
 
     /**
      * @var string The Elastic field for this property
      */
-    private $field;
+    private $property_field;
 
     /**
-	 * PropertyInfo constructor.
+     * @var PropertyFieldMapper The property field mapper for the chained property
+     *
+     * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
+     * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
+     * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
+     */
+    private $chained_property_field_mapper = null;
+
+    /**
+	 * PropertyFieldMapper constructor.
 	 *
-	 * @param string|DIProperty $property_name The property
+	 * @param string $property_name The name of the property (chained property name allowed)
 	 */
-	public function __construct( $property_name ) {
-	    if ( !($property_name instanceof DIProperty) ) {
-            $store = ApplicationFactory::getInstance()->getStore();
+	public function __construct( string $property_name ) {
+	    // Split the property name on "." to account for chained properties
+	    $property_name_chain = explode( ".", $property_name );
 
-            if ( !$store instanceof ElasticStore ) {
-                throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
-            }
+        $property_name = array_pop( $property_name_chain );
+        $chained_property_name = implode( ".", $property_name_chain );
 
-            $this->key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
-
-            $property = new DIProperty( $this->key );
+        // Check whether we are the property at the beginning of the chain
+	    if ( $chained_property_name !== "" ) {
+	        $this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
         }
 
-        $this->name = $property_name;
-        $this->id = $store->getObjectIds()->getSMWPropertyID( $property );
-        $this->type = $this->translatePropertyValueType( $property->findPropertyValueType() );
-        $this->field = "P:" . $this->id . "." . $this->type;
+        $store = ApplicationFactory::getInstance()->getStore();
+
+        if ( !$store instanceof ElasticStore ) {
+            throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
+        }
+
+        $this->property_name = $property_name;
+        $this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
+
+        $property = new DIProperty( $this->property_key );
+
+        $this->property_id = $store->getObjectIds()->getSMWPropertyID( $property );
+        $this->property_type = $this->translatePropertyValueType( $property->findPropertyValueType() );
+        $this->property_field = "P:{$this->property_id}.{$this->property_type}";
 	}
 
 	/**
@@ -90,7 +108,7 @@ class PropertyFieldMapper {
 	 * @return int
 	 */
 	public function getPropertyID(): int {
-		return $this->id;
+		return $this->property_id;
 	}
 
 	/**
@@ -99,7 +117,7 @@ class PropertyFieldMapper {
 	 * @return string
 	 */
 	public function getPropertyType(): string {
-		return $this->type;
+		return $this->property_type;
 	}
 
 	/**
@@ -108,7 +126,7 @@ class PropertyFieldMapper {
 	 * @return string
 	 */
 	public function getPropertyKey(): string {
-		return $this->key;
+		return $this->property_key;
 	}
 
     /**
@@ -117,7 +135,7 @@ class PropertyFieldMapper {
      * @return string
      */
     public function getPropertyName(): string {
-        return $this->name;
+        return $this->property_name;
     }
 
     /**
@@ -129,13 +147,26 @@ class PropertyFieldMapper {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
      */
 	public function getPropertyField( bool $keyword = false ): string {
-	    if ( $keyword === true && $this->type !== "numField" ) {
+	    if ( $keyword === true && $this->property_type !== "numField" ) {
 	        $suffix = ".keyword";
         } else {
 	        $suffix = "";
         }
 
-	    return $this->field . $suffix;
+	    return $this->property_field . $suffix;
+    }
+
+    /**
+     * Returns the property field mapper for the chained property.
+     *
+     * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
+     * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
+     * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
+     *
+     * @return PropertyFieldMapper
+     */
+    public function getChainedPropertyFieldMapper() {
+	    return $this->chained_property_field_mapper;
     }
 
     /**
