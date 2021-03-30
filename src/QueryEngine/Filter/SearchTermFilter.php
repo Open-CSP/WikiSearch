@@ -3,9 +3,8 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
-use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
+use ONGR\ElasticsearchDSL\Query\FullText\SimpleQueryStringQuery;
 
 /**
  * Class SearchTermFilter
@@ -15,14 +14,10 @@ use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
  */
 class SearchTermFilter implements Filter {
     /**
-     * @var string The search term to filter on
-     */
-    private $search_term;
-
-    /**
      * @var string[] The fields to search through for the term
+     * @stable to override
      */
-    private $fields = [
+    public static $fields = [
         "subject.title^8",
         "text_copy^5",
         "text_raw",
@@ -31,17 +26,17 @@ class SearchTermFilter implements Filter {
     ];
 
     /**
+     * @var string The search term to filter on
+     */
+    private $search_term;
+
+    /**
      * SearchTermFilter constructor.
      *
      * @param string $search_term
-     * @param array|null $fields
      */
-    public function __construct( string $search_term, array $fields = null ) {
+    public function __construct( string $search_term ) {
         $this->search_term = $search_term;
-
-        if ( is_array( $fields ) ) {
-            $this->fields = $fields;
-        }
     }
 
     /**
@@ -54,23 +49,14 @@ class SearchTermFilter implements Filter {
     }
 
     /**
-     * Sets the fields to search through for the term.
-     *
-     * @param string[] $fields
-     */
-    public function setFields( array $fields ) {
-        $this->fields = $fields;
-    }
-
-    /**
      * @inheritdoc
      */
     public function toQuery(): BoolQuery {
         $search_term = $this->prepareSearchTerm( $this->search_term );
 
-        $query_string_query = new QueryStringQuery( $search_term );
+        $query_string_query = new SimpleQueryStringQuery( $search_term );
         $query_string_query->setParameters( [
-            "fields" => $this->fields,
+            "fields" => self::$fields,
             "minimum_should_match" => 1
         ] );
 
