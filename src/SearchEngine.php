@@ -64,6 +64,15 @@ class SearchEngine {
     }
 
     /**
+     * Returns teh QueryEngine for this search engine.
+     *
+     * @return QueryEngine
+     */
+    public function getQueryEngine(): QueryEngine {
+        return $this->query_engine;
+    }
+
+    /**
      * Executes the given ElasticSearch query and returns the result.
      *
      * @param array $query
@@ -79,50 +88,6 @@ class SearchEngine {
     }
 
     /**
-     * Sets the offset for the query. An offset of 10 means the first 10 results will not
-     * be returned. Useful for paged searches.
-     *
-     * @param int $offset
-     */
-    public function setOffset( int $offset ) {
-        $this->query_engine->setOffset( $offset );
-    }
-
-    /**
-     * Adds the given filters to the query.
-     *
-     * @param Filter[] $filters
-     */
-    public function addFilters( array $filters ) {
-        foreach ( $filters as $filter ) {
-            $this->query_engine->addConstantScoreFilter($filter);
-        }
-    }
-
-    /**
-     * Allows the user to add additional aggregate filters on top of those provided by the
-     * facet properties from the config.
-     *
-     * @param Aggregation[] $aggregations
-     */
-    public function addAggregations( array $aggregations ) {
-        foreach ( $aggregations as $aggregation ) {
-            $this->query_engine->addAggregation( $aggregation );
-        }
-    }
-
-    /**
-     * Adds the given sorts to the query.
-     *
-     * @param array $sortings
-     */
-    public function addSortings( array $sortings ) {
-        foreach ( $sortings as $sort ) {
-            $this->query_engine->addSort( $sort );
-        }
-    }
-
-    /**
      * Adds the given search term.
      *
      * @param string $search_term
@@ -130,15 +95,6 @@ class SearchEngine {
     public function addSearchTerm( string $search_term ) {
         $search_term_filter = new SearchTermFilter( $search_term );
         $this->query_engine->addFunctionScoreFilter( $search_term_filter );
-    }
-
-    /**
-     * Limit the number of results returned.
-     *
-     * @param int $limit
-     */
-    public function setLimit( int $limit ) {
-        $this->query_engine->setLimit( $limit );
     }
 
     /**
@@ -159,16 +115,6 @@ class SearchEngine {
             "total" => $results["hits"]["total"],
             "aggs"  => $results["aggregations"]
         ];
-    }
-
-    /**
-     * Returns the query used in this search.
-     *
-     * @return array
-     * @throws \MWException
-     */
-    public function getQuery(): array {
-        return $this->query_engine->toArray();
     }
 
     /**

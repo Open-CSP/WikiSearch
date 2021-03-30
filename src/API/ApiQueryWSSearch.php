@@ -35,6 +35,8 @@ use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;
+use WSSearch\SearchEngineException;
+use WSSearch\SearchEngineFactory;
 
 /**
  * Class ApiQueryWSSearch
@@ -66,7 +68,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
             }
 
             if ( $in_debug_mode === true ) {
-                $this->getResult()->addValue( null, 'query', $engine->getQuery());
+                $this->getResult()->addValue( null, 'query', $engine->getQueryEngine()->toArray());
             }
 
             $this->getResult()->addValue( null, 'result', $result );
@@ -163,91 +165,22 @@ class ApiQueryWSSearch extends ApiQueryBase {
      * @throws ApiUsageException
      */
     private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
-        $engine = new SearchEngine( $engine_config );
+        $search_engine_factory = new SearchEngineFactory( $engine_config );
 
-        // Set the search term field
-        $term = $this->getParameter( "term" );
-        if ( $term !== null ) {
-            $engine->addSearchTerm( $term );
+        try {
+            $search_engine = $search_engine_factory->fromParameters(
+                $this->getParameter( "term" ),
+                $this->getParameter( "from" ),
+                $this->getParameter( "limit" ),
+                $this->getParameter( "filter" ),
+                $this->getParameter( "aggregations" ),
+                $this->getParameter( "sortings" )
+            );
+        } catch ( SearchEngineException $exception ) {
+            $this->dieWithError( $exception->getMessage() );
+            exit; // This is not needed, but we do this to stop PHPStorm from complaining
         }
 
-        // Set the offset from which to include results
-        $from = $this->getParameter( "from" );
-        if ( $from !== null ) {
-            $engine->setOffset( $from );
-        }
-
-        // Set the limit for the number of results
-        $limit = $this->getParameter( "limit" );
-        if ( $limit !== null ) {
-            $engine->setLimit( $limit );
-        }
-
-        // Set the applied filters
-        $filter = $this->getParameter( "filter" );
-        if ( $filter !== null ) {
-            $filters = json_decode( $filter, true );
-
-            if ( !is_array( $filters ) || json_last_error() !== JSON_ERROR_NONE ) {
-                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
-            }
-
-            $filters = array_map( [ FilterFactory::class, "fromArray" ], $filters );
-
-            foreach ( $filters as $filter ) {
-                $is_filter = $filter instanceof Filter;
-
-                if ( $is_filter === false ) {
-                    $this->dieWithError( wfMessage( "wssearch-invalid-filter" ) );
-                }
-            }
-
-            $engine->addFilters( $filters );
-        }
-
-        // Set the applied aggregations
-        $aggregations = $this->getParameter( "aggregations" );
-        if ( $aggregations !== null ) {
-            $aggregations = json_decode( $aggregations, true );
-
-            if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
-                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() ) );
-            }
-
-            $aggregations = array_map( [ AggregationFactory::class, "fromArray" ], $aggregations );
-
-            foreach ( $aggregations as $aggregation ) {
-                $is_aggregation = $aggregation instanceof Aggregation;
-
-                if ( !$is_aggregation ) {
-                    $this->dieWithError( wfMessage( "wssearch-invalid-aggregation" ) );
-                }
-            }
-
-            $engine->addAggregations( $aggregations );
-        }
-
-        $sortings = $this->getParameter( "sortings" );
-        if ( $sortings !== null ) {
-            $sortings = json_decode( $sortings, true );
-
-            if ( !is_array( $sortings ) || json_last_error() !== JSON_ERROR_NONE ) {
-                $this->dieWithError( wfMessage( "wssearch-api-invalid-json", "sortings", json_last_error_msg() ) );
-            }
-
-            $sortings = array_map( [ SortFactory::class, "fromArray" ], $sortings );
-
-            foreach ( $sortings as $sort ) {
-                $is_sort = $sort instanceof Sort;
-
-                if ( !$is_sort ) {
-                    $this->dieWithError( wfMessage( "wssearch-invalid-sort" ) );
-                }
-            }
-
-            $engine->addSortings( $sortings );
-        }
-
-        return $engine;
+        return $search_engine;
     }
 }
