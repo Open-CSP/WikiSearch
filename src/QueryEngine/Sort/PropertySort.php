@@ -64,7 +64,18 @@ class PropertySort implements Sort {
                 break;
         }
 
-        $this->field = $property->getPropertyField();
+        // TODO: Make this more general
+        switch ($property->getPropertyType()) {
+            case "numField":
+                // numField properties do not have a ".keyword"
+                $suffix = "";
+                break;
+            default:
+                $suffix = ".keyword";
+                break;
+        }
+
+        $this->field = $property->getPropertyField() . $suffix;
     }
 
     /**
