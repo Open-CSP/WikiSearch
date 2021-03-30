@@ -29,10 +29,12 @@ use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use Parser;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
+use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -52,30 +54,24 @@ class SearchEngine {
     private $query_engine;
 
     /**
-     * @var array|null
-     */
-    private $search_term_fields = null;
-
-    /**
      * Search constructor.
      *
      * @param SearchEngineConfig|null $config
      */
     public function __construct( SearchEngineConfig $config = null ) {
         $this->translations = $config->getPropertyTranslations();
-        $this->query_engine = $this->newQueryEngine( $config );
+        $this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
     }
 
     /**
      * Executes the given ElasticSearch query and returns the result.
      *
      * @param array $query
+     * @param array $hosts
      * @return array
      * @throws \Exception
      */
-    public function doQuery( array $query ): array {
-        $hosts = SearchEngine::getElasticSearchHosts();
-
+    public function doQuery( array $query, array $hosts ): array {
         // Allow other extensions to modify the query
         Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
 
@@ -110,7 +106,9 @@ class SearchEngine {
      * @param Aggregation[] $aggregations
      */
     public function addAggregations( array $aggregations ) {
-        $this->query_engine->addAggregations( $aggregations );
+        foreach ( $aggregations as $aggregation ) {
+            $this->query_engine->addAggregation( $aggregation );
+        }
     }
 
     /**
@@ -119,7 +117,7 @@ class SearchEngine {
      * @param string $search_term
      */
     public function addSearchTerm( string $search_term ) {
-        $search_term_filter = new SearchTermFilter( $search_term, $this->search_term_fields );
+        $search_term_filter = new SearchTermFilter( $search_term );
         $this->query_engine->addFunctionScoreFilter( $search_term_filter );
     }
 
@@ -142,7 +140,7 @@ class SearchEngine {
     public function doSearch(): array {
         $elastic_query = $this->query_engine->toArray();
 
-        $results = $this->doQuery( $elastic_query );
+        $results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
         $results = $this->applyResultTranslations( $results );
 
         return [
@@ -224,108 +222,5 @@ class SearchEngine {
         }
 
         return $results;
-    }
-
-    /**
-     * Returns the configured ElasticSearch hosts.
-     *
-     * @return array
-     */
-    private static function getElasticSearchHosts(): array {
-        $config = MediaWikiServices::getInstance()->getMainConfig();
-
-        try {
-            $hosts = $config->get( "WSSearchElasticSearchHosts" );
-        } catch ( \ConfigException $e ) {
-            $hosts = [];
-        }
-
-        if ( $hosts !== [] ) {
-            return $hosts;
-        }
-
-        global $smwgElasticsearchEndpoints;
-
-        if ( !isset( $smwgElasticsearchEndpoints ) || $smwgElasticsearchEndpoints === [] ) {
-            return [ "localhost:9200" ];
-        }
-
-        // @see https://doc.semantic-mediawiki.org/md_content_extensions_SemanticMediaWiki_src_Elastic_docs_config.html
-        foreach ( $smwgElasticsearchEndpoints as $endpoint ) {
-            if ( is_string( $endpoint ) ) {
-                $hosts[] = $endpoint;
-                continue;
-            }
-
-            $scheme = $endpoint["scheme"];
-            $host = $endpoint["host"];
-            $port = $endpoint["port"];
-
-            $hosts[] = implode( ":", [ $scheme, "//$host", $port ] );
-        }
-
-        return $hosts;
-    }
-
-    /**
-     * Constructs a new QueryEngine from the given SearchEngineConfig.
-     *
-     * @param SearchEngineConfig|null $config
-     * @return QueryEngine
-     */
-    private function newQueryEngine( SearchEngineConfig $config = null ): QueryEngine {
-        $mw_config = MediaWikiServices::getInstance()->getMainConfig();
-        $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
-
-        $query_engine = new QueryEngine( $index );
-
-        if ( $config === null ) {
-            // Nothing to configure
-            return $query_engine;
-        }
-
-        foreach ( $config->getFacetProperties() as $facet_property ) {
-            $translation_pair = explode( "=", $facet_property );
-            $query_engine->addAggregation( new PropertyAggregation( $translation_pair[0] ) );
-        }
-
-        // Configure the search term properties
-        if ( $config->getSearchParameter( "search term properties" ) !== false ) {
-            $fields = explode( ",", $config->getSearchParameter( "search term properties" ) );
-            $fields = array_map( "trim", $fields );
-            $fields = array_map( function( $property ): string {
-                return ( new PropertyFieldMapper( $property ) )->getPropertyField();
-            }, $fields );
-
-            $this->search_term_fields = $fields;
-        }
-
-        // Configure the base query
-        if ( $config->getSearchParameter( "base query" ) !== false ) {
-            $query_engine->setBaseQuery( $config->getSearchParameter( "base query" ) );
-        }
-
-        // Configure the highlighter
-        if ( $config->getSearchParameter( "highlighted properties" ) !== false ) {
-            // Specific properties need to be highlighted
-            $fields = explode( ",", $config->getSearchParameter( "highlighted properties" ) );
-            $fields = array_map( "trim", $fields );
-            $fields = array_map( function( $property ): PropertyFieldMapper {
-                return new PropertyFieldMapper( $property );
-            }, $fields );
-
-            $highlighter = new FieldHighlighter( $fields );
-            $query_engine->addHighlighter( $highlighter );
-        } else if( isset( $this->search_term_fields ) ) {
-            // The given search term fields need to be highlighted
-            $highlighter = new FieldHighlighter( $this->search_term_fields );
-            $query_engine->addHighlighter( $highlighter );
-        } else {
-            // Highlight the default search term fields
-            $highlighter = new FieldHighlighter();
-            $query_engine->addHighlighter( $highlighter );
-        }
-
-        return $query_engine;
     }
 }

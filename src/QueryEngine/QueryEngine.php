@@ -52,12 +52,20 @@ class QueryEngine {
     private $base_query = null;
 
     /**
+     * The configured ElasticSearch hosts.
+     *
+     * @var array
+     */
+    private $elasticsearch_hosts;
+
+    /**
      * QueryEngine constructor.
      *
      * @param string $index The ElasticSearch index to create the queries for
      */
-    public function __construct( string $index ) {
+    public function __construct( string $index, array $hosts ) {
         $this->elasticsearch_index = $index;
+        $this->elasticsearch_hosts = $hosts;
 
         $this->elasticsearch_search = new Search();
         $this->elasticsearch_search->setSize( MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" ) );
@@ -67,19 +75,6 @@ class QueryEngine {
 
         $this->elasticsearch_search->addQuery( new ConstantScoreQuery( $this->constant_score_filters ) );
         $this->elasticsearch_search->addQuery( new FunctionScoreQuery( $this->function_score_filters ) );
-    }
-
-    /**
-     * Adds aggregations to the query.
-     *
-     * @param Aggregation[] $aggregations
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
-     */
-    public function addAggregations( array $aggregations ) {
-        foreach ( $aggregations as $aggregation ) {
-            $this->addAggregation( $aggregation );
-        }
     }
 
     /**
@@ -179,6 +174,15 @@ class QueryEngine {
      */
     public function _(): Search {
         return $this->elasticsearch_search;
+    }
+
+    /**
+     * Returns the configured ElasticSearch hosts.
+     *
+     * @return array
+     */
+    public function getElasticHosts(): array {
+        return $this->elasticsearch_hosts;
     }
 
     /**
