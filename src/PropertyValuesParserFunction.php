@@ -65,7 +65,7 @@ class PropertyValuesParserFunction {
             return "The `limit` parameter must be an integer between 1 and 10000";
         }
 
-        list( $from, $to ) = $this->convertDate( $options["from"], $options["to"] );
+        list( $from, $to ) = $this->convertDate( $from, $to );
 
         $range_filter = new PropertyRangeFilter(
             $date_property,
