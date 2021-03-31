@@ -60,7 +60,7 @@ class SearchTermFilter implements Filter {
                 }
             }
         } else {
-            $this->chained_properties = [
+            $this->query_string_fields = [
                 "subject.title^8",
                 "text_copy^5",
                 "text_raw",
