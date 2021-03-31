@@ -3,7 +3,6 @@
 namespace WSSearch;
 
 use Elasticsearch\ClientBuilder;
-use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
 use Parser;
 use WSSearch\QueryEngine\Aggregation\FilterAggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
@@ -21,6 +20,7 @@ class PropertyValuesParserFunction {
      *
      * @param Parser $parser
      * @param string ...$args
+     * @return string
      * @throws \MWException
      */
     public function execute( Parser $parser, ...$args ) {
