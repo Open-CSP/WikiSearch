@@ -4,7 +4,7 @@ namespace WSSearch\QueryEngine\Factory;
 
 use MediaWiki\MediaWikiServices;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
-use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
+use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\SearchEngineConfig;
 use WSSearch\SearchEngineException;
@@ -45,7 +45,7 @@ class QueryEngineFactory {
         }
 
         // Configure the highlighter
-        $query_engine->addHighlighter( new FieldHighlighter() );
+        $query_engine->addHighlighter( new DefaultHighlighter( $config ) );
 
         return $query_engine;
     }

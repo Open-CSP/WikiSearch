@@ -7,6 +7,7 @@ use Config;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WSSearch\SearchEngine;
+use WSSearch\SearchEngineConfig;
 use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
@@ -17,7 +18,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @package WSSearch\QueryEngine\Highlighter
  */
-class FieldHighlighter implements Highlighter {
+class DefaultHighlighter implements Highlighter {
     /**
      * @var array The fields to apply the highlight to
      */
@@ -32,20 +33,19 @@ class FieldHighlighter implements Highlighter {
     private $field_settings;
 
     /**
-     * @var Config
+     * @var SearchEngineConfig
      */
     private $config;
 
     /**
      * DefaultHighlighter constructor.
      *
+     * @param SearchEngineConfig $config
      * @param string[]|null $fields The fields to apply the highlight to, or null to highlight the default fields
      * @param array|null $field_settings
-     * @param Config|null $config
-     * @throws SearchEngineException
      */
-    public function __construct( array $fields = null, array $field_settings = null, Config $config = null ) {
-        $this->config = $config === null ? MediaWikiServices::getInstance()->getMainConfig() : $config;
+    public function __construct( SearchEngineConfig $config, array $fields = null, array $field_settings = null ) {
+        $this->config = $config;
 
         if ( $fields !== null ) {
             $this->fields = $fields;
@@ -56,9 +56,11 @@ class FieldHighlighter implements Highlighter {
         if ( $field_settings !== null ) {
             $this->field_settings = $field_settings;
         } else {
+            $config = MediaWikiServices::getInstance()->getMainConfig();
+
             $this->field_settings = [
-                "fragment_size" => $this->config->get( "WSSearchHighlightFragmentSize" ),
-                "number_of_fragments" => $this->config->get( "WSSearchHighlightNumberOfFragments" )
+                "fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
+                "number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
             ];
         }
     }
@@ -81,18 +83,15 @@ class FieldHighlighter implements Highlighter {
      * Returns an array of fields to highlight if no specific fields are given in the constructor.
      *
      * @return array
-     * @throws SearchEngineException
      */
     private function getDefaultFields(): array {
-        $search_engine_config = SearchEngine::getInstance()->getConfig();
-
-        if ( $search_engine_config->getSearchParameter( "highlighted properties" ) ) {
-            $highlighted_properties = $search_engine_config->getSearchParameter("highlighted properties");
+        if ( $this->config->getSearchParameter( "highlighted properties" ) ) {
+            $highlighted_properties = $this->config->getSearchParameter("highlighted properties");
             return $this->toPropertyList($highlighted_properties);
         }
 
-        if ( $search_engine_config->getSearchParameter( "search term properties" ) ) {
-            $search_term_properties = $search_engine_config->getSearchParameter( "search term properties" );
+        if ( $this->config->getSearchParameter( "search term properties" ) ) {
+            $search_term_properties = $this->config->getSearchParameter( "search term properties" );
             return $this->toPropertyList( $search_term_properties );
         }
 

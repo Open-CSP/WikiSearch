@@ -32,7 +32,7 @@ use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
-use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
+use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -141,6 +141,7 @@ class SearchEngine {
      * Adds the given search term.
      *
      * @param string $search_term
+     * @throws SearchEngineException
      */
     public function addSearchTerm( string $search_term ) {
         $search_term_filter = new SearchTermFilter( $search_term );
