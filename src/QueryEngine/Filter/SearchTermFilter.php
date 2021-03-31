@@ -113,10 +113,10 @@ class SearchTermFilter implements Filter {
         ] );
 
         $bool_query = new BoolQuery();
-        $bool_query->add( $query_string_query, BoolQuery::MUST ); // CHANGE MUST TO SOMETHING ELSE
+        $bool_query->add( $query_string_query, BoolQuery::SHOULD );
 
         foreach ( $chained_property_queries as $chained_property_query ) {
-            $bool_query->add( $chained_property_query, BoolQuery::MUST );
+            $bool_query->add( $chained_property_query, BoolQuery::SHOULD );
         }
 
         return $bool_query;
