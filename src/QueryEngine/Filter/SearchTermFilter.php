@@ -91,7 +91,7 @@ class SearchTermFilter implements Filter {
             // Construct a new chained subquery for each chained property and add it to the bool query
             $property_text_filter = new PropertyTextFilter( $property, $search_term, $default_operator );
             $filter = new ChainedPropertyFilter( $property_text_filter, $property->getChainedPropertyFieldMapper() );
-            $bool_query->add( $filter->toQuery() );
+            $bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
         }
 
         if ( $this->property_fields !== [] ) {
