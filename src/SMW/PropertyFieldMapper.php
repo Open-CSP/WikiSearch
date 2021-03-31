@@ -56,11 +56,6 @@ class PropertyFieldMapper {
     private $property_name;
 
     /**
-     * @var string The Elastic field for this property
-     */
-    private $property_field;
-
-    /**
      * @var PropertyFieldMapper The property field mapper for the chained property
      *
      * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
@@ -99,7 +94,6 @@ class PropertyFieldMapper {
 
         $this->property_id = $store->getObjectIds()->getSMWPropertyID( $property );
         $this->property_type = $this->translatePropertyValueType( $property->findPropertyValueType() );
-        $this->property_field = "P:{$this->property_id}.{$this->property_type}";
 	}
 
 	/**
@@ -147,13 +141,17 @@ class PropertyFieldMapper {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
      */
 	public function getPropertyField( bool $keyword = false ): string {
-	    if ( $keyword === true && $this->property_type !== "numField" ) {
-	        $suffix = ".keyword";
-        } else {
-	        $suffix = "";
-        }
+	    $suffix = $keyword === true && $this->property_type !== "numField" ? ".keyword" : "";
+	    return "P:{$this->property_id}.{$this->property_type}{$suffix}";
+    }
 
-	    return $this->property_field . $suffix;
+    /**
+     * Returns the property's page field identifier.
+     *
+     * @return string
+     */
+    public function getPropertyPageFieldIdentifier(): string {
+	    return "P:{$this->property_id}.wpgID";
     }
 
     /**
