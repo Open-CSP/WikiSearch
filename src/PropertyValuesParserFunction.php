@@ -34,17 +34,35 @@ class PropertyValuesParserFunction {
         $property = isset( $options["property"] ) ? $options["property"] : "";
         $array_name = isset( $options["array"] ) ? $options["array"] : "";
         $date_property = isset( $options["date property"] ) ? $options["date property"] : "Modification date";
+        $from = isset( $options["from"] ) ? $options["from"] : "1";
+        $to = isset( $options["to"] ) ? $options["to"] : "5000";
 
         if ( !$property || !$array_name ) {
             return "Missing `array` or `property` parameter";
         }
 
-        if ( !isset( $options["from"] ) || !isset( $options["to"] ) ) {
-            return "Missing `from` or `to` parameter";
+        if ( !ctype_digit( $from ) || !ctype_digit( $to ) || !ctype_digit( $limit ) ) {
+            return "Invalid `from`, `limit` or `to` parameter";
         }
 
-        if ( !ctype_digit( $options["from"] ) || !ctype_digit( $options["to"] ) || !ctype_digit( $limit ) ) {
-            return "Invalid `from`, `limit` or `to` parameter";
+        $from = intval( $from );
+        $to = intval( $to );
+        $limit = intval( $limit );
+
+        if ( $from < 0 || $from > 9999 ) {
+            return "The `from` parameter must be a year between 0 and 10000";
+        }
+
+        if ( $to < 0 || $to > 9999 ) {
+            return "The `to` parameter must be a year between 0 and 10000";
+        }
+
+        if ( $to <= $from ) {
+            return "The `to` parameter must be greater than the `from` parameter";
+        }
+
+        if ( $limit < 1 || $limit > 9999 ) {
+            return "The `limit` parameter must be an integer between 1 and 10000";
         }
 
         list( $from, $to ) = $this->convertDate( $options["from"], $options["to"] );
