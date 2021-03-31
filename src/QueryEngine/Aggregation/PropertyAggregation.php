@@ -26,12 +26,18 @@ class PropertyAggregation implements Aggregation {
     private $property;
 
     /**
+     * @var int The maximum number of term buckets to be returned
+     */
+    private $size;
+
+    /**
      * PropertyAggregation constructor.
      *
      * @param PropertyFieldMapper|string $property The property object or name for the aggregation
      * @param string|null $aggregation_name
+     * @param int|null $size The maximum number of term buckets to be returned
      */
-    public function __construct( $property, string $aggregation_name = null ) {
+    public function __construct( $property, string $aggregation_name = null, int $size = null ) {
         if ( is_string( $property ) ) {
             $property = new PropertyFieldMapper( $property );
         }
@@ -46,6 +52,7 @@ class PropertyAggregation implements Aggregation {
 
         $this->aggregation_name = $aggregation_name;
         $this->property = $property;
+        $this->size = $size;
     }
 
     /**
@@ -61,9 +68,15 @@ class PropertyAggregation implements Aggregation {
      * @inheritDoc
      */
     public function toQuery(): AbstractAggregation {
-        return new TermsAggregation(
+        $terms_aggregation = new TermsAggregation(
             $this->aggregation_name,
             $this->property->getPropertyField( true )
         );
+
+        if ( $this->size !== null ) {
+            $terms_aggregation->addParameter( "size", $this->size );
+        }
+
+        return $terms_aggregation;
     }
 }
