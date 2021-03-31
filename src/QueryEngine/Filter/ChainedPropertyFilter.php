@@ -6,6 +6,7 @@ namespace WSSearch\QueryEngine\Filter;
 use Elasticsearch\ClientBuilder;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
+use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -46,7 +47,7 @@ class ChainedPropertyFilter implements Filter {
      *
      * @return BoolQuery
      * @throws \MWException
-     * @throws \WSSearch\SearchEngineException
+     * @throws SearchEngineException
      */
     public function toQuery(): BoolQuery {
         $query = $this->constructSubqueryFromFilter( $this->filter );

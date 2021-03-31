@@ -53,7 +53,7 @@ class PropertyAggregation implements Aggregation {
      *
      * @param PropertyFieldMapper $property
      */
-    public function setProperty(PropertyFieldMapper $property ) {
+    public function setProperty( PropertyFieldMapper $property ) {
         $this->property = $property;
     }
 
