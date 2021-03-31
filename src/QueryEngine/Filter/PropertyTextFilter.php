@@ -81,7 +81,7 @@ class PropertyTextFilter implements Filter {
     public function toQuery(): BoolQuery {
         $query_string_query = new SimpleQueryStringQuery( $this->property_value_query );
         $query_string_query->setParameters( [
-            "fields" => $this->property->getPropertyField(),
+            "fields" => [$this->property->getPropertyField()],
             "minimum_should_match" => 1,
             "default_operator" => $this->default_operator
         ] );

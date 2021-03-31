@@ -18,15 +18,8 @@ class SearchTermFilter implements Filter {
     const OP_AND = "and";
     const OP_OR = "or";
 
-    /**
-     * @var string[] The fields to search through for the term in the main "simple query string" query
-     */
-    public $query_string_fields = [];
-
-    /**
-     * @var PropertyFieldMapper[] Chained fields to search through
-     */
-    public $chained_properties = [];
+    private $chained_properties = [];
+    private $property_fields = [];
 
     /**
      * @var string The search term to filter on
@@ -48,19 +41,19 @@ class SearchTermFilter implements Filter {
             $properties = explode( ",", $properties );
             $properties = array_map( "trim", $properties );
 
-            $property_field_mappers = array_map( [ PropertyFieldMapper::class, "__construct" ], $properties );
+            $property_field_mappers = array_map( function ( string $property ): PropertyFieldMapper {
+                return new PropertyFieldMapper( $property );
+            }, $properties );
 
             foreach ( $property_field_mappers as $mapper ) {
-                assert( $mapper instanceof PropertyFieldMapper );
-
-                if ( $mapper->getChainedPropertyFieldMapper() !== null ) {
+                if ( $mapper->isChained() ) {
                     $this->chained_properties[] = $mapper;
                 } else {
-                    $this->query_string_fields[] = $mapper->getPropertyField();
+                    $this->property_fields[] = $mapper->getPropertyField();
                 }
             }
         } else {
-            $this->query_string_fields = [
+            $this->property_fields = [
                 "subject.title^8",
                 "text_copy^5",
                 "text_raw",
@@ -92,31 +85,24 @@ class SearchTermFilter implements Filter {
         $default_operator = trim( $search_engine_config->getSearchParameter( "default operator" ) );
         $default_operator = $default_operator === "and" ? self::OP_AND : self::OP_OR;
 
-        $chained_property_queries = [];
+        $bool_query = new BoolQuery();
 
         foreach ( $this->chained_properties as $property ) {
-            $property_text_filter = new PropertyTextFilter(
-                $property,
-                $search_term,
-                $default_operator
-            );
-
+            // Construct a new chained subquery for each chained property and add it to the bool query
+            $property_text_filter = new PropertyTextFilter( $property, $search_term, $default_operator );
             $filter = new ChainedPropertyFilter( $property_text_filter, $property->getChainedPropertyFieldMapper() );
-            $chained_property_queries[] = $filter->toQuery();
+            $bool_query->add( $filter->toQuery() );
         }
 
-        $query_string_query = new SimpleQueryStringQuery( $search_term );
-        $query_string_query->setParameters( [
-            "fields" => $this->query_string_fields,
-            "minimum_should_match" => 1,
-            "default_operator" => $default_operator
-        ] );
+        if ( $this->property_fields !== [] ) {
+            $query_string_query = new SimpleQueryStringQuery( $search_term );
+            $query_string_query->setParameters( [
+                "fields" => $this->property_fields,
+                "minimum_should_match" => 1,
+                "default_operator" => $default_operator
+            ] );
 
-        $bool_query = new BoolQuery();
-        $bool_query->add( $query_string_query, BoolQuery::SHOULD );
-
-        foreach ( $chained_property_queries as $chained_property_query ) {
-            $bool_query->add( $chained_property_query, BoolQuery::SHOULD );
+            $bool_query->add( $query_string_query, BoolQuery::SHOULD );
         }
 
         return $bool_query;

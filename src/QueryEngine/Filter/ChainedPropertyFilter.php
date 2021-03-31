@@ -54,7 +54,7 @@ class ChainedPropertyFilter implements Filter {
 
         $filter = new PagesPropertyFilter( $this->property, $terms );
 
-        if ( $this->property->getChainedPropertyFieldMapper() === null ) {
+        if ( $this->property->isChained() ) {
             return $filter->toQuery();
         }
 

@@ -168,6 +168,15 @@ class PropertyFieldMapper {
     }
 
     /**
+     * Returns true if and only if this is a PropertyFieldMapper for a chained property.
+     *
+     * @return bool
+     */
+    public function isChained(): bool {
+        return $this->chained_property_field_mapper !== null;
+    }
+
+    /**
      * Translates the given property name to a special property key if it is a special property.
      *
      * @param string $property_name
