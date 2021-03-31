@@ -151,7 +151,7 @@ abstract class WSSearchHooks {
 		try {
 			$parser->setFunctionHook( "WSSearchConfig", [ self::class, "searchConfigCallback"] );
 			$parser->setFunctionHook( "WSSearchFrontend", [ self::class, "searchEngineFrontendCallback"] );
-			$parser->setFunctionHook( "verwijzingen", [ self::class, "verwijzingenCallback" ] );
+			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 		} catch ( MWException $e ) {
 			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
 		}
@@ -239,75 +239,6 @@ abstract class WSSearchHooks {
 
 		return $result;
 	}
-
-    /**
-     * @param Parser $parser
-     * @return string
-     * @throws MWException
-     */
-	public static function verwijzingenCallback( Parser $parser ) {
-        if ( !class_exists( "\WSArrays" ) ) {
-            return "WSArrays must be installed.";
-        }
-
-        /*
-        $options = self::extractOptions( func_get_args() );
-
-        $limit = isset( $options["limit"] ) ? $options["limit"] : "100";
-        $property = isset( $options["property"] ) ? $options["property"] : "";
-        $array_name = isset( $options["array"] ) ? $options["array"] : "";
-        $date_property = isset( $options["date property"] ) ? $options["date property"] : "Modification date";
-
-        if ( !$property || !$array_name ) {
-            return "Missing `array` or `property` parameter";
-        }
-
-        if ( !isset( $options["from"] ) || !isset( $options["to"] ) ) {
-            return "Missing `from` or `to` parameter";
-        }
-
-        if ( !ctype_digit( $options["from"] ) || !ctype_digit( $options["to"] ) || !ctype_digit( $limit ) ) {
-            return "Invalid `from`, `limit` or `to` parameter";
-        }
-
-        list( $from, $to ) = self::convertDate( $options["from"], $options["to"] );
-
-        $filter = [
-            "verwijzingen" => [
-                "filter" => [
-                    "range" => [
-                        ( new Property( $date_property ) )->getPropertyField() => [
-                            "to" => $to,
-                            "from" => $from
-                        ]
-                    ]
-                ],
-                "aggs" => [
-                    "aantal_verwijzingen" => [
-                        "terms" => [
-                            "field" => (new Property($property))->getPropertyField()  . ".keyword",
-                            "size" => $limit
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $search_engine = new SearchEngine();
-        $search_engine->setLimit(0);
-        $search_engine->addAggregations( [ new VerwijzingenAggregation( $property, $date_property ) ] );
-
-        $result = $search_engine->doSearch();
-
-        \WSArrays::$arrays[$array_name] = new \ComplexArray( $result["aggs"]["verwijzingen"]["aantal_verwijzingen"]["buckets"] );
-
-        return "";
-        */
-
-        // TODO: To query engine
-
-        return "Not implemented in new version yet (ask Marijn)";
-    }
 
 	/**
 	 * Returns a formatted error message.

@@ -4,38 +4,32 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class PropertyFilter
+ * Class PropertyExistsFilter
  *
- * Filters pages based on the values of their properties. This filter does not take
- * property chains into account.
+ * Filters pages based on whether they have the specified property.
  *
  * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
  * @package WSSearch\QueryEngine\Filter
- * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-term-query.html
+ * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
  */
-class PropertyValueFilter implements Filter {
+class HasPropertyFilter implements Filter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
     private $property;
 
     /**
-     * @var string The value the property to filter on
-     */
-    private $property_value;
-
-    /**
-     * PropertyFilter constructor.
+     * PropertyExistsFilter constructor.
      *
      * @param PropertyFieldMapper|string $property The name or object of the property to filter on
-     * @param string $property_value The value the property to filter on
      */
-    public function __construct( $property, string $property_value ) {
+    public function __construct( $property ) {
         if ( is_string( $property ) ) {
             $property = new PropertyFieldMapper( $property );
         }
@@ -45,7 +39,6 @@ class PropertyValueFilter implements Filter {
         }
 
         $this->property = $property;
-        $this->property_value = $property_value;
     }
 
     /**
@@ -53,17 +46,8 @@ class PropertyValueFilter implements Filter {
      *
      * @param PropertyFieldMapper $property
      */
-    public function setPropertyName(PropertyFieldMapper $property ) {
+    public function setPropertyName( PropertyFieldMapper $property ) {
         $this->property = $property;
-    }
-
-    /**
-     * Sets the value of the property this filter will filter on.
-     *
-     * @param string $property_value
-     */
-    public function setPropertyValue( string $property_value ) {
-        $this->property_value = $property_value;
     }
 
     /**
@@ -72,21 +56,20 @@ class PropertyValueFilter implements Filter {
      * @return BoolQuery
      */
     public function toQuery(): BoolQuery {
-        $term_query = new TermQuery(
-            $this->property->getPropertyField( true ),
-            $this->property_value
+        $exists_query = new ExistsQuery(
+            $this->property->getPropertyField()
         );
 
         $bool_query = new BoolQuery();
-        $bool_query->add( $term_query, BoolQuery::FILTER );
+        $bool_query->add( $exists_query, BoolQuery::FILTER );
 
         /*
          * Example of such a query:
          *
          *  "bool": {
          *      "filter": {
-         *          "term": {
-         *              "P:0.wpgID": 0
+         *          "exists": {
+         *              "field": "P:2676.txtField"
          *          }
          *      }
          *  }

@@ -32,7 +32,7 @@ use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
-use WSSearch\QueryEngine\Highlighter\FieldHighlighter;
+use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -44,6 +44,11 @@ use WSSearch\SMW\PropertyFieldMapper;
  */
 class SearchEngine {
     /**
+     * @var SearchEngine
+     */
+    private static $instance;
+
+    /**
      * @var array
      */
     private $translations;
@@ -54,13 +59,58 @@ class SearchEngine {
     private $query_engine;
 
     /**
+     * @var SearchEngineConfig
+     */
+    private $config;
+
+    /**
      * Search constructor.
      *
      * @param SearchEngineConfig|null $config
+     * @throws SearchEngineException
      */
-    public function __construct( SearchEngineConfig $config = null ) {
+    private function __construct( SearchEngineConfig $config ) {
         $this->translations = $config->getPropertyTranslations();
         $this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
+        $this->config = $config;
+    }
+
+    /**
+     * Instantiates the SearchEngine singleton.
+     *
+     * @param SearchEngineConfig|null $config
+     * @return SearchEngine
+     * @throws SearchEngineException
+     */
+    public static function instantiate( SearchEngineConfig $config ): SearchEngine {
+        if ( !isset( self::$instance ) ) {
+            self::$instance = new SearchEngine( $config );
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Returns the current instance of the SearchEngine.
+     *
+     * @return SearchEngine
+     * @throws SearchEngineException
+     */
+    public static function getInstance(): SearchEngine {
+        if ( !isset( self::$instance ) ) {
+            throw new SearchEngineException( "SearchEngine not instantiated (call SearchEngine::instantiate() first)" );
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Returns the current search engine configuration.
+     *
+     * @return SearchEngineConfig
+     */
+    public function getConfig(): SearchEngineConfig {
+        return $this->config;
     }
 
     /**
@@ -91,6 +141,7 @@ class SearchEngine {
      * Adds the given search term.
      *
      * @param string $search_term
+     * @throws SearchEngineException
      */
     public function addSearchTerm( string $search_term ) {
         $search_term_filter = new SearchTermFilter( $search_term );

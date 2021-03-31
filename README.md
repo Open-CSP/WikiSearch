@@ -1,5 +1,13 @@
 # WSSearch
 
+## Installation
+* Download and place the file(s) in a directory called WSSearch in your extensions/ folder.
+* Add the following code at the bottom of your LocalSettings.php:
+  * wfLoadExtension( 'MWUnit' );
+* Run the update script which will automatically create the necessary database tables that this extension needs.
+* Run Composer.
+* Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
+
 ## Hooks
 
 ### `WSSearchBeforeElasticQuery`
@@ -100,6 +108,26 @@ reasons. It sets the search condition for that page, the list of facet propertie
 
 Note: Only one call to `#searchEngineConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
 
+#### Search parameters
+Certain configuration parameters can also be given through the search engine config. This section documents these parameters and their
+behaviour.
+
+##### `base query`
+The `base query` configuration parameter can be used to add a base query to the search. This base query is given as a Semantic MediaWiki query. A
+document will only be included in the search if it matched both the base query and the generated query.
+
+##### `highlighted properties`
+The `highlighted properties` configuration parameter can be used to specify alternate properties that should be highlighted. Please note that these
+properties do need to be part of the search space.
+
+##### `search term properties`
+The `search term properties` configuration parameter can be used to specify alternate properties to search through when doing a free-text search. These
+properties may also be chained properties.
+
+##### `default operator`
+The `default operator` configuration parameter can be used to change the default operator of the free-text search. The default operator inserted between
+each term is `or` and this configuration parameters allows the administrator to change that to an `and` if required.
+
 ### `#loadSearchEngine` (case-sensitive)
 The `#loadSearchEngine` parser function is used to load the frontend. The parameters and return value of this parser function
 depend completely on the frontend.
@@ -177,6 +205,32 @@ The above filter only includes pages where the property `Class` has the value `M
 
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
 
+#### HasPropertyFilter
+
+```
+{
+    "key": "Class",
+    "value": "+"
+}
+```
+
+The above filter only includes pages that have the property `Class`. It does not take the value of the property into account.
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
+
+#### PropertyTextFilter
+```
+{
+    "key": "Class",
+    "value": "Foo | (Bar + Quz)",
+    "type": "query"
+}
+```
+
+The above filter executes the given query and only includes pages that matched the executed query. The query syntax is identical to the simple query syntax used by ElasticSearch.
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
+
 ### Aggregations syntax
 
 The `aggregations` parameter takes a list of objects. These objects have the following form:
@@ -231,3 +285,17 @@ The `sortings` parameter takes a list of objects. These objects have the followi
 The above filter sorts the results based on the value of the property `Genre` in an `asc`ending order. It is also possible to sort in a `desc`ending order.
 
 > **Note:** Sorting on a property that does not exist will result in an error.
+
+## Chained properties
+WSSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
+
+```
+{
+    "key": "Subpage.Foobar",
+    "value": "+"
+}
+```
+
+For instance, the above filter matches any page for which the value of the property "Subpage" is a page that contains the property "Foobar".
+
+See also: https://www.semantic-mediawiki.org/wiki/Help:Subqueries_and_property_chains

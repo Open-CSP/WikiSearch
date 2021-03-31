@@ -11,7 +11,10 @@ use WSSearch\SMW\PropertyFieldMapper;
 /**
  * Class DateRangeFilter
  *
- * Represents a date range filter to filter in between date properties values.
+ * Represents a date range filter to filter in between date properties values. This filter does not take
+ * property chains into account.
+ *
+ * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
