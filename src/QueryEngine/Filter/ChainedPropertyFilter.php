@@ -11,10 +11,14 @@ use WSSearch\SMW\PropertyFieldMapper;
 /**
  * Class ChainedPropertyTermsFilter
  *
+ * This class is used to allow searching of property chains. It takes an initial filter and a property, and
+ * recursively constructs a new filter from the results of the initial filter until the end of the
+ * property chain is reached.
+ *
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
  */
-class ChainedPropertyValuesFilter implements Filter {
+class ChainedPropertyFilter implements Filter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
@@ -38,20 +42,23 @@ class ChainedPropertyValuesFilter implements Filter {
     }
 
     /**
+     * @inheritDoc
+     *
      * @return BoolQuery
      * @throws \MWException
+     * @throws \WSSearch\SearchEngineException
      */
     public function toQuery(): BoolQuery {
         $query = $this->constructSubqueryFromFilter( $this->filter );
         $terms = $this->getTermsFromSubquery( $query );
 
-        $filter = new PropertyValuesFilter( $this->property, $terms );
+        $filter = new PagesPropertyFilter( $this->property, $terms );
 
         if ( $this->property->getChainedPropertyFieldMapper() === null ) {
             return $filter->toQuery();
         }
 
-        return ( new ChainedPropertyValuesFilter(
+        return ( new ChainedPropertyFilter(
             $filter,
             $this->property->getChainedPropertyFieldMapper()
         ) )->toQuery();
@@ -67,6 +74,7 @@ class ChainedPropertyValuesFilter implements Filter {
     private function constructSubqueryFromFilter( Filter $filter ): array {
         $query_engine = QueryEngineFactory::fromNull();
         $query_engine->addConstantScoreFilter( $filter );
+        $query_engine->setLimit( 9999 );
 
         return $query_engine->toArray();
     }
@@ -78,11 +86,25 @@ class ChainedPropertyValuesFilter implements Filter {
      * @return array
      */
     private function getTermsFromSubquery( array $query ): array {
-        $results = ClientBuilder::create()->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )->build()->search( $query );
+        $results = ClientBuilder::create()
+            ->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
+            ->build()
+            ->search( $query );
+        $hits = $results["hits"]["hits"];
 
-        // TODO
-        var_dump($results); die();
+        return array_map( function ( array $hit ): int {
+            /*
+             * Below is an example of what $hit may look like:
+             *
+             * {
+             *      "_index": "smw-data-csp_wikibase_nl-v2",
+             *      "_type": "data",
+             *      "_id": "2673",
+             *      "_score": 1
+             * }
+             */
 
-        return [];
+            return intval( $hit["_id"] );
+        }, $hits );
     }
 }
