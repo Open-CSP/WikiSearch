@@ -114,7 +114,7 @@ class DefaultHighlighter implements Highlighter {
         $fields = explode( $separator, $parameter ); // Split the string on the given separator
         $fields = array_map( "trim", $fields ); // Remove any excess whitespace
         return array_map( function( $property ): string {
-            return ( new PropertyFieldMapper( $property ) )->getPropertyField( true ); // Map the property name to its field
+            return ( new PropertyFieldMapper( $property ) )->getPropertyField(); // Map the property name to its field
         }, $fields );
     }
 }
