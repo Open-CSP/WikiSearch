@@ -48,6 +48,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
      * @inheritDoc
      * @throws ApiUsageException
      * @throws MWException
+     * @throws SearchEngineException
      */
     public function execute() {
         $this->checkUserRights();
@@ -163,6 +164,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
      * @param SearchEngineConfig $engine_config
      * @return SearchEngine
      * @throws ApiUsageException
+     * @throws SearchEngineException
      */
     private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
         $search_engine_factory = new SearchEngineFactory( $engine_config );

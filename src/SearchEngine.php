@@ -67,6 +67,7 @@ class SearchEngine {
      * Search constructor.
      *
      * @param SearchEngineConfig|null $config
+     * @throws SearchEngineException
      */
     private function __construct( SearchEngineConfig $config ) {
         $this->translations = $config->getPropertyTranslations();
@@ -79,8 +80,9 @@ class SearchEngine {
      *
      * @param SearchEngineConfig|null $config
      * @return SearchEngine
+     * @throws SearchEngineException
      */
-    public static function instantiate(SearchEngineConfig $config ): SearchEngine {
+    public static function instantiate( SearchEngineConfig $config ): SearchEngine {
         if ( !isset( self::$instance ) ) {
             self::$instance = new SearchEngine( $config );
         }

@@ -47,8 +47,6 @@ class FieldHighlighter implements Highlighter {
     public function __construct( array $fields = null, array $field_settings = null, Config $config = null ) {
         $this->config = $config === null ? MediaWikiServices::getInstance()->getMainConfig() : $config;
 
-        $search_engine_config = SearchEngine::getInstance()->getConfig();
-
         if ( $fields !== null ) {
             $this->fields = $fields;
         } else {
