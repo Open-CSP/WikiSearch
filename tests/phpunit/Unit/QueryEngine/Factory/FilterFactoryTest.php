@@ -7,6 +7,7 @@ use WSSearch\QueryEngine\Factory\FilterFactory;
 use WSSearch\QueryEngine\Filter\Filter;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
+use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -110,7 +111,10 @@ class FilterFactoryTest extends \MediaWikiUnitTestCase {
                     "key" => $this->propertyFieldMapperMock( "Age" ),
                     "value" => []
                 ],
-                null
+                new PropertyValuesFilter(
+                	$this->propertyFieldMapperMock( "Age" ),
+					[]
+				)
             ],
             [
                 [

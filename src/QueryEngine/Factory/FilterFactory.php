@@ -34,7 +34,8 @@ class FilterFactory {
             return null;
         }
 
-        $property_field_mapper = new PropertyFieldMapper( $array["key"] );
+        $property_field_mapper = $array["key"] instanceof PropertyFieldMapper ?
+			$array["key"] : new PropertyFieldMapper( $array["key"] );
         $filter = self::filterFromArray( $array, $property_field_mapper );
 
         if ( $filter !== null && $property_field_mapper->isChained() ) {
