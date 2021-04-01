@@ -34,14 +34,7 @@ class FilterFactory {
         }
 
         $property_field_mapper = new PropertyFieldMapper( $array["key"] );
-
-        if ( isset( $array["range"] ) ) {
-            $filter = self::rangeFilterFromArray( $array, $property_field_mapper );
-        } else if ( isset( $array[ "value" ] ) ) {
-            $filter = self::valueFilterFromArray( $array, $property_field_mapper );
-        } else {
-            return null;
-        }
+        $filter = self::filterFromArray( $array, $property_field_mapper );
 
         if ( $filter !== null && $property_field_mapper->isChained() ) {
             // This is a chained filter property
@@ -52,53 +45,105 @@ class FilterFactory {
         return $filter;
     }
 
-    /**
-     * Constructs a new range filter from the given array. Returns null on failure.
-     *
-     * @param array $array
-     * @param PropertyFieldMapper $property_field_mapper
-     * @return PropertyRangeFilter|null
-     */
-    private static function rangeFilterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
-        if ( !is_array( $array["range"] ) ) {
-            return null;
-        }
+	/**
+	 * Constructs a new filter from the given array.
+	 *
+	 * @param array $array
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return HasPropertyFilter|PropertyRangeFilter|PropertyTextFilter|PropertyValueFilter|null
+	 */
+    private static function filterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
+    	if ( isset( $array["range"] ) ) {
+			if ( !is_array( $array["range"] ) ) {
+				return null;
+			}
 
-        return new PropertyRangeFilter(
-            $property_field_mapper,
-            $array["range"]
-        );
-    }
+    		return self::rangeFilterFromRange( $array["range"], $property_field_mapper );
+		}
+
+    	if ( isset( $array["value"] ) ) {
+			if ( !is_string( $array["value"] ) && !is_bool( $array["value"] ) ) {
+				return null;
+			}
+
+			return self::valueFilterFromValue( $array["value"], $property_field_mapper );
+		}
+
+		if ( isset( $array["type"] ) ) {
+			if ( !is_string( $array["type"] ) ) {
+				return null;
+			}
+
+			return self::typeFilterFromArray( $array["type"], $array, $property_field_mapper );
+		}
+
+    	return null;
+	}
 
     /**
      * Constructs a new value filter from the given array. Returns null on failure.
      *
-     * @param array $array
+     * @param string|bool $value
      * @param PropertyFieldMapper $property_field_mapper
      * @return HasPropertyFilter|PropertyTextFilter|PropertyValueFilter|null
      */
-    private static function valueFilterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
-        if ( !is_string( $array["value"] ) ) {
-            return null;
+    private static function valueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ) {
+        if ( $value === "+" ) {
+            return self::hasPropertyFilterFromProperty( $property_field_mapper );
         }
 
-        if ( isset( $array["type"] ) ) {
-            if ( $array["type"] === "query") {
-                return new PropertyTextFilter( $property_field_mapper, $array["value"] );
-            }
-
-            return null;
-        }
-
-        if ( $array["value"] === "+" ) {
-            // This should match any page that has the property
-            return new HasPropertyFilter( $property_field_mapper );
-        }
-
-        // This is a "regular" property
-        return new PropertyValueFilter(
-            $property_field_mapper,
-            $array["value"]
-        );
+        return self::propertyValueFilterFromValue( $value, $property_field_mapper );
     }
+
+	/**
+	 * @param string $type
+	 * @param array $array
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return PropertyTextFilter|null
+	 */
+	private static function typeFilterFromArray( string $type, array $array, PropertyFieldMapper $property_field_mapper ) {
+		switch ( $type ) {
+			case "query":
+				return self::propertyTextFilterFromArray( $array, $property_field_mapper );
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * Constructs a new range filter from the given range.
+	 *
+	 * @param array $range
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return PropertyRangeFilter
+	 */
+	private static function rangeFilterFromRange( array $range, PropertyFieldMapper $property_field_mapper ) {
+		return new PropertyRangeFilter( $property_field_mapper, $range );
+	}
+
+	/**
+	 * @param string|bool $value
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return PropertyValueFilter
+	 */
+	private static function propertyValueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ) {
+		return new PropertyValueFilter( $property_field_mapper, $value );
+	}
+
+	/**
+	 * @param array $array
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return PropertyTextFilter
+	 */
+	private static function propertyTextFilterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
+		return new PropertyTextFilter( $property_field_mapper, $array["value"] );
+	}
+
+	/**
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return HasPropertyFilter
+	 */
+	private static function hasPropertyFilterFromProperty( PropertyFieldMapper $property_field_mapper ) {
+		return new HasPropertyFilter( $property_field_mapper );
+	}
 }

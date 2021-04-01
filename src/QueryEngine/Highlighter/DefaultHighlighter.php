@@ -3,12 +3,9 @@
 
 namespace WSSearch\QueryEngine\Highlighter;
 
-use Config;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;
-use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**

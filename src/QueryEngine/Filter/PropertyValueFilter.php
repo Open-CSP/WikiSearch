@@ -25,7 +25,7 @@ class PropertyValueFilter implements Filter {
     private $property;
 
     /**
-     * @var string The value the property to filter on
+     * @var string|bool The value the property to filter on
      */
     private $property_value;
 
@@ -33,9 +33,9 @@ class PropertyValueFilter implements Filter {
      * PropertyFilter constructor.
      *
      * @param PropertyFieldMapper|string $property The name or object of the property to filter on
-     * @param string $property_value The value the property to filter on
+     * @param string|bool $property_value The value the property to filter on
      */
-    public function __construct( $property, string $property_value ) {
+    public function __construct( $property, $property_value ) {
         if ( is_string( $property ) ) {
             $property = new PropertyFieldMapper( $property );
         }
