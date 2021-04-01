@@ -46,6 +46,8 @@ class SearchTermFilter implements Filter {
             }, $properties );
 
             foreach ( $property_field_mappers as $mapper ) {
+            	assert( $mapper instanceof PropertyFieldMapper );
+
                 if ( $mapper->isChained() ) {
                     $this->chained_properties[] = $mapper;
                 } else {

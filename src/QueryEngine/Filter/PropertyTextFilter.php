@@ -60,7 +60,7 @@ class PropertyTextFilter implements Filter {
      *
      * @param PropertyFieldMapper $property
      */
-    public function setPropertyName(PropertyFieldMapper $property ) {
+    public function setPropertyName( PropertyFieldMapper $property ) {
         $this->property = $property;
     }
 

@@ -43,6 +43,12 @@ class PagesPropertyFilter implements Filter {
             throw new SearchEngineException( "Cannot apply PropertyPagesFilter to non-page property" );
         }
 
+        foreach ( $pages as $page ) {
+        	if ( !is_int( $page ) ) {
+        		throw new \InvalidArgumentException();
+			}
+		}
+
         $this->property = $property;
         $this->property_values = $pages;
     }
@@ -62,6 +68,12 @@ class PagesPropertyFilter implements Filter {
      * @param int[] $property_values
      */
     public function setPropertyValues( array $property_values ) {
+		foreach ( $property_values as $value ) {
+			if ( !is_int( $value ) ) {
+				throw new \InvalidArgumentException();
+			}
+		}
+
         $this->property_values = $property_values;
     }
 

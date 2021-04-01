@@ -44,6 +44,10 @@ class PropertyValueFilter implements Filter {
             throw new \InvalidArgumentException();
         }
 
+		if ( !in_array( gettype( $property_value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
+			throw new \InvalidArgumentException();
+		}
+
         $this->property = $property;
         $this->property_value = $property_value;
     }
@@ -53,7 +57,7 @@ class PropertyValueFilter implements Filter {
      *
      * @param PropertyFieldMapper $property
      */
-    public function setPropertyName(PropertyFieldMapper $property ) {
+    public function setPropertyName( PropertyFieldMapper $property ) {
         $this->property = $property;
     }
 
@@ -62,7 +66,11 @@ class PropertyValueFilter implements Filter {
      *
      * @param string $property_value
      */
-    public function setPropertyValue( string $property_value ) {
+    public function setPropertyValue( $property_value ) {
+		if ( !in_array( gettype( $property_value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
+			throw new \InvalidArgumentException();
+		}
+
         $this->property_value = $property_value;
     }
 
