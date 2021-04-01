@@ -3,6 +3,7 @@
 namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\SimpleQueryStringQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -79,10 +80,11 @@ class PropertyTextFilter implements Filter {
      * @return BoolQuery
      */
     public function toQuery(): BoolQuery {
-        $query_string_query = new SimpleQueryStringQuery( $this->property_value_query );
+		$search_term = $this->prepareSearchTerm( $this->property_value_query );
+
+        $query_string_query = new QueryStringQuery( $search_term );
         $query_string_query->setParameters( [
             "fields" => [$this->property->getPropertyField()],
-            "minimum_should_match" => 1,
             "default_operator" => $this->default_operator
         ] );
 
@@ -91,4 +93,24 @@ class PropertyTextFilter implements Filter {
 
         return $bool_query;
     }
+
+	/**
+	 * Prepares the search term for use with ElasticSearch.
+	 *
+	 * @param string $search_term
+	 * @return string
+	 */
+	private function prepareSearchTerm( string $search_term ): string {
+		$search_term = trim( $search_term );
+		$term_length = strlen( $search_term );
+
+		if ( $term_length === 0 ) {
+			return "*";
+		}
+
+		// Disable regex searches by replacing each "/" with "\/"
+		$search_term = str_replace( "/", "\\/", $search_term );
+
+		return $search_term;
+	}
 }
