@@ -141,7 +141,20 @@ class PropertyFieldMapper {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
      */
 	public function getPropertyField( bool $keyword = false ): string {
-	    $suffix = $keyword === true && $this->property_type !== "numField" ? ".keyword" : "";
+	    switch ( $this->property_type ) {
+			case "numField":
+			case "booField":
+				$suffix = "";
+				break;
+			default:
+				$suffix = ".keyword";
+				break;
+		}
+
+		if ( $keyword === false ) {
+			$suffix = "";
+		}
+
 	    return "P:{$this->property_id}.{$this->property_type}{$suffix}";
     }
 

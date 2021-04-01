@@ -64,11 +64,12 @@ class SearchEngineFactory {
         return $this->engine;
     }
 
-    /**
-     * Sets the search term field.
-     *
-     * @param string $term The search term to set
-     */
+	/**
+	 * Sets the search term field.
+	 *
+	 * @param string $term The search term to set
+	 * @throws SearchEngineException
+	 */
     private function setTerm( string $term ) {
         $this->engine->addSearchTerm( $term );
     }
