@@ -201,9 +201,29 @@ The `range` parameter takes an object that allows the following properties:
 }
 ```
 
-The above filter only includes pages where the property `Class` has the value `Manual`.
+The above filter only includes pages where the property `Class` has the value `Manual`. The `value` may
+by any of the following data types:
+
+* string
+* boolean
+* integer
+* float
+* double
 
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
+
+#### PropertyValuesFilter
+
+```
+{
+    "key": "Class",
+    "value": ["foo", "bar"]
+}
+```
+
+The above filter only includes pages where the property `Class` has the value `foo` or `bar`.
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
 
 #### HasPropertyFilter
 
