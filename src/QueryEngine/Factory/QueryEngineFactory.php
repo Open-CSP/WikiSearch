@@ -28,15 +28,23 @@ class QueryEngineFactory {
      *
      * @param SearchEngineConfig|null $config
      * @return QueryEngine
-     * @throws SearchEngineException
-     */
+	 */
     public static function fromSearchEngineConfig( SearchEngineConfig $config = null ): QueryEngine {
         $mw_config = MediaWikiServices::getInstance()->getMainConfig();
         $index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
         $query_engine = new QueryEngine( $index, self::getElasticSearchHosts() );
 
+        $aggregation_size = $config->getSearchParameter( "aggregation size" ) !== false ?
+			$config->getSearchParameter( "aggregation size" ) : null;
+
         foreach ( $config->getFacetProperties() as $facet_property ) {
-            $query_engine->addAggregation( new PropertyAggregation( explode( "=", $facet_property )[0] ) );
+        	$aggregation = new PropertyAggregation(
+        		explode( "=", $facet_property )[0],
+				null,
+				$aggregation_size
+			);
+
+            $query_engine->addAggregation( $aggregation );
         }
 
         // Configure the base query
