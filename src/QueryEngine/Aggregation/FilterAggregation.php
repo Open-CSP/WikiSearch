@@ -5,7 +5,7 @@ namespace WSSearch\QueryEngine\Aggregation;
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\RangeAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
-use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -28,7 +28,7 @@ class FilterAggregation implements Aggregation {
     private $aggregations;
 
     /**
-     * @var Filter
+     * @var AbstractFilter
      */
     private $filter;
 
@@ -36,11 +36,11 @@ class FilterAggregation implements Aggregation {
     /**
      * FilterAggregation constructor.
      *
-     * @param Filter $filter
+     * @param AbstractFilter $filter
      * @param Aggregation[] $aggregations
      * @param string|null $aggregation_name
      */
-    public function __construct( Filter $filter, array $aggregations, string $aggregation_name ) {
+    public function __construct(AbstractFilter $filter, array $aggregations, string $aggregation_name ) {
         $this->filter = $filter;
         $this->aggregations = $aggregations;
         $this->aggregation_name = $aggregation_name;

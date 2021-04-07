@@ -20,7 +20,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
  */
-class PagesPropertyFilter implements Filter {
+class PagesPropertyFilter extends AbstractFilter {
     /**
      * @var PropertyFieldMapper
      */

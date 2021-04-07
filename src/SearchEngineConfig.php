@@ -32,7 +32,7 @@ use WSSearch\SMW\SMWQueryProcessor;
  * @package WSSearch
  */
 class SearchEngineConfig {
-    const SEARCH_PARAMETER_KEYS = [ "base query", "highlighted properties", "search term properties", "default operator", "aggregation size" ];
+    const SEARCH_PARAMETER_KEYS = [ "base query", "highlighted properties", "search term properties", "default operator", "aggregation size", "post filter properties" ];
 
 	/**
 	 * @var Title

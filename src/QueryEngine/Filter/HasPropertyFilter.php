@@ -18,7 +18,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
  */
-class HasPropertyFilter implements Filter {
+class HasPropertyFilter extends AbstractFilter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */

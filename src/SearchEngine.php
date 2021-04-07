@@ -30,7 +30,7 @@ use Parser;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;

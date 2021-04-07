@@ -14,7 +14,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @package WSSearch\QueryEngine\Filter
  */
-class SearchTermFilter implements Filter {
+class SearchTermFilter extends AbstractFilter {
 	const OP_AND = "and";
 	const OP_OR = "or";
 
@@ -123,10 +123,8 @@ class SearchTermFilter implements Filter {
 			return "*";
 		}
 
-		// Disable regex searches by replacing each "/" with "\/"
-		$search_term = str_replace( "/", "\\/", $search_term );
-
-		// Disable field name searches by replacing each ":" with "\:"
+		// Disable regex searches by replacing each "/" with " "
+		$search_term = str_replace( "/", ' ', $search_term );
 
 		// Don't insert wildcard around terms when the user is performing an "advanced query"
 		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?"];
@@ -137,6 +135,12 @@ class SearchTermFilter implements Filter {
 		if ( !$is_advanced_query ) {
 			$search_term = $this->insertWildcards( $search_term );
 		}
+
+		// Disable certain search operators by escaping them
+		$search_term = str_replace( ":", '\:', $search_term );
+		$search_term = str_replace( "+", '\+', $search_term );
+		$search_term = str_replace( "-", '\-', $search_term );
+		$search_term = str_replace( "=", '\=', $search_term );
 
 		return $search_term;
 	}
@@ -158,7 +162,7 @@ class SearchTermFilter implements Filter {
 
 		// Insert quotes around each term
 		for ( $idx = 0; $idx < $num_terms; $idx++ ) {
-			$is_term = ($idx % 2) === 0;
+			$is_term = ($idx % 2) === 0 && !empty( $terms[$idx] );
 
 			if ( $is_term ) {
 				$terms[$idx] = "*{$terms[$idx]}*";

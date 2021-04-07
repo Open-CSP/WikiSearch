@@ -31,7 +31,7 @@ use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Factory\AggregationFactory;
 use WSSearch\QueryEngine\Factory\FilterFactory;
 use WSSearch\QueryEngine\Factory\SortFactory;
-use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;

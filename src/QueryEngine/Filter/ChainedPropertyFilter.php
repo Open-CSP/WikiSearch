@@ -19,25 +19,25 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
  */
-class ChainedPropertyFilter implements Filter {
+class ChainedPropertyFilter extends AbstractFilter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
     private $property;
 
     /**
-     * @var Filter The initial filter to use to get the terms for the to be constructed Terms filter
+     * @var AbstractFilter The initial filter to use to get the terms for the to be constructed Terms filter
      */
     private $filter;
 
     /**
      * ChainedPropertyTermsFilter constructor.
      *
-     * @param Filter $filter The initial filter to use to get the values for the to be constructed Terms filter
+     * @param AbstractFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
      * @param PropertyFieldMapper $property The property to filter on; if this property is also a property
      * chain, the class will return a ChainedPropertyTermsFilter containing the constructed TermsFilter
      */
-    public function __construct( Filter $filter, PropertyFieldMapper $property ) {
+    public function __construct(AbstractFilter $filter, PropertyFieldMapper $property ) {
         $this->filter = $filter;
         $this->property = $property;
     }
@@ -68,11 +68,11 @@ class ChainedPropertyFilter implements Filter {
     /**
      * Constructs a new ElasticSearch subquery from the given Filter.
      *
-     * @param Filter $filter
+     * @param AbstractFilter $filter
      * @return array
      * @throws \MWException
      */
-    private function constructSubqueryFromFilter( Filter $filter ): array {
+    private function constructSubqueryFromFilter(AbstractFilter $filter ): array {
         $query_engine = QueryEngineFactory::fromNull();
         $query_engine->addConstantScoreFilter( $filter );
         $query_engine->setLimit( 9999 );
