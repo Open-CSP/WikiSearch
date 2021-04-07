@@ -128,6 +128,12 @@ properties may also be chained properties.
 The `default operator` configuration parameter can be used to change the default operator of the free-text search. The default operator inserted between
 each term is `or` and this configuration parameters allows the administrator to change that to an `and` if required.
 
+##### `post filter properties`
+The `post filter properties` configuration parameter can be used to specify which filters should be added as a post filter instead
+of a regular filter. This parameter takes a comma-separated list of property names. Each filter that applies to any of the given property names
+will be added as a post filter. The difference between post filters and regular filters is explained [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-post-filter.html).
+This configuration parameter is especially useful when you have disjunct checkbox properties.
+
 ### `#loadSearchEngine` (case-sensitive)
 The `#loadSearchEngine` parser function is used to load the frontend. The parameters and return value of this parser function
 depend completely on the frontend.
