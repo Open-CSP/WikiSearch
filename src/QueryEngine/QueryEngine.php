@@ -8,9 +8,10 @@ use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Highlighter\Highlighter;
 use WSSearch\QueryEngine\Sort\Sort;
+use WSSearch\SearchEngine;
 use WSSearch\SMW\SMWQueryProcessor;
 
 /**
@@ -92,26 +93,26 @@ class QueryEngine {
     /**
      * Adds a filter to the constant-score fragment of the query.
      *
-     * @param Filter $filter
+     * @param AbstractFilter $filter
      * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
      */
-    public function addConstantScoreFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
-        $this->constant_score_filters->add($filter->toQuery(), $occur);
+    public function addConstantScoreFilter(AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
+    	$this->constant_score_filters->add($filter->toQuery(), $occur);
     }
 
     /**
      * Adds a filter to the function-score fragment of the query.
      *
-     * @param Filter $filter
+     * @param AbstractFilter $filter
      * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
      */
-    public function addFunctionScoreFilter( Filter $filter, string $occur = BoolQuery::MUST ) {
+    public function addFunctionScoreFilter(AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
         $this->function_score_filters->add( $filter->toQuery(), $occur );
     }
 

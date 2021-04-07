@@ -4,7 +4,7 @@ namespace WSSearch\Tests\Phpunit\Unit\QueryEngine\Factory;
 
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
 use WSSearch\QueryEngine\Factory\FilterFactory;
-use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
@@ -34,7 +34,7 @@ class FilterFactoryTest extends \MediaWikiUnitTestCase {
     /**
      * @dataProvider filterArrays
      */
-    public function testFromArray( array $filter_array, Filter $expected_filter = null ) {
+    public function testFromArray(array $filter_array, AbstractFilter $expected_filter = null ) {
         $this->assertEquals( $expected_filter, $this->filter_factory->fromArray( $filter_array ) );
     }
 

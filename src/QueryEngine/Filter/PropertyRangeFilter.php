@@ -19,7 +19,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
  */
-class PropertyRangeFilter implements Filter {
+class PropertyRangeFilter extends AbstractFilter {
     /**
      * @var \WSSearch\SMW\PropertyFieldMapper The property to apply the filter to
      */

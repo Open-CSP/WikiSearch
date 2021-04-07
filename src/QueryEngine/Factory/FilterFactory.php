@@ -4,12 +4,14 @@ namespace WSSearch\QueryEngine\Factory;
 
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
 use WSSearch\QueryEngine\Filter\ChainedPropertyFilter;
-use WSSearch\QueryEngine\Filter\Filter;
+use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Filter\HasPropertyFilter;
 use WSSearch\QueryEngine\Filter\PropertyTextFilter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
+use WSSearch\SearchEngine;
+use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -18,13 +20,14 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Factory
  */
 class FilterFactory {
-    /**
-     * Constructs a new Filter class from the given array. The given array directly corresponds to the array given by
-     * the user through the API. Returns "null" on failure.
-     *
-     * @param array $array
-     * @return Filter|null
-     */
+	/**
+	 * Constructs a new Filter class from the given array. The given array directly corresponds to the array given by
+	 * the user through the API. Returns "null" on failure.
+	 *
+	 * @param array $array
+	 * @return AbstractFilter|null
+	 * @throws SearchEngineException
+	 */
     public static function fromArray( array $array ) {
         if ( !isset( $array["key"] ) ) {
             return null;
@@ -37,6 +40,16 @@ class FilterFactory {
         $property_field_mapper = $array["key"] instanceof PropertyFieldMapper ?
 			$array["key"] : new PropertyFieldMapper( $array["key"] );
         $filter = self::filterFromArray( $array, $property_field_mapper );
+
+        $search_engine_config = SearchEngine::getInstance()->getConfig();
+
+        // TODO: Optimise this so it is not repeated for each constructed filter
+        $post_filter_properties = $search_engine_config->getSearchParameter( "post filter properties" );
+        $post_filter_properties = array_map( "trim", explode( ",", $post_filter_properties ) );
+
+        if ( in_array( $array["key"], $post_filter_properties, true ) ) {
+        	$filter->setPostFilter();
+		}
 
         if ( $filter !== null && $property_field_mapper->isChained() ) {
             // This is a chained filter property
@@ -52,7 +65,7 @@ class FilterFactory {
 	 *
 	 * @param array $array
 	 * @param PropertyFieldMapper $property_field_mapper
-	 * @return Filter|null
+	 * @return AbstractFilter|null
 	 */
     private static function filterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
     	if ( isset( $array["range"] ) ) {
@@ -83,7 +96,7 @@ class FilterFactory {
      *
      * @param mixed $value
      * @param PropertyFieldMapper $property_field_mapper
-     * @return Filter|null
+     * @return AbstractFilter|null
      */
     private static function valueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ) {
         if ( $value === "+" ) {
