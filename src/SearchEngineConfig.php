@@ -34,7 +34,7 @@ use WSSearch\SMW\SMWQueryProcessor;
 class SearchEngineConfig {
     const SEARCH_PARAMETER_KEYS = [
     	"base query" 			 =>	["type" => "string"],
-		"highlighted properties" => ["type" => "propertylist"],
+		"highlighted properties" => ["type" => "propertyfieldlist"],
 		"search term properties" => ["type" => "propertylist"],
 		"default operator" 		 => ["type" => "string"],
 		"aggregation size" 		 =>	["type" => "integer"],
@@ -154,39 +154,15 @@ class SearchEngineConfig {
             }
 
             $key_value_pair = explode( "=", $parameter );
-            $key = $key_value_pair[0];
+            $key = trim( $key_value_pair[0] );
 
-            if ( !in_array( $key_value_pair[0], array_keys( self::SEARCH_PARAMETER_KEYS ) ) ) {
+            if ( !in_array( $key, array_keys( self::SEARCH_PARAMETER_KEYS ) ) ) {
                 // This is a "facet property", since its key is not a valid search parameter
                 $facet_properties[] = $parameter;
-                continue;
-            }
-
-            $search_parameter_value = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
-            $search_parameter_type = isset( self::SEARCH_PARAMETER_KEYS[$key]["type"] ) ?
-				self::SEARCH_PARAMETER_KEYS[$key]["type"] :
-				"string";
-
-            switch ( $search_parameter_type ) {
-				case "integer":
-					$search_parameter_value = intval( $search_parameter_value );
-					break;
-				case "string":
-					$search_parameter_value = trim( $search_parameter_value );
-					break;
-				case "list":
-					$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value ) );
-					break;
-				case "propertylist":
-					$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value ) );
-					$search_parameter_value = array_map( function( $property ): string {
-						// Map the property name to its field
-						return ( new PropertyFieldMapper( $property ) )->getPropertyField();
-					}, $search_parameter_value );
-					break;
+            } else {
+            	// This is a "search term parameter"
+            	$search_parameters[$key] = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
 			}
-
-            $search_parameters[$key] = $search_parameter_value;
         }
 
         return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
@@ -258,15 +234,6 @@ class SearchEngineConfig {
 	}
 
     /**
-     * Returns all search parameters given to the parser function.
-     *
-     * @return array
-     */
-	public function getSearchParameters(): array {
-	    return $this->search_parameters;
-    }
-
-    /**
      * Returns the value of the given search term parameter, or false when the parameter
      * does not exist.
      *
@@ -274,7 +241,42 @@ class SearchEngineConfig {
      * @return false|string|integer|array
      */
     public function getSearchParameter( string $parameter ) {
-	    return isset( $this->search_parameters[$parameter] ) ? $this->search_parameters[$parameter] : false;
+    	if ( !isset( $this->search_parameters[$parameter] ) ) {
+    		return false;
+		}
+
+		$search_parameter_value_raw = $this->search_parameters[$parameter];
+		$search_parameter_type = isset( self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ) ? self::SEARCH_PARAMETER_KEYS[$parameter]["type"] : "untyped";
+
+		switch ( $search_parameter_type ) {
+			case "integer":
+				$search_parameter_value = intval( $search_parameter_value_raw );
+				break;
+			case "string":
+				$search_parameter_value = trim( $search_parameter_value_raw );
+				break;
+			case "list":
+				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				break;
+			case "propertyfieldlist":
+				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				$search_parameter_value = array_map( function( $property ): string {
+					// Map the property name to its field
+					return ( new PropertyFieldMapper( $property ) )->getPropertyField();
+				}, $search_parameter_value );
+				break;
+			case "propertylist":
+				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				$search_parameter_value = array_map( function( $property ): PropertyFieldMapper {
+					// Map the property name to its field
+					return ( new PropertyFieldMapper( $property ) );
+				}, $search_parameter_value );
+				break;
+			default:
+				$search_parameter_value = $search_parameter_value_raw;
+		}
+
+	    return $search_parameter_value;
     }
 
     /**
