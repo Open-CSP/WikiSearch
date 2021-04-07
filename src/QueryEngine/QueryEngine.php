@@ -100,7 +100,11 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
      */
     public function addConstantScoreFilter(AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
-    	$this->constant_score_filters->add($filter->toQuery(), $occur);
+    	if ($filter->isPostFilter()) {
+    		$this->elasticsearch_search->addPostFilter($filter->toQuery(), $occur);
+		} else {
+			$this->constant_score_filters->add($filter->toQuery(), $occur);
+		}
     }
 
     /**
@@ -113,7 +117,11 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
      */
     public function addFunctionScoreFilter(AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
-        $this->function_score_filters->add( $filter->toQuery(), $occur );
+		if ($filter->isPostFilter()) {
+			$this->elasticsearch_search->addPostFilter($filter->toQuery(), $occur);
+		} else {
+			$this->function_score_filters->add($filter->toQuery(), $occur);
+		}
     }
 
     /**
