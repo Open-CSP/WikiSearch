@@ -196,14 +196,14 @@ abstract class WSSearchHooks {
         exit();
 	}
 
-    /**
-     * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
-     * appropriate SearchEngineConfig object and for storing that object in the database.
-     *
-     * @param Parser $parser
-     * @param string ...$parameters
-     * @return string
-     */
+	/**
+	 * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
+	 * appropriate SearchEngineConfig object and for storing that object in the database.
+	 *
+	 * @param Parser $parser
+	 * @param string ...$parameters
+	 * @return string
+	 */
 	public static function searchConfigCallback(Parser $parser, string ...$parameters ): string {
 	    try {
             $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );

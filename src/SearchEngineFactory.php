@@ -17,10 +17,9 @@ class SearchEngineFactory {
      * SearchEngineFactory constructor.
      *
      * @param SearchEngineConfig $config The SearchEngineConfig to construct the engine from
-     * @throws SearchEngineException
-     */
+	 */
     public function __construct( SearchEngineConfig $config ) {
-        $this->engine = SearchEngine::instantiate( $config );
+        $this->engine = new SearchEngine( $config );
     }
 
     /**

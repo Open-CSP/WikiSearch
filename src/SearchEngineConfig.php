@@ -32,7 +32,14 @@ use WSSearch\SMW\SMWQueryProcessor;
  * @package WSSearch
  */
 class SearchEngineConfig {
-    const SEARCH_PARAMETER_KEYS = [ "base query", "highlighted properties", "search term properties", "default operator", "aggregation size", "post filter properties" ];
+    const SEARCH_PARAMETER_KEYS = [
+    	"base query" 			 =>	["type" => "string"],
+		"highlighted properties" => ["type" => "propertylist"],
+		"search term properties" => ["type" => "propertylist"],
+		"default operator" 		 => ["type" => "string"],
+		"aggregation size" 		 =>	["type" => "integer"],
+		"post filter properties" => ["type" => "list"]
+	];
 
 	/**
 	 * @var Title
@@ -149,14 +156,37 @@ class SearchEngineConfig {
             $key_value_pair = explode( "=", $parameter );
             $key = $key_value_pair[0];
 
-            if ( !in_array( $key_value_pair[0], self::SEARCH_PARAMETER_KEYS ) ) {
+            if ( !in_array( $key_value_pair[0], array_keys( self::SEARCH_PARAMETER_KEYS ) ) ) {
                 // This is a "facet property", since its key is not a valid search parameter
                 $facet_properties[] = $parameter;
                 continue;
             }
 
-            $value = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
-            $search_parameters[$key] = $value;
+            $search_parameter_value = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
+            $search_parameter_type = isset( self::SEARCH_PARAMETER_KEYS[$key]["type"] ) ?
+				self::SEARCH_PARAMETER_KEYS[$key]["type"] :
+				"string";
+
+            switch ( $search_parameter_type ) {
+				case "integer":
+					$search_parameter_value = intval( $search_parameter_value );
+					break;
+				case "string":
+					$search_parameter_value = trim( $search_parameter_value );
+					break;
+				case "list":
+					$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value ) );
+					break;
+				case "propertylist":
+					$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value ) );
+					$search_parameter_value = array_map( function( $property ): string {
+						// Map the property name to its field
+						return ( new PropertyFieldMapper( $property ) )->getPropertyField();
+					}, $search_parameter_value );
+					break;
+			}
+
+            $search_parameters[$key] = $search_parameter_value;
         }
 
         return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
@@ -241,7 +271,7 @@ class SearchEngineConfig {
      * does not exist.
      *
      * @param string $parameter
-     * @return false|string
+     * @return false|string|integer|array
      */
     public function getSearchParameter( string $parameter ) {
 	    return isset( $this->search_parameters[$parameter] ) ? $this->search_parameters[$parameter] : false;

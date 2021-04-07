@@ -41,11 +41,7 @@ class FilterFactory {
 			$array["key"] : new PropertyFieldMapper( $array["key"] );
         $filter = self::filterFromArray( $array, $property_field_mapper );
 
-        $search_engine_config = SearchEngine::getInstance()->getConfig();
-
-        // TODO: Optimise this so it is not repeated for each constructed filter
-        $post_filter_properties = $search_engine_config->getSearchParameter( "post filter properties" );
-        $post_filter_properties = array_map( "trim", explode( ",", $post_filter_properties ) );
+        $post_filter_properties = SearchEngine::$config->getSearchParameter( "post filter properties" );
 
         if ( in_array( $array["key"], $post_filter_properties, true ) ) {
         	$filter->setPostFilter();

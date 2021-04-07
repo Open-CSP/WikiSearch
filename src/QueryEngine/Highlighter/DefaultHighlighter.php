@@ -83,13 +83,11 @@ class DefaultHighlighter implements Highlighter {
      */
     private function getDefaultFields(): array {
         if ( $this->config->getSearchParameter( "highlighted properties" ) ) {
-            $highlighted_properties = $this->config->getSearchParameter("highlighted properties");
-            return $this->toPropertyList($highlighted_properties);
+            return $this->config->getSearchParameter("highlighted properties");
         }
 
         if ( $this->config->getSearchParameter( "search term properties" ) ) {
-            $search_term_properties = $this->config->getSearchParameter( "search term properties" );
-            return $this->toPropertyList( $search_term_properties );
+           	return $this->config->getSearchParameter( "search term properties" );
         }
 
         // Fallback fields if no field is specified in the highlighted properties or search term properties
@@ -98,20 +96,5 @@ class DefaultHighlighter implements Highlighter {
             "text_copy",
             "attachment.content"
         ];
-    }
-
-    /**
-     * Takes a string of properties and a separator and returns an array of the property field names.
-     *
-     * @param string $parameter
-     * @param string $separator
-     * @return string[]
-     */
-    private function toPropertyList( string $parameter, string $separator = "," ): array {
-        $fields = explode( $separator, $parameter ); // Split the string on the given separator
-        $fields = array_map( "trim", $fields ); // Remove any excess whitespace
-        return array_map( function( $property ): string {
-            return ( new PropertyFieldMapper( $property ) )->getPropertyField(); // Map the property name to its field
-        }, $fields );
     }
 }
