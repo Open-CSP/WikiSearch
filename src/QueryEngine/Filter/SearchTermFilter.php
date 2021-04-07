@@ -34,18 +34,11 @@ class SearchTermFilter extends AbstractFilter {
 	 */
 	public function __construct( string $search_term ) {
 		$this->search_term = $search_term;
-		$search_engine_config = SearchEngine::getInstance()->getConfig();
 
-		if ( $search_engine_config->getSearchParameter( "search term properties" ) ) {
-			$properties = $search_engine_config->getSearchParameter( "search term properties" );
-			$properties = explode( ",", $properties );
-			$properties = array_map( "trim", $properties );
+		if ( SearchEngine::$config->getSearchParameter( "search term properties" ) ) {
+			$properties = SearchEngine::$config->getSearchParameter( "search term properties" );
 
-			$property_field_mappers = array_map( function ( string $property ): PropertyFieldMapper {
-				return new PropertyFieldMapper( $property );
-			}, $properties );
-
-			foreach ( $property_field_mappers as $mapper ) {
+			foreach ( $properties as $mapper ) {
 				assert( $mapper instanceof PropertyFieldMapper );
 
 				if ( $mapper->isChained() ) {
@@ -83,8 +76,7 @@ class SearchTermFilter extends AbstractFilter {
 	public function toQuery(): BoolQuery {
 		$search_term = $this->prepareSearchTerm( $this->search_term );
 
-		$search_engine_config = SearchEngine::getInstance()->getConfig();
-		$default_operator = trim( $search_engine_config->getSearchParameter( "default operator" ) );
+		$default_operator = SearchEngine::$config->getSearchParameter( "default operator" );
 		$default_operator = $default_operator === "and" ? self::OP_AND : self::OP_OR;
 
 		$bool_query = new BoolQuery();
