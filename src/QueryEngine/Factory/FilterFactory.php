@@ -63,16 +63,16 @@ class FilterFactory {
     		return self::rangeFilterFromRange( $array["range"], $property_field_mapper );
 		}
 
-    	if ( isset( $array["value"] ) ) {
-			return self::valueFilterFromValue( $array["value"], $property_field_mapper );
-		}
-
 		if ( isset( $array["type"] ) ) {
 			if ( !is_string( $array["type"] ) ) {
 				return null;
 			}
 
 			return self::typeFilterFromArray( $array["type"], $array, $property_field_mapper );
+		}
+
+    	if ( isset( $array["value"] ) ) {
+			return self::valueFilterFromValue( $array["value"], $property_field_mapper );
 		}
 
     	return null;
