@@ -76,6 +76,11 @@ class SearchEngineConfig {
      */
     private $translations = [];
 
+	/**
+	 * @var array
+	 */
+    private $search_parameters_cache = [];
+
     /**
 	 * Constructs a new SearchEngineConfig object from the values in the database identified by $page. If no
 	 * SearchEngineConfig object exists in the database for the given $page, NULL will be returned.
@@ -241,6 +246,10 @@ class SearchEngineConfig {
      * @return false|string|integer|array
      */
     public function getSearchParameter( string $parameter ) {
+    	if ( isset( $this->search_parameters_cache[$parameter] ) ) {
+    		return $this->search_parameters_cache[$parameter];
+		}
+
     	if ( !isset( $this->search_parameters[$parameter] ) ) {
     		return false;
 		}
@@ -276,7 +285,9 @@ class SearchEngineConfig {
 				$search_parameter_value = $search_parameter_value_raw;
 		}
 
-	    return $search_parameter_value;
+	    $this->search_parameters_cache[$parameter] = $search_parameter_value;
+
+		return $this->search_parameters_cache[$parameter];
     }
 
     /**
