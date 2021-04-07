@@ -15,9 +15,6 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  */
 class SearchTermFilter extends AbstractFilter {
-	const OP_AND = "and";
-	const OP_OR = "or";
-
 	private $chained_properties = [];
 	private $property_fields = [];
 
@@ -76,19 +73,19 @@ class SearchTermFilter extends AbstractFilter {
 	public function toQuery(): BoolQuery {
 		$search_term = $this->prepareSearchTerm( $this->search_term );
 
-		$default_operator = SearchEngine::$config->getSearchParameter( "default operator" );
-		$default_operator = $default_operator === "and" ? self::OP_AND : self::OP_OR;
-
 		$bool_query = new BoolQuery();
 
 		foreach ( $this->chained_properties as $property ) {
 			// Construct a new chained subquery for each chained property and add it to the bool query
-			$property_text_filter = new PropertyTextFilter( $property, $search_term, $default_operator );
+			$property_text_filter = new PropertyTextFilter( $property, $search_term );
 			$filter = new ChainedPropertyFilter( $property_text_filter, $property->getChainedPropertyFieldMapper() );
 			$bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
 		}
 
 		if ( $this->property_fields !== [] ) {
+			$default_operator = SearchEngine::$config->getSearchParameter( "default operator" );
+			$default_operator = $default_operator === "and" ? "and" : "or";
+
 			$query_string_query = new QueryStringQuery( $search_term );
 			$query_string_query->setParameters( [
 				"fields" => $this->property_fields,
