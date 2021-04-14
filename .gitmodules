@@ -1,0 +1,3 @@
+[submodule "extensions/WSSearchFront"]
+	path = extensions/WSSearchFront
+	url = git@bitbucket.org:wikibasesolutions/wssearchfront.git
