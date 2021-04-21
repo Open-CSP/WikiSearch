@@ -46,6 +46,13 @@ class FilterAggregation implements Aggregation {
         $this->aggregation_name = $aggregation_name;
     }
 
+	/**
+	 * @inheritDoc
+	 */
+	public function getName(): string {
+		return $this->aggregation_name;
+	}
+
     /**
      * @inheritDoc
      */

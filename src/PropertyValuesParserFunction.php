@@ -5,7 +5,7 @@ namespace WSSearch;
 use Elasticsearch\ClientBuilder;
 use Parser;
 use WSSearch\QueryEngine\Aggregation\FilterAggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 
@@ -72,7 +72,7 @@ class PropertyValuesParserFunction {
             [ "to" => $to, "from" => $from ]
         );
 
-        $terms_aggregation = new PropertyAggregation( $property, "common_values", $limit );
+        $terms_aggregation = new PropertyValueAggregation( $property, "common_values", $limit );
 
         $aggregation = new FilterAggregation(
             $range_filter,

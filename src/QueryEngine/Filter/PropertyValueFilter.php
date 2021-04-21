@@ -18,7 +18,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-term-query.html
  */
-class PropertyValueFilter extends AbstractFilter {
+class PropertyValueFilter extends PropertyFilter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
@@ -51,6 +51,15 @@ class PropertyValueFilter extends AbstractFilter {
         $this->property = $property;
         $this->property_value = $property_value;
     }
+
+	/**
+	 * Returns the property field mapper corresponding to this filter.
+	 *
+	 * @return PropertyFieldMapper
+	 */
+	public function getProperty(): PropertyFieldMapper {
+		return $this->property;
+	}
 
     /**
      * Sets the property this filter will filter on.

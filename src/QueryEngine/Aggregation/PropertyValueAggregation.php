@@ -3,20 +3,18 @@
 namespace WSSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
-use ONGR\ElasticsearchDSL\Aggregation\Bucketing\RangeAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class PropertyRangeAggregation
+ * Class PropertyAggregation
  *
- * A multi-bucket value source based aggregation that enables the user to define a
- * set of ranges - each representing a bucket.
+ * Multi-bucket value source based aggregation with buckets of property values.
  *
  * @package WSSearch\QueryEngine\Aggregation
- * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
+ * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
  */
-class PropertyRangeAggregation implements PropertyAggregation {
+class PropertyValueAggregation implements PropertyAggregation {
     /**
      * @var string
      */
@@ -28,18 +26,18 @@ class PropertyRangeAggregation implements PropertyAggregation {
     private $property;
 
     /**
-     * @var array
+     * @var int The maximum number of term buckets to be returned
      */
-    private $ranges;
+    private $size;
 
     /**
      * PropertyAggregation constructor.
      *
      * @param PropertyFieldMapper|string $property The property object or name for the aggregation
-     * @param array $ranges
      * @param string|null $aggregation_name
+     * @param int|null $size The maximum number of term buckets to be returned
      */
-    public function __construct( $property, array $ranges, string $aggregation_name = null ) {
+    public function __construct( $property, string $aggregation_name = null, int $size = null ) {
         if ( is_string( $property ) ) {
             $property = new PropertyFieldMapper( $property );
         }
@@ -54,7 +52,7 @@ class PropertyRangeAggregation implements PropertyAggregation {
 
         $this->aggregation_name = $aggregation_name;
         $this->property = $property;
-        $this->ranges = $ranges;
+        $this->size = $size;
     }
 
     /**
@@ -62,17 +60,8 @@ class PropertyRangeAggregation implements PropertyAggregation {
      *
      * @param PropertyFieldMapper $property
      */
-    public function setProperty(PropertyFieldMapper $property ) {
+    public function setProperty( PropertyFieldMapper $property ) {
         $this->property = $property;
-    }
-
-    /**
-     * Sets the ranges to use for the aggregation.
-     *
-     * @param array $ranges
-     */
-    public function setRanges( array $ranges ) {
-        $this->ranges = $ranges;
     }
 
 	/**
@@ -80,7 +69,7 @@ class PropertyRangeAggregation implements PropertyAggregation {
 	 *
 	 * @return PropertyFieldMapper
 	 */
-    public function getProperty(): PropertyFieldMapper {
+	public function getProperty(): PropertyFieldMapper {
 		return $this->property;
 	}
 
@@ -91,15 +80,19 @@ class PropertyRangeAggregation implements PropertyAggregation {
 		return $this->aggregation_name;
 	}
 
-	/**
+    /**
      * @inheritDoc
      */
     public function toQuery(): AbstractAggregation {
-        return new RangeAggregation(
+        $terms_aggregation = new TermsAggregation(
             $this->aggregation_name,
-            $this->property->getPropertyField(),
-            $this->ranges,
-            true
+            $this->property->getPropertyField( true )
         );
+
+        if ( $this->size !== null ) {
+            $terms_aggregation->addParameter( "size", $this->size );
+        }
+
+        return $terms_aggregation;
     }
 }

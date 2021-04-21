@@ -4,22 +4,22 @@
 namespace WSSearch\Tests\Phpunit\Unit\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyAggregationTest
  *
  * @package WSSearch\Tests\Phpunit\Unit\QueryEngine\Aggregation
- * @covers \WSSearch\QueryEngine\Aggregation\PropertyAggregation
+ * @covers \WSSearch\QueryEngine\Aggregation\PropertyValueAggregation
  */
 class PropertyAggregationTest extends \MediaWikiUnitTestCase {
     public function testCanConstruct() {
         $mock_property_field_mapper = $this->mockPropertyFieldMapper( "", "", "", "", 0 );
 
         $this->assertInstanceOf(
-            PropertyAggregation::class,
-            new PropertyAggregation( $mock_property_field_mapper )
+            PropertyValueAggregation::class,
+            new PropertyValueAggregation( $mock_property_field_mapper )
         );
     }
 
@@ -27,7 +27,7 @@ class PropertyAggregationTest extends \MediaWikiUnitTestCase {
      * @dataProvider samplePropertyFieldMappers
      */
     public function testAggregationNameIsPropertyNameWhenEmpty( PropertyFieldMapper $field_mapper ) {
-        $property_aggregation = new PropertyAggregation( $field_mapper );
+        $property_aggregation = new PropertyValueAggregation( $field_mapper );
         $abstract_aggregation = $property_aggregation->toQuery();
 
         $this->assertSame( $field_mapper->getPropertyName(), $abstract_aggregation->getName() );
@@ -37,7 +37,7 @@ class PropertyAggregationTest extends \MediaWikiUnitTestCase {
      * @dataProvider samplePropertyFieldMappers
      */
     public function testAggregationNameIsCorrectWhenNonempty( PropertyFieldMapper $field_mapper ) {
-        $property_aggregation = new PropertyAggregation( $field_mapper, "AGGREGATION_NAME" );
+        $property_aggregation = new PropertyValueAggregation( $field_mapper, "AGGREGATION_NAME" );
         $abstract_aggregation = $property_aggregation->toQuery();
 
         $this->assertSame( "AGGREGATION_NAME", $abstract_aggregation->getName() );
@@ -47,7 +47,7 @@ class PropertyAggregationTest extends \MediaWikiUnitTestCase {
      * @dataProvider samplePropertyFieldMappers
      */
     public function testToQuery( PropertyFieldMapper $field_mapper ) {
-        $property_aggregation = new PropertyAggregation( $field_mapper );
+        $property_aggregation = new PropertyValueAggregation( $field_mapper );
         $abstract_aggregation = $property_aggregation->toQuery();
 
         $this->assertEquals( new TermsAggregation(

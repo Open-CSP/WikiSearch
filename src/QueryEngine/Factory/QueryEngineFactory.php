@@ -3,7 +3,7 @@
 namespace WSSearch\QueryEngine\Factory;
 
 use MediaWiki\MediaWikiServices;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\SearchEngineConfig;
@@ -38,7 +38,7 @@ class QueryEngineFactory {
 			$config->getSearchParameter( "aggregation size" ) : null;
 
         foreach ( $config->getFacetProperties() as $facet_property ) {
-        	$aggregation = new PropertyAggregation(
+        	$aggregation = new PropertyValueAggregation(
         		explode( "=", $facet_property )[0],
 				null,
 				$aggregation_size

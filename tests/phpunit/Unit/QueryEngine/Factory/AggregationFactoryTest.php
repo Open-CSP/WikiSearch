@@ -3,7 +3,7 @@
 namespace WSSearch\Tests\Phpunit\Unit\QueryEngine\Factory;
 
 use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
 use WSSearch\QueryEngine\Factory\AggregationFactory;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -165,7 +165,7 @@ class AggregationFactoryTest extends \MediaWikiUnitTestCase {
                     "property" => $this->propertyFieldMapperMock( "Price" ),
                     "name" => "Foobar"
                 ],
-                new PropertyAggregation(
+                new PropertyValueAggregation(
                     $this->propertyFieldMapperMock( "Price" ),
                     "Foobar"
                 )
@@ -177,7 +177,7 @@ class AggregationFactoryTest extends \MediaWikiUnitTestCase {
                     "property" => $this->propertyFieldMapperMock( "Price" ),
                     "name" => "Foobar"
                 ],
-                new PropertyAggregation(
+                new PropertyValueAggregation(
                     $this->propertyFieldMapperMock( "Price" ),
                     "Foobar"
                 )
