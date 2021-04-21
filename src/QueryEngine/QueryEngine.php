@@ -310,7 +310,10 @@ class QueryEngine {
 		if ( !$has_filter_applied ) {
 			return $aggregation->toQuery();
 		} else {
-			return new FilterAggregation( $aggregation->getName(), $compound_filter );
+			$filter_aggregation = new FilterAggregation( $aggregation->getName(), $compound_filter );
+			$filter_aggregation->addAggregation( $aggregation->toQuery() );
+
+			return $filter_aggregation;
 		}
 	}
 }
