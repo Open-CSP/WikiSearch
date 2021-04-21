@@ -3,9 +3,12 @@
 namespace WSSearch\QueryEngine;
 
 use MediaWiki\MediaWikiServices;
+use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
+use ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
+use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use ONGR\ElasticsearchDSL\Search;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
@@ -269,7 +272,7 @@ class QueryEngine {
 		}
 
 		foreach ( $aggregations as $aggregation ) {
-			$search->addAggregation( self::constructFilterAggregation( $aggregation, $post_filters ) );
+			$search->addAggregation( self::constructAggregation( $aggregation, $post_filters ) );
 		}
 
 		return $search;
@@ -280,12 +283,14 @@ class QueryEngine {
 	 *
 	 * @param Aggregation $aggregation
 	 * @param AbstractFilter[] $post_filters
-	 * @return \ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation
+	 * @return AbstractAggregation
 	 */
-	private static function constructFilterAggregation(
+	private static function constructAggregation(
 		Aggregation $aggregation,
 		array $post_filters
-	): \ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation {
+	) {
+		$has_filter_applied = false;
+
 		$compound_filter = new BoolQuery();
 		$aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
 
@@ -297,13 +302,15 @@ class QueryEngine {
 
 			// If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
 			if ( !$filter_belongs_to_aggregation ) {
+				$has_filter_applied = true;
 				$compound_filter->add( $filter->toQuery() );
 			}
 		}
 
-		return new \ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation(
-			$aggregation->getName(),
-			$compound_filter
-		);
+		if ( !$has_filter_applied ) {
+			return $aggregation->toQuery();
+		} else {
+			return new FilterAggregation( $aggregation->getName(), $compound_filter );
+		}
 	}
 }
