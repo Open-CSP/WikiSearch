@@ -20,7 +20,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
  */
-class PagesPropertyFilter extends AbstractFilter {
+class PagesPropertyFilter extends PropertyFilter {
     /**
      * @var PropertyFieldMapper
      */
@@ -52,6 +52,15 @@ class PagesPropertyFilter extends AbstractFilter {
         $this->property = $property;
         $this->property_values = $pages;
     }
+
+	/**
+	 * Returns the property field mapper corresponding to this filter.
+	 *
+	 * @return PropertyFieldMapper
+	 */
+	public function getProperty(): PropertyFieldMapper {
+		return $this->property;
+	}
 
     /**
      * Sets the property this filter will filter on.

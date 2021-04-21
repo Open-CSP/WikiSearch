@@ -4,7 +4,7 @@
 namespace WSSearch\QueryEngine\Factory;
 
 use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
 use WSSearch\SMW\PropertyFieldMapper;
 
@@ -72,7 +72,7 @@ class AggregationFactory {
      * on failure.
      *
      * @param array $array
-     * @return PropertyAggregation|null
+     * @return PropertyValueAggregation|null
      */
     private static function propertyAggregationFromArray( array $array ) {
         $aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
@@ -88,6 +88,6 @@ class AggregationFactory {
             return null;
         }
 
-        return new PropertyAggregation( $property, $aggregation_name );
+        return new PropertyValueAggregation( $property, $aggregation_name );
     }
 }

@@ -18,7 +18,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
  */
-class PropertyTextFilter extends AbstractFilter {
+class PropertyTextFilter extends PropertyFilter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
@@ -53,6 +53,15 @@ class PropertyTextFilter extends AbstractFilter {
         $this->property_value_query = $property_value_query;
         $this->default_operator = SearchEngine::$config->getSearchParameter("default operator") === "and" ? "and" : "or";
     }
+
+	/**
+	 * Returns the property field mapper corresponding to this filter.
+	 *
+	 * @return PropertyFieldMapper
+	 */
+	public function getProperty(): PropertyFieldMapper {
+		return $this->property;
+	}
 
     /**
      * Sets the property this filter will filter on.

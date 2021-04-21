@@ -3,15 +3,19 @@
 namespace WSSearch\QueryEngine;
 
 use MediaWiki\MediaWikiServices;
+use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
+use ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
+use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use ONGR\ElasticsearchDSL\Search;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\AbstractFilter;
+use WSSearch\QueryEngine\Filter\PropertyFilter;
 use WSSearch\QueryEngine\Highlighter\Highlighter;
 use WSSearch\QueryEngine\Sort\Sort;
-use WSSearch\SearchEngine;
 use WSSearch\SMW\SMWQueryProcessor;
 
 /**
@@ -32,19 +36,6 @@ class QueryEngine {
      */
     private $elasticsearch_index;
 
-    /**
-     * The main constant score boolean query filter.
-     *
-     * @var BoolQuery
-     */
-    private $constant_score_filters;
-
-    /**
-     * The main function score boolean query filter.
-     *
-     * @var BoolQuery
-     */
-    private $function_score_filters;
 
     /**
      * The base ElasticSearch query.
@@ -59,6 +50,34 @@ class QueryEngine {
      * @var array
      */
     private $elasticsearch_hosts;
+
+	/**
+	 * The main constant score boolean query filter.
+	 *
+	 * @var BoolQuery
+	 */
+	private $constant_score_filters;
+
+	/**
+	 * The main function score boolean query filter.
+	 *
+	 * @var BoolQuery
+	 */
+	private $function_score_filters;
+
+	/**
+	 * List of aggregations to calculate.
+	 *
+	 * @var Aggregation[]
+	 */
+	private $aggregations = [];
+
+	/**
+	 * List of filters to be applied after aggregations have been calculated.
+	 *
+	 * @var AbstractFilter[]
+	 */
+	private $post_filters = [];
 
     /**
      * QueryEngine constructor.
@@ -87,7 +106,7 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
      */
     public function addAggregation( Aggregation $aggregation ) {
-        $this->elasticsearch_search->addAggregation( $aggregation->toQuery() );
+    	$this->aggregations[] = $aggregation;
     }
 
     /**
@@ -99,11 +118,13 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
      */
-    public function addConstantScoreFilter(AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
-    	if ($filter->isPostFilter()) {
-    		$this->elasticsearch_search->addPostFilter($filter->toQuery(), $occur);
+    public function addConstantScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
+    	$query = $filter->toQuery();
+
+    	if ( $filter->isPostFilter() ) {
+    		$this->post_filters[] = $filter;
 		} else {
-			$this->constant_score_filters->add($filter->toQuery(), $occur);
+			$this->constant_score_filters->add($query, $occur);
 		}
     }
 
@@ -116,11 +137,13 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
      */
-    public function addFunctionScoreFilter(AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
-		if ($filter->isPostFilter()) {
-			$this->elasticsearch_search->addPostFilter($filter->toQuery(), $occur);
+    public function addFunctionScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
+    	$query = $filter->toQuery();
+
+		if ( $filter->isPostFilter() ) {
+			$this->post_filters[] = $filter;
 		} else {
-			$this->function_score_filters->add($filter->toQuery(), $occur);
+			$this->function_score_filters->add($query, $occur);
 		}
     }
 
@@ -211,9 +234,16 @@ class QueryEngine {
      * @throws \MWException
      */
     public function toArray(): array {
+    	$elasticsearch_search = clone $this->elasticsearch_search;
+		$elasticsearch_search = $this->applyAggregationsAndPostFilters(
+    		$elasticsearch_search,
+			$this->aggregations,
+			$this->post_filters
+		);
+
         $query = [
             "index" => $this->elasticsearch_index,
-            "body" => $this->elasticsearch_search->toArray()
+            "body"  => $elasticsearch_search->toArray()
         ];
 
         if ( isset( $this->base_query ) ) {
@@ -222,4 +252,61 @@ class QueryEngine {
 
         return $query;
     }
+
+	/**
+	 * Applies the given aggregations and post filters to the given Search object.
+	 *
+	 * @param Search $search
+	 * @param Aggregation[] $aggregations
+	 * @param AbstractFilter[] $post_filters
+	 *
+	 * @return Search
+	 */
+    private static function applyAggregationsAndPostFilters(
+    	Search $search,
+		array $aggregations,
+		array $post_filters
+	): Search {
+    	foreach ( $post_filters as $filter ) {
+    		$search->addPostFilter( $filter->toQuery() );
+		}
+
+		foreach ( $aggregations as $aggregation ) {
+			$search->addAggregation( self::constructAggregation( $aggregation, $post_filters ) );
+		}
+
+		return $search;
+	}
+
+	/**
+	 * Constructs a new FilterAggregation from the given Aggregation and post filters.
+	 *
+	 * @param Aggregation $aggregation
+	 * @param AbstractFilter[] $post_filters
+	 * @return AbstractAggregation
+	 */
+	private static function constructAggregation(
+		Aggregation $aggregation,
+		array $post_filters
+	) {
+		$compound_filter = new BoolQuery();
+		$aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
+
+		foreach ( $post_filters as $filter ) {
+			$filter_property = $filter instanceof PropertyFilter ? $filter->getProperty() : null;
+			$filter_belongs_to_aggregation = $aggregation_property !== null &&
+				$filter_property !== null &&
+				$aggregation_property->getPropertyField( false ) === $filter_property->getPropertyField( false );
+
+			// If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
+			if ( !$filter_belongs_to_aggregation ) {
+				$compound_filter->add( $filter->toQuery(), BoolQuery::FILTER );
+			}
+		}
+
+		$filter_aggregation = new FilterAggregation( $aggregation->getName(), $compound_filter );
+		$filter_aggregation->addAggregation( $aggregation->toQuery() );
+
+		return $filter_aggregation;
+	}
 }

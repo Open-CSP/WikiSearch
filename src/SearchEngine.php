@@ -28,7 +28,7 @@ use MWNamespace;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use Parser;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;

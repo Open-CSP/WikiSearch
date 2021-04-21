@@ -19,7 +19,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
  */
-class PropertyRangeFilter extends AbstractFilter {
+class PropertyRangeFilter extends PropertyFilter {
     /**
      * @var \WSSearch\SMW\PropertyFieldMapper The property to apply the filter to
      */
@@ -61,6 +61,15 @@ class PropertyRangeFilter extends AbstractFilter {
             $this->options["boost"] = 1.0;
         }
     }
+
+	/**
+	 * Returns the property field mapper corresponding to this filter.
+	 *
+	 * @return PropertyFieldMapper
+	 */
+	public function getProperty(): PropertyFieldMapper {
+		return $this->property;
+	}
 
     /**
      * @inheritDoc

@@ -18,7 +18,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
  */
-class HasPropertyFilter extends AbstractFilter {
+class HasPropertyFilter extends PropertyFilter {
     /**
      * @var PropertyFieldMapper The property to filter on
      */
@@ -40,6 +40,15 @@ class HasPropertyFilter extends AbstractFilter {
 
         $this->property = $property;
     }
+
+	/**
+	 * Returns the property field mapper corresponding to this filter.
+	 *
+	 * @return PropertyFieldMapper
+	 */
+	public function getProperty(): PropertyFieldMapper {
+		return $this->property;
+	}
 
     /**
      * Sets the property this filter will filter on.
