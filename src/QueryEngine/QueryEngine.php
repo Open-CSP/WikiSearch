@@ -289,8 +289,6 @@ class QueryEngine {
 		Aggregation $aggregation,
 		array $post_filters
 	) {
-		$has_filter_applied = false;
-
 		$compound_filter = new BoolQuery();
 		$aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
 
@@ -302,18 +300,13 @@ class QueryEngine {
 
 			// If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
 			if ( !$filter_belongs_to_aggregation ) {
-				$has_filter_applied = true;
 				$compound_filter->add( $filter->toQuery() );
 			}
 		}
 
-		if ( !$has_filter_applied ) {
-			return $aggregation->toQuery();
-		} else {
-			$filter_aggregation = new FilterAggregation( $aggregation->getName(), $compound_filter );
-			$filter_aggregation->addAggregation( $aggregation->toQuery() );
+		$filter_aggregation = new FilterAggregation( $aggregation->getName(), $compound_filter );
+		$filter_aggregation->addAggregation( $aggregation->toQuery() );
 
-			return $filter_aggregation;
-		}
+		return $filter_aggregation;
 	}
 }
