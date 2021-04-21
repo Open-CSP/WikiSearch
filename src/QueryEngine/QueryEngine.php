@@ -268,7 +268,7 @@ class QueryEngine {
 		array $post_filters
 	): Search {
     	foreach ( $post_filters as $filter ) {
-    		$search->addPostFilter( $filter );
+    		$search->addPostFilter( $filter->toQuery() );
 		}
 
 		foreach ( $aggregations as $aggregation ) {
@@ -296,11 +296,11 @@ class QueryEngine {
 			$filter_property = $filter instanceof PropertyFilter ? $filter->getProperty() : null;
 			$filter_belongs_to_aggregation = $aggregation_property !== null &&
 				$filter_property !== null &&
-				$filter_property->getPropertyField( false ) === $filter_property->getPropertyField( false );
+				$aggregation_property->getPropertyField( false ) === $filter_property->getPropertyField( false );
 
 			// If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
 			if ( !$filter_belongs_to_aggregation ) {
-				$compound_filter->add( $filter->toQuery() );
+				$compound_filter->add( $filter->toQuery(), BoolQuery::FILTER );
 			}
 		}
 
