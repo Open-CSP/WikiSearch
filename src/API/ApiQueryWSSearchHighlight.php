@@ -73,10 +73,23 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$query_engine->addConstantScoreFilter( $page_filter );
 		$query_engine->addConstantScoreFilter( $search_term_filter );
 
+		$query = $query_engine->toArray();
+
 		$results = ClientBuilder::create()
 			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
 			->build()
-			->search( $query_engine->toArray() );
+			->search( $query );
+
+		try {
+			$config = MediaWikiServices::getInstance()->getMainConfig();
+			$in_debug_mode = $config->get( "WSSearchEnableDebugMode" );
+		} catch( \ConfigException $exception ) {
+			$in_debug_mode = false;
+		}
+
+		if ( $in_debug_mode === true ) {
+			$this->getResult()->addValue( null, 'query', $query);
+		}
 
 		$this->getResult()->addValue(null, "value", $results);
 	}
