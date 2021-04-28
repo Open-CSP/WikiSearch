@@ -26,8 +26,9 @@ class SearchTermFilter extends AbstractFilter {
 	/**
 	 * SearchTermFilter constructor.
 	 *
+	 * Note: This filter requires a valid SearchEngineConfig to be defined via SearchEngine::$config.
+	 *
 	 * @param string $search_term
-	 * @throws SearchEngineException
 	 */
 	public function __construct( string $search_term ) {
 		$this->search_term = $search_term;

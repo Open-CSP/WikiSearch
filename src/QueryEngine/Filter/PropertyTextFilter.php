@@ -36,6 +36,8 @@ class PropertyTextFilter extends PropertyFilter {
 
     /**
      * PropertyFilter constructor.
+	 *
+	 * Note: This filter requires a valid SearchEngineConfig to be defined via SearchEngine::$config.
      *
      * @param PropertyFieldMapper|string $property The name or object of the property to filter on
      * @param string $property_value_query The query string used to match the property value

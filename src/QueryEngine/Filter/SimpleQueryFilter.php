@@ -72,6 +72,7 @@ class SimpleQueryFilter extends AbstractFilter {
 	 * @return string
 	 */
 	private function prepareSearchTerm( string $search_term ): string {
+		// TODO: Remove code duplication (this function is identical to the one in SearchTermFilter)
 		$search_term = trim( $search_term );
 		$term_length = strlen( $search_term );
 
@@ -108,6 +109,7 @@ class SimpleQueryFilter extends AbstractFilter {
 	 * @return string
 	 */
 	private function insertWildcards( string $search_string ): string {
+		// TODO: Remove code duplication (this function is identical to the one in SearchTermFilter)
 		$terms = preg_split( "/((?<=\w)\b\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
 
 		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and

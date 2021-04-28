@@ -7,6 +7,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use WSSearch\SMW\PropertyFieldMapper;
+use WSSearch\SMW\WikiPageObjectIdLookup;
 
 /**
  * Class PageFilter
@@ -46,8 +47,8 @@ class PageFilter extends AbstractFilter {
 	 */
 	public function toQuery(): BoolQuery {
 		$term_query = new TermQuery(
-			"subject.title",
-			$this->title->getFullText()
+			"_id",
+			WikiPageObjectIdLookup::getObjectIdForTitle( $this->title )
 		);
 
 		$bool_query = new BoolQuery();

@@ -30,15 +30,10 @@ use MWException;
 use Title;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\PageFilter;
-use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\Filter\SimpleQueryFilter;
-use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\Highlighter\IndividualWordHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
-use WSSearch\SearchEngine;
-use WSSearch\SearchEngineConfig;
 use WSSearch\SearchEngineException;
-use WSSearch\SearchEngineFactory;
 
 /**
  * Class ApiQueryWSSearchHighlight

@@ -25,6 +25,7 @@ use BadMethodCallException;
 use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
+use SMW\DIWikiPage;
 use SMW\Elastic\ElasticStore;
 
 /**
