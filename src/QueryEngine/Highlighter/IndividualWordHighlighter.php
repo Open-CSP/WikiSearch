@@ -48,7 +48,7 @@ class IndividualWordHighlighter implements Highlighter {
 
 		foreach ( $this->fields as $field ) {
 			$highlight->addField( $field, [
-				"fragment_size" => 0,
+				"fragment_size" => 1,
 				"number_of_fragments" => $this->limit
 			] );
 		}

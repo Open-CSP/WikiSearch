@@ -73,25 +73,14 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$query_engine->addConstantScoreFilter( $page_filter );
 		$query_engine->addConstantScoreFilter( $search_term_filter );
 
-		$query = $query_engine->toArray();
-
 		$results = ClientBuilder::create()
 			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
 			->build()
-			->search( $query );
+			->search( $query_engine->toArray() );
 
-		try {
-			$config = MediaWikiServices::getInstance()->getMainConfig();
-			$in_debug_mode = $config->get( "WSSearchEnableDebugMode" );
-		} catch( \ConfigException $exception ) {
-			$in_debug_mode = false;
-		}
+		$words = $this->wordsFromResult( $results );
 
-		if ( $in_debug_mode === true ) {
-			$this->getResult()->addValue( null, 'query', $query);
-		}
-
-		$this->getResult()->addValue(null, "value", $results);
+		$this->getResult()->addValue( null, 'words', $words );
 	}
 
 	/**
@@ -142,5 +131,30 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 	 */
 	private function getEngine(): QueryEngine {
 		return QueryEngineFactory::fromNull();
+	}
+
+	/**
+	 * Converts an ElasticSearch result to a list of highlight words.
+	 *
+	 * @param array $result
+	 * @return array
+	 */
+	private function wordsFromResult( array $result ): array {
+		$buffer = [];
+
+		$hits = $result["hits"]["hits"];
+		foreach ( $hits as $hit ) {
+			if ( !isset( $hit["highlight"] ) ) {
+				continue;
+			}
+
+			$highlights = $hit["highlight"];
+
+			foreach ( $highlights as $highlight ) {
+				$buffer = array_merge( $buffer, $highlight );
+			}
+		}
+
+		return array_values( array_unique( $buffer ) );
 	}
 }

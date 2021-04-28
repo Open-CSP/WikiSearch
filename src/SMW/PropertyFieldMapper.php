@@ -38,7 +38,16 @@ use SMW\Elastic\ElasticStore;
 class PropertyFieldMapper {
 	const SPECIAL_PROPERTIES = [
 		"text_copy",
-		"text_raw"
+		"text_raw",
+		"subject.title",
+		"subject.subobject",
+		"subject.namespace",
+		"subject.interwiki",
+		"subject.sortkey",
+		"subject.serialization",
+		"subject.sha1",
+		"subject.rev_id",
+		"subject.namespacename"
 	];
 
 	/**
