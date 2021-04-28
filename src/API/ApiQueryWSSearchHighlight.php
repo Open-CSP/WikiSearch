@@ -99,7 +99,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 				ApiBase::PARAM_REQUIRED => true
 			],
 			'page_id' => [
-				ApiBase::PARAM_TYPE => 'int',
+				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_REQUIRED => true
 			],
 			'limit' => [
