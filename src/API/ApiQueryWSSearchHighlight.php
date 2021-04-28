@@ -31,6 +31,7 @@ use Title;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\PageFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
+use WSSearch\QueryEngine\Filter\SimpleQueryFilter;
 use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\Highlighter\IndividualWordHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
@@ -68,7 +69,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		}
 
 		$highlighter = new IndividualWordHighlighter( $properties, $limit );
-		$search_term_filter = new SearchTermFilter( $query );
+		$search_term_filter = new SimpleQueryFilter( $query, $properties );
 		$page_filter = new PageFilter( $title );
 
 		$query_engine = $this->getEngine();
