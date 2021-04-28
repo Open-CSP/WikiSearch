@@ -30,10 +30,11 @@ use MWException;
 use Title;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\PageFilter;
-use WSSearch\QueryEngine\Filter\SimpleQueryFilter;
+use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\Highlighter\IndividualWordHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\SearchEngineException;
+use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class ApiQueryWSSearchHighlight
@@ -56,6 +57,9 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$page_id = $this->getParameter( "page_id" );
 
 		$properties = explode( ",", $properties );
+		$properties = array_map(function( string $property ): PropertyFieldMapper {
+			return new PropertyFieldMapper( $property );
+		}, $properties);
 
 		$title = Title::newFromID( $page_id );
 
@@ -64,7 +68,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		}
 
 		$highlighter = new IndividualWordHighlighter( $properties, $limit );
-		$search_term_filter = new SimpleQueryFilter( $query, $properties );
+		$search_term_filter = new SearchTermFilter( $query, $properties );
 		$page_filter = new PageFilter( $title );
 
 		$query_engine = $this->getEngine();

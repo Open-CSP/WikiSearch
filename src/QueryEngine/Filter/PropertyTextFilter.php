@@ -55,6 +55,8 @@ class PropertyTextFilter extends PropertyFilter {
 
         $this->property = $property;
         $this->property_value_query = $property_value_query;
+
+        // TODO: Refactor dependency on SearchEngine out of this filter class
         $this->default_operator = SearchEngine::$config->getSearchParameter("default operator") === "and" ? "and" : "or";
     }
 

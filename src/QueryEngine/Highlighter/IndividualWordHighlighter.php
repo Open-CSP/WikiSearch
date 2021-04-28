@@ -29,13 +29,13 @@ class IndividualWordHighlighter implements Highlighter {
 	/**
 	 * FieldHighlighter constructor.
 	 *
-	 * @param string[] $properties
+	 * @param PropertyFieldMapper[] $properties
 	 * @param int $limit
 	 */
 	public function __construct( array $properties, int $limit = 128 ) {
 		$this->limit = $limit;
-		$this->fields = array_map(function( string $property_name ): string {
-			return ( new PropertyFieldMapper( $property_name ) )->getPropertyField();
+		$this->fields = array_map(function( PropertyFieldMapper $property ): string {
+			return $property->getPropertyField();
 		}, $properties );
 	}
 

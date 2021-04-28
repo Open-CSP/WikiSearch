@@ -26,18 +26,22 @@ class SearchTermFilter extends AbstractFilter {
 	private $search_term;
 
 	/**
+	 * @var string
+	 */
+	private $default_operator;
+
+	/**
 	 * SearchTermFilter constructor.
 	 *
-	 * Note: This filter requires a valid SearchEngineConfig to be defined via SearchEngine::$config.
-	 *
 	 * @param string $search_term
+	 * @param PropertyFieldMapper[] $properties
+	 * @param string $default_operator
 	 */
-	public function __construct( string $search_term ) {
+	public function __construct( string $search_term, array $properties = [], string $default_operator = "or" ) {
 		$this->search_term = $search_term;
+		$this->default_operator = $default_operator;
 
-		if ( SearchEngine::$config->getSearchParameter( "search term properties" ) ) {
-			$properties = SearchEngine::$config->getSearchParameter( "search term properties" );
-
+		if ( $properties !== [] ) {
 			foreach ( $properties as $mapper ) {
 				assert( $mapper instanceof PropertyFieldMapper );
 
@@ -86,13 +90,10 @@ class SearchTermFilter extends AbstractFilter {
 		}
 
 		if ( $this->property_fields !== [] ) {
-			$default_operator = SearchEngine::$config->getSearchParameter( "default operator" );
-			$default_operator = $default_operator === "and" ? "and" : "or";
-
 			$query_string_query = new QueryStringQuery( $search_term );
 			$query_string_query->setParameters( [
 				"fields" => $this->property_fields,
-				"default_operator" => $default_operator
+				"default_operator" => $this->default_operator
 			] );
 
 			$bool_query->add( $query_string_query, BoolQuery::SHOULD );
