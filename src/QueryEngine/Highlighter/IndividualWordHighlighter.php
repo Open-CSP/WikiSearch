@@ -9,13 +9,13 @@ use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class FieldHighlighter
+ * Class IndividualWordHighlighter
  *
  * Simple highlighter that returns individual words in the given field(s).
  *
  * @package WSSearch\QueryEngine\Highlighter
  */
-class FieldHighlighter implements Highlighter {
+class IndividualWordHighlighter implements Highlighter {
 	/**
 	 * @var array The fields to apply the highlight to
 	 */
@@ -29,12 +29,14 @@ class FieldHighlighter implements Highlighter {
 	/**
 	 * FieldHighlighter constructor.
 	 *
-	 * @param array $fields
+	 * @param string[] $properties
 	 * @param int $limit
 	 */
-	public function __construct( array $fields, int $limit = 128 ) {
-		$this->fields = $fields;
+	public function __construct( array $properties, int $limit = 128 ) {
 		$this->limit = $limit;
+		$this->fields = array_map(function( string $property_name ): string {
+			return ( new PropertyFieldMapper( $property_name ) )->getPropertyField();
+		}, $properties );
 	}
 
 	/**
