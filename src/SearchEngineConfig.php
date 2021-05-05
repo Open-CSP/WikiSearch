@@ -182,14 +182,6 @@ class SearchEngineConfig {
      * @param array $result_properties
      */
 	public function __construct( Title $title, array $search_parameters, array $facet_properties, array $result_properties ) {
-		if ( empty( $facet_properties ) ) {
-			throw new \InvalidArgumentException( "Invalid facet properties array; at least one facet property is required." );
-		}
-
-		if ( empty( $result_properties ) ) {
-			throw new \InvalidArgumentException( "Invalid result properties array; at least one result property is required." );
-		}
-
 		$this->title = $title;
 		$this->facet_properties = $facet_properties;
 		$this->search_parameters = $search_parameters;
