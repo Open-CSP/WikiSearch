@@ -39,17 +39,17 @@ class PropertyFieldMapper {
 	const SPECIAL_PROPERTIES = [
 		"text_copy",
 		"text_raw",
-		"subject.title",
-		"subject.subobject",
-		"subject.namespace",
-		"subject.interwiki",
-		"subject.sortkey",
-		"subject.serialization",
-		"subject.sha1",
-		"subject.rev_id",
-		"subject.namespacename",
-		"attachment.title",
-		"attachment.content"
+		"subject-title",
+		"subject-subobject",
+		"subject-namespace",
+		"subject-interwiki",
+		"subject-sortkey",
+		"subject-serialization",
+		"subject-sha1",
+		"subject-rev_id",
+		"subject-namespacename",
+		"attachment-title",
+		"attachment-content"
 	];
 
 	/**
@@ -87,25 +87,21 @@ class PropertyFieldMapper {
 	 * @param string $property_name The name of the property (chained property name allowed)
 	 */
 	public function __construct( string $property_name ) {
-		$property_name = trim( $property_name );
+		$store = ApplicationFactory::getInstance()->getStore();
 
-		if ( !in_array( $property_name, self::SPECIAL_PROPERTIES ) ) {
-			// Split the property name on "." to account for chained properties
-			$property_name_chain = explode( ".", $property_name );
-			$property_name = array_pop( $property_name_chain );
-			$chained_property_name = implode( ".", $property_name_chain );
-
-			// Check whether we are the property at the beginning of the chain
-			if ( $chained_property_name !== "" ) {
-				$this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
-			}
+		if ( !$store instanceof ElasticStore ) {
+			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
-        $store = ApplicationFactory::getInstance()->getStore();
+		// Split the property name on "." to account for chained properties
+		$property_name_chain = explode( ".", $property_name );
+		$property_name = array_pop( $property_name_chain );
+		$chained_property_name = implode( ".", $property_name_chain );
 
-        if ( !$store instanceof ElasticStore ) {
-            throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
-        }
+		// Check whether we are the property at the beginning of the chain
+		if ( $chained_property_name !== "" ) {
+			$this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
+		}
 
         $this->property_name = $property_name;
         $this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
@@ -161,9 +157,10 @@ class PropertyFieldMapper {
      */
 	public function getPropertyField( bool $keyword = false ): string {
 		if ( in_array( $this->property_name, self::SPECIAL_PROPERTIES ) ) {
-			return $this->property_name;
+			return str_replace( "-", ".", $this->property_name );
 		}
 
+		// TODO: Make this more general and figure out when, and when not, to use ".keyword"
 	    switch ( $this->property_type ) {
 			case "numField":
 			case "booField":
