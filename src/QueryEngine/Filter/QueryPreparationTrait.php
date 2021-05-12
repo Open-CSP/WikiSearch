@@ -28,8 +28,13 @@ trait QueryPreparationTrait {
 		// Disable regex searches by replacing each "/" with " "
 		$search_term = str_replace( "/", ' ', $search_term );
 
+		// Disable certain search operators by escaping them
+		$search_term = str_replace( ":", '\:', $search_term );
+		$search_term = str_replace( "+", '\+', $search_term );
+		$search_term = str_replace( "=", '\=', $search_term );
+
 		// Don't insert wildcard around terms when the user is performing an "advanced query"
-		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*"];
+		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -"];
 		$is_advanced_query = array_reduce( $advanced_search_chars, function( bool $carry, $char ) use ( $search_term ) {
 			return $carry ?: strpos( $search_term, $char ) !== false;
 		}, false );
@@ -38,12 +43,7 @@ trait QueryPreparationTrait {
 			$search_term = $this->insertWildcards( $search_term );
 		}
 
-		// Disable certain search operators by escaping them
-		$search_term = str_replace( ":", '\:', $search_term );
-		$search_term = str_replace( "+", '\+', $search_term );
-		$search_term = str_replace( "=", '\=', $search_term );
-
-		$search_term = preg_replace("/(?=\S*['-])([a-zA-Z'-]+)/", '"$1"', $search_term );
+		$search_term = preg_replace("/(?=[a-zA-Z'\-_]*['-])([^-][a-zA-Z'\-_]+)/", '"$1"', $search_term );
 
 		return $search_term;
 	}
