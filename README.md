@@ -1,3 +1,14 @@
+---
+title: WSSearch API documentation
+date: May 2021
+author:
+- "Wikibase Solutions"
+numbersections: true
+geometry: margin=2cm
+lang: "en"
+titlepage: true
+---
+
 # WSSearch
 
 ## Installation
@@ -173,9 +184,15 @@ This resulted in the following:
 }
 ```
 
-The `hits` field contains a JSON-encoded string of the ElasticSearch search results. In particular, this field directly corresponds to the `hits.hits` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search) for further details. 
+The `hits` field contains a JSON-encoded string of the ElasticSearch search results. In particular, this field directly corresponds to the `hits.hits` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search) for further details. This fields also contains the associated highlights if specified (see [Highlighting](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/highlighting.html)).
+
+To get the associated page name of any search result, the `subject.namespacename` and `subject.title` property may be concatenated using a colon. The `subject.namespacename` field contains the name of the namespace in which the search result lives, and the `subject.title` field contains the name of the page that matched the search (without a namespace prefix). To get the full URL for this page, you can prepend `http://<wikiurl>/index.php/` to the page name.
 
 The `aggs` field directly corresponds to the `aggregations` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html) for further details.
+
+The `total` field contains the total number of results returned by ElasticSearch.
+
+The `batchcomplete` field can be ignored, since it contains information used for debugging on MediaWiki.
 
 ### Filters syntax
 
