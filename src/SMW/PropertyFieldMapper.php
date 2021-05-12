@@ -177,6 +177,15 @@ class PropertyFieldMapper {
 	    return "P:{$this->property_id}.{$this->property_type}{$suffix}";
     }
 
+	/**
+	 * Returns the text field associated with this property.
+	 *
+	 * @return string
+	 */
+    public function getPropertyTextFieldKeyword(): string {
+		return "P:{$this->property_id}.txtField.keyword";
+	}
+
     /**
      * Returns the property's page field identifier.
      *
