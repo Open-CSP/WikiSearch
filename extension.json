@@ -27,7 +27,8 @@
 		"WSSearchMagic": "i18n/WSSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  "WSSearch": "WSSearch\\API\\ApiQueryWSSearch"
+	  	"WSSearch": "WSSearch\\API\\ApiQueryWSSearch",
+		"WSSearchHighlight": "WSSearch\\API\\ApiQueryWSSearchHighlight"
   	},
 	"AvailableRights": [
 		"wssearch-execute-api"

@@ -25,6 +25,7 @@ use BadMethodCallException;
 use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
+use SMW\DIWikiPage;
 use SMW\Elastic\ElasticStore;
 
 /**
@@ -35,6 +36,20 @@ use SMW\Elastic\ElasticStore;
  * @package WSSearch
  */
 class PropertyFieldMapper {
+	const SPECIAL_PROPERTIES = [
+		"text_copy",
+		"text_raw",
+		"subject.title",
+		"subject.subobject",
+		"subject.namespace",
+		"subject.interwiki",
+		"subject.sortkey",
+		"subject.serialization",
+		"subject.sha1",
+		"subject.rev_id",
+		"subject.namespacename"
+	];
+
 	/**
 	 * @var int The unique ID of the property
 	 */
@@ -141,6 +156,10 @@ class PropertyFieldMapper {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
      */
 	public function getPropertyField( bool $keyword = false ): string {
+		if ( in_array( $this->property_name, self::SPECIAL_PROPERTIES ) ) {
+			return $this->property_name;
+		}
+
 	    switch ( $this->property_type ) {
 			case "numField":
 			case "booField":

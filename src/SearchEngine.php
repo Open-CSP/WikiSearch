@@ -110,7 +110,12 @@ class SearchEngine {
      * @throws SearchEngineException
      */
     public function addSearchTerm( string $search_term ) {
-        $search_term_filter = new SearchTermFilter( $search_term );
+        $search_term_filter = new SearchTermFilter(
+        	$search_term,
+			$this->getConfig()->getSearchParameter( "search term properties" ) ?: [],
+			$this->getConfig()->getSearchParameter( "default operator" ) ?: "or"
+		);
+
         $this->query_engine->addFunctionScoreFilter( $search_term_filter );
     }
 

@@ -19,6 +19,8 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
  */
 class PropertyTextFilter extends PropertyFilter {
+	use QueryPreparationTrait;
+
     /**
      * @var PropertyFieldMapper The property to filter on
      */
@@ -36,6 +38,8 @@ class PropertyTextFilter extends PropertyFilter {
 
     /**
      * PropertyFilter constructor.
+	 *
+	 * Note: This filter requires a valid SearchEngineConfig to be defined via SearchEngine::$config.
      *
      * @param PropertyFieldMapper|string $property The name or object of the property to filter on
      * @param string $property_value_query The query string used to match the property value
@@ -51,6 +55,8 @@ class PropertyTextFilter extends PropertyFilter {
 
         $this->property = $property;
         $this->property_value_query = $property_value_query;
+
+        // TODO: Refactor dependency on SearchEngine out of this filter class
         $this->default_operator = SearchEngine::$config->getSearchParameter("default operator") === "and" ? "and" : "or";
     }
 
@@ -87,7 +93,7 @@ class PropertyTextFilter extends PropertyFilter {
      * @return BoolQuery
      */
     public function toQuery(): BoolQuery {
-		$search_term = $this->prepareSearchTerm( $this->property_value_query );
+		$search_term = $this->prepareQuery( $this->property_value_query );
 
         $query_string_query = new QueryStringQuery( $search_term );
         $query_string_query->setParameters( [
@@ -100,70 +106,4 @@ class PropertyTextFilter extends PropertyFilter {
 
         return $bool_query;
     }
-
-	/**
-	 * Prepares the search term for use with ElasticSearch.
-	 *
-	 * @param string $search_term
-	 * @return string
-	 */
-	private function prepareSearchTerm( string $search_term ): string {
-		// TODO: Remove code duplication (this function is identical to the one in SearchTermFilter)
-		$search_term = trim( $search_term );
-		$term_length = strlen( $search_term );
-
-		if ( $term_length === 0 ) {
-			return "*";
-		}
-
-		// Disable regex searches by replacing each "/" with " "
-		$search_term = str_replace( "/", ' ', $search_term );
-
-		// Don't insert wildcard around terms when the user is performing an "advanced query"
-		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?"];
-		$is_advanced_query = array_reduce( $advanced_search_chars, function( bool $carry, $char ) use ( $search_term ) {
-			return $carry ?: strpos( $search_term, $char ) !== false;
-		}, false );
-
-		if ( !$is_advanced_query ) {
-			$search_term = $this->insertWildcards( $search_term );
-		}
-
-		// Disable certain search operators by escaping them
-		$search_term = str_replace( ":", '\:', $search_term );
-		$search_term = str_replace( "+", '\+', $search_term );
-		$search_term = str_replace( "-", '\-', $search_term );
-		$search_term = str_replace( "=", '\=', $search_term );
-
-		return $search_term;
-	}
-
-	/**
-	 * Inserts wild cards around each term in the provided search string.
-	 *
-	 * @param string $search_string
-	 * @return string
-	 */
-	private function insertWildcards( string $search_string ): string {
-		// TODO: Remove code duplication (this function is identical to the one in SearchTermFilter)
-		$terms = preg_split( "/((?<=\w)\b\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
-
-		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and
-		// every odd element the delimiter between that term and the next term. Calling implode() on
-		// $terms gives back the original search string
-
-		$num_terms = count( $terms );
-
-		// Insert quotes around each term
-		for ( $idx = 0; $idx < $num_terms; $idx++ ) {
-			$is_term = ($idx % 2) === 0 && !empty( $terms[$idx] );
-
-			if ( $is_term ) {
-				$terms[$idx] = "*{$terms[$idx]}*";
-			}
-		}
-
-		// Join everything together again to get the search string
-		return implode( "", $terms );
-	}
 }

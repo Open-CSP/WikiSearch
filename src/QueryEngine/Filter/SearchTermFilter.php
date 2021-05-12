@@ -15,6 +15,8 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Filter
  */
 class SearchTermFilter extends AbstractFilter {
+	use QueryPreparationTrait;
+
 	private $chained_properties = [];
 	private $property_fields = [];
 
@@ -24,17 +26,22 @@ class SearchTermFilter extends AbstractFilter {
 	private $search_term;
 
 	/**
+	 * @var string
+	 */
+	private $default_operator;
+
+	/**
 	 * SearchTermFilter constructor.
 	 *
 	 * @param string $search_term
-	 * @throws SearchEngineException
+	 * @param PropertyFieldMapper[] $properties
+	 * @param string $default_operator
 	 */
-	public function __construct( string $search_term ) {
+	public function __construct( string $search_term, array $properties = [], string $default_operator = "or" ) {
 		$this->search_term = $search_term;
+		$this->default_operator = $default_operator;
 
-		if ( SearchEngine::$config->getSearchParameter( "search term properties" ) ) {
-			$properties = SearchEngine::$config->getSearchParameter( "search term properties" );
-
+		if ( $properties !== [] ) {
 			foreach ( $properties as $mapper ) {
 				assert( $mapper instanceof PropertyFieldMapper );
 
@@ -71,7 +78,7 @@ class SearchTermFilter extends AbstractFilter {
 	 * @throws \MWException
 	 */
 	public function toQuery(): BoolQuery {
-		$search_term = $this->prepareSearchTerm( $this->search_term );
+		$search_term = $this->prepareQuery( $this->search_term );
 
 		$bool_query = new BoolQuery();
 
@@ -83,82 +90,16 @@ class SearchTermFilter extends AbstractFilter {
 		}
 
 		if ( $this->property_fields !== [] ) {
-			$default_operator = SearchEngine::$config->getSearchParameter( "default operator" );
-			$default_operator = $default_operator === "and" ? "and" : "or";
-
 			$query_string_query = new QueryStringQuery( $search_term );
 			$query_string_query->setParameters( [
 				"fields" => $this->property_fields,
-				"default_operator" => $default_operator
+				"default_operator" => $this->default_operator,
+				"analyze_wildcard" => true
 			] );
 
 			$bool_query->add( $query_string_query, BoolQuery::SHOULD );
 		}
 
 		return $bool_query;
-	}
-
-	/**
-	 * Prepares the search term for use with ElasticSearch.
-	 *
-	 * @param string $search_term
-	 * @return string
-	 */
-	private function prepareSearchTerm( string $search_term ): string {
-		$search_term = trim( $search_term );
-		$term_length = strlen( $search_term );
-
-		if ( $term_length === 0 ) {
-			return "*";
-		}
-
-		// Disable regex searches by replacing each "/" with " "
-		$search_term = str_replace( "/", ' ', $search_term );
-
-		// Don't insert wildcard around terms when the user is performing an "advanced query"
-		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?"];
-		$is_advanced_query = array_reduce( $advanced_search_chars, function( bool $carry, $char ) use ( $search_term ) {
-			return $carry ?: strpos( $search_term, $char ) !== false;
-		}, false );
-
-		if ( !$is_advanced_query ) {
-			$search_term = $this->insertWildcards( $search_term );
-		}
-
-		// Disable certain search operators by escaping them
-		$search_term = str_replace( ":", '\:', $search_term );
-		$search_term = str_replace( "+", '\+', $search_term );
-		$search_term = str_replace( "-", '\-', $search_term );
-		$search_term = str_replace( "=", '\=', $search_term );
-
-		return $search_term;
-	}
-
-	/**
-	 * Inserts wild cards around each term in the provided search string.
-	 *
-	 * @param string $search_string
-	 * @return string
-	 */
-	private function insertWildcards( string $search_string ): string {
-		$terms = preg_split( "/((?<=\w)\b\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
-
-		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and
-		// every odd element the delimiter between that term and the next term. Calling implode() on
-		// $terms gives back the original search string
-
-		$num_terms = count( $terms );
-
-		// Insert quotes around each term
-		for ( $idx = 0; $idx < $num_terms; $idx++ ) {
-			$is_term = ($idx % 2) === 0 && !empty( $terms[$idx] );
-
-			if ( $is_term ) {
-				$terms[$idx] = "*{$terms[$idx]}*";
-			}
-		}
-
-		// Join everything together again to get the search string
-		return implode( "", $terms );
 	}
 }
