@@ -107,10 +107,10 @@ class PropertyFieldMapper {
             throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
         }
 
-		$property = new DIProperty( $this->property_key );
-
         $this->property_name = $property_name;
         $this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
+
+		$property = new DIProperty( $this->property_key );
         $this->property_id = $store->getObjectIds()->getSMWPropertyID( $property );
         $this->property_type = $this->translatePropertyValueType( $property->findPropertyValueType() );
 	}
