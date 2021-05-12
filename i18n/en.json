@@ -14,5 +14,19 @@
   "wssearch-api-missing-pageid": "Missing required parameter 'pageid'",
   "wssearch-invalid-dbms": "WSSearch does not support database type `$1`",
   "right-wssearch-execute-api": "Query the WSSearch API",
-  "action-wssearch-execute-api": "query the WSSearch API"
+  "action-wssearch-execute-api": "query the WSSearch API",
+  "apihelp-query+WSSearch-summary": "Perform advanced search queries against an ElasticSearch backend",
+  "apihelp-query+WSSearch-param-pageid": "The page ID of the page that contains the search engine config for the current request",
+  "apihelp-query+WSSearch-param-term": "The search query term used for full-text search",
+  "apihelp-query+WSSearch-param-filter": "An array of filters (as JSON) to apply to the search",
+  "apihelp-query+WSSearch-param-aggregations": "An array of aggregations (as JSON) to apply to the search",
+  "apihelp-query+WSSearch-param-sortings": "An array of sortings (as JSON) to apply to the search",
+  "apihelp-query+WSSearch-param-from": "From which offset to return search results",
+  "apihelp-query+WSSearch-param-limit": "The maximum number of search results to return",
+  "apihelp-query+WSSearchHighlight-param-query": "The query to generate highlights from",
+  "apihelp-query+WSSearchHighlight-param-properties": "The properties to generate highlights from",
+  "apihelp-query+WSSearchHighlight-param-page_id": "The page for which you want to generate highlights",
+  "apihelp-query+WSSearchHighlight-param-limit": "The maximum number of highlights to return",
+  "apihelp-query+WSSearchHighlight-param-size": "The size of the snippets to return (leave blank to highlight individual words)",
+  "apihelp-query+WSSearchHighlight-summary": "Create highlight snippets from an ElasticSearch search query"
 }
