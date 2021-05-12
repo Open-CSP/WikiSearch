@@ -41,8 +41,9 @@ trait QueryPreparationTrait {
 		// Disable certain search operators by escaping them
 		$search_term = str_replace( ":", '\:', $search_term );
 		$search_term = str_replace( "+", '\+', $search_term );
-		$search_term = str_replace( "-", '\-', $search_term );
 		$search_term = str_replace( "=", '\=', $search_term );
+
+		$search_term = preg_replace("/(?<!\w)-(?=\w)/", '\-', $search_term );
 
 		return $search_term;
 	}
@@ -54,7 +55,7 @@ trait QueryPreparationTrait {
 	 * @return string
 	 */
 	public function insertWildcards( string $search_string ): string {
-		$terms = preg_split( "/((?<=\w)\b\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$terms = preg_split( "/((?<=[a-zA-Z_-])(?=$|[^a-zA-Z_-])\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
 
 		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and
 		// every odd element the delimiter between that term and the next term. Calling implode() on
