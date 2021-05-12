@@ -93,7 +93,8 @@ class SearchTermFilter extends AbstractFilter {
 			$query_string_query = new QueryStringQuery( $search_term );
 			$query_string_query->setParameters( [
 				"fields" => $this->property_fields,
-				"default_operator" => $this->default_operator
+				"default_operator" => $this->default_operator,
+				"analyze_wildcard" => true
 			] );
 
 			$bool_query->add( $query_string_query, BoolQuery::SHOULD );
