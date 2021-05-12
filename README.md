@@ -3,7 +3,7 @@
 ## Installation
 * Download and place the file(s) in a directory called WSSearch in your extensions/ folder.
 * Add the following code at the bottom of your LocalSettings.php:
-  * wfLoadExtension( 'MWUnit' );
+  * wfLoadExtension( 'WSSearch' );
 * Run the update script which will automatically create the necessary database tables that this extension needs.
 * Run Composer.
 * Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
