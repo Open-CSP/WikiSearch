@@ -161,7 +161,7 @@ This resulted in the following:
   "batchcomplete": "",
   "result": {
     "total": 0,
-    "hits": [],
+    "hits": "[]",
     "aggs": {
       "Foo": {
         "doc_count_error_upper_bound": 0,
@@ -172,6 +172,10 @@ This resulted in the following:
   }
 }
 ```
+
+The `hits` field contains a JSON-encoded string of the ElasticSearch search results. In particular, this field directly corresponds to the `hits.hits` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search) for further details. 
+
+The `aggs` field directly corresponds to the `aggregations` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html) for further details.
 
 ### Filters syntax
 
