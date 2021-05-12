@@ -139,6 +139,7 @@ The `#loadSearchEngine` parser function is used to load the frontend. The parame
 depend completely on the frontend.
 
 ## API
+### Main WSSearch API
 The API has the following parameters:
 
 * `pageid`: The page ID to use for retrieving the appropriate `searchEngineConfig`
@@ -312,6 +313,37 @@ The above filter sorts the results based on the value of the property `Genre` in
 
 > **Note:** Sorting on a property that does not exist will result in an error.
 
+### Highlight API
+The highlight API has the following properties:
+
+* `query`: The query to generate highlighted terms from
+* `properties`: The properties over which the highlights need to be calculated
+* `page_id`: The page ID of the page on which the highlights need to be calculated
+* `limit`: The number of highlighted terms to calculate; this does not always correspond directly with the number of terms returned, since duplicates are removed after the query to ElasticSearch
+* `size`: The (approximate) size of snippets to generate, leave blank to highlight individual words
+
+An example API call looks like this:
+
+```
+https://csp.wikibase.nl/api.php?action=query&meta=WSSearchHighlight&query=pa*&properties=text_raw&page_id=200&limit=10
+```
+
+This would return:
+
+```
+{
+    "batchcomplete": "",
+    "words": [
+        "third-party",
+        "party",
+        "pa11y",
+        "patterns",
+        "parts",
+        "particular"
+    ]
+}
+```
+
 ## Chained properties
 WSSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
 
@@ -325,3 +357,13 @@ WSSearch provides support for creating filters with chained properties. Chained 
 For instance, the above filter matches any page for which the value of the property "Subpage" is a page that contains the property "Foobar".
 
 See also: https://www.semantic-mediawiki.org/wiki/Help:Subqueries_and_property_chains
+
+## Special properties
+There are a number of special properties defined by Semantic MediaWiki that are worth pointing out. These properties act just like regular properties, but do not appear in Special:Browse.
+
+* `text_copy`: (from SemanticMediaWiki documentation) this mapping is used to enable wide proximity searches on textual annotated elements. The `text_copy` field is a compound field for all strings to be searched when a specific property is unknown.
+* `text_raw`: this mapping contains unstructured, unprocessed raw text from an article.
+* `attachment-title`: this mapping contains the title of a file attachment.
+* `attachment-content`: this mapping contains the content of a file attachment.
+
+For example, if you want to search through PDF files linked through the `Pdf` property, you can use the chained property `Pdf.attachment-content`.
