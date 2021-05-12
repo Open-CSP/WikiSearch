@@ -47,7 +47,9 @@ class PropertyFieldMapper {
 		"subject.serialization",
 		"subject.sha1",
 		"subject.rev_id",
-		"subject.namespacename"
+		"subject.namespacename",
+		"attachment.title",
+		"attachment.content"
 	];
 
 	/**
@@ -85,16 +87,19 @@ class PropertyFieldMapper {
 	 * @param string $property_name The name of the property (chained property name allowed)
 	 */
 	public function __construct( string $property_name ) {
-	    // Split the property name on "." to account for chained properties
-	    $property_name_chain = explode( ".", $property_name );
+		$property_name = trim( $property_name );
 
-        $property_name = array_pop( $property_name_chain );
-        $chained_property_name = implode( ".", $property_name_chain );
+		if ( !in_array( $property_name, self::SPECIAL_PROPERTIES ) ) {
+			// Split the property name on "." to account for chained properties
+			$property_name_chain = explode( ".", $property_name );
+			$property_name = array_pop( $property_name_chain );
+			$chained_property_name = implode( ".", $property_name_chain );
 
-        // Check whether we are the property at the beginning of the chain
-	    if ( $chained_property_name !== "" ) {
-	        $this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
-        }
+			// Check whether we are the property at the beginning of the chain
+			if ( $chained_property_name !== "" ) {
+				$this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
+			}
+		}
 
         $store = ApplicationFactory::getInstance()->getStore();
 
@@ -102,11 +107,10 @@ class PropertyFieldMapper {
             throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
         }
 
+		$property = new DIProperty( $this->property_key );
+
         $this->property_name = $property_name;
         $this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
-
-        $property = new DIProperty( $this->property_key );
-
         $this->property_id = $store->getObjectIds()->getSMWPropertyID( $property );
         $this->property_type = $this->translatePropertyValueType( $property->findPropertyValueType() );
 	}
@@ -176,15 +180,6 @@ class PropertyFieldMapper {
 
 	    return "P:{$this->property_id}.{$this->property_type}{$suffix}";
     }
-
-	/**
-	 * Returns the text field associated with this property.
-	 *
-	 * @return string
-	 */
-    public function getPropertyTextFieldKeyword(): string {
-		return "P:{$this->property_id}.txtField.keyword";
-	}
 
     /**
      * Returns the property's page field identifier.
