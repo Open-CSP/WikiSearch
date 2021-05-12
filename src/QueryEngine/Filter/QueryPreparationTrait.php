@@ -33,8 +33,6 @@ trait QueryPreparationTrait {
 		$search_term = str_replace( "+", '\+', $search_term );
 		$search_term = str_replace( "=", '\=', $search_term );
 
-		$search_term = preg_replace("/(?=\S*['-])([^-][a-zA-Z'\-_]+)/", '"$1"', $search_term );
-
 		// Don't insert wildcard around terms when the user is performing an "advanced query"
 		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -"];
 		$is_advanced_query = array_reduce( $advanced_search_chars, function( bool $carry, $char ) use ( $search_term ) {
@@ -44,6 +42,8 @@ trait QueryPreparationTrait {
 		if ( !$is_advanced_query ) {
 			$search_term = $this->insertWildcards( $search_term );
 		}
+
+		$search_term = preg_replace("/(?=\S*['-])([^-][a-zA-Z'\-_]+)/", '"$1"', $search_term );
 
 		return $search_term;
 	}
