@@ -43,7 +43,7 @@ trait QueryPreparationTrait {
 		$search_term = str_replace( "+", '\+', $search_term );
 		$search_term = str_replace( "=", '\=', $search_term );
 
-		$search_term = preg_replace("/(?=\S*['-])[^-]([a-zA-Z'\-_]+)/", '"$1"', $search_term );
+		$search_term = preg_replace("/(?=\S*['-])([^-][a-zA-Z'\-_]+)/", '"$1"', $search_term );
 
 		return $search_term;
 	}
