@@ -43,7 +43,7 @@ trait QueryPreparationTrait {
 			$search_term = $this->insertWildcards( $search_term );
 		}
 
-		$search_term = preg_replace("/(?=\S*['-])([^-][a-zA-Z'\-_]+)/", '"$1"', $search_term );
+		$search_term = preg_replace("/(?=[a-zA-Z'\-_]*['-])([^-][a-zA-Z'\-_]+)/", '"$1"', $search_term );
 
 		return $search_term;
 	}
