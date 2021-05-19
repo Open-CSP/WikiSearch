@@ -7,6 +7,10 @@ numbersections: true
 geometry: margin=2cm
 lang: "en"
 titlepage: true
+header-includes:
+  - \hypersetup{colorlinks=false,
+            allbordercolors={0 0 0},
+            pdfborderstyle={/S/U/W 1}}
 ---
 
 # WSSearch
@@ -21,15 +25,15 @@ ElasticSearch query that was used to perform the search.
 
 ### Parameters
 
-| Parameter      | Required? | Type      | Description                                                                                                                                                                                              |
-|----------------|-----------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `pageid`       | Yes       | `integer` | The MediaWiki page ID of the page from which the search configuration should be retrieved. Needs to be a valid page ID of a page containing a configuration.                                             |
-| `term`         | No        | `string`  | The search term query to use for the main free-text search. This corresponds to the main search field on a search page. Defaults to the empty string. When no `term` is given, all results are returned. |
-| `from`         | No        | `integer` | The cursor to use for pagination. `from` specifies the offset of the results to return. Defaults to `0`.                                                                                                 |
-| `limit`        | No        | `integer` | The limit on the number of results to return (inclusive). Defaults to `10`.                                                                                                                              |
-| `filter`       | No        | `list`    | The filters to apply to the search. Defaults to the empty list. See below for additional information about the syntax.                                                                                   |
-| `aggregations` | No        | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
-| `sorting`      | No        | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
+| Parameter      | Type      | Description                                                                                                                                                                                              |
+|----------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pageid`       | `integer` | The MediaWiki page ID of the page from which the search configuration should be retrieved. Needs to be a valid page ID of a page containing a configuration.                                             |
+| `term`         | `string`  | The search term query to use for the main free-text search. This corresponds to the main search field on a search page. Defaults to the empty string. When no `term` is given, all results are returned. |
+| `from`         | `integer` | The cursor to use for pagination. `from` specifies the offset of the results to return. Defaults to `0`.                                                                                                 |
+| `limit`        | `integer` | The limit on the number of results to return (inclusive). Defaults to `10`.                                                                                                                              |
+| `filter`       | `list`    | The filters to apply to the search. Defaults to the empty list. See below for additional information about the syntax.                                                                                   |
+| `aggregations` | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
+| `sorting`      | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
 
 ### Example request
 
@@ -43,7 +47,15 @@ curl https://wiki.example.org/api.php \
 -d from=0 \
 -d limit=10 \
 -d pageid=698 \
--d aggregations=[{"type":"range","ranges":[{"from":1,"to":6,"key":"1"},{"from":2,"to":6,"key":"2"},{"from":3,"to":6,"key":"3"},{"from":4,"to":6,"key":"4"},{"from":5,"to":6,"key":"5"}],"property":"Average rating"}]
+-d aggregations=[
+    {"type":"range","ranges":[
+        {"from":1,"to":6,"key":"1"},
+        {"from":2,"to":6,"key":"2"},
+        {"from":3,"to":6,"key":"3"},
+        {"from":4,"to":6,"key":"4"},
+        {"from":5,"to":6,"key":"5"}
+    ],"property":"Average rating"}
+]
 ```
 
 Example response:
@@ -378,28 +390,6 @@ The highlight API has the following properties:
 * `limit`: The number of highlighted terms to calculate; this does not always correspond directly with the number of terms returned, since duplicates are removed after the query to ElasticSearch
 * `size`: The (approximate) size of snippets to generate, leave blank to highlight individual words
 
-An example API call looks like this:
-
-```
-https://csp.wikibase.nl/api.php?action=query&meta=WSSearchHighlight&query=pa*&properties=text_raw&page_id=200&limit=10
-```
-
-This would return:
-
-```
-{
-    "batchcomplete": "",
-    "words": [
-        "third-party",
-        "party",
-        "pa11y",
-        "patterns",
-        "parts",
-        "particular"
-    ]
-}
-```
-
 ## Chained properties
 
 WSSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
@@ -470,7 +460,12 @@ This hook must be implemented by any WSSearch frontend. It gets called when the 
 is called. It has the following signature:
 
 ```php
-function onWSSearchOnLoadFrontend( string &$result, \WSSearch\SearchEngineConfig $config, Parser $parser, array $parameters ) {}
+function onWSSearchOnLoadFrontend( 
+    string &$result, 
+    \WSSearch\SearchEngineConfig $config, 
+    Parser $parser, 
+    array $parameters 
+) {}
 ```
 
 * `string &$result`: The result of the call to the parser function. This is the text that will be transcluded on the page.
