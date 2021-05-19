@@ -14,58 +14,214 @@ titlepage: true
 This document describes how to use WSSearch. It is meant for both wiki-administrators as well as external users using the
 API endpoint.
 
-## API
+## Performing a search
 
-### Main WSSearch API
+Performs a search and returns the list of search results. If the API is in debug mode, this endpoint also returns the raw
+ElasticSearch query that was used to perform the search.
 
-The API has the following parameters:
+### Parameters
 
-* `pageid`: The page ID to use for retrieving the appropriate `searchEngineConfig`
-* `filter`: The ElasticSearch filters to apply
-* `aggregations`: The aggregations to add to the query
-* `sortings`: Sorting to add to the query
-* `term`: The term to search for
-* `from`: The result offset
-* `limit`: The maximum number of results to return
+| Parameter      | Required? | Type      | Description                                                                                                                                                                                              |
+|----------------|-----------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pageid`       | Yes       | `integer` | The MediaWiki page ID of the page from which the search configuration should be retrieved. Needs to be a valid page ID of a page containing a configuration.                                             |
+| `term`         | No        | `string`  | The search term query to use for the main free-text search. This corresponds to the main search field on a search page. Defaults to the empty string. When no `term` is given, all results are returned. |
+| `from`         | No        | `integer` | The cursor to use for pagination. `from` specifies the offset of the results to return. Defaults to `0`.                                                                                                 |
+| `limit`        | No        | `integer` | The limit on the number of results to return (inclusive). Defaults to `10`.                                                                                                                              |
+| `filter`       | No        | `list`    | The filters to apply to the search. Defaults to the empty list. See below for additional information about the syntax.                                                                                   |
+| `aggregations` | No        | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
+| `sorting`      | No        | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
 
-An example API call looks like this:
+### Example request
 
-`https://pidsdev02.wikibase.nl/api.php?action=query&format=json&meta=WSSearch&pageid=1&filter=[{%22value%22:%222021%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459209,%22lte%22:2459574}}},{%22value%22:%22Last+month%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459205,%22lte%22:2459236}}},{%22value%22:%223500%22,%22key%22:%22Namespace%22},{%22value%22:%22Admin%22,%22key%22:%22User%22}]&term=e&from=0`
+Example request (cURL):
+```
+curl https://wiki.example.org/api.php \
+-d action=query \
+-d format=json \
+-d meta=WSSearch \
+-d filter=[{"value":"5","key":"Average rating","range":{"gte":5,"lte":6}}] \
+-d from=0 \
+-d limit=10 \
+-d pageid=698 \
+-d aggregations=[{"type":"range","ranges":[{"from":1,"to":6,"key":"1"},{"from":2,"to":6,"key":"2"},{"from":3,"to":6,"key":"3"},{"from":4,"to":6,"key":"4"},{"from":5,"to":6,"key":"5"}],"property":"Average rating"}]
+```
 
-This resulted in the following:
-
-```json
+Example response:
+```
 {
-  "batchcomplete": "",
-  "result": {
-    "total": 0,
-    "hits": "[]",
-    "aggs": {
-      "Foo": {
-        "doc_count_error_upper_bound": 0,
-        "sum_other_doc_count": 0,
-        "buckets": []
-      }
+    "batchcomplete": "",
+    "result": {
+        "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
+        "total": 1,
+        "aggs": {
+            "Average rating": {
+                "meta": [],
+                "doc_count": 1,
+                "Average rating": {
+                    "buckets": {
+                        "1": {
+                            "from": 1,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "2": {
+                            "from": 2,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "3": {
+                            "from": 3,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "4": {
+                            "from": 4,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "5": {
+                            "from": 5,
+                            "to": 6,
+                            "doc_count": 1
+                        }
+                    }
+                }
+            }
+        }
     }
-  }
 }
 ```
 
-The `hits` field contains a JSON-encoded string of the ElasticSearch search results. In particular, this field directly corresponds to the `hits.hits` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search) for further details. This fields also contains the associated highlights if specified (see [Highlighting](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/highlighting.html)).
+### Parsing the response
 
-To get the associated page name of any search result, the `subject.namespacename` and `subject.title` property may be concatenated using a colon. The `subject.namespacename` field contains the name of the namespace in which the search result lives, and the `subject.title` field contains the name of the page that matched the search (without a namespace prefix). To get the full URL for this page, you can prepend `http://<wikiurl>/index.php/` to the page name.
+This section assumes you have successfully made a request to the API using PHP and have stored the raw API result in the
+variable `$response`.
+
+The `$response` object is a JSON encoded string, and needs to be decoded before it can be used:
+
+```php
+$response = json_decode($response, true);
+```
+
+After having decoded the `$response` object, the response usually contains two keys (three if debug mode is enabled):
+
+| Field           | Type     | Description                                                                                                       |
+|-----------------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `batchcomplete` | `string` | Added by MediaWiki and not relevant for API users.                                                                |
+| `result`        | `object` | Contains the result object of the performed search.                                                               |
+| `query`         | `object` | The raw ElasticSearch query used to perform this search. This field is only available when debug mode is enabled. |
+
+Generally, we are only interested in the API result object, so we can create a new variable only containing that field:
+
+```php
+$result = $response["result"];
+```
+
+This `$result` field will look something like this:
+
+```json
+{
+    "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
+    "total": 1,
+    "aggs": {
+        "Average rating": {
+            "meta": [],
+            "doc_count": 1,
+            "Average rating": {
+                "buckets": {
+                    "1": {
+                        "from": 1,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "2": {
+                        "from": 2,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "3": {
+                        "from": 3,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "4": {
+                        "from": 4,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "5": {
+                        "from": 5,
+                        "to": 6,
+                        "doc_count": 1
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+#### The `hits` field
+
+The `hits` field contains a JSON-encoded string of the ElasticSearch search results. This field needs to be decoded
+using `json_decode` before it can be used. The field directly corresponds to the `hits.hits` field from the
+ElasticSearch response. See the
+[ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search)
+for very detailed documentation about what this field looks like.
+
+To get the associated page name of any search result, the `subject.namespacename` and `subject.title` hit-field in the 
+`hits` field may be concatenated using a colon, like so:
+
+```php
+$hits = json_decode($result["hits"], true);
+
+foreach ($hits as $hit) {
+    $namespace_name = $hit["subject"]["namespacename"];
+    $page_title = $hit["subject"]["title"];
+
+    $page_name = sprintf("%s:%s", $namespace_name, $page_title);
+
+    echo $page_name;
+}
+```
+
+The `subject.namespacename` hit-field contains the name of the namespace in which the search result lives, and the `subject.title` hit-field contains the name of the page that matched the search (without a namespace prefix). To get the full URL for this page, you can prepend `http://<wikiurl>/index.php/` to the page name.
+
+The `hits` field also contains the generated highlighted snippets, if they are available. These can be accessed through the `highlight` hit-field, like so:
+
+```php
+$hits = json_decode($result["hits"], true);
+
+foreach ($hits as $hit) {
+    $highlights = $hit["highlight"];
+    
+    foreach ($highlights as $highlight) {
+        // $highlight is an array of highlighted snippets
+
+        $highlight_string = implode("", $highlight);
+    
+        echo $highlight_string;
+    }
+}
+```
+
+See also the [ElasticSearch Highlighting documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/highlighting.html).
+
+#### The `aggs` field
 
 The `aggs` field directly corresponds to the `aggregations` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html) for further details.
 
-The `total` field contains the total number of results returned by ElasticSearch.
+#### The `total` field
 
-The `batchcomplete` field can be ignored, since it contains information used for debugging on MediaWiki.
+The `total` field contains the total number of results found by ElasticSearch. This field is not influenced by the `limit` and always displays the total number of results available, regardsless of how many were actually returned.
 
 ### Filters syntax
 
-The `filters` parameter takes a list of objects. These objects have the following form:
+The `filter` parameter takes a list of objects. These objects have the following form:
 
 #### PropertyRangeFilter
+
+This filter only returns pages that have the specified property with a value in the specified range.
 
 ```
 {
@@ -89,6 +245,8 @@ The `range` parameter takes an object that allows the following properties:
 
 #### PropertyValueFilter
 
+This filter only returns pages that have the specified property with the specified value.
+
 ```
 {
     "key": "Class",
@@ -109,6 +267,8 @@ See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-
 
 #### PropertyValuesFilter
 
+This filter only returns pages that have the specified property with any of the specified values.
+
 ```
 {
     "key": "Class",
@@ -122,6 +282,7 @@ See also: https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl
 
 #### HasPropertyFilter
 
+This filter only returns pages that have the specified property with any value.
 
 ```
 {
@@ -135,6 +296,8 @@ The above filter only includes pages that have the property `Class`. It does not
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
 
 #### PropertyTextFilter
+
+This filter only returns pages that have the specified property with a value that matches the given search query string.
 
 ```
 {
@@ -204,6 +367,8 @@ The above filter sorts the results based on the value of the property `Genre` in
 > **Note:** Sorting on a property that does not exist will result in an error.
 
 ### Highlight API
+
+> **Note:** This API is mostly for internal use.
 
 The highlight API has the following properties:
 
@@ -337,6 +502,10 @@ WSSearch has several configuration variables that influence its default behaviou
 * `$wgWSSearchElasticSearchHosts`: Sets the list of ElasticSearch hosts to use (defaults to `["localhost:9200"]`)
 * `$wgWSSearchAPIRequiredRights`: Sets the list of rights required to query the WSSearch API (defaults to `["read", "wssearch-execute-api"]`)
 * `$wgWSSearchSearchFieldOverride`: Sets the search page to redirect to when using Special:Search. The user is redirected to the specified wiki article with the query parameter `search_query` specified through the search page if it is available. Does not change the behaviour of the search snippets shown when using the inline search field.
+
+### Debug mode
+
+To enable debug mode, set `$wgWSSearchEnableDebugMode` to `true`.
 
 ## Parser functions
 
