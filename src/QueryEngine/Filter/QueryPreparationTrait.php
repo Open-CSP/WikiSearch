@@ -53,7 +53,8 @@ trait QueryPreparationTrait {
 	 * @return string
 	 */
 	public function insertWildcards( string $search_string ): string {
-		$terms = preg_split( "/((?<=[a-zA-Z_-])(?=$|[^a-zA-Z_-])\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$word_character_set = "a-zA-Z_\-0-9";
+		$terms = preg_split( "/((?<=[$word_character_set])(?=$|[^$word_character_set])\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
 
 		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and
 		// every odd element the delimiter between that term and the next term. Calling implode() on
