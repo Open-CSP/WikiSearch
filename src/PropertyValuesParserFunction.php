@@ -91,12 +91,12 @@ class PropertyValuesParserFunction {
             ->build()
             ->search( $query );
 
-        if ( !isset( $results["aggregations"]["property_values"]["common_values"]["buckets"] ) ) {
+        if ( !isset( $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ) ) {
         	// Failed to create aggregations
         	return "";
 		}
 
-        $buckets = $results["aggregations"]["property_values"]["common_values"]["buckets"];
+        $buckets = $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"];
 
         if ( !is_array( $results ) ) {
         	// The aggregations are not valid
