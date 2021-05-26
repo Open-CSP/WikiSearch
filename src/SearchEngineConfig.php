@@ -170,6 +170,9 @@ class SearchEngineConfig {
 			}
         }
 
+        $facet_properties = array_unique( $facet_properties );
+        $result_properties = array_unique( $result_properties );
+
         return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
     }
 
