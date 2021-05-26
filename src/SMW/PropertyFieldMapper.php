@@ -141,7 +141,7 @@ class PropertyFieldMapper {
 	 * @return string
 	 */
 	public function getPropertyType(): string {
-		return $this->property_type;
+		return $this->property_type . "Field";
 	}
 
 	/**
@@ -188,7 +188,7 @@ class PropertyFieldMapper {
 		$pid = $this->getPID();
 		$type = $this->getPropertyType();
 
-	    return sprintf( "%s.%sField%s", $pid, $type, $suffix );
+	    return sprintf( "%s.%s%s", $pid, $type, $suffix );
     }
 
     /**
