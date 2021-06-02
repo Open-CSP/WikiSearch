@@ -44,9 +44,9 @@ use WSSearch\SMW\PropertyFieldMapper;
 class ApiQueryWSSearchHighlight extends ApiQueryBase {
 	/**
 	 * @inheritDoc
+	 *
 	 * @throws ApiUsageException
 	 * @throws MWException
-	 * @throws SearchEngineException
 	 */
 	public function execute() {
 		$this->checkUserRights();
