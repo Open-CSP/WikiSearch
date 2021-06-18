@@ -31,7 +31,7 @@ use Title;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\QueryEngine\Filter\PageFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
-use WSSearch\QueryEngine\Highlighter\IndividualWordHighlighter;
+use WSSearch\QueryEngine\Highlighter\FragmentHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
 use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -56,6 +56,12 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$limit = $this->getParameter( "limit" );
 		$page_id = $this->getParameter( "page_id" );
 
+		$size = $this->getParameter( "size" );
+
+		if ( $size === null ) {
+			$size = 1;
+		}
+
 		$properties = explode( ",", $properties );
 		$properties = array_map(function( string $property ): PropertyFieldMapper {
 			return new PropertyFieldMapper( $property );
@@ -67,7 +73,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 			$this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
 		}
 
-		$highlighter = new IndividualWordHighlighter( $properties, $limit );
+		$highlighter = new FragmentHighlighter( $properties, $size, $limit );
 		$search_term_filter = new SearchTermFilter( $query, $properties );
 		$page_filter = new PageFilter( $title );
 
@@ -107,6 +113,11 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 			'limit' => [
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_REQUIRED => true
+			],
+			'size' => [
+				ApiBase::PARAM_TYPE => 'integer',
+				ApiBase::PARAM_MIN => 1,
+				ApiBase::PARAM_MAX => 250
 			]
 		];
 	}

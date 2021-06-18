@@ -25,7 +25,6 @@ use BadMethodCallException;
 use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
-use SMW\DIWikiPage;
 use SMW\Elastic\ElasticStore;
 
 /**
@@ -37,17 +36,27 @@ use SMW\Elastic\ElasticStore;
  */
 class PropertyFieldMapper {
 	const SPECIAL_PROPERTIES = [
+		"attachment-author",
+		"attachment-title",
+		"attachment-content",
+		"attachment-content_length",
+		"attachment-content_type",
+		"attachment-date",
+		"attachment-language",
+		"file_path",
+		"file_sha1",
+		"noop",
+		"subject-title",
+		"subject-subobject",
+		"subject-namespace",
+		"subject-interwiki",
+		"subject-sortkey",
+		"subject-serialization",
+		"subject-sha1",
+		"subject-rev_id",
+		"subject-namespacename",
 		"text_copy",
-		"text_raw",
-		"subject.title",
-		"subject.subobject",
-		"subject.namespace",
-		"subject.interwiki",
-		"subject.sortkey",
-		"subject.serialization",
-		"subject.sha1",
-		"subject.rev_id",
-		"subject.namespacename"
+		"text_raw"
 	];
 
 	/**
@@ -85,30 +94,36 @@ class PropertyFieldMapper {
 	 * @param string $property_name The name of the property (chained property name allowed)
 	 */
 	public function __construct( string $property_name ) {
-	    // Split the property name on "." to account for chained properties
-	    $property_name_chain = explode( ".", $property_name );
+		$store = ApplicationFactory::getInstance()->getStore();
 
-        $property_name = array_pop( $property_name_chain );
-        $chained_property_name = implode( ".", $property_name_chain );
+		if ( !$store instanceof ElasticStore ) {
+			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
+		}
 
-        // Check whether we are the property at the beginning of the chain
-	    if ( $chained_property_name !== "" ) {
-	        $this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
-        }
+		// Split the property name on "." to account for chained properties
+		$property_name_chain = explode( ".", $property_name );
+		$this->property_name = array_pop( $property_name_chain );
+		$chained_property_name = implode( ".", $property_name_chain );
 
-        $store = ApplicationFactory::getInstance()->getStore();
+		// Check whether we are the property at the beginning of the chain
+		if ( $chained_property_name !== "" ) {
+			$this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
+		}
 
-        if ( !$store instanceof ElasticStore ) {
-            throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
-        }
+        $this->property_key = str_replace(
+        	" ",
+			"_",
+			$this->translateSpecialProperties( $this->property_name )
+		);
 
-        $this->property_name = $property_name;
-        $this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $property_name ) );
+		$data_item_property = new DIProperty( $this->property_key );
 
-        $property = new DIProperty( $this->property_key );
-
-        $this->property_id = $store->getObjectIds()->getSMWPropertyID( $property );
-        $this->property_type = $this->translatePropertyValueType( $property->findPropertyValueType() );
+        $this->property_id = $store->getObjectIds()->getSMWPropertyID( $data_item_property );
+        $this->property_type = str_replace(
+        	'_',
+        	'',
+        	DataTypeRegistry::getInstance()->getFieldType( $data_item_property->findPropertyValueType() )
+		);
 	}
 
 	/**
@@ -126,7 +141,7 @@ class PropertyFieldMapper {
 	 * @return string
 	 */
 	public function getPropertyType(): string {
-		return $this->property_type;
+		return $this->property_type . "Field";
 	}
 
 	/**
@@ -147,34 +162,33 @@ class PropertyFieldMapper {
         return $this->property_name;
     }
 
+	/**
+	 * Returns this property's PID.
+	 *
+	 * @return string
+	 */
+    public function getPID(): string {
+    	return "P:{$this->property_id}";
+	}
+
     /**
      * Returns the field associated with this property.
      *
-     * @param bool $keyword Give the keyword field for this property instead, if it is available
+     * @param bool $requires_keyword Give the keyword field for this property instead, if it is available
      * @return string
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
      */
-	public function getPropertyField( bool $keyword = false ): string {
-		if ( in_array( $this->property_name, self::SPECIAL_PROPERTIES ) ) {
-			return $this->property_name;
+	public function getPropertyField( bool $requires_keyword = false ): string {
+		if ( $this->isSpecialProperty() ) {
+			return str_replace( "-", ".", $this->property_name );
 		}
 
-	    switch ( $this->property_type ) {
-			case "numField":
-			case "booField":
-				$suffix = "";
-				break;
-			default:
-				$suffix = ".keyword";
-				break;
-		}
+		$suffix = $requires_keyword === true && $this->hasKeywordField() ? ".keyword" : "";
+		$pid = $this->getPID();
+		$type = $this->getPropertyType();
 
-		if ( $keyword === false ) {
-			$suffix = "";
-		}
-
-	    return "P:{$this->property_id}.{$this->property_type}{$suffix}";
+	    return sprintf( "%s.%s%s", $pid, $type, $suffix );
     }
 
     /**
@@ -183,7 +197,7 @@ class PropertyFieldMapper {
      * @return string
      */
     public function getPropertyPageFieldIdentifier(): string {
-	    return "P:{$this->property_id}.wpgID";
+	    return sprintf( "%s.wpgID", $this->getPID() );
     }
 
     /**
@@ -208,6 +222,31 @@ class PropertyFieldMapper {
         return $this->chained_property_field_mapper !== null;
     }
 
+	/**
+	 * Returns true if and only if this property has a keyword field.
+	 *
+	 * @return bool
+	 */
+	public function hasKeywordField(): bool {
+		switch ( $this->property_type ) {
+			case "numField":
+			case "booField":
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns true if and only if this property is not a regular property, but a special property that does not
+	 * appear on Special:Browse.
+	 *
+	 * @return bool
+	 */
+	public function isSpecialProperty(): bool {
+		return in_array( $this->property_name, self::SPECIAL_PROPERTIES, true );
+	}
+
     /**
      * Translates the given property name to a special property key if it is a special property.
      *
@@ -216,18 +255,5 @@ class PropertyFieldMapper {
      */
     private function translateSpecialProperties( string $property_name ): string {
         return PropertyAliasMapper::findPropertyKey( $property_name );
-    }
-
-    /**
-     * Translates the given property value type to the corresponding Elastic property value type (including the
-     * Field affix).
-     *
-     * @param string $type
-     * @return string
-     *
-     * @see https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/1f4bbda9bb8f7826ffabf00159cfdc0760043ca3/src/Elastic/docs/technical.md#field-mapping
-     */
-    private function translatePropertyValueType( string $type ): string {
-        return trim( $type, "_" ) . "Field";
     }
 }

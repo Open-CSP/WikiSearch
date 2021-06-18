@@ -36,13 +36,8 @@ class PagesPropertyFilter extends PropertyFilter {
      *
      * @param PropertyFieldMapper $property The property that should match the given page IDs
      * @param array $pages Array of (SMW) page IDs
-     * @throws SearchEngineException
      */
     public function __construct( PropertyFieldMapper $property, array $pages ) {
-        if ( $property->getPropertyType() !== "wpgField" ) {
-            throw new SearchEngineException( "Cannot apply PropertyPagesFilter to non-page property" );
-        }
-
         foreach ( $pages as $page ) {
         	if ( !is_int( $page ) ) {
         		throw new \InvalidArgumentException();
