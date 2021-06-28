@@ -4,6 +4,7 @@
 namespace WSSearch\QueryEngine\Filter;
 
 use Elasticsearch\ClientBuilder;
+use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\SearchEngineException;
@@ -84,7 +85,16 @@ class ChainedPropertyFilter extends PropertyFilter {
     private function constructSubqueryFromFilter(AbstractFilter $filter ): array {
         $query_engine = QueryEngineFactory::fromNull();
         $query_engine->addConstantScoreFilter( $filter );
-        $query_engine->setLimit( 9999 );
+
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+
+		try {
+			$limit = $config->get("WSSearchMaxChainedQuerySize");
+		} catch ( \ConfigException $e ) {
+			$limit = 1000;
+		}
+
+        $query_engine->setLimit( $limit );
 
         return $query_engine->toArray();
     }
