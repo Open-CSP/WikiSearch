@@ -2,13 +2,12 @@
 
 namespace WSSearch\QueryEngine\Factory;
 
-use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
-use WSSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WSSearch\QueryEngine\Filter\AbstractFilter;
+use WSSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WSSearch\QueryEngine\Filter\HasPropertyFilter;
+use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WSSearch\QueryEngine\Filter\PropertyTextFilter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
-use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
 use WSSearch\SearchEngine;
 use WSSearch\SearchEngineException;
@@ -28,33 +27,33 @@ class FilterFactory {
 	 * @return AbstractFilter|null
 	 * @throws SearchEngineException
 	 */
-    public static function fromArray( array $array ) {
-        if ( !isset( $array["key"] ) ) {
-            return null;
-        }
-
-        if ( !is_string( $array["key"] ) && !($array["key"] instanceof PropertyFieldMapper) ) {
-            return null;
-        }
-
-        $property_field_mapper = $array["key"] instanceof PropertyFieldMapper ?
-			$array["key"] : new PropertyFieldMapper( $array["key"] );
-        $filter = self::filterFromArray( $array, $property_field_mapper );
-
-        $post_filter_properties = SearchEngine::$config->getSearchParameter( "post filter properties" );
-
-        if ( in_array( $array["key"], $post_filter_properties, true ) ) {
-        	$filter->setPostFilter();
+	public static function fromArray( array $array ) {
+		if ( !isset( $array["key"] ) ) {
+			return null;
 		}
 
-        if ( $filter !== null && $property_field_mapper->isChained() ) {
-            // This is a chained filter property
-            return new ChainedPropertyFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
-        }
+		if ( !is_string( $array["key"] ) && !( $array["key"] instanceof PropertyFieldMapper ) ) {
+			return null;
+		}
 
-        // This is not a chained filter property, so simply return the constructed filter (or null on failure)
-        return $filter;
-    }
+		$property_field_mapper = $array["key"] instanceof PropertyFieldMapper ?
+			$array["key"] : new PropertyFieldMapper( $array["key"] );
+		$filter = self::filterFromArray( $array, $property_field_mapper );
+
+		$post_filter_properties = SearchEngine::$config->getSearchParameter( "post filter properties" );
+
+		if ( in_array( $array["key"], $post_filter_properties, true ) ) {
+			$filter->setPostFilter();
+		}
+
+		if ( $filter !== null && $property_field_mapper->isChained() ) {
+			// This is a chained filter property
+			return new ChainedPropertyFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
+		}
+
+		// This is not a chained filter property, so simply return the constructed filter (or null on failure)
+		return $filter;
+	}
 
 	/**
 	 * Constructs a new filter from the given array.
@@ -63,13 +62,13 @@ class FilterFactory {
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @return AbstractFilter|null
 	 */
-    private static function filterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
-    	if ( isset( $array["range"] ) ) {
+	private static function filterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
+		if ( isset( $array["range"] ) ) {
 			if ( !is_array( $array["range"] ) ) {
 				return null;
 			}
 
-    		return self::rangeFilterFromRange( $array["range"], $property_field_mapper );
+			return self::rangeFilterFromRange( $array["range"], $property_field_mapper );
 		}
 
 		if ( isset( $array["type"] ) ) {
@@ -80,41 +79,41 @@ class FilterFactory {
 			return self::typeFilterFromArray( $array["type"], $array, $property_field_mapper );
 		}
 
-    	if ( isset( $array["value"] ) ) {
+		if ( isset( $array["value"] ) ) {
 			return self::valueFilterFromValue( $array["value"], $property_field_mapper );
 		}
 
-    	return null;
+		return null;
 	}
 
-    /**
-     * Constructs a new value filter from the given array. Returns null on failure.
-     *
-     * @param mixed $value
-     * @param PropertyFieldMapper $property_field_mapper
-     * @return AbstractFilter|null
-     */
-    private static function valueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ) {
-        if ( $value === "+" ) {
-            return self::hasPropertyFilterFromProperty( $property_field_mapper );
-        }
+	/**
+	 * Constructs a new value filter from the given array. Returns null on failure.
+	 *
+	 * @param mixed $value
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return AbstractFilter|null
+	 */
+	private static function valueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ) {
+		if ( $value === "+" ) {
+			return self::hasPropertyFilterFromProperty( $property_field_mapper );
+		}
 
-        if ( is_array( $value ) ) {
-        	foreach ( $value as $v ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $v ) {
 				if ( !in_array( gettype( $v ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
 					return null;
 				}
 			}
 
-        	return self::propertyValuesFilterFromValues( $value, $property_field_mapper );
+			return self::propertyValuesFilterFromValues( $value, $property_field_mapper );
 		}
 
 		if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
 			return null;
 		}
 
-        return self::propertyValueFilterFromValue( $value, $property_field_mapper );
-    }
+		return self::propertyValueFilterFromValue( $value, $property_field_mapper );
+	}
 
 	/**
 	 * @param string $type
@@ -122,7 +121,11 @@ class FilterFactory {
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @return PropertyTextFilter|null
 	 */
-	private static function typeFilterFromArray( string $type, array $array, PropertyFieldMapper $property_field_mapper ) {
+	private static function typeFilterFromArray(
+		string $type,
+		array $array,
+		PropertyFieldMapper $property_field_mapper
+	) {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
@@ -177,7 +180,10 @@ class FilterFactory {
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @return PropertyValuesFilter
 	 */
-	private static function propertyValuesFilterFromValues( array $values, PropertyFieldMapper $property_field_mapper ) {
+	private static function propertyValuesFilterFromValues(
+		array $values,
+		PropertyFieldMapper $property_field_mapper
+	) {
 		return new PropertyValuesFilter( $property_field_mapper, $values );
 	}
 }

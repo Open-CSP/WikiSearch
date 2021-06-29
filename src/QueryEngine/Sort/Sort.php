@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Sort;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
@@ -14,8 +13,8 @@ use WSSearch\QueryEngine\QueryConvertable;
  * @package WSSearch\QueryEngine\Highlighter
  */
 interface Sort extends QueryConvertable {
-    /**
-     * @inheritDoc
-     */
-    public function toQuery(): BuilderInterface;
+	/**
+	 * @inheritDoc
+	 */
+	public function toQuery(): BuilderInterface;
 }

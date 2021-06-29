@@ -2,11 +2,8 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
-use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
-use WSSearch\SMW\PropertyFieldMapper;
 use WSSearch\SMW\WikiPageObjectIdLookup;
 
 /**

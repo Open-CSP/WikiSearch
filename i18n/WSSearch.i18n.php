@@ -27,5 +27,5 @@ $magicWords = [];
 $magicWords['en'] = [
 	'WSSearchConfig' => [ 0, 'WSSearchConfig' ],
 	'WSSearchFrontend' => [ 0, 'WSSearchFrontend' ],
-    'prop_values' => [ 0, 'prop_values' ]
+	'prop_values' => [ 0, 'prop_values' ]
 ];

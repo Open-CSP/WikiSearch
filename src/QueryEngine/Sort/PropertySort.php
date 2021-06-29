@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Sort;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
@@ -15,72 +14,72 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Sort
  */
 class PropertySort implements Sort {
-    /**
-     * @var string The order of the sort
-     */
-    private $order;
+	/**
+	 * @var string The order of the sort
+	 */
+	private $order;
 
-    /**
-     * @var string The field to sort on
-     */
-    private $field;
+	/**
+	 * @var string The field to sort on
+	 */
+	private $field;
 
-    /**
-     * @var array Additional sort parameters to pass to the sort query
-     */
-    private $parameters = [];
+	/**
+	 * @var array Additional sort parameters to pass to the sort query
+	 */
+	private $parameters = [];
 
-    /**
-     * FieldSort constructor.
-     *
-     * @param string $property The property to sort on
-     * @param string $order
-     */
-    public function __construct( $property, string $order = null ) {
-        if ( is_string( $property ) ) {
-            $property = new PropertyFieldMapper( $property );
-        }
+	/**
+	 * FieldSort constructor.
+	 *
+	 * @param string $property The property to sort on
+	 * @param string|null $order
+	 */
+	public function __construct( $property, string $order = null ) {
+		if ( is_string( $property ) ) {
+			$property = new PropertyFieldMapper( $property );
+		}
 
-        if ( !( $property instanceof PropertyFieldMapper ) ) {
-            throw new \InvalidArgumentException();
-        }
+		if ( !( $property instanceof PropertyFieldMapper ) ) {
+			throw new \InvalidArgumentException();
+		}
 
-        switch ( $order ) {
-            case "asc":
-            case "ascending":
-            case "up":
-                $this->order = FieldSort::ASC;
-                $this->addParameter( "mode", "min" );
-                break;
-            case "desc":
-            case "dsc":
-            case "descending":
-            case "down":
-                $this->order = FieldSort::DESC;
-                $this->addParameter( "mode", "max" );
-                break;
-            default:
-                $this->order = null;
-                break;
-        }
+		switch ( $order ) {
+			case "asc":
+			case "ascending":
+			case "up":
+				$this->order = FieldSort::ASC;
+				$this->addParameter( "mode", "min" );
+				break;
+			case "desc":
+			case "dsc":
+			case "descending":
+			case "down":
+				$this->order = FieldSort::DESC;
+				$this->addParameter( "mode", "max" );
+				break;
+			default:
+				$this->order = null;
+				break;
+		}
 
-        $this->field = $property->getPropertyField( true );
-    }
+		$this->field = $property->getPropertyField( true );
+	}
 
-    /**
-     * Adds a parameter (option) to the sort.
-     *
-     * @param string $key
-     * @param $value
-     */
-    public function addParameter( string $key, $value ) {
-        $this->parameters[$key] = $value;
-    }
+	/**
+	 * Adds a parameter (option) to the sort.
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function addParameter( string $key, $value ) {
+		$this->parameters[$key] = $value;
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function toQuery(): BuilderInterface {
-        return new FieldSort( $this->field, $this->order, $this->parameters );
-    }
+	/**
+	 * @inheritDoc
+	 */
+	public function toQuery(): BuilderInterface {
+		return new FieldSort( $this->field, $this->order, $this->parameters );
+	}
 }

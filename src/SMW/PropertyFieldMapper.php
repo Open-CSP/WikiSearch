@@ -35,6 +35,7 @@ use SMW\Elastic\ElasticStore;
  * @package WSSearch
  */
 class PropertyFieldMapper {
+	// phpcs:ignore
 	const SPECIAL_PROPERTIES = [
 		"attachment-author",
 		"attachment-title",
@@ -74,21 +75,21 @@ class PropertyFieldMapper {
 	 */
 	private $property_key;
 
-    /**
-     * @var string The human-readable name of the property as a string
-     */
-    private $property_name;
+	/**
+	 * @var string The human-readable name of the property as a string
+	 */
+	private $property_name;
 
-    /**
-     * @var PropertyFieldMapper The property field mapper for the chained property
-     *
-     * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
-     * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
-     * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
-     */
-    private $chained_property_field_mapper = null;
+	/**
+	 * @var PropertyFieldMapper The property field mapper for the chained property
+	 *
+	 * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
+	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
+	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
+	 */
+	private $chained_property_field_mapper = null;
 
-    /**
+	/**
 	 * PropertyFieldMapper constructor.
 	 *
 	 * @param string $property_name The name of the property (chained property name allowed)
@@ -110,19 +111,19 @@ class PropertyFieldMapper {
 			$this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
 		}
 
-        $this->property_key = str_replace(
-        	" ",
+		$this->property_key = str_replace(
+			" ",
 			"_",
 			$this->translateSpecialProperties( $this->property_name )
 		);
 
 		$data_item_property = new DIProperty( $this->property_key );
 
-        $this->property_id = $store->getObjectIds()->getSMWPropertyID( $data_item_property );
-        $this->property_type = str_replace(
-        	'_',
-        	'',
-        	DataTypeRegistry::getInstance()->getFieldType( $data_item_property->findPropertyValueType() )
+		$this->property_id = $store->getObjectIds()->getSMWPropertyID( $data_item_property );
+		$this->property_type = str_replace(
+			'_',
+			'',
+			DataTypeRegistry::getInstance()->getFieldType( $data_item_property->findPropertyValueType() )
 		);
 	}
 
@@ -153,32 +154,32 @@ class PropertyFieldMapper {
 		return $this->property_key;
 	}
 
-    /**
-     * Returns the human-readable name of this property.
-     *
-     * @return string
-     */
-    public function getPropertyName(): string {
-        return $this->property_name;
-    }
+	/**
+	 * Returns the human-readable name of this property.
+	 *
+	 * @return string
+	 */
+	public function getPropertyName(): string {
+		return $this->property_name;
+	}
 
 	/**
 	 * Returns this property's PID.
 	 *
 	 * @return string
 	 */
-    public function getPID(): string {
-    	return "P:{$this->property_id}";
+	public function getPID(): string {
+		return "P:{$this->property_id}";
 	}
 
-    /**
-     * Returns the field associated with this property.
-     *
-     * @param bool $requires_keyword Give the keyword field for this property instead, if it is available
-     * @return string
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
-     */
+	/**
+	 * Returns the field associated with this property.
+	 *
+	 * @param bool $requires_keyword Give the keyword field for this property instead, if it is available
+	 * @return string
+	 *
+	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
+	 */
 	public function getPropertyField( bool $requires_keyword = false ): string {
 		if ( $this->isSpecialProperty() ) {
 			return str_replace( "-", ".", $this->property_name );
@@ -188,39 +189,39 @@ class PropertyFieldMapper {
 		$pid = $this->getPID();
 		$type = $this->getPropertyType();
 
-	    return sprintf( "%s.%s%s", $pid, $type, $suffix );
-    }
+		return sprintf( "%s.%s%s", $pid, $type, $suffix );
+	}
 
-    /**
-     * Returns the property's page field identifier.
-     *
-     * @return string
-     */
-    public function getPropertyPageFieldIdentifier(): string {
-	    return sprintf( "%s.wpgID", $this->getPID() );
-    }
+	/**
+	 * Returns the property's page field identifier.
+	 *
+	 * @return string
+	 */
+	public function getPropertyPageFieldIdentifier(): string {
+		return sprintf( "%s.wpgID", $this->getPID() );
+	}
 
-    /**
-     * Returns the property field mapper for the chained property.
-     *
-     * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
-     * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
-     * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
-     *
-     * @return PropertyFieldMapper
-     */
-    public function getChainedPropertyFieldMapper() {
-	    return $this->chained_property_field_mapper;
-    }
+	/**
+	 * Returns the property field mapper for the chained property.
+	 *
+	 * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
+	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
+	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
+	 *
+	 * @return PropertyFieldMapper
+	 */
+	public function getChainedPropertyFieldMapper() {
+		return $this->chained_property_field_mapper;
+	}
 
-    /**
-     * Returns true if and only if this is a PropertyFieldMapper for a chained property.
-     *
-     * @return bool
-     */
-    public function isChained(): bool {
-        return $this->chained_property_field_mapper !== null;
-    }
+	/**
+	 * Returns true if and only if this is a PropertyFieldMapper for a chained property.
+	 *
+	 * @return bool
+	 */
+	public function isChained(): bool {
+		return $this->chained_property_field_mapper !== null;
+	}
 
 	/**
 	 * Returns true if and only if this property has a keyword field.
@@ -247,13 +248,13 @@ class PropertyFieldMapper {
 		return in_array( $this->property_name, self::SPECIAL_PROPERTIES, true );
 	}
 
-    /**
-     * Translates the given property name to a special property key if it is a special property.
-     *
-     * @param string $property_name
-     * @return string
-     */
-    private function translateSpecialProperties( string $property_name ): string {
-        return PropertyAliasMapper::findPropertyKey( $property_name );
-    }
+	/**
+	 * Translates the given property name to a special property key if it is a special property.
+	 *
+	 * @param string $property_name
+	 * @return string
+	 */
+	private function translateSpecialProperties( string $property_name ): string {
+		return PropertyAliasMapper::findPropertyKey( $property_name );
+	}
 }

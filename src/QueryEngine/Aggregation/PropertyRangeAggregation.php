@@ -4,7 +4,6 @@ namespace WSSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\RangeAggregation;
-use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -17,70 +16,70 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
  */
 class PropertyRangeAggregation implements PropertyAggregation {
-    /**
-     * @var string
-     */
-    private $aggregation_name;
+	/**
+	 * @var string
+	 */
+	private $aggregation_name;
 
-    /**
-     * @var PropertyFieldMapper
-     */
-    private $property;
+	/**
+	 * @var PropertyFieldMapper
+	 */
+	private $property;
 
-    /**
-     * @var array
-     */
-    private $ranges;
+	/**
+	 * @var array
+	 */
+	private $ranges;
 
-    /**
-     * PropertyAggregation constructor.
-     *
-     * @param PropertyFieldMapper|string $property The property object or name for the aggregation
-     * @param array $ranges
-     * @param string|null $aggregation_name
-     */
-    public function __construct( $property, array $ranges, string $aggregation_name = null ) {
-        if ( is_string( $property ) ) {
-            $property = new PropertyFieldMapper( $property );
-        }
+	/**
+	 * PropertyAggregation constructor.
+	 *
+	 * @param PropertyFieldMapper|string $property The property object or name for the aggregation
+	 * @param array $ranges
+	 * @param string|null $aggregation_name
+	 */
+	public function __construct( $property, array $ranges, string $aggregation_name = null ) {
+		if ( is_string( $property ) ) {
+			$property = new PropertyFieldMapper( $property );
+		}
 
-        if ( !($property instanceof PropertyFieldMapper)) {
-            throw new \InvalidArgumentException();
-        }
+		if ( !( $property instanceof PropertyFieldMapper ) ) {
+			throw new \InvalidArgumentException();
+		}
 
-        if ( $aggregation_name === null ) {
-            $aggregation_name = $property->getPropertyName();
-        }
+		if ( $aggregation_name === null ) {
+			$aggregation_name = $property->getPropertyName();
+		}
 
-        $this->aggregation_name = $aggregation_name;
-        $this->property = $property;
-        $this->ranges = $ranges;
-    }
+		$this->aggregation_name = $aggregation_name;
+		$this->property = $property;
+		$this->ranges = $ranges;
+	}
 
-    /**
-     * Sets the property object to use for the aggregation.
-     *
-     * @param PropertyFieldMapper $property
-     */
-    public function setProperty(PropertyFieldMapper $property ) {
-        $this->property = $property;
-    }
+	/**
+	 * Sets the property object to use for the aggregation.
+	 *
+	 * @param PropertyFieldMapper $property
+	 */
+	public function setProperty( PropertyFieldMapper $property ) {
+		$this->property = $property;
+	}
 
-    /**
-     * Sets the ranges to use for the aggregation.
-     *
-     * @param array $ranges
-     */
-    public function setRanges( array $ranges ) {
-        $this->ranges = $ranges;
-    }
+	/**
+	 * Sets the ranges to use for the aggregation.
+	 *
+	 * @param array $ranges
+	 */
+	public function setRanges( array $ranges ) {
+		$this->ranges = $ranges;
+	}
 
 	/**
 	 * Returns the property field mapper corresponding to this aggregation.
 	 *
 	 * @return PropertyFieldMapper
 	 */
-    public function getProperty(): PropertyFieldMapper {
+	public function getProperty(): PropertyFieldMapper {
 		return $this->property;
 	}
 
@@ -92,14 +91,14 @@ class PropertyRangeAggregation implements PropertyAggregation {
 	}
 
 	/**
-     * @inheritDoc
-     */
-    public function toQuery(): AbstractAggregation {
-        return new RangeAggregation(
-            $this->aggregation_name,
-            $this->property->getPropertyField(),
-            $this->ranges,
-            true
-        );
-    }
+	 * @inheritDoc
+	 */
+	public function toQuery(): AbstractAggregation {
+		return new RangeAggregation(
+			$this->aggregation_name,
+			$this->property->getPropertyField(),
+			$this->ranges,
+			true
+		);
+	}
 }

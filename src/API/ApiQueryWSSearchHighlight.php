@@ -33,7 +33,6 @@ use WSSearch\QueryEngine\Filter\PageFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
 use WSSearch\QueryEngine\Highlighter\FragmentHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
-use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -63,14 +62,14 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		}
 
 		$properties = explode( ",", $properties );
-		$properties = array_map(function( string $property ): PropertyFieldMapper {
+		$properties = array_map( function ( string $property ): PropertyFieldMapper {
 			return new PropertyFieldMapper( $property );
-		}, $properties);
+		}, $properties );
 
 		$title = Title::newFromID( $page_id );
 
 		if ( !( $title instanceof Title ) || !$title->exists() ) {
-			$this->dieWithError( wfMessage( "wssearch-api-invalid-pageid" ) );
+			$this->dieWithError( $this->msg( "wssearch-api-invalid-pageid" ) );
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $size, $limit );

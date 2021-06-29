@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch\QueryEngine;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
@@ -13,10 +12,10 @@ use ONGR\ElasticsearchDSL\BuilderInterface;
  * @package WSSearch\QueryEngine
  */
 interface QueryConvertable {
-    /**
-     * Converts the object to a BuilderInterface for use in the QueryEngine.
-     *
-     * @return BuilderInterface
-     */
-    public function toQuery();
+	/**
+	 * Converts the object to a BuilderInterface for use in the QueryEngine.
+	 *
+	 * @return BuilderInterface
+	 */
+	public function toQuery();
 }

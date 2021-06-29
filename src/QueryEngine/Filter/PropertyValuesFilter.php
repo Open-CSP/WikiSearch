@@ -1,11 +1,9 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermsQuery;
-use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**

@@ -23,19 +23,10 @@ namespace WSSearch;
 
 use Elasticsearch\ClientBuilder;
 use Hooks;
-use MediaWiki\MediaWikiServices;
 use MWNamespace;
-use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use Parser;
-use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Filter\SearchTermFilter;
-use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
-use WSSearch\QueryEngine\Sort\Sort;
-use WSSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class Search
@@ -48,158 +39,159 @@ class SearchEngine {
 	 */
 	public static $config = null;
 
-    /**
-     * @var array
-     */
-    private $translations;
+	/**
+	 * @var array
+	 */
+	private $translations;
 
-    /**
-     * @var QueryEngine
-     */
-    private $query_engine;
+	/**
+	 * @var QueryEngine
+	 */
+	private $query_engine;
 
-    /**
-     * Search constructor.
-     *
-     * @param SearchEngineConfig|null $config
-     */
-    public function __construct( SearchEngineConfig $config ) {
-    	self::$config = $config;
+	/**
+	 * Search constructor.
+	 *
+	 * @param SearchEngineConfig|null $config
+	 */
+	public function __construct( SearchEngineConfig $config ) {
+		self::$config = $config;
 
-        $this->translations = $config->getPropertyTranslations();
-        $this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
-    }
+		$this->translations = $config->getPropertyTranslations();
+		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
+	}
 
-    /**
-     * Returns the current search engine configuration.
-     *
-     * @return SearchEngineConfig
-     */
-    public function getConfig(): SearchEngineConfig {
-        return self::$config;
-    }
+	/**
+	 * Returns the current search engine configuration.
+	 *
+	 * @return SearchEngineConfig
+	 */
+	public function getConfig(): SearchEngineConfig {
+		return self::$config;
+	}
 
-    /**
-     * Returns teh QueryEngine for this search engine.
-     *
-     * @return QueryEngine
-     */
-    public function getQueryEngine(): QueryEngine {
-        return $this->query_engine;
-    }
+	/**
+	 * Returns teh QueryEngine for this search engine.
+	 *
+	 * @return QueryEngine
+	 */
+	public function getQueryEngine(): QueryEngine {
+		return $this->query_engine;
+	}
 
-    /**
-     * Executes the given ElasticSearch query and returns the result.
-     *
-     * @param array $query
-     * @param array $hosts
-     * @return array
-     * @throws \Exception
-     */
-    public function doQuery( array $query, array $hosts ): array {
-        // Allow other extensions to modify the query
-        Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+	/**
+	 * Executes the given ElasticSearch query and returns the result.
+	 *
+	 * @param array $query
+	 * @param array $hosts
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function doQuery( array $query, array $hosts ): array {
+		// Allow other extensions to modify the query
+		Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
 
-        return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
-    }
+		return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
+	}
 
-    /**
-     * Adds the given search term.
-     *
-     * @param string $search_term
-     * @throws SearchEngineException
-     */
-    public function addSearchTerm( string $search_term ) {
-        $search_term_filter = new SearchTermFilter(
-        	$search_term,
+	/**
+	 * Adds the given search term.
+	 *
+	 * @param string $search_term
+	 * @throws SearchEngineException
+	 */
+	public function addSearchTerm( string $search_term ) {
+		$search_term_filter = new SearchTermFilter(
+			$search_term,
 			$this->getConfig()->getSearchParameter( "search term properties" ) ?: [],
 			$this->getConfig()->getSearchParameter( "default operator" ) ?: "or"
 		);
 
-        $this->query_engine->addFunctionScoreFilter( $search_term_filter );
-    }
+		$this->query_engine->addFunctionScoreFilter( $search_term_filter );
+	}
 
-    /**
-     * Performs an ElasticSearch query.
-     *
-     * @return array
-     *
-     * @throws \Exception
-     */
-    public function doSearch(): array {
-        $elastic_query = $this->query_engine->toArray();
+	/**
+	 * Performs an ElasticSearch query.
+	 *
+	 * @return array
+	 *
+	 * @throws \Exception
+	 */
+	public function doSearch(): array {
+		$elastic_query = $this->query_engine->toArray();
 
-        $results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
-        $results = $this->applyResultTranslations( $results );
+		$results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
+		$results = $this->applyResultTranslations( $results );
 
-        return [
-            "hits"  => json_encode( $results["hits"]["hits"] ),
-            "total" => $results["hits"]["total"],
-            "aggs"  => $results["aggregations"]
-        ];
-    }
+		return [
+			"hits"  => json_encode( $results["hits"]["hits"] ),
+			"total" => $results["hits"]["total"],
+			"aggs"  => $results["aggregations"]
+		];
+	}
 
-    /**
-     * Applies necessary translations to the ElasticSearch query result.
-     *
-     * @param array $results
-     * @return array
-     * @throws \Exception
-     */
-    private function applyResultTranslations( array $results ): array {
-        $results = $this->doFacetTranslations( $results );
-        $results = $this->doNamespaceTranslations( $results );
+	/**
+	 * Applies necessary translations to the ElasticSearch query result.
+	 *
+	 * @param array $results
+	 * @return array
+	 * @throws \Exception
+	 */
+	private function applyResultTranslations( array $results ): array {
+		$results = $this->doFacetTranslations( $results );
+		$results = $this->doNamespaceTranslations( $results );
 
-        // Allow other extensions to modify the result
-        Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
+		// Allow other extensions to modify the result
+		Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
 
-        return $results;
-    }
+		return $results;
+	}
 
-    /**
-     * Does facet translations.
-     *
-     * @param array $results
-     * @return array
-     */
-    private function doFacetTranslations( array $results ): array {
-        if ( !isset( $results["aggregations"] ) ) {
-            return $results;
-        }
+	/**
+	 * Does facet translations.
+	 *
+	 * @param array $results
+	 * @return array
+	 */
+	private function doFacetTranslations( array $results ): array {
+		if ( !isset( $results["aggregations"] ) ) {
+			return $results;
+		}
 
-        $aggregations = $results["aggregations"];
+		$aggregations = $results["aggregations"];
 
-        foreach ( $aggregations as $property_name => $aggregate_data ) {
-            if ( !isset( $this->translations[$property_name] ) ) {
-                // No translation available
-                continue;
-            }
+		foreach ( $aggregations as $property_name => $aggregate_data ) {
+			if ( !isset( $this->translations[$property_name] ) ) {
+				// No translation available
+				continue;
+			}
 
-            $parts = explode( ":", $this->translations[$property_name] );
+			$parts = explode( ":", $this->translations[$property_name] );
 
-            if ( $parts[0] = "namespace" ) {
-                foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
-                    $namespace = MWNamespace::getCanonicalName( $bucket_value['key'] );
-                    $results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
-                }
-            }
-        }
+			if ( $parts[0] === "namespace" ) {
+				foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
+					$namespace = MWNamespace::getCanonicalName( $bucket_value['key'] );
+					$results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
+				}
+			}
+		}
 
-        return $results;
-    }
+		return $results;
+	}
 
-    /**
-     * Translates namespace IDs to their canonical name.
-     *
-     * @param array $results
-     * @return array
-     */
-    private function doNamespaceTranslations( array $results ): array {
-        // Translate namespace IDs to their canonical name
-        foreach ( $results['hits']['hits'] as $key => $value ) {
-            $results['hits']['hits'][$key]['_source']['subject']['namespacename'] = MWNamespace::getCanonicalName( $value['_source']['subject']['namespace'] );
-        }
+	/**
+	 * Translates namespace IDs to their canonical name.
+	 *
+	 * @param array $results
+	 * @return array
+	 */
+	private function doNamespaceTranslations( array $results ): array {
+		// Translate namespace IDs to their canonical name
+		foreach ( $results['hits']['hits'] as $key => $value ) {
+			$namespace = MWNamespace::getCanonicalName( $value['_source']['subject']['namespace'] );
+			$results['hits']['hits'][$key]['_source']['subject']['namespacename'] = $namespace;
+		}
 
-        return $results;
-    }
+		return $results;
+	}
 }

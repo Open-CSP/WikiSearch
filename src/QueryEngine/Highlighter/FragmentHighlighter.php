@@ -1,11 +1,8 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Highlighter;
 
-use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -41,7 +38,7 @@ class FragmentHighlighter implements Highlighter {
 	public function __construct( array $properties, int $size = 1, int $limit = 128 ) {
 		$this->size = $size;
 		$this->limit = $limit;
-		$this->fields = array_map(function( PropertyFieldMapper $property ): string {
+		$this->fields = array_map( function ( PropertyFieldMapper $property ): string {
 			return $property->getPropertyField();
 		}, $properties );
 	}
@@ -51,7 +48,7 @@ class FragmentHighlighter implements Highlighter {
 	 */
 	public function toQuery(): Highlight {
 		$highlight = new Highlight();
-		$highlight->setTags( [""], [""] );
+		$highlight->setTags( [ "" ], [ "" ] );
 
 		foreach ( $this->fields as $field ) {
 			$highlight->addField( $field, [

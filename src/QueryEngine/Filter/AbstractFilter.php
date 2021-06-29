@@ -16,7 +16,7 @@ abstract class AbstractFilter implements QueryConvertable {
 	 * @param bool $set
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/filter-search-results.html#post-filter
 	 */
-	public function setPostFilter(bool $set = true) {
+	public function setPostFilter( bool $set = true ) {
 		$this->is_post_filter = $set;
 	}
 

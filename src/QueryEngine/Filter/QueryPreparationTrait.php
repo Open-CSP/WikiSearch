@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Filter;
 
 /**
@@ -34,8 +33,9 @@ trait QueryPreparationTrait {
 		$search_term = str_replace( "=", '\=', $search_term );
 
 		// Don't insert wildcard around terms when the user is performing an "advanced query"
-		$advanced_search_chars = ["\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -"];
-		$is_advanced_query = array_reduce( $advanced_search_chars, function( bool $carry, $char ) use ( $search_term ) {
+		$advanced_search_chars = [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ];
+		$is_advanced_query = array_reduce( $advanced_search_chars, function ( bool $carry, $char ) use ( $search_term )
+		{
 			return $carry ?: strpos( $search_term, $char ) !== false;
 		}, false );
 
@@ -54,7 +54,12 @@ trait QueryPreparationTrait {
 	 */
 	public function insertWildcards( string $search_string ): string {
 		$word_character_set = "a-zA-Z_\-0-9";
-		$terms = preg_split( "/((?<=[$word_character_set])(?=$|[^$word_character_set])\s*)/", $search_string, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$terms = preg_split(
+			"/((?<=[$word_character_set])(?=$|[^$word_character_set])\s*)/",
+			$search_string,
+			-1,
+			PREG_SPLIT_DELIM_CAPTURE
+		);
 
 		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and
 		// every odd element the delimiter between that term and the next term. Calling implode() on
@@ -64,7 +69,7 @@ trait QueryPreparationTrait {
 
 		// Insert quotes around each term
 		for ( $idx = 0; $idx < $num_terms; $idx++ ) {
-			$is_term = ($idx % 2) === 0 && !empty( $terms[$idx] );
+			$is_term = ( $idx % 2 ) === 0 && !empty( $terms[$idx] );
 
 			if ( $is_term ) {
 				$terms[$idx] = "*{$terms[$idx]}*";

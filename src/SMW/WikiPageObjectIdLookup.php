@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch\SMW;
 
 use SMW\ApplicationFactory;

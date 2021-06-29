@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Highlighter;
 
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
@@ -14,8 +13,8 @@ use WSSearch\QueryEngine\QueryConvertable;
  * @package WSSearch\QueryEngine\Highlighter
  */
 interface Highlighter extends QueryConvertable {
-    /**
-     * @inheritDoc
-     */
-    public function toQuery(): Highlight;
+	/**
+	 * @inheritDoc
+	 */
+	public function toQuery(): Highlight;
 }
