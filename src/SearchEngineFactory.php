@@ -13,11 +13,17 @@ class SearchEngineFactory {
 	private $engine;
 
 	/**
+	 * @var SearchEngineConfig
+	 */
+	private $config;
+
+	/**
 	 * SearchEngineFactory constructor.
 	 *
 	 * @param SearchEngineConfig $config The SearchEngineConfig to construct the engine from
 	 */
 	public function __construct( SearchEngineConfig $config ) {
+		$this->config = $config;
 		$this->engine = new SearchEngine( $config );
 	}
 
@@ -104,7 +110,10 @@ class SearchEngineFactory {
 			throw new SearchEngineException( $message );
 		}
 
-		$filters = array_map( [ FilterFactory::class, "fromArray" ], $filters );
+		$filters = array_map( function ( array $filter ) {
+			return FilterFactory::fromArray( $filter, $this->config );
+		}, $filters );
+
 		$all_filters_valid = count( array_filter( $filters, "is_null" ) ) === 0;
 
 		if ( !$all_filters_valid ) {

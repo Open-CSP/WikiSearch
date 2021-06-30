@@ -10,7 +10,7 @@ use WSSearch\QueryEngine\Filter\PropertyTextFilter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
 use WSSearch\SearchEngine;
-use WSSearch\SearchEngineException;
+use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -24,10 +24,10 @@ class FilterFactory {
 	 * the user through the API. Returns "null" on failure.
 	 *
 	 * @param array $array
+	 * @param SearchEngineConfig $config
 	 * @return AbstractFilter|null
-	 * @throws SearchEngineException
 	 */
-	public static function fromArray( array $array ) {
+	public static function fromArray( array $array, SearchEngineConfig $config ) {
 		if ( !isset( $array["key"] ) ) {
 			return null;
 		}
@@ -38,7 +38,7 @@ class FilterFactory {
 
 		$property_field_mapper = $array["key"] instanceof PropertyFieldMapper ?
 			$array["key"] : new PropertyFieldMapper( $array["key"] );
-		$filter = self::filterFromArray( $array, $property_field_mapper );
+		$filter = self::filterFromArray( $array, $property_field_mapper, $config );
 
 		$post_filter_properties = SearchEngine::$config->getSearchParameter( "post filter properties" );
 
@@ -60,9 +60,14 @@ class FilterFactory {
 	 *
 	 * @param array $array
 	 * @param PropertyFieldMapper $property_field_mapper
+	 * @param SearchEngineConfig $config
 	 * @return AbstractFilter|null
 	 */
-	private static function filterFromArray( array $array, PropertyFieldMapper $property_field_mapper ) {
+	private static function filterFromArray(
+		array $array,
+		PropertyFieldMapper $property_field_mapper,
+		SearchEngineConfig $config
+	) {
 		if ( isset( $array["range"] ) ) {
 			if ( !is_array( $array["range"] ) ) {
 				return null;
@@ -76,7 +81,7 @@ class FilterFactory {
 				return null;
 			}
 
-			return self::typeFilterFromArray( $array["type"], $array, $property_field_mapper );
+			return self::typeFilterFromArray( $array["type"], $array, $property_field_mapper, $config );
 		}
 
 		if ( isset( $array["value"] ) ) {
@@ -119,12 +124,14 @@ class FilterFactory {
 	 * @param string $type
 	 * @param array $array
 	 * @param PropertyFieldMapper $property_field_mapper
+	 * @param SearchEngineConfig $config
 	 * @return PropertyTextFilter|null
 	 */
 	private static function typeFilterFromArray(
 		string $type,
 		array $array,
-		PropertyFieldMapper $property_field_mapper
+		PropertyFieldMapper $property_field_mapper,
+		SearchEngineConfig $config
 	) {
 		switch ( $type ) {
 			case "query":
@@ -132,7 +139,9 @@ class FilterFactory {
 					return null;
 				}
 
-				return self::propertyTextFilterFromText( $array["value"], $property_field_mapper );
+				$default_operator = $config->getSearchParameter( "default operator" ) === "and" ?
+					"and" : "or";
+				return self::propertyTextFilterFromText( $array["value"], $default_operator, $property_field_mapper );
 			default:
 				return null;
 		}
@@ -160,11 +169,16 @@ class FilterFactory {
 
 	/**
 	 * @param string $text
+	 * @param string $default_operator
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @return PropertyTextFilter
 	 */
-	private static function propertyTextFilterFromText( string $text, PropertyFieldMapper $property_field_mapper ) {
-		return new PropertyTextFilter( $property_field_mapper, $text );
+	private static function propertyTextFilterFromText(
+		string $text,
+		string $default_operator,
+		PropertyFieldMapper $property_field_mapper
+	) {
+		return new PropertyTextFilter( $property_field_mapper, $text, $default_operator );
 	}
 
 	/**

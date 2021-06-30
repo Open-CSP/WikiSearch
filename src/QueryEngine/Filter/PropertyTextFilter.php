@@ -4,7 +4,6 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WSSearch\SearchEngine;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -43,8 +42,9 @@ class PropertyTextFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper|string $property The name or object of the property to filter on
 	 * @param string $property_value_query The query string used to match the property value
+	 * @param string $default_operator The default operator to insert between words
 	 */
-	public function __construct( $property, string $property_value_query ) {
+	public function __construct( $property, string $property_value_query, string $default_operator ) {
 		if ( is_string( $property ) ) {
 			$property = new PropertyFieldMapper( $property );
 		}
@@ -55,10 +55,7 @@ class PropertyTextFilter extends PropertyFilter {
 
 		$this->property = $property;
 		$this->property_value_query = $property_value_query;
-
-		// TODO: Refactor dependency on SearchEngine out of this filter class
-		$this->default_operator = SearchEngine::$config->getSearchParameter( "default operator" ) === "and" ?
-			"and" : "or";
+		$this->default_operator = $default_operator;
 	}
 
 	/**
