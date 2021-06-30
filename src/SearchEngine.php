@@ -37,7 +37,7 @@ class SearchEngine {
 	/**
 	 * @var SearchEngineConfig
 	 */
-	public static $config = null;
+	private $config = null;
 
 	/**
 	 * @var array
@@ -55,8 +55,7 @@ class SearchEngine {
 	 * @param SearchEngineConfig|null $config
 	 */
 	public function __construct( SearchEngineConfig $config ) {
-		self::$config = $config;
-
+		$this->config = $config;
 		$this->translations = $config->getPropertyTranslations();
 		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
 	}
@@ -67,7 +66,7 @@ class SearchEngine {
 	 * @return SearchEngineConfig
 	 */
 	public function getConfig(): SearchEngineConfig {
-		return self::$config;
+		return $this->config;
 	}
 
 	/**
@@ -98,13 +97,12 @@ class SearchEngine {
 	 * Adds the given search term.
 	 *
 	 * @param string $search_term
-	 * @throws SearchEngineException
 	 */
 	public function addSearchTerm( string $search_term ) {
 		$search_term_filter = new SearchTermFilter(
 			$search_term,
-			$this->getConfig()->getSearchParameter( "search term properties" ) ?: [],
-			$this->getConfig()->getSearchParameter( "default operator" ) ?: "or"
+			$this->config->getSearchParameter( "search term properties" ) ?: [],
+			$this->config->getSearchParameter( "default operator" ) ?: "or"
 		);
 
 		$this->query_engine->addFunctionScoreFilter( $search_term_filter );

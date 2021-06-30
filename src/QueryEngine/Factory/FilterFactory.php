@@ -40,7 +40,7 @@ class FilterFactory {
 			$array["key"] : new PropertyFieldMapper( $array["key"] );
 		$filter = self::filterFromArray( $array, $property_field_mapper, $config );
 
-		$post_filter_properties = SearchEngine::$config->getSearchParameter( "post filter properties" );
+		$post_filter_properties = $config->getSearchParameter( "post filter properties" );
 
 		if ( in_array( $array["key"], $post_filter_properties, true ) ) {
 			$filter->setPostFilter();
