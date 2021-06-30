@@ -507,20 +507,20 @@ To enable debug mode, set `$wgWSSearchEnableDebugMode` to `true`.
 
 WSSearch defines two parser functions.
 
-### `#searchEngineConfig` (case-sensitive)
+### `#WSSearchConfig` (case-sensitive)
 
-The `#searchEngineConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
+The `#WSSearchConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
 reasons. It sets the search condition for that page, the list of facet properties, and the list of result properties.
 
 ```
-{{#searchEngineConfig: <condition>
+{{#WSSearchConfig:
   |<facet property>
   |?<result property>
 }}
 ```
 
 ```
-{{#searchEngineConfig: Class=Foobar
+{{#WSSearchConfig:
   |Version
   |Tag
   |Space
@@ -529,7 +529,7 @@ reasons. It sets the search condition for that page, the list of facet propertie
 }}
 ```
 
-Note: Only one call to `#searchEngineConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
+Note: Only one call to `#WSSearchConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
 
 #### Search parameters
 
@@ -563,9 +563,9 @@ of a regular filter. This parameter takes a comma-separated list of property nam
 will be added as a post filter. The difference between post filters and regular filters is explained [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-post-filter.html).
 This configuration parameter is especially useful when you have disjunct checkbox properties.
 
-### `#loadSearchEngine` (case-sensitive)
+### `#WSSearchFrontend` (case-sensitive)
 
-The `#loadSearchEngine` parser function is used to load the frontend. The parameters and return value of this parser function
+The `#WSSearchFrontend` parser function is used to load the frontend. The parameters and return value of this parser function
 depend completely on the frontend.
 
 ## Installation
