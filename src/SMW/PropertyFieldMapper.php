@@ -230,8 +230,8 @@ class PropertyFieldMapper {
 	 */
 	public function hasKeywordField(): bool {
 		switch ( $this->property_type ) {
-			case "numField":
-			case "booField":
+			case "num":
+			case "boo":
 				return false;
 		}
 
