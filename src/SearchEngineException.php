@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch;
 
 /**
@@ -8,4 +7,5 @@ namespace WSSearch;
  *
  * @package WSSearch
  */
-class SearchEngineException extends \Exception {}
+class SearchEngineException extends \Exception {
+}

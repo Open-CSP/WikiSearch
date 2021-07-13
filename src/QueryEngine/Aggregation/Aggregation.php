@@ -3,7 +3,6 @@
 namespace WSSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
-use ONGR\ElasticsearchDSL\BuilderInterface;
 use WSSearch\QueryEngine\QueryConvertable;
 
 /**
@@ -19,8 +18,8 @@ interface Aggregation extends QueryConvertable {
 	 */
 	public function getName(): string;
 
-    /**
-     * @inheritDoc
-     */
-    public function toQuery(): AbstractAggregation;
+	/**
+	 * @inheritDoc
+	 */
+	public function toQuery(): AbstractAggregation;
 }

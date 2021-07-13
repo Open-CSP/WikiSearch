@@ -2,11 +2,8 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
-use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
-use WSSearch\SMW\PropertyFieldMapper;
 use WSSearch\SMW\WikiPageObjectIdLookup;
 
 /**
@@ -46,9 +43,10 @@ class PageFilter extends AbstractFilter {
 	 * @return BoolQuery
 	 */
 	public function toQuery(): BoolQuery {
+		$object_id = WikiPageObjectIdLookup::getObjectIdForTitle( $this->title ) ?: -1;
 		$term_query = new TermQuery(
 			"_id",
-			WikiPageObjectIdLookup::getObjectIdForTitle( $this->title )
+			$object_id
 		);
 
 		$bool_query = new BoolQuery();

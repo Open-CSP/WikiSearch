@@ -128,7 +128,7 @@ abstract class WSSearchHooks {
 		$tables = [
 			"search_facets"         => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
 			"search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type ),
-            "search_parameters"     => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type )
+			"search_parameters"     => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type )
 		];
 
 		foreach ( $tables as $table ) {
@@ -149,51 +149,51 @@ abstract class WSSearchHooks {
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
 		try {
-			$parser->setFunctionHook( "WSSearchConfig", [ self::class, "searchConfigCallback"] );
-			$parser->setFunctionHook( "WSSearchFrontend", [ self::class, "searchEngineFrontendCallback"] );
+			$parser->setFunctionHook( "WSSearchConfig", [ self::class, "searchConfigCallback" ] );
+			$parser->setFunctionHook( "WSSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 		} catch ( MWException $e ) {
 			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
 		}
 	}
 
-    /**
-     * Allows last minute changes to the output page, e.g. adding of CSS or
-     * JavaScript by extensions.
-     *
-     * @param OutputPage $out
-     * @param Skin $skin
-     */
+	/**
+	 * Allows last minute changes to the output page, e.g. adding of CSS or
+	 * JavaScript by extensions.
+	 *
+	 * @param OutputPage $out
+	 * @param Skin $skin
+	 */
 	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
-	    if ( $out->getTitle()->getFullText() !== "Special:Search" ) {
-	        return;
-        }
+		if ( $out->getTitle()->getFullText() !== "Special:Search" ) {
+			return;
+		}
 
-	    $config = MediaWikiServices::getInstance()->getMainConfig();
-	    $search_field_override = $config->get( "WSSearchSearchFieldOverride" );
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		$search_field_override = $config->get( "WSSearchSearchFieldOverride" );
 
-	    if ( $search_field_override === false ) {
-	        return;
-        }
+		if ( $search_field_override === false ) {
+			return;
+		}
 
-	    // Create Title object to get the full URL
-	    $title = Title::newFromText( $search_field_override );
+		// Create Title object to get the full URL
+		$title = Title::newFromText( $search_field_override );
 
-	    // The search page redirect is invalid
-	    if ( !$title instanceof Title ) {
-	        return;
-        }
+		// The search page redirect is invalid
+		if ( !$title instanceof Title ) {
+			return;
+		}
 
-	    // Get the current search query
-	    $search_query = $out->getRequest()->getval( "search", "" );
+		// Get the current search query
+		$search_query = $out->getRequest()->getval( "search", "" );
 
-	    // Get the full URL to redirect to
-	    $redirect_url = $title->getFullUrlForRedirect( [ "term" => $search_query ] );
+		// Get the full URL to redirect to
+		$redirect_url = $title->getFullUrlForRedirect( [ "term" => $search_query ] );
 
-	    // Perform the redirect
-        header( "Location: $redirect_url" );
+		// Perform the redirect
+		header( "Location: $redirect_url" );
 
-        exit();
+		exit();
 	}
 
 	/**
@@ -204,36 +204,36 @@ abstract class WSSearchHooks {
 	 * @param string ...$parameters
 	 * @return string
 	 */
-	public static function searchConfigCallback(Parser $parser, string ...$parameters ): string {
-	    try {
-            $config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
-        } catch( \InvalidArgumentException $exception ) {
-            return self::error( "wssearch-invalid-engine-config-detailed", [$exception->getMessage()] );
-        }
+	public static function searchConfigCallback( Parser $parser, string ...$parameters ): string {
+		try {
+			$config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
+		} catch ( \InvalidArgumentException $exception ) {
+			return self::error( "wssearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
+		}
 
 		$config->update( wfGetDB( DB_MASTER ) );
 
 		return "";
 	}
 
-    /**
-     * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
-     * of the extension.
-     *
-     * @param Parser $parser
-     * @param string ...$parameters
-     *
-     * @return string
-     * @throws \Exception
-     */
-	public static function searchEngineFrontendCallback(Parser $parser, string ...$parameters ): string {
-	    $config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
+	/**
+	 * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
+	 * of the extension.
+	 *
+	 * @param Parser $parser
+	 * @param string ...$parameters
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	public static function searchEngineFrontendCallback( Parser $parser, string ...$parameters ): string {
+		$config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
 
-	    if ( $config === null ) {
-		    return self::error( "wssearch-invalid-engine-config" );
-        }
+		if ( $config === null ) {
+			return self::error( "wssearch-invalid-engine-config" );
+		}
 
-        $result = self::error( "wssearch-missing-frontend" );
+		$result = self::error( "wssearch-missing-frontend" );
 
 		\Hooks::run( "WSSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
 

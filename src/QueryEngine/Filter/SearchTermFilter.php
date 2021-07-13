@@ -1,11 +1,9 @@
 <?php
 
-
 namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WSSearch\SearchEngine;
 use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
 
@@ -17,7 +15,14 @@ use WSSearch\SMW\PropertyFieldMapper;
 class SearchTermFilter extends AbstractFilter {
 	use QueryPreparationTrait;
 
+	/**
+	 * @var array
+	 */
 	private $chained_properties = [];
+
+	/**
+	 * @var array
+	 */
 	private $property_fields = [];
 
 	/**
@@ -43,8 +48,6 @@ class SearchTermFilter extends AbstractFilter {
 
 		if ( $properties !== [] ) {
 			foreach ( $properties as $mapper ) {
-				assert( $mapper instanceof PropertyFieldMapper );
-
 				if ( $mapper->isChained() ) {
 					$this->chained_properties[] = $mapper;
 				} else {
@@ -84,7 +87,7 @@ class SearchTermFilter extends AbstractFilter {
 
 		foreach ( $this->chained_properties as $property ) {
 			// Construct a new chained subquery for each chained property and add it to the bool query
-			$property_text_filter = new PropertyTextFilter( $property, $search_term );
+			$property_text_filter = new PropertyTextFilter( $property, $search_term, $this->default_operator );
 			$filter = new ChainedPropertyFilter( $property_text_filter, $property->getChainedPropertyFieldMapper() );
 			$bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
 		}

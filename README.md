@@ -1,182 +1,239 @@
+---
+title: WSSearch API documentation
+date: May 2021
+author:
+- "Wikibase Solutions"
+numbersections: true
+geometry: margin=2cm
+lang: "en"
+titlepage: true
+header-includes:
+  - \hypersetup{colorlinks=false,
+            allbordercolors={0 0 0},
+            pdfborderstyle={/S/U/W 1}}
+---
+
 # WSSearch
 
-## Installation
-* Download and place the file(s) in a directory called WSSearch in your extensions/ folder.
-* Add the following code at the bottom of your LocalSettings.php:
-  * wfLoadExtension( 'WSSearch' );
-* Run the update script which will automatically create the necessary database tables that this extension needs.
-* Run Composer.
-* Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
+This document describes how to use WSSearch. It is meant for both wiki-administrators as well as external users using the
+API endpoint.
 
-## Hooks
+## Performing a search
 
-### `WSSearchBeforeElasticQuery`
-This hook is called right before the query is sent to ElasticSearch. It has the following signature:
+Performs a search and returns the list of search results. If the API is in debug mode, this endpoint also returns the raw
+ElasticSearch query that was used to perform the search.
 
-```php
-function onWSSearchBeforeElasticQuery( array &$query, array &$hosts ) {}
+### Parameters
+
+| Parameter      | Type      | Description                                                                                                                                                                                              |
+|----------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pageid`       | `integer` | The MediaWiki page ID of the page from which the search configuration should be retrieved. Needs to be a valid page ID of a page containing a configuration.                                             |
+| `term`         | `string`  | The search term query to use for the main free-text search. This corresponds to the main search field on a search page. Defaults to the empty string. When no `term` is given, all results are returned. |
+| `from`         | `integer` | The cursor to use for pagination. `from` specifies the offset of the results to return. Defaults to `0`.                                                                                                 |
+| `limit`        | `integer` | The limit on the number of results to return (inclusive). Defaults to `10`.                                                                                                                              |
+| `filter`       | `list`    | The filters to apply to the search. Defaults to the empty list. See below for additional information about the syntax.                                                                                   |
+| `aggregations` | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
+| `sorting`      | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
+
+### Example request
+
+Example request (cURL):
+```
+curl https://wiki.example.org/api.php \
+-d action=query \
+-d format=json \
+-d meta=WSSearch \
+-d filter=[{"value":"5","key":"Average rating","range":{"gte":5,"lte":6}}] \
+-d from=0 \
+-d limit=10 \
+-d pageid=698 \
+-d aggregations=[
+    {"type":"range","ranges":[
+        {"from":1,"to":6,"key":"1"},
+        {"from":2,"to":6,"key":"2"},
+        {"from":3,"to":6,"key":"3"},
+        {"from":4,"to":6,"key":"4"},
+        {"from":5,"to":6,"key":"5"}
+    ],"property":"Average rating"}
+]
 ```
 
-The hook has access to and can alter the given `$query`. It can also add or remove hosts from the
-`$hosts` array.
-
-### `WSSearchApplyResultTranslations`
-This hook is called right before returning the final results to the API. It can be used
-to alter the `$results` array. This can be useful to filter any pages the user is not allowed
-to see or add additional data to the query result.
-
-It has the following signature:
-
-```php
-function onWSSearchApplyResultTranslations( array &$results ) {}
+Example response:
 ```
-
-### `WSSearchPermissionCheck`
-This hook is called when determining whether a page should be visible in the ElasticSearch query results. It
-has the following signature:
-
-```php
-function onWSSearchPermissionCheck( Revision $revision, Title $title, bool &$is_allowed ) {}
-```
-
-* `Revision $revision`: The Revision we are evaluating
-* `Title $title`: The Title object associated with the Revision
-* `bool &$is_allowed`: Set to `false` to hide the page from the search results, leave unchanged otherwise
-
-### `WSSearchOnLoadFrontend`
-This hook must be implemented by any WSSearch frontend. It gets called when the `#loadSeachEngine` parser function
-is called. It has the following signature:
-
-```php
-function onWSSearchOnLoadFrontend( string &$result, \WSSearch\SearchEngineConfig $config, Parser $parser, array $parameters ) {}
-```
-
-* `string &$result`: The result of the call to the parser function. This is the text that will be transcluded on the page.
-* `SearchEngineConfig $config`: The SearchEngineConfig object of the current page. The SearchEngineConfig object exposes the following methods:
-    * `getTitle(): Title`: The Title associated with this SearchEngineConfig
-    * `getConditionProperty(): PropertyInfo`: The PropertyInfo object associated with the property in the search condition (e.g. `Class` for `Class=Foobar`)
-        * The `PropertyInfo` class exposes the following methods:
-            * `getPropertyID(): int`: Returns the property ID
-            * `getPropertyType(): string`: Returns the property type (e.g. `txtField` or `wpgField`)
-            * `getPropertyName(): string`: Returns the name of the property (e.g. `Class`)
-    * `getConditionValue(): string`: Returns the value in the condition (e.g. `Foobar` in `Class=Foobar`)
-    * `getFacetProperties(): array`: Returns the facet properties in the config (facet properties are the properties that are **not** prefixed with `?`). May be the
-      name of a property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar")
-    * `getFacetPropertyIDs(): array`: Returns a key-value pair list where the key is the ID of the facet property and the value the type of that property
-    * `getResultProperties(): array`: Returns the result properties in the config as PropertyInfo objects (result properties are the properties prefixed with `?`)
-    * `getResultPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the result property and the value the ID of that property
-    * `getSearchParameters(): array`: Returns a key-value pair list of additional search parameters
-* `Parser $parser`: The current Parser object
-* `array $parameters`: The parameters passed to the `#loadSearchEngine` call
-
-## Config variables
-
-WSSearch has several configuration variables that influence its default behaviour.
-
-* `$wgWSSearchElasticStoreIndex`: Sets the name of the ElasticStore index to use (defaults to `"smw-data-" . strtolower( wfWikiID() )`)
-* `$wgWSSearchDefaultResultLimit`: Sets the number of results to return when no explicit limit is given (defaults to `10`)
-* `$wgWSSearchHighlightFragmentSize`: Sets the maximum number of characters in the highlight fragment (defaults to `250`)
-* `$wgWSSearchHighlightNumberOfFragments`: Sets the maximum number of highlight fragments to return per result (defaults to `1`)
-* `$wgWSSearchElasticSearchHosts`: Sets the list of ElasticSearch hosts to use (defaults to `["localhost:9200"]`)
-* `$wgWSSearchAPIRequiredRights`: Sets the list of rights required to query the WSSearch API (defaults to `["read", "wssearch-execute-api"]`)
-* `$wgWSSearchSearchFieldOverride`: Sets the search page to redirect to when using Special:Search. The user is redirected to the specified wiki article with the query parameter `search_query` specified through the search page if it is available. Does not change the behaviour of the search snippets shown when using the inline search field.
-
-## Parser functions
-
-WSSearch defines two parser functions.
-
-### `#searchEngineConfig` (case-sensitive)
-The `#searchEngineConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
-reasons. It sets the search condition for that page, the list of facet properties, and the list of result properties.
-
-```
-{{#searchEngineConfig: <condition>
-  |<facet property>
-  |?<result property>
-}}
-```
-
-```
-{{#searchEngineConfig: Class=Foobar
-  |Version
-  |Tag
-  |Space
-  |?Title
-  |?Version
-}}
-```
-
-Note: Only one call to `#searchEngineConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
-
-#### Search parameters
-Certain configuration parameters can also be given through the search engine config. This section documents these parameters and their
-behaviour.
-
-##### `base query`
-The `base query` configuration parameter can be used to add a base query to the search. This base query is given as a Semantic MediaWiki query. A
-document will only be included in the search if it matched both the base query and the generated query.
-
-##### `highlighted properties`
-The `highlighted properties` configuration parameter can be used to specify alternate properties that should be highlighted. Please note that these
-properties do need to be part of the search space.
-
-##### `search term properties`
-The `search term properties` configuration parameter can be used to specify alternate properties to search through when doing a free-text search. These
-properties may also be chained properties.
-
-##### `default operator`
-The `default operator` configuration parameter can be used to change the default operator of the free-text search. The default operator inserted between
-each term is `or` and this configuration parameters allows the administrator to change that to an `and` if required.
-
-##### `post filter properties`
-The `post filter properties` configuration parameter can be used to specify which filters should be added as a post filter instead
-of a regular filter. This parameter takes a comma-separated list of property names. Each filter that applies to any of the given property names
-will be added as a post filter. The difference between post filters and regular filters is explained [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-post-filter.html).
-This configuration parameter is especially useful when you have disjunct checkbox properties.
-
-### `#loadSearchEngine` (case-sensitive)
-The `#loadSearchEngine` parser function is used to load the frontend. The parameters and return value of this parser function
-depend completely on the frontend.
-
-## API
-The API has the following parameters:
-
-* `pageid`: The page ID to use for retrieving the appropriate `searchEngineConfig`
-* `filter`: The ElasticSearch filters to apply
-* `aggregations`: The aggregations to add to the query
-* `sortings`: Sorting to add to the query
-* `term`: The term to search for
-* `from`: The result offset
-* `limit`: The maximum number of results to return
-
-An example API call looks like this:
-
-`https://pidsdev02.wikibase.nl/api.php?action=query&format=json&meta=WSSearch&pageid=1&filter=[{%22value%22:%222021%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459209,%22lte%22:2459574}}},{%22value%22:%22Last+month%22,%22key%22:%22Date%22,%22range%22:{%22P:29.datField%22:{%22gte%22:2459205,%22lte%22:2459236}}},{%22value%22:%223500%22,%22key%22:%22Namespace%22},{%22value%22:%22Admin%22,%22key%22:%22User%22}]&term=e&from=0`
-
-This resulted in the following:
-
-```json
 {
-  "batchcomplete": "",
-  "result": {
-    "total": 0,
-    "hits": [],
-    "aggs": {
-      "Foo": {
-        "doc_count_error_upper_bound": 0,
-        "sum_other_doc_count": 0,
-        "buckets": []
-      }
+    "batchcomplete": "",
+    "result": {
+        "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
+        "total": 1,
+        "aggs": {
+            "Average rating": {
+                "meta": [],
+                "doc_count": 1,
+                "Average rating": {
+                    "buckets": {
+                        "1": {
+                            "from": 1,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "2": {
+                            "from": 2,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "3": {
+                            "from": 3,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "4": {
+                            "from": 4,
+                            "to": 6,
+                            "doc_count": 1
+                        },
+                        "5": {
+                            "from": 5,
+                            "to": 6,
+                            "doc_count": 1
+                        }
+                    }
+                }
+            }
+        }
     }
-  }
 }
 ```
 
+### Parsing the response
+
+This section assumes you have successfully made a request to the API using PHP and have stored the raw API result in the
+variable `$response`.
+
+The `$response` object is a JSON encoded string, and needs to be decoded before it can be used:
+
+```php
+$response = json_decode($response, true);
+```
+
+After having decoded the `$response` object, the response usually contains two keys (three if debug mode is enabled):
+
+| Field           | Type     | Description                                                                                                       |
+|-----------------|----------|-------------------------------------------------------------------------------------------------------------------|
+| `batchcomplete` | `string` | Added by MediaWiki and not relevant for API users.                                                                |
+| `result`        | `object` | Contains the result object of the performed search.                                                               |
+| `query`         | `object` | The raw ElasticSearch query used to perform this search. This field is only available when debug mode is enabled. |
+
+Generally, we are only interested in the API result object, so we can create a new variable only containing that field:
+
+```php
+$result = $response["result"];
+```
+
+This `$result` field will look something like this:
+
+```json
+{
+    "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
+    "total": 1,
+    "aggs": {
+        "Average rating": {
+            "meta": [],
+            "doc_count": 1,
+            "Average rating": {
+                "buckets": {
+                    "1": {
+                        "from": 1,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "2": {
+                        "from": 2,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "3": {
+                        "from": 3,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "4": {
+                        "from": 4,
+                        "to": 6,
+                        "doc_count": 1
+                    },
+                    "5": {
+                        "from": 5,
+                        "to": 6,
+                        "doc_count": 1
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+#### The `hits` field
+
+The `hits` field contains a JSON-encoded string of the ElasticSearch search results. This field needs to be decoded
+using `json_decode` before it can be used. The field directly corresponds to the `hits.hits` field from the
+ElasticSearch response. See the
+[ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search)
+for very detailed documentation about what this field looks like.
+
+To get the associated page name of any search result, the `subject.namespacename` and `subject.title` hit-field in the 
+`hits` field may be concatenated using a colon, like so:
+
+```php
+$hits = json_decode($result["hits"], true);
+
+foreach ($hits as $hit) {
+    $namespace_name = $hit["subject"]["namespacename"];
+    $page_title = $hit["subject"]["title"];
+
+    $page_name = sprintf("%s:%s", $namespace_name, $page_title);
+
+    echo $page_name;
+}
+```
+
+The `subject.namespacename` hit-field contains the name of the namespace in which the search result lives, and the `subject.title` hit-field contains the name of the page that matched the search (without a namespace prefix). To get the full URL for this page, you can prepend `http://<wikiurl>/index.php/` to the page name.
+
+The `hits` field also contains the generated highlighted snippets, if they are available. These can be accessed through the `highlight` hit-field, like so:
+
+```php
+$hits = json_decode($result["hits"], true);
+
+foreach ($hits as $hit) {
+    $highlights = $hit["highlight"];
+    
+    foreach ($highlights as $highlight) {
+        // $highlight is an array of highlighted snippets
+
+        $highlight_string = implode("", $highlight);
+    
+        echo $highlight_string;
+    }
+}
+```
+
+See also the [ElasticSearch Highlighting documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/highlighting.html).
+
+#### The `aggs` field
+
+The `aggs` field directly corresponds to the `aggregations` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html) for further details.
+
+#### The `total` field
+
+The `total` field contains the total number of results found by ElasticSearch. This field is not influenced by the `limit` and always displays the total number of results available, regardsless of how many were actually returned.
+
 ### Filters syntax
 
-The `filters` parameter takes a list of objects. These objects have the following form:
+The `filter` parameter takes a list of objects. These objects have the following form:
 
 #### PropertyRangeFilter
+
+This filter only returns pages that have the specified property with a value in the specified range.
 
 ```
 {
@@ -200,6 +257,8 @@ The `range` parameter takes an object that allows the following properties:
 
 #### PropertyValueFilter
 
+This filter only returns pages that have the specified property with the specified value.
+
 ```
 {
     "key": "Class",
@@ -220,6 +279,8 @@ See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-
 
 #### PropertyValuesFilter
 
+This filter only returns pages that have the specified property with any of the specified values.
+
 ```
 {
     "key": "Class",
@@ -233,6 +294,8 @@ See also: https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl
 
 #### HasPropertyFilter
 
+This filter only returns pages that have the specified property with any value.
+
 ```
 {
     "key": "Class",
@@ -245,6 +308,9 @@ The above filter only includes pages that have the property `Class`. It does not
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
 
 #### PropertyTextFilter
+
+This filter only returns pages that have the specified property with a value that matches the given search query string.
+
 ```
 {
     "key": "Class",
@@ -312,7 +378,20 @@ The above filter sorts the results based on the value of the property `Genre` in
 
 > **Note:** Sorting on a property that does not exist will result in an error.
 
+### Highlight API
+
+> **Note:** This API is mostly for internal use.
+
+The highlight API has the following properties:
+
+* `query`: The query to generate highlighted terms from
+* `properties`: The properties over which the highlights need to be calculated
+* `page_id`: The page ID of the page on which the highlights need to be calculated
+* `limit`: The number of highlighted terms to calculate; this does not always correspond directly with the number of terms returned, since duplicates are removed after the query to ElasticSearch
+* `size`: The (approximate) size of snippets to generate, leave blank to highlight individual words
+
 ## Chained properties
+
 WSSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
 
 ```
@@ -325,3 +404,186 @@ WSSearch provides support for creating filters with chained properties. Chained 
 For instance, the above filter matches any page for which the value of the property "Subpage" is a page that contains the property "Foobar".
 
 See also: https://www.semantic-mediawiki.org/wiki/Help:Subqueries_and_property_chains
+
+## Special properties
+
+There are a number of special properties defined by Semantic MediaWiki that are worth pointing out. These properties act just like regular properties, but do not appear in Special:Browse.
+
+* `text_copy`: (from SemanticMediaWiki documentation) this mapping is used to enable wide proximity searches on textual annotated elements. The `text_copy` field is a compound field for all strings to be searched when a specific property is unknown.
+* `text_raw`: this mapping contains unstructured, unprocessed raw text from an article.
+* `attachment-title`: this mapping contains the title of a file attachment.
+* `attachment-content`: this mapping contains the content of a file attachment.
+
+For example, if you want to search through PDF files linked through the `Pdf` property, you can use the chained property `Pdf.attachment-content`.
+
+## Hooks
+
+### `WSSearchBeforeElasticQuery`
+
+This hook is called right before the query is sent to ElasticSearch. It has the following signature:
+
+```php
+function onWSSearchBeforeElasticQuery( array &$query, array &$hosts ) {}
+```
+
+The hook has access to and can alter the given `$query`. It can also add or remove hosts from the
+`$hosts` array.
+
+### `WSSearchApplyResultTranslations`
+
+This hook is called right before returning the final results to the API. It can be used
+to alter the `$results` array. This can be useful to filter any pages the user is not allowed
+to see or add additional data to the query result.
+
+It has the following signature:
+
+```php
+function onWSSearchApplyResultTranslations( array &$results ) {}
+```
+
+### `WSSearchPermissionCheck`
+
+This hook is called when determining whether a page should be visible in the ElasticSearch query results. It
+has the following signature:
+
+```php
+function onWSSearchPermissionCheck( Revision $revision, Title $title, bool &$is_allowed ) {}
+```
+
+* `Revision $revision`: The Revision we are evaluating
+* `Title $title`: The Title object associated with the Revision
+* `bool &$is_allowed`: Set to `false` to hide the page from the search results, leave unchanged otherwise
+
+### `WSSearchOnLoadFrontend`
+
+This hook must be implemented by any WSSearch frontend. It gets called when the `#loadSeachEngine` parser function
+is called. It has the following signature:
+
+```php
+function onWSSearchOnLoadFrontend( 
+    string &$result, 
+    \WSSearch\SearchEngineConfig $config, 
+    Parser $parser, 
+    array $parameters 
+) {}
+```
+
+* `string &$result`: The result of the call to the parser function. This is the text that will be transcluded on the page.
+* `SearchEngineConfig $config`: The SearchEngineConfig object of the current page. The SearchEngineConfig object exposes the following methods:
+    * `getTitle(): Title`: The Title associated with this SearchEngineConfig
+    * `getConditionProperty(): PropertyInfo`: The PropertyInfo object associated with the property in the search condition (e.g. `Class` for `Class=Foobar`)
+        * The `PropertyInfo` class exposes the following methods:
+            * `getPropertyID(): int`: Returns the property ID
+            * `getPropertyType(): string`: Returns the property type (e.g. `txtField` or `wpgField`)
+            * `getPropertyName(): string`: Returns the name of the property (e.g. `Class`)
+    * `getConditionValue(): string`: Returns the value in the condition (e.g. `Foobar` in `Class=Foobar`)
+    * `getFacetProperties(): array`: Returns the facet properties in the config (facet properties are the properties that are **not** prefixed with `?`). May be the
+      name of a property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar")
+    * `getFacetPropertyIDs(): array`: Returns a key-value pair list where the key is the ID of the facet property and the value the type of that property
+    * `getResultProperties(): array`: Returns the result properties in the config as PropertyInfo objects (result properties are the properties prefixed with `?`)
+    * `getResultPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the result property and the value the ID of that property
+    * `getSearchParameters(): array`: Returns a key-value pair list of additional search parameters
+* `Parser $parser`: The current Parser object
+* `array $parameters`: The parameters passed to the `#loadSearchEngine` call
+
+## Config variables
+
+WSSearch has several configuration variables that influence its default behaviour.
+
+* `$wgWSSearchElasticStoreIndex`: Sets the name of the ElasticStore index to use (defaults to `"smw-data-" . strtolower( wfWikiID() )`)
+* `$wgWSSearchDefaultResultLimit`: Sets the number of results to return when no explicit limit is given (defaults to `10`)
+* `$wgWSSearchHighlightFragmentSize`: Sets the maximum number of characters in the highlight fragment (defaults to `250`)
+* `$wgWSSearchHighlightNumberOfFragments`: Sets the maximum number of highlight fragments to return per result (defaults to `1`)
+* `$wgWSSearchElasticSearchHosts`: Sets the list of ElasticSearch hosts to use (defaults to `["localhost:9200"]`)
+* `$wgWSSearchAPIRequiredRights`: Sets the list of rights required to query the WSSearch API (defaults to `["read", "wssearch-execute-api"]`)
+* `$wgWSSearchSearchFieldOverride`: Sets the search page to redirect to when using Special:Search. The user is redirected to the specified wiki article with the query parameter `search_query` specified through the search page if it is available. Does not change the behaviour of the search snippets shown when using the inline search field.
+* `$wgWSSearchMaxChainedQuerySize`: Sets the maximum number of results to retrieve for a chained property query (defaults to `1000`). Setting this to an extreme value may cause ElasticSearch to run out of memory when performing a large chained query.
+
+### Debug mode
+
+To enable debug mode, set `$wgWSSearchEnableDebugMode` to `true`.
+
+## Parser functions
+
+WSSearch defines two parser functions.
+
+### `#WSSearchConfig` (case-sensitive)
+
+The `#WSSearchConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
+reasons. It sets the search condition for that page, the list of facet properties, and the list of result properties.
+
+```
+{{#WSSearchConfig:
+  |<facet property>
+  |?<result property>
+}}
+```
+
+```
+{{#WSSearchConfig:
+  |Version
+  |Tag
+  |Space
+  |?Title
+  |?Version
+}}
+```
+
+Note: Only one call to `#WSSearchConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
+
+#### Search parameters
+
+Certain configuration parameters can also be given through the search engine config. This section documents these parameters and their
+behaviour.
+
+##### `base query`
+
+The `base query` configuration parameter can be used to add a base query to the search. This base query is given as a Semantic MediaWiki query. A
+document will only be included in the search if it matched both the base query and the generated query.
+
+##### `highlighted properties`
+
+The `highlighted properties` configuration parameter can be used to specify alternate properties that should be highlighted. Please note that these
+properties do need to be part of the search space.
+
+##### `search term properties`
+
+The `search term properties` configuration parameter can be used to specify alternate properties to search through when doing a free-text search. These
+properties may also be chained properties.
+
+##### `default operator`
+
+The `default operator` configuration parameter can be used to change the default operator of the free-text search. The default operator inserted between
+each term is `or` and this configuration parameters allows the administrator to change that to an `and` if required.
+
+##### `post filter properties`
+
+The `post filter properties` configuration parameter can be used to specify which filters should be added as a post filter instead
+of a regular filter. This parameter takes a comma-separated list of property names. Each filter that applies to any of the given property names
+will be added as a post filter. The difference between post filters and regular filters is explained [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-post-filter.html).
+This configuration parameter is especially useful when you have disjunct checkbox properties.
+
+### `#WSSearchFrontend` (case-sensitive)
+
+The `#WSSearchFrontend` parser function is used to load the frontend. The parameters and return value of this parser function
+depend completely on the frontend.
+
+## Installation
+
+* Download and place the file(s) in a directory called WSSearch in your extensions/ folder.
+* Add the following code at the bottom of your LocalSettings.php:
+  * wfLoadExtension( 'WSSearch' );
+* Run the update script which will automatically create the necessary database tables that this extension needs.
+* Run Composer.
+* Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
+
+## Copyright
+
+Faceted search for MediaWiki.
+Copyright (C) 2021 Marijn van Wezel, Robis Koopmans
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.

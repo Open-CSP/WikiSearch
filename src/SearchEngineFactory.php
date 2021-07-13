@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WSSearch;
 
 use WSSearch\QueryEngine\Factory\AggregationFactory;
@@ -8,60 +7,66 @@ use WSSearch\QueryEngine\Factory\FilterFactory;
 use WSSearch\QueryEngine\Factory\SortFactory;
 
 class SearchEngineFactory {
-    /**
-     * @var SearchEngine
-     */
-    private $engine;
-
-    /**
-     * SearchEngineFactory constructor.
-     *
-     * @param SearchEngineConfig $config The SearchEngineConfig to construct the engine from
+	/**
+	 * @var SearchEngine
 	 */
-    public function __construct( SearchEngineConfig $config ) {
-        $this->engine = new SearchEngine( $config );
-    }
+	private $engine;
 
-    /**
-     * Constructs a new QueryEngine from the API endpoint parameters.
-     *
-     * @param string|null $term
-     * @param string|null $from
-     * @param string|null $limit
-     * @param string|null $filters
-     * @param string|null $aggregations
-     * @param string|null $sortings
-     *
-     * @return SearchEngine
-     * @throws SearchEngineException
-     */
-    public function fromParameters( $term, $from, $limit, $filters, $aggregations, $sortings ): SearchEngine {
-        if ( $term !== null ) {
-            $this->setTerm( $term );
-        }
+	/**
+	 * @var SearchEngineConfig
+	 */
+	private $config;
 
-        if ( $from !== null ) {
-            $this->setFrom( $from );
-        }
+	/**
+	 * SearchEngineFactory constructor.
+	 *
+	 * @param SearchEngineConfig $config The SearchEngineConfig to construct the engine from
+	 */
+	public function __construct( SearchEngineConfig $config ) {
+		$this->config = $config;
+		$this->engine = new SearchEngine( $config );
+	}
 
-        if ( $limit !== null ) {
-            $this->setLimit( $limit );
-        }
+	/**
+	 * Constructs a new QueryEngine from the API endpoint parameters.
+	 *
+	 * @param string|null $term
+	 * @param string|null $from
+	 * @param string|null $limit
+	 * @param string|null $filters
+	 * @param string|null $aggregations
+	 * @param string|null $sortings
+	 *
+	 * @return SearchEngine
+	 * @throws SearchEngineException
+	 */
+	public function fromParameters( $term, $from, $limit, $filters, $aggregations, $sortings ): SearchEngine {
+		if ( $term !== null ) {
+			$this->setTerm( $term );
+		}
 
-        if ( $filters !== null ) {
-            $this->setFilters( $filters );
-        }
+		if ( $from !== null ) {
+			$this->setFrom( $from );
+		}
 
-        if ( $aggregations !== null ) {
-            $this->setAggregations( $aggregations );
-        }
+		if ( $limit !== null ) {
+			$this->setLimit( $limit );
+		}
 
-        if ( $sortings !== null ) {
-            $this->setSortings( $sortings );
-        }
+		if ( $filters !== null ) {
+			$this->setFilters( $filters );
+		}
 
-        return $this->engine;
-    }
+		if ( $aggregations !== null ) {
+			$this->setAggregations( $aggregations );
+		}
+
+		if ( $sortings !== null ) {
+			$this->setSortings( $sortings );
+		}
+
+		return $this->engine;
+	}
 
 	/**
 	 * Sets the search term field.
@@ -69,100 +74,106 @@ class SearchEngineFactory {
 	 * @param string $term The search term to set
 	 * @throws SearchEngineException
 	 */
-    private function setTerm( string $term ) {
-        $this->engine->addSearchTerm( $term );
-    }
+	private function setTerm( string $term ) {
+		$this->engine->addSearchTerm( $term );
+	}
 
-    /**
-     * Sets the result offset.
-     *
-     * @param int $from
-     */
-    private function setFrom( int $from ) {
-        $this->engine->getQueryEngine()->setOffset( $from );
-    }
+	/**
+	 * Sets the result offset.
+	 *
+	 * @param int $from
+	 */
+	private function setFrom( int $from ) {
+		$this->engine->getQueryEngine()->setOffset( $from );
+	}
 
-    /**
-     * Sets the limit of the number of results to return.
-     *
-     * @param int $limit
-     */
-    private function setLimit( int $limit ) {
-        $this->engine->getQueryEngine()->setLimit( $limit );
-    }
+	/**
+	 * Sets the limit of the number of results to return.
+	 *
+	 * @param int $limit
+	 */
+	private function setLimit( int $limit ) {
+		$this->engine->getQueryEngine()->setLimit( $limit );
+	}
 
-    /**
-     * Applies the given filters to the query.
-     *
-     * @param string $filters JSON-encoded string of the filter parameter
-     * @throws SearchEngineException
-     */
-    private function setFilters( string $filters ) {
-        $filters = json_decode( $filters, true );
+	/**
+	 * Applies the given filters to the query.
+	 *
+	 * @param string $filters JSON-encoded string of the filter parameter
+	 * @throws SearchEngineException
+	 */
+	private function setFilters( string $filters ) {
+		$filters = json_decode( $filters, true );
 
-        if ( !is_array( $filters ) || json_last_error() !== JSON_ERROR_NONE ) {
-            throw new SearchEngineException( wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() ) );
-        }
+		if ( !is_array( $filters ) || json_last_error() !== JSON_ERROR_NONE ) {
+			$message = wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() );
+			throw new SearchEngineException( $message );
+		}
 
-        $filters = array_map( [ FilterFactory::class, "fromArray" ], $filters );
-        $all_filters_valid = count( array_filter( $filters, "is_null" ) ) === 0;
+		$filters = array_map( function ( array $filter ) {
+			return FilterFactory::fromArray( $filter, $this->config );
+		}, $filters );
 
-        if ( !$all_filters_valid ) {
-            throw new SearchEngineException( wfMessage( "wssearch-invalid-filter" ) );
-        }
+		$all_filters_valid = count( array_filter( $filters, "is_null" ) ) === 0;
 
-        foreach ( $filters as $filter ) {
-            $this->engine->getQueryEngine()->addConstantScoreFilter( $filter );
-        }
-    }
+		if ( !$all_filters_valid ) {
+			throw new SearchEngineException( wfMessage( "wssearch-invalid-filter" ) );
+		}
 
-    /**
-     * Applies the given aggregations to the query.
-     *
-     * @param string $aggregations
-     * @throws SearchEngineException
-     */
-    private function setAggregations( string $aggregations ) {
-        $aggregations = json_decode( $aggregations, true );
+		foreach ( $filters as $filter ) {
+			$this->engine->getQueryEngine()->addConstantScoreFilter( $filter );
+		}
+	}
 
-        if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
-            throw new SearchEngineException( wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() ) );
-        }
+	/**
+	 * Applies the given aggregations to the query.
+	 *
+	 * @param string $aggregations
+	 * @throws SearchEngineException
+	 */
+	private function setAggregations( string $aggregations ) {
+		$aggregations = json_decode( $aggregations, true );
 
-        $aggregations = array_map( [ AggregationFactory::class, "fromArray" ], $aggregations );
-        $all_aggregations_valid = count( array_filter( $aggregations, "is_null" ) ) === 0;
+		if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
+			$message = wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() );
+			throw new SearchEngineException( $message );
+		}
 
-        if ( !$all_aggregations_valid ) {
-            throw new SearchEngineException( wfMessage( "wssearch-invalid-aggregation" ) );
-        }
+		$aggregations = array_map( [ AggregationFactory::class, "fromArray" ], $aggregations );
+		$all_aggregations_valid = count( array_filter( $aggregations, "is_null" ) ) === 0;
 
-        foreach ( $aggregations as $aggregation ) {
-            $this->engine->getQueryEngine()->addAggregation( $aggregation );
-        }
-    }
+		if ( !$all_aggregations_valid ) {
+			throw new SearchEngineException( wfMessage( "wssearch-invalid-aggregation" ) );
+		}
 
-    /**
-     * Applies the given sortings to the query.
-     *
-     * @param string $sortings
-     * @throws SearchEngineException
-     */
-    private function setSortings( string $sortings ) {
-        $sortings = json_decode( $sortings, true );
+		foreach ( $aggregations as $aggregation ) {
+			$this->engine->getQueryEngine()->addAggregation( $aggregation );
+		}
+	}
 
-        if ( !is_array( $sortings ) || json_last_error() !== JSON_ERROR_NONE ) {
-            throw new SearchEngineException( wfMessage( "wssearch-api-invalid-json", "sortings", json_last_error_msg() ) );
-        }
+	/**
+	 * Applies the given sortings to the query.
+	 *
+	 * @param string $sortings
+	 * @throws SearchEngineException
+	 */
+	private function setSortings( string $sortings ) {
+		$sortings = json_decode( $sortings, true );
 
-        $sortings = array_map( [ SortFactory::class, "fromArray" ], $sortings );
-        $all_sortings_valid = count( array_filter( $sortings, "is_null" ) ) === 0;
+		if ( !is_array( $sortings ) || json_last_error() !== JSON_ERROR_NONE ) {
+			$message = wfMessage( "wssearch-api-invalid-json", "sortings", json_last_error_msg() );
+			throw new SearchEngineException( $message );
+		}
 
-        if ( !$all_sortings_valid ) {
-            throw new SearchEngineException( wfMessage( "wssearch-invalid-sort" ) );
-        }
+		$sortings = array_map( [ SortFactory::class, "fromArray" ], $sortings );
+		$all_sortings_valid = count( array_filter( $sortings, "is_null" ) ) === 0;
 
-        foreach ( $sortings as $sort ) {
-            $this->engine->getQueryEngine()->addSort( $sort );
-        }
-    }
+		if ( !$all_sortings_valid ) {
+			throw new SearchEngineException( wfMessage( "wssearch-invalid-sort" ) );
+		}
+
+		foreach ( $sortings as $sort ) {
+			$this->engine->getQueryEngine()->addSort( $sort );
+		}
+	}
 }
