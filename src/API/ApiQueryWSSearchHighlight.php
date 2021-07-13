@@ -88,6 +88,9 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 			->search( $query_engine->toArray() );
 
 		$words = $this->wordsFromResult( $results );
+		$words = array_map( function ( string $word ): string {
+			return trim( $word, ", \t\n\r\0\x0B");
+		}, $words );
 
 		$this->getResult()->addValue( null, 'words', $words );
 	}
