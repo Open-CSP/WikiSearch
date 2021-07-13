@@ -68,7 +68,7 @@
 			"value": false
 		},
 		"WSSearchMaxChainedQuerySize": {
-			"value": 1000
+			"value": 500
 		}
 	},
 	"load_composer_autoloader": true,
