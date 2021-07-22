@@ -1,6 +1,6 @@
 {
     "name": "wikibasesolutions/wssearch",
-    "type": "project",
+    "type": "mediawiki-extension",
     "description": "Faceted search for MediaWiki",
     "keywords": ["mediawiki", "search", "extension"],
     "license": "GPL-2.0-or-later",
