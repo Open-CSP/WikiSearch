@@ -1,18 +1,3 @@
----
-title: WSSearch API documentation
-date: May 2021
-author:
-- "Wikibase Solutions"
-numbersections: true
-geometry: margin=2cm
-lang: "en"
-titlepage: true
-header-includes:
-  - \hypersetup{colorlinks=false,
-            allbordercolors={0 0 0},
-            pdfborderstyle={/S/U/W 1}}
----
-
 # WSSearch
 
 This document describes how to use WSSearch. It is meant for both wiki-administrators as well as external users using the
