@@ -67,7 +67,7 @@ class DefaultHighlighter implements Highlighter {
 	 */
 	public function toQuery(): Highlight {
 		$highlight = new Highlight();
-		$highlight->setTags( [ '<b class="wssearch-term-highlight">' ], [ "</b>" ] );
+		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGH_@@}" ] );
 
 		foreach ( $this->fields as $field ) {
 			$highlight->addField( $field, $this->field_settings );
