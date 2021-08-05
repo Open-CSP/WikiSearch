@@ -67,7 +67,7 @@ class DefaultHighlighter implements Highlighter {
 	 */
 	public function toQuery(): Highlight {
 		$highlight = new Highlight();
-		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGH_@@}" ] );
+		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
 		foreach ( $this->fields as $field ) {
 			$highlight->addField( $field, $this->field_settings );
