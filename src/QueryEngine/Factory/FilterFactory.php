@@ -9,7 +9,6 @@ use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WSSearch\QueryEngine\Filter\PropertyTextFilter;
 use WSSearch\QueryEngine\Filter\PropertyValueFilter;
 use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
-use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;
 use WSSearch\SMW\PropertyFieldMapper;
 
