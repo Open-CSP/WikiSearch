@@ -9,4 +9,5 @@ run_tests:
   image: composer:1
   stage: test
   script:
+    - composer update --ignore-platform-reqs
     - composer test
