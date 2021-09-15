@@ -95,7 +95,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$words_filtered = [];
 
 		foreach ( $words as $word ) {
-			$match = preg_match("/(HIGHLIGHT_@@|^)([a-zA-Z0-9]*)(@@_HIGHLIGHT|$)/", $word, $matches );
+			$match = preg_match( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9]*)(@@_HIGHLIGHT|$)/", $word, $matches );
 
 			if ( $match === 1 && isset( $matches[2] ) ) {
 				$words_filtered[] = $matches[2];
