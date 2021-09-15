@@ -1,0 +1,14 @@
+include:
+  - template: Composer.gitlab-ci.yml
+
+stages:
+  - test
+  - build
+
+run_tests:
+  allow_failure: true
+  image: composer:1
+  stage: test
+  script:
+    - composer update --ignore-platform-reqs
+    - composer test
