@@ -7,7 +7,7 @@ stages:
 
 publish:
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "stable"'
 
 run_tests:
   image: composer:1
@@ -15,3 +15,4 @@ run_tests:
   script:
     - composer update --ignore-platform-reqs
     - composer test
+  allow_failure: true
