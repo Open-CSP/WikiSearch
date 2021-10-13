@@ -426,19 +426,6 @@ It has the following signature:
 function onWSSearchApplyResultTranslations( array &$results ) {}
 ```
 
-### `WSSearchPermissionCheck`
-
-This hook is called when determining whether a page should be visible in the ElasticSearch query results. It
-has the following signature:
-
-```php
-function onWSSearchPermissionCheck( Revision $revision, Title $title, bool &$is_allowed ) {}
-```
-
-* `Revision $revision`: The Revision we are evaluating
-* `Title $title`: The Title object associated with the Revision
-* `bool &$is_allowed`: Set to `false` to hide the page from the search results, leave unchanged otherwise
-
 ### `WSSearchOnLoadFrontend`
 
 This hook must be implemented by any WSSearch frontend. It gets called when the `#loadSeachEngine` parser function
