@@ -1,5 +1,5 @@
 {
-    "name": "wikibase/w-s-search",
+    "name": "wikibase-solutions/w-s-search",
     "type": "mediawiki-extension",
     "description": "Faceted search for MediaWiki",
     "keywords": ["mediawiki", "search", "extension"],
