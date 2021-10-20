@@ -47,8 +47,11 @@ class FragmentHighlighter implements Highlighter {
 	 * @inheritDoc
 	 */
 	public function toQuery(): Highlight {
+		$tag_left = "HIGHLIGHT_@@";
+		$tag_right = "@@_HIGHLIGHT";
+
 		$highlight = new Highlight();
-		$highlight->setTags( [ "" ], [ "" ] );
+		$highlight->setTags( [ $tag_left ], [ $tag_right ] );
 
 		foreach ( $this->fields as $field ) {
 			$highlight->addField( $field, [

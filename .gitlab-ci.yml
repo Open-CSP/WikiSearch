@@ -5,14 +5,10 @@ stages:
   - test
   - build
 
-publish:
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "stable"'
-
 run_tests:
+  allow_failure: true
   image: composer:1
   stage: test
   script:
     - composer update --ignore-platform-reqs
     - composer test
-  allow_failure: true
