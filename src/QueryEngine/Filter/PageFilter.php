@@ -4,6 +4,7 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
+use WSSearch\Logger;
 use WSSearch\SMW\WikiPageObjectIdLookup;
 
 /**
@@ -43,7 +44,16 @@ class PageFilter extends AbstractFilter {
 	 * @return BoolQuery
 	 */
 	public function toQuery(): BoolQuery {
-		$object_id = WikiPageObjectIdLookup::getObjectIdForTitle( $this->title ) ?: -1;
+		$object_id = WikiPageObjectIdLookup::getObjectIdForTitle( $this->title );
+
+		if ( $object_id === null ) {
+			$object_id = -1;
+
+			Logger::getLogger()->alert( 'Failed to lookup object ID for Title {title}, falling back to -1', [
+				'title' => $this->title->getFullText()
+			] );
+		}
+
 		$term_query = new TermQuery(
 			"_id",
 			$object_id

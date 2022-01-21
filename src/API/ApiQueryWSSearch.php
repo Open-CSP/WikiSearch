@@ -27,6 +27,7 @@ use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
+use WSSearch\Logger;
 use WSSearch\SearchEngine;
 use WSSearch\SearchEngineConfig;
 use WSSearch\SearchEngineException;
@@ -67,6 +68,10 @@ class ApiQueryWSSearch extends ApiQueryBase {
 
 			$this->getResult()->addValue( null, 'result', $result );
 		} catch ( \Exception $e ) {
+			Logger::getLogger()->critical( 'Caught exception while executing search query: {e}', [
+				'e' => $e
+			] );
+
 			$this->dieWithError( $this->msg( "wssearch-api-invalid-query", $e->getMessage() ) );
 		}
 	}
@@ -113,6 +118,10 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			$required_rights = $config->get( "WSSearchAPIRequiredRights" );
 			$this->checkUserRightsAny( $required_rights );
 		} catch ( \ConfigException $e ) {
+			Logger::getLogger()->critical( 'Caught exception while trying to get required rights for WSSearch API: {e}', [
+				'e' => $e
+			] );
+
 			// Something went wrong; to be safe we block the access
 			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
 		}
@@ -172,9 +181,11 @@ class ApiQueryWSSearch extends ApiQueryBase {
 				$this->getParameter( "sortings" )
 			);
 		} catch ( SearchEngineException $exception ) {
+			Logger::getLogger()->critical( 'Caught exception while trying to construct a SearchEngine: {e}', [
+				'e' => $exception
+			] );
+
 			$this->dieWithError( $exception->getMessage() );
-			// This is not needed, but we do this to stop PHPStorm from complaining
-			exit;
 		}
 
 		return $search_engine;

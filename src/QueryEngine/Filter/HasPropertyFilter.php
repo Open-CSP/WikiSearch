@@ -4,6 +4,7 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
+use WSSearch\Logger;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -33,6 +34,10 @@ class HasPropertyFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
+			Logger::getLogger()->critical( 'Tried to construct a HasPropertyFilter with an invalid property: {property}', [
+				'property' => $property
+			] );
+
 			throw new \InvalidArgumentException();
 		}
 

@@ -24,7 +24,6 @@ class SearchEngineFactory {
 	 */
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
-		$this->engine = new SearchEngine( $config );
 	}
 
 	/**
@@ -41,6 +40,8 @@ class SearchEngineFactory {
 	 * @throws SearchEngineException
 	 */
 	public function fromParameters( $term, $from, $limit, $filters, $aggregations, $sortings ): SearchEngine {
+		$this->engine = new SearchEngine( $this->config );
+
 		if ( $term !== null ) {
 			$this->setTerm( $term );
 		}
@@ -72,7 +73,6 @@ class SearchEngineFactory {
 	 * Sets the search term field.
 	 *
 	 * @param string $term The search term to set
-	 * @throws SearchEngineException
 	 */
 	private function setTerm( string $term ) {
 		$this->engine->addSearchTerm( $term );

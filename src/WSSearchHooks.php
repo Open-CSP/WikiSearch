@@ -153,7 +153,9 @@ abstract class WSSearchHooks {
 			$parser->setFunctionHook( "WSSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 		} catch ( MWException $e ) {
-			LoggerFactory::getInstance( "WSSearch" )->error( "Unable to register parser hooks" );
+			Logger::getLogger()->alert( 'Unable to register parser hooks: {e}', [
+				'e' => $e
+			] );
 		}
 	}
 
@@ -208,6 +210,10 @@ abstract class WSSearchHooks {
 		try {
 			$config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
 		} catch ( \InvalidArgumentException $exception ) {
+			Logger::getLogger()->alert( 'Caught exception while creating SearchEngineConfig: {e}', [
+				'e' => $exception
+			] );
+
 			return self::error( "wssearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
 		}
 
@@ -230,6 +236,8 @@ abstract class WSSearchHooks {
 		$config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
 
 		if ( $config === null ) {
+			Logger::getLogger()->alert( 'Tried to load front-end with an invalid SearchEngineConfig' );
+
 			return self::error( "wssearch-invalid-engine-config" );
 		}
 

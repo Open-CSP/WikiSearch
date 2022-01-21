@@ -4,6 +4,7 @@ namespace WSSearch\QueryEngine\Sort;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
+use WSSearch\Logger;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -41,6 +42,10 @@ class PropertySort implements Sort {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
+			Logger::getLogger()->critical( 'Tried to construct a PropertySort with an invalid property: {property}', [
+				'property' => $property
+			] );
+
 			throw new \InvalidArgumentException();
 		}
 

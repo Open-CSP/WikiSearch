@@ -3,6 +3,7 @@
 namespace WSSearch\SMW;
 
 use SMW\PropertyRegistry;
+use WSSearch\Logger;
 
 /**
  * Class PropertyLabelMapper
@@ -32,6 +33,10 @@ class PropertyAliasMapper {
 		$property_key = ( PropertyRegistry::getInstance() )->findPropertyIdByLabel( $property_label );
 
 		if ( $property_key === false ) {
+			Logger::getLogger()->debug( 'Could not find property ID by label {label}', [
+				'label' => $property_label
+			] );
+
 			return $property_label;
 		}
 

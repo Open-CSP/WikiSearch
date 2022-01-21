@@ -90,6 +90,10 @@ class SearchEngine {
 		// Allow other extensions to modify the query
 		Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
 
+		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
+			'query' => $query
+		] );
+
 		return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
 	}
 

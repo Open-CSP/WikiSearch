@@ -360,8 +360,18 @@ class SearchEngineConfig {
 	 * @param Database $database
 	 */
 	public function update( $database ) {
-		$this->delete( $database, $this->title->getArticleID() );
+		$id = $this->title->getArticleID();
+
+		Logger::getLogger()->debug( 'Updating search engine configuration for page ID {id}', [
+			'id' => $id
+		] );
+
+		$this->delete( $database, $id );
 		$this->insert( $database );
+
+		Logger::getLogger()->debug( 'Finished updating search engine configuration for page ID {id}', [
+			'id' => $id
+		] );
 	}
 
 	/**

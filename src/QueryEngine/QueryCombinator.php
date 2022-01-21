@@ -2,6 +2,8 @@
 
 namespace WSSearch\QueryEngine;
 
+use WSSearch\Logger;
+
 /**
  * Class QueryCombinator
  *
@@ -59,6 +61,8 @@ class QueryCombinator {
 	 */
 	public function add( array $query ): QueryCombinator {
 		if ( !isset( $query["body"]["query"] ) ) {
+			Logger::getLogger()->error( 'Tried to combine invalid queries' );
+
 			throw new \MWException( "Invalid query returned by Semantic MediaWiki" );
 		}
 

@@ -5,6 +5,7 @@ namespace WSSearch\QueryEngine\Filter;
 use Elasticsearch\ClientBuilder;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use WSSearch\Logger;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
 use WSSearch\SearchEngineException;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -91,6 +92,10 @@ class ChainedPropertyFilter extends PropertyFilter {
 			$limit = $config->get( "WSSearchMaxChainedQuerySize" );
 		} catch ( \ConfigException $e ) {
 			$limit = 1000;
+
+			Logger::getLogger()->alert( 'Failed to get $wgWSSearchMaxChainedQuerySize, falling back to {limit}', [
+				'limit' => $limit
+			] );
 		}
 
 		$query_engine->setLimit( $limit );

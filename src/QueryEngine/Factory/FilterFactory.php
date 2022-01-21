@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Factory;
 
+use WSSearch\Logger;
 use WSSearch\QueryEngine\Filter\AbstractFilter;
 use WSSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WSSearch\QueryEngine\Filter\HasPropertyFilter;
@@ -27,11 +28,17 @@ class FilterFactory {
 	 * @return AbstractFilter|null
 	 */
 	public static function fromArray( array $array, SearchEngineConfig $config ) {
+		Logger::getLogger()->debug( 'Constructing Filter from array' );
+
 		if ( !isset( $array["key"] ) ) {
+			Logger::getLogger()->debug( 'Failed to construct Filter from array: missing "key"' );
+
 			return null;
 		}
 
 		if ( !is_string( $array["key"] ) && !( $array["key"] instanceof PropertyFieldMapper ) ) {
+			Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "key"' );
+
 			return null;
 		}
 
@@ -69,6 +76,8 @@ class FilterFactory {
 	) {
 		if ( isset( $array["range"] ) ) {
 			if ( !is_array( $array["range"] ) ) {
+				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "range"' );
+
 				return null;
 			}
 
@@ -77,6 +86,8 @@ class FilterFactory {
 
 		if ( isset( $array["type"] ) ) {
 			if ( !is_string( $array["type"] ) ) {
+				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
+
 				return null;
 			}
 
@@ -105,6 +116,8 @@ class FilterFactory {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $v ) {
 				if ( !in_array( gettype( $v ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
+					Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
+
 					return null;
 				}
 			}
@@ -113,6 +126,8 @@ class FilterFactory {
 		}
 
 		if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
+			Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
+
 			return null;
 		}
 
@@ -135,6 +150,8 @@ class FilterFactory {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
+					Logger::getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+
 					return null;
 				}
 
@@ -142,6 +159,8 @@ class FilterFactory {
 					"and" : "or";
 				return self::propertyTextFilterFromText( $array["value"], $default_operator, $property_field_mapper );
 			default:
+				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
+
 				return null;
 		}
 	}

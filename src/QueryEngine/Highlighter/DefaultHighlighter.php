@@ -35,8 +35,6 @@ class DefaultHighlighter implements Highlighter {
 	/**
 	 * DefaultHighlighter constructor.
 	 *
-	 * Note: This highlighter requires a valid SearchEngineConfig to be defined via SearchEngine::$config.
-	 *
 	 * @param SearchEngineConfig $config
 	 * @param string[]|null $fields The fields to apply the highlight to, or null to highlight the default fields
 	 * @param array|null $field_settings
