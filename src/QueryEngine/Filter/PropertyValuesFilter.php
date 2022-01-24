@@ -4,6 +4,7 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermsQuery;
+use WSSearch\Logger;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -40,6 +41,10 @@ class PropertyValuesFilter extends PropertyFilter {
 
 		foreach ( $values as $value ) {
 			if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
+				Logger::getLogger()->critical( 'Tried to construct a PropertyValuesFilter with an invalid property value: {propertyValue}', [
+					'propertyValue' => $value
+				] );
+
 				throw new \InvalidArgumentException();
 			}
 		}
@@ -71,6 +76,10 @@ class PropertyValuesFilter extends PropertyFilter {
 	public function setPropertyValues( array $property_values ) {
 		foreach ( $property_values as $value ) {
 			if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
+				Logger::getLogger()->critical( 'Tried to set an invalid property value: {propertyValue}', [
+					'propertyValue' => $value
+				] );
+
 				throw new \InvalidArgumentException();
 			}
 		}

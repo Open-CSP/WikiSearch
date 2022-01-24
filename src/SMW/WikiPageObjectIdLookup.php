@@ -7,6 +7,7 @@ use SMW\SQLStore\SQLStore;
 use SMW\Store;
 use Title;
 use Wikimedia\Rdbms\IResultWrapper;
+use WSSearch\Logger;
 
 class WikiPageObjectIdLookup {
 	/**
@@ -16,6 +17,10 @@ class WikiPageObjectIdLookup {
 	 * @return string|null
 	 */
 	public static function getObjectIdForTitle( Title $title ) {
+		Logger::getLogger()->debug('Fetching object ID for Title {title}', [
+			'title' => $title->getFullText()
+		]);
+
 		/** @var Store $store */
 		$store = ApplicationFactory::getInstance()->getStore();
 		$connection = $store->getConnection( "mw.db" );
@@ -35,6 +40,13 @@ class WikiPageObjectIdLookup {
 			__METHOD__
 		);
 
-		return $rows->current()->smw_id;
+		$object_id = $rows->current()->smw_id;
+
+		Logger::getLogger()->debug('Finished fetching object ID for Title {title}: {objectId}', [
+			'title' => $title->getFullText(),
+			'objectId' => $object_id
+		]);
+
+		return $object_id;
 	}
 }

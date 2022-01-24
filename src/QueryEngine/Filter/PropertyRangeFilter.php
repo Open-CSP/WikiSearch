@@ -4,6 +4,7 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
+use WSSearch\Logger;
 use WSSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -47,6 +48,10 @@ class PropertyRangeFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
+			Logger::getLogger()->critical( 'Tried to construct a PropertyRangeFilter with an invalid property: {property}', [
+				'property' => $property
+			] );
+
 			throw new \InvalidArgumentException();
 		}
 

@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Factory;
 
+use WSSearch\Logger;
 use WSSearch\QueryEngine\Sort\PropertySort;
 use WSSearch\QueryEngine\Sort\Sort;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -20,7 +21,11 @@ class SortFactory {
 	 * @return Sort|null
 	 */
 	public static function fromArray( array $array ) {
+		Logger::getLogger()->debug( 'Constructing Sort from array' );
+
 		if ( !isset( $array["type"] ) ) {
+			Logger::getLogger()->debug( 'Failed to construct Sort from array: missing "type"' );
+
 			return null;
 		}
 
@@ -28,6 +33,8 @@ class SortFactory {
 			case "property":
 				return self::propertySortFromArray( $array );
 			default:
+				Logger::getLogger()->debug( 'Failed to construct Sort from array: invalid "type"' );
+
 				return null;
 		}
 	}
@@ -39,11 +46,17 @@ class SortFactory {
 	 * @return PropertySort|null
 	 */
 	private static function propertySortFromArray( array $array ) {
-		if ( !isset( $array["property"] ) ) { return null;
+		if ( !isset( $array["property"] ) ) {
+			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: missing "property"' );
+
+			return null;
 		}
+
 		$property = $array["property"];
 
 		if ( !is_string( $property ) && !( $property instanceof PropertyFieldMapper ) ) {
+			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: invalid "property"' );
+
 			return null;
 		}
 

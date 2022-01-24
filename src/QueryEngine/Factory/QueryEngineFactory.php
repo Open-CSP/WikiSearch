@@ -3,6 +3,7 @@
 namespace WSSearch\QueryEngine\Factory;
 
 use MediaWiki\MediaWikiServices;
+use WSSearch\Logger;
 use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WSSearch\QueryEngine\QueryEngine;
@@ -78,6 +79,8 @@ class QueryEngineFactory {
 		global $smwgElasticsearchEndpoints;
 
 		if ( !isset( $smwgElasticsearchEndpoints ) || $smwgElasticsearchEndpoints === [] ) {
+			Logger::getLogger()->alert( 'Missing or empty $smwgElasticsearchEndpoints, fallback to "localhost:9200"' );
+
 			return [ "localhost:9200" ];
 		}
 

@@ -9,6 +9,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
+use WSSearch\Logger;
 use WSSearch\QueryEngine\Aggregation\Aggregation;
 use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WSSearch\QueryEngine\Filter\AbstractFilter;
@@ -236,6 +237,8 @@ class QueryEngine {
 	 * @throws \MWException
 	 */
 	public function toArray(): array {
+		Logger::getLogger()->debug( 'Constructing ElasticSearch query from QueryEngine' );
+
 		$elasticsearch_search = clone $this->elasticsearch_search;
 		$elasticsearch_search = $this->applyAggregationsAndPostFilters(
 			$elasticsearch_search,
