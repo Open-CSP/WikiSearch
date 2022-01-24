@@ -3,7 +3,7 @@
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "3.6.0",
+	"version": "3.7.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WSSearch",
 	"descriptionmsg": "wssearch-desc",
 	"license-name": "GPL-2.0-or-later",
