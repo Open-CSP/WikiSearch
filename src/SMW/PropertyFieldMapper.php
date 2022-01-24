@@ -114,8 +114,8 @@ class PropertyFieldMapper {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
-		list ( $this->property_name, $this->chained_property_field_mapper ) = $this->parseChainedProperty( $property_name );
-        list ( $this->property_name, $this->property_weight ) = $this->parsePropertyWeight( $property_name );
+		list ( $this->chained_property_field_mapper, $this->property_name ) = $this->parseChainedProperty( $property_name );
+        list ( $this->property_weight, $this->property_name ) = $this->parsePropertyWeight( $property_name );
 
 		$this->property_key = str_replace(" ", "_", $this->translateSpecialProperties( $this->property_name ));
 
@@ -317,7 +317,8 @@ class PropertyFieldMapper {
         $chained_property_name = implode( ".", $property_name_chain );
 
         // Recursively construct the chained field mapper
-        $chained_field_mapper = $chained_property_name !== "" ? new PropertyFieldMapper( $chained_property_name ) : null;
+        $chained_field_mapper = $chained_property_name !== "" ?
+            new PropertyFieldMapper( $chained_property_name ) : null;
 
         return [$chained_field_mapper, $property_name];
     }
