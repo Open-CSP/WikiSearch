@@ -309,17 +309,17 @@ class PropertyFieldMapper {
 	 * @return array
 	 */
 	private static function parseChainedProperty( string $property_name ): array {
+	    // Split on the last period in the property name
 		$property_name_chain = explode( ".", $property_name );
-
-		// Pop the last part of the property chain
 		$final_property_name = array_pop( $property_name_chain );
-
-		// Check whether we are the property at the end of the chain
 		$chained_property_name = implode( ".", $property_name_chain );
 
-		// Recursively construct the chained field mapper
-		$chained_field_mapper = $chained_property_name !== "" ?
-			new PropertyFieldMapper( $chained_property_name ) : null;
+        if ( $chained_property_name !== "" ) {
+            // Recursively construct the chained field mapper, if this is a chained property
+            $chained_field_mapper = new PropertyFieldMapper( $chained_property_name );
+        } else {
+            $chained_field_mapper = null;
+        }
 
 		return [ $chained_field_mapper, $final_property_name ];
 	}
