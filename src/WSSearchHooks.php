@@ -25,7 +25,6 @@ use Content;
 use ContentHandler;
 use DatabaseUpdater;
 use LogEntry;
-use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use OutputPage;

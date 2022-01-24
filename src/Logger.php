@@ -44,8 +44,8 @@ class Logger {
 	 * @return LoggerInterface
 	 */
 	public static function getLogger(): LoggerInterface {
-		if (!isset(self::$loggerInstance)) {
-			self::$loggerInstance = LoggerFactory::getInstance(self::LOGGING_CHANNEL);
+		if ( !isset( self::$loggerInstance ) ) {
+			self::$loggerInstance = LoggerFactory::getInstance( self::LOGGING_CHANNEL );
 		}
 
 		return self::$loggerInstance;

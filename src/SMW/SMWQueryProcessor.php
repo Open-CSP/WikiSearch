@@ -36,9 +36,9 @@ class SMWQueryProcessor {
 	 * @throws \MWException When the query is invalid
 	 */
 	public function toElasticSearchQuery(): array {
-		Logger::getLogger()->debug('Converting base Semantic MediaWiki query to ElasticSearch query: {query}', [
+		Logger::getLogger()->debug( 'Converting base Semantic MediaWiki query to ElasticSearch query: {query}', [
 			'query' => $this->query
-		]);
+		] );
 
 		list( $query_string, $parameters, $printouts ) = \SMWQueryProcessor::getComponentsFromFunctionParams(
 			[ $this->query ],
@@ -55,22 +55,22 @@ class SMWQueryProcessor {
 
 		$query->setOption( \SMWQuery::MODE_DEBUG, 'API' );
 
-		Logger::getLogger()->debug('Constructing QueryEngine from ElasticFactory');
+		Logger::getLogger()->debug( 'Constructing QueryEngine from ElasticFactory' );
 
 		$elastic_factory = new ElasticFactory();
 		$store = \SMW\ApplicationFactory::getInstance()->getStore();
 		$query_engine = $elastic_factory->newQueryEngine( $store );
 
-		Logger::getLogger()->debug('Finished constructing QueryEngine from ElasticFactory');
+		Logger::getLogger()->debug( 'Finished constructing QueryEngine from ElasticFactory' );
 
 		$query_engine->getQueryResult( $query );
 		$query_info = $query_engine->getQueryInfo();
 
 		if ( !isset( $query_info["elastic"] ) ) {
-			Logger::getLogger()->critical('Base query {query} resulted in invalid query information: {queryInfo}', [
+			Logger::getLogger()->critical( 'Base query {query} resulted in invalid query information: {queryInfo}', [
 				'query' => $this->query,
 				'queryInfo' => $query_info
-			]);
+			] );
 
 			throw new \MWException( "Invalid query" );
 		}

@@ -17,9 +17,9 @@ class WikiPageObjectIdLookup {
 	 * @return string|null
 	 */
 	public static function getObjectIdForTitle( Title $title ) {
-		Logger::getLogger()->debug('Fetching object ID for Title {title}', [
+		Logger::getLogger()->debug( 'Fetching object ID for Title {title}', [
 			'title' => $title->getFullText()
-		]);
+		] );
 
 		/** @var Store $store */
 		$store = ApplicationFactory::getInstance()->getStore();
@@ -42,10 +42,10 @@ class WikiPageObjectIdLookup {
 
 		$object_id = $rows->current()->smw_id;
 
-		Logger::getLogger()->debug('Finished fetching object ID for Title {title}: {objectId}', [
+		Logger::getLogger()->debug( 'Finished fetching object ID for Title {title}: {objectId}', [
 			'title' => $title->getFullText(),
 			'objectId' => $object_id
-		]);
+		] );
 
 		return $object_id;
 	}

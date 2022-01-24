@@ -136,9 +136,9 @@ class SearchEngineConfig {
 		try {
 			return new SearchEngineConfig( $page, $search_parameters, $facet_properties, $result_properties );
 		} catch ( \InvalidArgumentException $e ) {
-			Logger::getLogger()->alert('Exception caught while trying to construct a new SearchEngineConfig: {e}', [
+			Logger::getLogger()->alert( 'Exception caught while trying to construct a new SearchEngineConfig: {e}', [
 				'e' => $e
-			]);
+			] );
 
 			return null;
 		}
@@ -229,9 +229,9 @@ class SearchEngineConfig {
 				$query_processor = new SMWQueryProcessor( $search_parameters["base query"] );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
-				Logger::getLogger()->alert('Exception caught while trying to parse a base query: {e}', [
+				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
 					'e' => $exception
-				]);
+				] );
 
 				// The query is invalid
 				throw new \InvalidArgumentException( "Invalid base query" );

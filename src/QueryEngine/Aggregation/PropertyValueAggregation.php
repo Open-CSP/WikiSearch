@@ -65,7 +65,7 @@ class PropertyValueAggregation implements PropertyAggregation {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setProperty( PropertyFieldMapper $property ) {
+	public function setProperty( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 

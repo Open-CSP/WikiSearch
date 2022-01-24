@@ -66,7 +66,7 @@ class PropertyRangeAggregation implements PropertyAggregation {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setProperty( PropertyFieldMapper $property ) {
+	public function setProperty( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 
@@ -75,7 +75,7 @@ class PropertyRangeAggregation implements PropertyAggregation {
 	 *
 	 * @param array $ranges
 	 */
-	public function setRanges( array $ranges ) {
+	public function setRanges( array $ranges ): void {
 		$this->ranges = $ranges;
 	}
 

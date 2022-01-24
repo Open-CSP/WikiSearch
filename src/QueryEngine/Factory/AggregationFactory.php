@@ -21,7 +21,7 @@ class AggregationFactory {
 	 * @param array $array
 	 * @return Aggregation|null
 	 */
-	public static function fromArray( array $array ) {
+	public static function fromArray( array $array ): ?Aggregation {
 		Logger::getLogger()->debug( 'Constructing Aggregation from array' );
 
 		if ( !isset( $array["type"] ) ) {
@@ -47,7 +47,7 @@ class AggregationFactory {
 	 * @param array $array
 	 * @return PropertyRangeAggregation|null
 	 */
-	private static function propertyRangeAggregationFromArray( array $array ) {
+	private static function propertyRangeAggregationFromArray( array $array ): ?PropertyRangeAggregation {
 		$aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
 
 		if ( !is_string( $aggregation_name ) && $aggregation_name !== null ) {
@@ -94,7 +94,7 @@ class AggregationFactory {
 	 * @param array $array
 	 * @return PropertyValueAggregation|null
 	 */
-	private static function propertyAggregationFromArray( array $array ) {
+	private static function propertyAggregationFromArray( array $array ): ?PropertyValueAggregation {
 		$aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
 
 		if ( !is_string( $aggregation_name ) ) {
