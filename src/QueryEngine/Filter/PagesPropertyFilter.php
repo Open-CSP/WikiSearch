@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermsQuery;
 use WSSearch\SMW\PropertyFieldMapper;
@@ -22,28 +23,28 @@ class PagesPropertyFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var int[]
 	 */
-	private $property_values;
+	private array $property_values;
 
 	/**
 	 * PropertyTermsFilter constructor.
 	 *
 	 * @param PropertyFieldMapper $property The property that should match the given page IDs
-	 * @param array $pages Array of (SMW) page IDs
+	 * @param int[] $property_values Array of (SMW) page IDs
 	 */
-	public function __construct( PropertyFieldMapper $property, array $pages ) {
-		foreach ( $pages as $page ) {
-			if ( !is_int( $page ) ) {
-				throw new \InvalidArgumentException();
+	public function __construct( PropertyFieldMapper $property, array $property_values ) {
+		foreach ( $property_values as $property_value ) {
+			if ( !is_int( $property_value ) ) {
+				throw new InvalidArgumentException('$property_values must be an array of integers');
 			}
 		}
 
 		$this->property = $property;
-		$this->property_values = $pages;
+		$this->property_values = $property_values;
 	}
 
 	/**
@@ -60,7 +61,7 @@ class PagesPropertyFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setPropertyName( PropertyFieldMapper $property ) {
+	public function setPropertyName( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 
@@ -69,12 +70,12 @@ class PagesPropertyFilter extends PropertyFilter {
 	 *
 	 * @param int[] $property_values
 	 */
-	public function setPropertyValues( array $property_values ) {
-		foreach ( $property_values as $value ) {
-			if ( !is_int( $value ) ) {
-				throw new \InvalidArgumentException();
-			}
-		}
+	public function setPropertyValues( array $property_values ): void {
+        foreach ( $property_values as $property_value ) {
+            if ( !is_int( $property_value ) ) {
+                throw new InvalidArgumentException('$property_values must be an array of integers');
+            }
+        }
 
 		$this->property_values = $property_values;
 	}

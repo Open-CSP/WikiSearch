@@ -9,7 +9,7 @@ class SMWQueryProcessor {
 	/**
 	 * @var string
 	 */
-	private $query;
+	private string $query;
 
 	/**
 	 * SMWQueryProcessor constructor.
@@ -25,7 +25,7 @@ class SMWQueryProcessor {
 	 *
 	 * @param string $query
 	 */
-	public function setQuery( string $query ) {
+	public function setQuery( string $query ): void {
 		$this->query = $query;
 	}
 

@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Sort;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use WSSearch\Logger;
@@ -18,22 +19,22 @@ class PropertySort implements Sort {
 	/**
 	 * @var string The order of the sort
 	 */
-	private $order;
+	private string $order;
 
 	/**
 	 * @var string The field to sort on
 	 */
-	private $field;
+	private string $field;
 
 	/**
 	 * @var array Additional sort parameters to pass to the sort query
 	 */
-	private $parameters = [];
+	private array $parameters = [];
 
 	/**
 	 * FieldSort constructor.
 	 *
-	 * @param string $property The property to sort on
+	 * @param string|PropertyFieldMapper $property The property to sort on
 	 * @param string|null $order
 	 */
 	public function __construct( $property, string $order = null ) {
@@ -46,7 +47,7 @@ class PropertySort implements Sort {
 				'property' => $property
 			] );
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		switch ( $order ) {
@@ -77,7 +78,7 @@ class PropertySort implements Sort {
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public function addParameter( string $key, $value ) {
+	public function addParameter( string $key, $value ): void {
 		$this->parameters[$key] = $value;
 	}
 

@@ -106,7 +106,7 @@ class FilterFactory {
 	 *
 	 * @param mixed $value
 	 * @param PropertyFieldMapper $property_field_mapper
-	 * @return AbstractFilter|null
+	 * @return PropertyValuesFilter|PropertyValueFilter|null
 	 */
 	private static function valueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ): ?AbstractFilter {
 		if ( $value === "+" ) {
@@ -146,7 +146,7 @@ class FilterFactory {
 		array $array,
 		PropertyFieldMapper $property_field_mapper,
 		SearchEngineConfig $config
-	) {
+	): PropertyTextFilter {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {

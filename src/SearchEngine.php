@@ -22,6 +22,7 @@
 namespace WSSearch;
 
 use Elasticsearch\ClientBuilder;
+use Exception;
 use Hooks;
 use MWNamespace;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
@@ -37,17 +38,17 @@ class SearchEngine {
 	/**
 	 * @var SearchEngineConfig
 	 */
-	private $config = null;
+	private ?SearchEngineConfig $config = null;
 
 	/**
 	 * @var array
 	 */
-	private $translations;
+	private array $translations;
 
 	/**
 	 * @var QueryEngine
 	 */
-	private $query_engine;
+	private QueryEngine $query_engine;
 
 	/**
 	 * Search constructor.
@@ -84,7 +85,7 @@ class SearchEngine {
 	 * @param array $query
 	 * @param array $hosts
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function doQuery( array $query, array $hosts ): array {
 		// Allow other extensions to modify the query
@@ -117,7 +118,7 @@ class SearchEngine {
 	 *
 	 * @return array
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function doSearch(): array {
 		$elastic_query = $this->query_engine->toArray();
@@ -137,7 +138,7 @@ class SearchEngine {
 	 *
 	 * @param array $results
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function applyResultTranslations( array $results ): array {
 		$results = $this->doFacetTranslations( $results );

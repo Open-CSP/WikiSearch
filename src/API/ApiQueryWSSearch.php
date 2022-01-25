@@ -111,7 +111,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 	 *
 	 * @throws ApiUsageException
 	 */
-	private function checkUserRights() {
+	private function checkUserRights(): void {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
 		try {

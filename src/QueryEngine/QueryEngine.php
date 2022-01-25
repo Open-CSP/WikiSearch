@@ -3,6 +3,7 @@
 namespace WSSearch\QueryEngine;
 
 use MediaWiki\MediaWikiServices;
+use MWException;
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
@@ -27,56 +28,56 @@ class QueryEngine {
 	/**
 	 * @var Search
 	 */
-	private $elasticsearch_search;
+	private Search $elasticsearch_search;
 
 	/**
 	 * The "index" to use for the ElasticSearch query.
 	 *
 	 * @var string
 	 */
-	private $elasticsearch_index;
+	private string $elasticsearch_index;
 
 	/**
 	 * The base ElasticSearch query.
 	 *
 	 * @var array|null
 	 */
-	private $base_query = null;
+	private ?array $base_query = null;
 
 	/**
 	 * The configured ElasticSearch hosts.
 	 *
 	 * @var array
 	 */
-	private $elasticsearch_hosts;
+	private array $elasticsearch_hosts;
 
 	/**
 	 * The main constant score boolean query filter.
 	 *
 	 * @var BoolQuery
 	 */
-	private $constant_score_filters;
+	private BoolQuery $constant_score_filters;
 
 	/**
 	 * The main function score boolean query filter.
 	 *
 	 * @var BoolQuery
 	 */
-	private $function_score_filters;
+	private BoolQuery $function_score_filters;
 
 	/**
 	 * List of aggregations to calculate.
 	 *
 	 * @var Aggregation[]
 	 */
-	private $aggregations = [];
+	private array $aggregations = [];
 
 	/**
 	 * List of filters to be applied after aggregations have been calculated.
 	 *
 	 * @var AbstractFilter[]
 	 */
-	private $post_filters = [];
+	private array $post_filters = [];
 
 	/**
 	 * QueryEngine constructor.
@@ -87,15 +88,14 @@ class QueryEngine {
 	public function __construct( string $index, array $hosts ) {
 		$this->elasticsearch_index = $index;
 		$this->elasticsearch_hosts = $hosts;
+        $this->elasticsearch_search = new Search();
 
 		$default_result_limit = MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" );
 
-		$this->elasticsearch_search = new Search();
+        $this->constant_score_filters = new BoolQuery();
+        $this->function_score_filters = new BoolQuery();
+
 		$this->elasticsearch_search->setSize( $default_result_limit );
-
-		$this->constant_score_filters = new BoolQuery();
-		$this->function_score_filters = new BoolQuery();
-
 		$this->elasticsearch_search->addQuery( new ConstantScoreQuery( $this->constant_score_filters ) );
 		$this->elasticsearch_search->addQuery( new FunctionScoreQuery( $this->function_score_filters ) );
 	}
@@ -107,7 +107,7 @@ class QueryEngine {
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
 	 */
-	public function addAggregation( Aggregation $aggregation ) {
+	public function addAggregation( Aggregation $aggregation ): void {
 		$this->aggregations[] = $aggregation;
 	}
 
@@ -120,7 +120,7 @@ class QueryEngine {
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
 	 */
-	public function addConstantScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
+	public function addConstantScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
 		$query = $filter->toQuery();
 
 		if ( $filter->isPostFilter() ) {
@@ -139,7 +139,7 @@ class QueryEngine {
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
 	 */
-	public function addFunctionScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ) {
+	public function addFunctionScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
 		$query = $filter->toQuery();
 
 		if ( $filter->isPostFilter() ) {
@@ -154,7 +154,7 @@ class QueryEngine {
 	 *
 	 * @param Highlighter $highlighter
 	 */
-	public function addHighlighter( Highlighter $highlighter ) {
+	public function addHighlighter( Highlighter $highlighter ): void {
 		$this->elasticsearch_search->addHighlight( $highlighter->toQuery() );
 	}
 
@@ -163,7 +163,7 @@ class QueryEngine {
 	 *
 	 * @param Sort $sort
 	 */
-	public function addSort( Sort $sort ) {
+	public function addSort( Sort $sort ): void {
 		$this->elasticsearch_search->addSort( $sort->toQuery() );
 	}
 
@@ -172,7 +172,7 @@ class QueryEngine {
 	 *
 	 * @param string $index
 	 */
-	public function setIndex( string $index ) {
+	public function setIndex( string $index ): void {
 		$this->elasticsearch_index = $index;
 	}
 
@@ -181,7 +181,7 @@ class QueryEngine {
 	 *
 	 * @param int $offset
 	 */
-	public function setOffset( int $offset ) {
+	public function setOffset( int $offset ): void {
 		$this->elasticsearch_search->setFrom( $offset );
 	}
 
@@ -190,7 +190,7 @@ class QueryEngine {
 	 *
 	 * @param int $limit
 	 */
-	public function setLimit( int $limit ) {
+	public function setLimit( int $limit ): void {
 		$this->elasticsearch_search->setSize( $limit );
 	}
 
@@ -199,12 +199,13 @@ class QueryEngine {
 	 *
 	 * @param string $base_query
 	 */
-	public function setBaseQuery( string $base_query ) {
+	public function setBaseQuery( string $base_query ): void {
 		try {
 			$query_processor = new SMWQueryProcessor( $base_query );
 			$elastic_search_query = $query_processor->toElasticSearchQuery();
-		} catch ( \MWException $exception ) {
+		} catch ( MWException $exception ) {
 			// The query is invalid
+            Logger::getLogger()->critical( 'Tried to set invalid query as the base query' );
 			return;
 		}
 
@@ -234,7 +235,7 @@ class QueryEngine {
 	 * Converts this class into a full ElasticSearch query.
 	 *
 	 * @return array A complete ElasticSearch query
-	 * @throws \MWException
+	 * @throws MWException
 	 */
 	public function toArray(): array {
 		Logger::getLogger()->debug( 'Constructing ElasticSearch query from QueryEngine' );
@@ -288,12 +289,12 @@ class QueryEngine {
 	 *
 	 * @param Aggregation $aggregation
 	 * @param AbstractFilter[] $post_filters
-	 * @return AbstractAggregation
+	 * @return FilterAggregation
 	 */
 	private static function constructAggregation(
 		Aggregation $aggregation,
 		array $post_filters
-	) {
+	): FilterAggregation {
 		$compound_filter = new BoolQuery();
 		$aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
 

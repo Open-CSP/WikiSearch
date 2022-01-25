@@ -67,27 +67,27 @@ class PropertyFieldMapper {
 	/**
 	 * @var int The unique ID of the property
 	 */
-	private $property_id;
+	private int $property_id;
 
 	/**
 	 * @var string The kind/datatype of the property
 	 */
-	private $property_type;
+	private string $property_type;
 
 	/**
 	 * @var string The key of the property as a string
 	 */
-	private $property_key;
+	private string $property_key;
 
 	/**
 	 * @var string The human-readable name of the property as a string
 	 */
-	private $property_name;
+	private string $property_name;
 
 	/**
 	 * @var int The weight this property was given
 	 */
-	private $property_weight;
+	private int $property_weight;
 
 	/**
 	 * @var PropertyFieldMapper The property field mapper for the chained property
@@ -96,7 +96,7 @@ class PropertyFieldMapper {
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
 	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
 	 */
-	private $chained_property_field_mapper;
+	private ?PropertyFieldMapper $chained_property_field_mapper = null;
 
 	/**
 	 * PropertyFieldMapper constructor.
@@ -219,9 +219,9 @@ class PropertyFieldMapper {
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
 	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
 	 *
-	 * @return PropertyFieldMapper
+	 * @return PropertyFieldMapper|null
 	 */
-	public function getChainedPropertyFieldMapper() {
+	public function getChainedPropertyFieldMapper(): ?PropertyFieldMapper {
 		return $this->chained_property_field_mapper;
 	}
 

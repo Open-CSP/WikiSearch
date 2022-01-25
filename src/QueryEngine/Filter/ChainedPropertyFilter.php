@@ -2,8 +2,10 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use ConfigException;
 use Elasticsearch\ClientBuilder;
 use MediaWiki\MediaWikiServices;
+use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WSSearch\Logger;
 use WSSearch\QueryEngine\Factory\QueryEngineFactory;
@@ -24,12 +26,12 @@ class ChainedPropertyFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var AbstractFilter The initial filter to use to get the terms for the to be constructed Terms filter
 	 */
-	private $filter;
+	private AbstractFilter $filter;
 
 	/**
 	 * ChainedPropertyTermsFilter constructor.
@@ -56,23 +58,20 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @inheritDoc
 	 *
 	 * @return BoolQuery
-	 * @throws \MWException
+	 * @throws MWException
 	 * @throws SearchEngineException
 	 */
 	public function toQuery(): BoolQuery {
-		$query = $this->constructSubqueryFromFilter( $this->filter );
-		$terms = $this->getTermsFromSubquery( $query );
+        $query = $this->constructSubqueryFromFilter( $this->filter );
+        $terms = $this->getTermsFromSubquery( $query );
 
-		$filter = new PagesPropertyFilter( $this->property, $terms );
+        $filter = new PagesPropertyFilter( $this->property, $terms );
 
-		if ( !$this->property->isChained() ) {
-			return $filter->toQuery();
-		}
+        if ( $this->property->isChained() ) {
+            $filter = new ChainedPropertyFilter( $filter, $this->property->getChainedPropertyFieldMapper() );
+        }
 
-		return ( new ChainedPropertyFilter(
-			$filter,
-			$this->property->getChainedPropertyFieldMapper()
-		) )->toQuery();
+        return $filter->toQuery();
 	}
 
 	/**
@@ -80,7 +79,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 *
 	 * @param AbstractFilter $filter
 	 * @return array
-	 * @throws \MWException
+	 * @throws MWException
 	 */
 	private function constructSubqueryFromFilter( AbstractFilter $filter ): array {
 		$query_engine = QueryEngineFactory::fromNull();
@@ -90,7 +89,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 
 		try {
 			$limit = $config->get( "WSSearchMaxChainedQuerySize" );
-		} catch ( \ConfigException $e ) {
+		} catch ( ConfigException $e ) {
 			$limit = 1000;
 
 			Logger::getLogger()->alert( 'Failed to get $wgWSSearchMaxChainedQuerySize, falling back to {limit}', [

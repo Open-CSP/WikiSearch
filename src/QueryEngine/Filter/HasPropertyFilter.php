@@ -21,7 +21,7 @@ class HasPropertyFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * PropertyExistsFilter constructor.
@@ -58,7 +58,7 @@ class HasPropertyFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setPropertyName( PropertyFieldMapper $property ) {
+	public function setPropertyName( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 

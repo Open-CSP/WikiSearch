@@ -5,6 +5,7 @@
     "keywords": ["mediawiki", "search", "extension"],
     "license": "GPL-2.0-or-later",
     "require": {
+        "php": "^7.4",
         "elasticsearch/elasticsearch": "^5.3|^6.0",
         "ongr/elasticsearch-dsl": "~6.0"
     },

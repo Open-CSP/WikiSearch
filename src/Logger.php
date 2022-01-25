@@ -31,12 +31,12 @@ use Psr\Log\LoggerInterface;
  */
 class Logger {
 	// The logging channel for this extension
-	const LOGGING_CHANNEL = 'wssearch';
+	public const LOGGING_CHANNEL = 'wssearch';
 
 	/**
 	 * @var LoggerInterface An instance of a logger
 	 */
-	private static $loggerInstance;
+	private static LoggerInterface $loggerInstance;
 
 	/**
 	 * Returns the logger instance.

@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use WSSearch\Logger;
@@ -22,7 +23,7 @@ class PropertyValueFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var mixed The value the property to filter on
@@ -41,19 +42,27 @@ class PropertyValueFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertyValueFilter with an invalid property: {property}', [
-				'property' => $property
-			] );
+			Logger::getLogger()->critical(
+			    'Tried to construct a PropertyValueFilter with an invalid property: {property}',
+                [
+				    'property' => $property
+                ]
+            );
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		if ( !in_array( gettype( $property_value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertyValueFilter with an invalid property value: {propertyValue}', [
-				'propertyValue' => $property_value
-			] );
+			Logger::getLogger()->critical(
+			    'Tried to construct a PropertyValueFilter with an invalid property value: {propertyValue}',
+                [
+				    'propertyValue' => $property_value
+			    ]
+            );
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException(
+			    '$property_value must be a of type boolean, string, integer, double or float'
+            );
 		}
 
 		$this->property = $property;
@@ -74,7 +83,7 @@ class PropertyValueFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setPropertyName( PropertyFieldMapper $property ) {
+	public function setPropertyName( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 
@@ -83,13 +92,18 @@ class PropertyValueFilter extends PropertyFilter {
 	 *
 	 * @param string $property_value
 	 */
-	public function setPropertyValue( $property_value ) {
+	public function setPropertyValue( $property_value ): void {
 		if ( !in_array( gettype( $property_value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-			Logger::getLogger()->critical( 'Tried to set an invalid property value: {propertyValue}', [
-				'propertyValue' => $property_value
-			] );
+            Logger::getLogger()->critical(
+                'Tried to set an invalid property value: {propertyValue}',
+                [
+                    'propertyValue' => $property_value
+                ]
+            );
 
-			throw new \InvalidArgumentException();
+            throw new InvalidArgumentException(
+                '$property_value must be a of type boolean, string, integer, double or float'
+            );
 		}
 
 		$this->property_value = $property_value;

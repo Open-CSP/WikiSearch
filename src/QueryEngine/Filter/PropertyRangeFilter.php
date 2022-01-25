@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
 use WSSearch\Logger;
@@ -20,19 +21,19 @@ use WSSearch\SMW\PropertyFieldMapper;
  */
 class PropertyRangeFilter extends PropertyFilter {
 	/**
-	 * @var \WSSearch\SMW\PropertyFieldMapper The property to apply the filter to
+	 * @var PropertyFieldMapper The property to apply the filter to
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var array The options for this filter
 	 */
-	private $options;
+	private array $options;
 
 	/**
 	 * DateRangeFilter constructor.
 	 *
-	 * @param \WSSearch\SMW\PropertyFieldMapper|string $property The property to apply the filter to
+	 * @param PropertyFieldMapper|string $property The property to apply the filter to
 	 * @param array $options The options for this filter, for instance:
 	 *  [
 	 *      RangeQuery::GTE => 10,
@@ -52,7 +53,7 @@ class PropertyRangeFilter extends PropertyFilter {
 				'property' => $property
 			] );
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		$this->property = $property;

@@ -4,6 +4,7 @@ namespace WSSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
+use Title;
 use WSSearch\Logger;
 use WSSearch\SMW\WikiPageObjectIdLookup;
 
@@ -16,25 +17,25 @@ use WSSearch\SMW\WikiPageObjectIdLookup;
  */
 class PageFilter extends AbstractFilter {
 	/**
-	 * @var \Title
+	 * @var Title
 	 */
-	private $title;
+	private Title $title;
 
 	/**
 	 * PageFilter constructor.
 	 *
-	 * @param \Title $title
+	 * @param Title $title
 	 */
-	public function __construct( \Title $title ) {
+	public function __construct( Title $title ) {
 		$this->title = $title;
 	}
 
 	/**
 	 * Sets the page to filter on.
 	 *
-	 * @param \Title $title
+	 * @param Title $title
 	 */
-	public function setPage( \Title $title ) {
+	public function setPage( Title $title ): void {
 		$this->title = $title;
 	}
 

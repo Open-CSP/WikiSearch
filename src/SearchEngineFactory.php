@@ -10,12 +10,12 @@ class SearchEngineFactory {
 	/**
 	 * @var SearchEngine
 	 */
-	private $engine;
+	private SearchEngine $engine;
 
 	/**
 	 * @var SearchEngineConfig
 	 */
-	private $config;
+	private SearchEngineConfig $config;
 
 	/**
 	 * SearchEngineFactory constructor.
@@ -74,7 +74,7 @@ class SearchEngineFactory {
 	 *
 	 * @param string $term The search term to set
 	 */
-	private function setTerm( string $term ) {
+	private function setTerm( string $term ): void {
 		$this->engine->addSearchTerm( $term );
 	}
 
@@ -83,7 +83,7 @@ class SearchEngineFactory {
 	 *
 	 * @param int $from
 	 */
-	private function setFrom( int $from ) {
+	private function setFrom( int $from ): void {
 		$this->engine->getQueryEngine()->setOffset( $from );
 	}
 
@@ -92,7 +92,7 @@ class SearchEngineFactory {
 	 *
 	 * @param int $limit
 	 */
-	private function setLimit( int $limit ) {
+	private function setLimit( int $limit ): void {
 		$this->engine->getQueryEngine()->setLimit( $limit );
 	}
 
@@ -102,7 +102,7 @@ class SearchEngineFactory {
 	 * @param string $filters JSON-encoded string of the filter parameter
 	 * @throws SearchEngineException
 	 */
-	private function setFilters( string $filters ) {
+	private function setFilters( string $filters ): void {
 		$filters = json_decode( $filters, true );
 
 		if ( !is_array( $filters ) || json_last_error() !== JSON_ERROR_NONE ) {
@@ -131,7 +131,7 @@ class SearchEngineFactory {
 	 * @param string $aggregations
 	 * @throws SearchEngineException
 	 */
-	private function setAggregations( string $aggregations ) {
+	private function setAggregations( string $aggregations ): void {
 		$aggregations = json_decode( $aggregations, true );
 
 		if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
@@ -157,7 +157,7 @@ class SearchEngineFactory {
 	 * @param string $sortings
 	 * @throws SearchEngineException
 	 */
-	private function setSortings( string $sortings ) {
+	private function setSortings( string $sortings ): void {
 		$sortings = json_decode( $sortings, true );
 
 		if ( !is_array( $sortings ) || json_last_error() !== JSON_ERROR_NONE ) {

@@ -23,6 +23,7 @@ namespace WSSearch;
 
 use Database;
 use Title;
+use Wikimedia\Rdbms\DBConnRef;
 use WSSearch\SMW\PropertyFieldMapper;
 use WSSearch\SMW\SMWQueryProcessor;
 
@@ -45,42 +46,42 @@ class SearchEngineConfig {
 	/**
 	 * @var Title
 	 */
-	private $title;
+	private Title $title;
 
 	/**
 	 * @var array
 	 */
-	private $search_parameters;
+	private array $search_parameters;
 
 	/**
 	 * @var array
 	 */
-	private $facet_properties;
+	private array $facet_properties;
 
 	/**
 	 * @var array
 	 */
-	private $result_properties;
+	private array $result_properties;
 
 	/**
 	 * @var array
 	 */
-	private $facet_property_ids = [];
+	private array $facet_property_ids = [];
 
 	/**
 	 * @var array
 	 */
-	private $result_property_ids = [];
+	private array $result_property_ids = [];
 
 	/**
 	 * @var array
 	 */
-	private $translations = [];
+	private array $translations = [];
 
 	/**
 	 * @var array
 	 */
-	private $search_parameters_cache = [];
+	private array $search_parameters_cache = [];
 
 	/**
 	 * Constructs a new SearchEngineConfig object from the values in the database identified by $page. If no
@@ -357,9 +358,9 @@ class SearchEngineConfig {
 	/**
 	 * Updates/adds this SearchEngineConfig object in the database with the current values.
 	 *
-	 * @param Database $database
+	 * @param DBConnRef $database
 	 */
-	public function update( $database ) {
+	public function update( DBConnRef $database ): void {
 		$id = $this->title->getArticleID();
 
 		Logger::getLogger()->debug( 'Updating search engine configuration for page ID {id}', [
@@ -379,9 +380,9 @@ class SearchEngineConfig {
 	 * into account whether the current object might already have been saved and may throw an error if the object
 	 * is saved twice. Use $this->update() instead.
 	 *
-	 * @param Database $database
+	 * @param DBConnRef $database
 	 */
-	public function insert( $database ) {
+	public function insert( DBConnRef $database ): void {
 		$page_id = $this->title->getArticleID();
 
 		$facet_properties = array_unique( $this->facet_properties );
@@ -428,10 +429,10 @@ class SearchEngineConfig {
 	/**
 	 * Deletes the SearchEngineConfig object associated with the given $page_id from the database.
 	 *
-	 * @param Database $database
+	 * @param DBConnRef $database
 	 * @param int $page_id
 	 */
-	public static function delete( $database, int $page_id ) {
+	public static function delete( DBConnRef $database, int $page_id ): void {
 		$database->delete(
 			"search_facets",
 			[ "page_id" => $page_id ]

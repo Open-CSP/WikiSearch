@@ -23,7 +23,7 @@ class PropertyValuesParserFunction {
 	 * @return string
 	 * @throws \MWException
 	 */
-	public function execute( Parser $parser, ...$args ) {
+	public function execute( Parser $parser, ...$args ): string {
 		if ( !class_exists( "\WSArrays" ) ) {
 			return "WSArrays must be installed.";
 		}

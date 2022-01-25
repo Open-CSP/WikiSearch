@@ -18,22 +18,22 @@ class SearchTermFilter extends AbstractFilter {
 	/**
 	 * @var array
 	 */
-	private $chained_properties = [];
+	private array $chained_properties = [];
 
 	/**
 	 * @var array
 	 */
-	private $property_fields = [];
+	private array $property_fields = [];
 
 	/**
 	 * @var string The search term to filter on
 	 */
-	private $search_term;
+	private string $search_term;
 
 	/**
 	 * @var string
 	 */
-	private $default_operator;
+	private string $default_operator;
 
 	/**
 	 * SearchTermFilter constructor.
@@ -70,7 +70,7 @@ class SearchTermFilter extends AbstractFilter {
 	 *
 	 * @param string $search_term
 	 */
-	public function setSearchTerm( string $search_term ) {
+	public function setSearchTerm( string $search_term ): void {
 		$this->search_term = $search_term;
 	}
 

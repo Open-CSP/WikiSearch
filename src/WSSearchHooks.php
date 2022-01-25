@@ -216,7 +216,9 @@ abstract class WSSearchHooks {
 			return self::error( "wssearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
 		}
 
-		$config->update( wfGetDB( DB_MASTER ) );
+		$database = wfGetDB( DB_PRIMARY );
+
+		$config->update( $database );
 
 		return "";
 	}

@@ -16,7 +16,7 @@ class WikiPageObjectIdLookup {
 	 * @param Title $title
 	 * @return string|null
 	 */
-	public static function getObjectIdForTitle( Title $title ) {
+	public static function getObjectIdForTitle( Title $title ): ?string {
 		Logger::getLogger()->debug( 'Fetching object ID for Title {title}', [
 			'title' => $title->getFullText()
 		] );

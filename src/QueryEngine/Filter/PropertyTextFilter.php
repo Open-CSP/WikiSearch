@@ -2,6 +2,7 @@
 
 namespace WSSearch\QueryEngine\Filter;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
 use WSSearch\Logger;
@@ -24,17 +25,17 @@ class PropertyTextFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var string The query string used to match the property value
 	 */
-	private $property_value_query;
+	private string $property_value_query;
 
 	/**
 	 * @var string The default operator to use
 	 */
-	private $default_operator;
+	private string $default_operator;
 
 	/**
 	 * PropertyFilter constructor.
@@ -55,7 +56,7 @@ class PropertyTextFilter extends PropertyFilter {
 				'property' => $property
 			] );
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		$this->property = $property;
@@ -77,7 +78,7 @@ class PropertyTextFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setPropertyName( PropertyFieldMapper $property ) {
+	public function setPropertyName( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 
@@ -86,7 +87,7 @@ class PropertyTextFilter extends PropertyFilter {
 	 *
 	 * @param string $property_value_query
 	 */
-	public function setPropertyValueQuery( string $property_value_query ) {
+	public function setPropertyValueQuery( string $property_value_query ): void {
 		$this->property_value_query = $property_value_query;
 	}
 
