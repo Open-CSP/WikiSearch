@@ -29,8 +29,8 @@
 		"WikiSearchMagic": "i18n/WikiSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  	"WikiSearch": "WikiSearch\\API\\ApiQueryWSSearch",
-		"WikiSearchHighlight": "WikiSearch\\API\\ApiQueryWSSearchHighlight"
+	  	"WikiSearch": "WikiSearch\\API\\ApiQueryWikiSearch",
+		"WikiSearchHighlight": "WikiSearch\\API\\ApiQueryWikiSearchHighlight"
   	},
 	"AvailableRights": [
 		"wikisearch-execute-api"
