@@ -1,19 +1,19 @@
 <?php
 
-namespace WSSearch\QueryEngine\Highlighter;
+namespace WikiSearch\QueryEngine\Highlighter;
 
 use LogicException;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\SearchEngineConfig;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SearchEngineConfig;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
  *
- * The default highlighter applied to all WSSearch searches.
+ * The default highlighter applied to all WikiSearch searches.
  *
- * @package WSSearch\QueryEngine\Highlighter
+ * @package WikiSearch\QueryEngine\Highlighter
  */
 class DefaultHighlighter implements Highlighter {
 	private const FALLBACK_HIGHLIGHT_FIELDS = [
@@ -63,8 +63,8 @@ class DefaultHighlighter implements Highlighter {
 			$config = MediaWikiServices::getInstance()->getMainConfig();
 
 			$this->field_settings = [
-				"fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
+				"fragment_size" => $config->get( "WikiSearchHighlightFragmentSize" ),
+				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" )
 			];
 		}
 	}

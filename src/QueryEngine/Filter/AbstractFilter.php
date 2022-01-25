@@ -1,8 +1,8 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
-use WSSearch\QueryEngine\QueryConvertable;
+use WikiSearch\QueryEngine\QueryConvertable;
 
 abstract class AbstractFilter implements QueryConvertable {
 	/**

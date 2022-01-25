@@ -25,7 +25,7 @@ $magicWords = [];
  * @author Robis Koopmans
  */
 $magicWords['en'] = [
-	'WSSearchConfig' => [ 0, 'WSSearchConfig' ],
-	'WSSearchFrontend' => [ 0, 'WSSearchFrontend' ],
+	'WikiSearchConfig' => [ 0, 'WikiSearchConfig' ],
+	'WikiSearchFrontend' => [ 0, 'WikiSearchFrontend' ],
 	'prop_values' => [ 0, 'prop_values' ]
 ];

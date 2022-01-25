@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch\API;
+namespace WikiSearch\API;
 
 use ApiBase;
 use ApiQueryBase;
@@ -27,18 +27,18 @@ use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
-use WSSearch\Logger;
-use WSSearch\SearchEngine;
-use WSSearch\SearchEngineConfig;
-use WSSearch\SearchEngineException;
-use WSSearch\SearchEngineFactory;
+use WikiSearch\Logger;
+use WikiSearch\SearchEngine;
+use WikiSearch\SearchEngineConfig;
+use WikiSearch\SearchEngineException;
+use WikiSearch\SearchEngineFactory;
 
 /**
- * Class ApiQueryWSSearch
+ * Class ApiQueryWikiSearch
  *
- * @package WSSearch
+ * @package WikiSearch
  */
-class ApiQueryWSSearch extends ApiQueryBase {
+class ApiQueryWikiSearch extends ApiQueryBase {
 	/**
 	 * @inheritDoc
 	 * @throws ApiUsageException
@@ -57,7 +57,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			$config = MediaWikiServices::getInstance()->getMainConfig();
 
 			try {
-				$in_debug_mode = $config->get( "WSSearchEnableDebugMode" );
+				$in_debug_mode = $config->get( "WikiSearchEnableDebugMode" );
 			} catch ( \ConfigException $exception ) {
 				$in_debug_mode = false;
 			}
@@ -72,7 +72,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 				'e' => $e
 			] );
 
-			$this->dieWithError( $this->msg( "wssearch-api-invalid-query", $e->getMessage() ) );
+			$this->dieWithError( $this->msg( "wikisearch-api-invalid-query", $e->getMessage() ) );
 		}
 	}
 
@@ -115,11 +115,11 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
 		try {
-			$required_rights = $config->get( "WSSearchAPIRequiredRights" );
+			$required_rights = $config->get( "WikiSearchAPIRequiredRights" );
 			$this->checkUserRightsAny( $required_rights );
 		} catch ( \ConfigException $e ) {
 			Logger::getLogger()->critical(
-				'Caught exception while trying to get required rights for WSSearch API: {e}',
+				'Caught exception while trying to get required rights for WikiSearch API: {e}',
 				[
 					'e' => $e
 				]
@@ -141,7 +141,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		$title = Title::newFromID( $page_id );
 
 		if ( !$title || !$title instanceof Title ) {
-			$this->dieWithError( $this->msg( "wssearch-api-invalid-pageid" ) );
+			$this->dieWithError( $this->msg( "wikisearch-api-invalid-pageid" ) );
 		}
 
 		return $title;
@@ -158,7 +158,7 @@ class ApiQueryWSSearch extends ApiQueryBase {
 		$engine_config = SearchEngineConfig::newFromDatabase( $title );
 
 		if ( $engine_config === null ) {
-			$this->dieWithError( $this->msg( "wssearch-api-invalid-pageid" ) );
+			$this->dieWithError( $this->msg( "wikisearch-api-invalid-pageid" ) );
 		}
 
 		return $engine_config;

@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\SMW;
+namespace WikiSearch\SMW;
 
 use SMW\PropertyRegistry;
-use WSSearch\Logger;
+use WikiSearch\Logger;
 
 /**
  * Class PropertyLabelMapper
  *
  * This class maps the given property key to its corresponding property label and visa-versa.
  *
- * @package WSSearch\SMW
+ * @package WikiSearch\SMW
  */
 class PropertyAliasMapper {
 	/**

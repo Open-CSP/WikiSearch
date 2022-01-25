@@ -1,22 +1,22 @@
 <?php
 
-namespace WSSearch\QueryEngine\Factory;
+namespace WikiSearch\QueryEngine\Factory;
 
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Filter\AbstractFilter;
-use WSSearch\QueryEngine\Filter\ChainedPropertyFilter;
-use WSSearch\QueryEngine\Filter\HasPropertyFilter;
-use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
-use WSSearch\QueryEngine\Filter\PropertyTextFilter;
-use WSSearch\QueryEngine\Filter\PropertyValueFilter;
-use WSSearch\QueryEngine\Filter\PropertyValuesFilter;
-use WSSearch\SearchEngineConfig;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Filter\AbstractFilter;
+use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
+use WikiSearch\QueryEngine\Filter\HasPropertyFilter;
+use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
+use WikiSearch\QueryEngine\Filter\PropertyTextFilter;
+use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
+use WikiSearch\QueryEngine\Filter\PropertyValuesFilter;
+use WikiSearch\SearchEngineConfig;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class FilterFactory
  *
- * @package WSSearch\QueryEngine\Factory
+ * @package WikiSearch\QueryEngine\Factory
  */
 class FilterFactory {
 	/**

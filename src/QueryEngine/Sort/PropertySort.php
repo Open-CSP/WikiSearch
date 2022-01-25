@@ -1,19 +1,19 @@
 <?php
 
-namespace WSSearch\QueryEngine\Sort;
+namespace WikiSearch\QueryEngine\Sort;
 
 use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class FieldSort
  *
  * Sorts based on the value of the given property.
  *
- * @package WSSearch\QueryEngine\Sort
+ * @package WikiSearch\QueryEngine\Sort
  */
 class PropertySort implements Sort {
 	/**

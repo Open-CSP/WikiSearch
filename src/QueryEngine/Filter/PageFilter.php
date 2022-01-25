@@ -1,19 +1,19 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use Title;
-use WSSearch\Logger;
-use WSSearch\SMW\WikiPageObjectIdLookup;
+use WikiSearch\Logger;
+use WikiSearch\SMW\WikiPageObjectIdLookup;
 
 /**
  * Class PageFilter
  *
  * Filters out everything except for the specified page.
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  */
 class PageFilter extends AbstractFilter {
 	/**

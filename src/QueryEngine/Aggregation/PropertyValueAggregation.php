@@ -1,18 +1,18 @@
 <?php
 
-namespace WSSearch\QueryEngine\Aggregation;
+namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyAggregation
  *
  * Multi-bucket value source based aggregation with buckets of property values.
  *
- * @package WSSearch\QueryEngine\Aggregation
+ * @package WikiSearch\QueryEngine\Aggregation
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
  */
 class PropertyValueAggregation implements PropertyAggregation {

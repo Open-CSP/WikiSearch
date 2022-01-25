@@ -1,6 +1,6 @@
 <?php
 
-namespace WSSearch\QueryEngine;
+namespace WikiSearch\QueryEngine;
 
 use MediaWiki\MediaWikiServices;
 use MWException;
@@ -9,19 +9,19 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyAggregation;
-use WSSearch\QueryEngine\Filter\AbstractFilter;
-use WSSearch\QueryEngine\Filter\PropertyFilter;
-use WSSearch\QueryEngine\Highlighter\Highlighter;
-use WSSearch\QueryEngine\Sort\Sort;
-use WSSearch\SMW\SMWQueryProcessor;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Aggregation\Aggregation;
+use WikiSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WikiSearch\QueryEngine\Filter\AbstractFilter;
+use WikiSearch\QueryEngine\Filter\PropertyFilter;
+use WikiSearch\QueryEngine\Highlighter\Highlighter;
+use WikiSearch\QueryEngine\Sort\Sort;
+use WikiSearch\SMW\SMWQueryProcessor;
 
 /**
  * Class QueryEngine
  *
- * @package WSSearch\QueryEngine
+ * @package WikiSearch\QueryEngine
  */
 class QueryEngine {
 	/**
@@ -89,7 +89,7 @@ class QueryEngine {
 		$this->elasticsearch_hosts = $hosts;
 		$this->elasticsearch_search = new Search();
 
-		$default_result_limit = MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" );
+		$default_result_limit = MediaWikiServices::getInstance()->getMainConfig()->get( "WikiSearchDefaultResultLimit" );
 
 		$this->constant_score_filters = new BoolQuery();
 		$this->function_score_filters = new BoolQuery();

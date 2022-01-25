@@ -1,11 +1,11 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyExistsFilter
@@ -14,7 +14,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
  */
 class HasPropertyFilter extends PropertyFilter {

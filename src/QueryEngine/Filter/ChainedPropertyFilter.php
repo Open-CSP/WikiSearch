@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use ConfigException;
 use Elasticsearch\ClientBuilder;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\SearchEngineException;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\SearchEngineException;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class ChainedPropertyTermsFilter
@@ -19,7 +19,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * recursively constructs a new filter from the results of the initial filter until the end of the
  * property chain is reached.
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
  */
 class ChainedPropertyFilter extends PropertyFilter {
@@ -88,11 +88,11 @@ class ChainedPropertyFilter extends PropertyFilter {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
 		try {
-			$limit = $config->get( "WSSearchMaxChainedQuerySize" );
+			$limit = $config->get( "WikiSearchMaxChainedQuerySize" );
 		} catch ( ConfigException $e ) {
 			$limit = 1000;
 
-			Logger::getLogger()->alert( 'Failed to get $wgWSSearchMaxChainedQuerySize, falling back to {limit}', [
+			Logger::getLogger()->alert( 'Failed to get $wgWikiSearchMaxChainedQuerySize, falling back to {limit}', [
 				'limit' => $limit
 			] );
 		}

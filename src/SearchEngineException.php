@@ -1,11 +1,11 @@
 <?php
 
-namespace WSSearch;
+namespace WikiSearch;
 
 /**
  * Class SearchEngineException
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class SearchEngineException extends \Exception {
 }

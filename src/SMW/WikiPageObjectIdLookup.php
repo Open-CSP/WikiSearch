@@ -1,13 +1,13 @@
 <?php
 
-namespace WSSearch\SMW;
+namespace WikiSearch\SMW;
 
 use SMW\ApplicationFactory;
 use SMW\SQLStore\SQLStore;
 use SMW\Store;
 use Title;
 use Wikimedia\Rdbms\IResultWrapper;
-use WSSearch\Logger;
+use WikiSearch\Logger;
 
 class WikiPageObjectIdLookup {
 	/**

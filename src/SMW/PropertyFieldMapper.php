@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,21 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch\SMW;
+namespace WikiSearch\SMW;
 
 use BadMethodCallException;
 use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
-use WSSearch\Logger;
+use WikiSearch\Logger;
 
 /**
  * Class PropertyFieldMapper
  *
  * @see https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/1f4bbda9bb8f7826ffabf00159cfdc0760043ca3/src/Elastic/docs/technical.md#field-mapping
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class PropertyFieldMapper {
 	// The default property weight
@@ -114,7 +114,7 @@ class PropertyFieldMapper {
 				]
 			);
 
-			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
+			throw new BadMethodCallException( "WikiSearch requires ElasticSearch to be installed" );
 		}
 
 		list( $this->chained_property_field_mapper, $property_name ) = $this->parseChainedProperty( $property_name );

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch\API;
+namespace WikiSearch\API;
 
 use ApiBase;
 use ApiQueryBase;
@@ -28,19 +28,19 @@ use Elasticsearch\ClientBuilder;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
-use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\QueryEngine\Filter\PageFilter;
-use WSSearch\QueryEngine\Filter\SearchTermFilter;
-use WSSearch\QueryEngine\Highlighter\FragmentHighlighter;
-use WSSearch\QueryEngine\QueryEngine;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\PageFilter;
+use WikiSearch\QueryEngine\Filter\SearchTermFilter;
+use WikiSearch\QueryEngine\Highlighter\FragmentHighlighter;
+use WikiSearch\QueryEngine\QueryEngine;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class ApiQueryWSSearchHighlight
+ * Class ApiQueryWikiSearchHighlight
  *
- * @package WSSearch
+ * @package WikiSearch
  */
-class ApiQueryWSSearchHighlight extends ApiQueryBase {
+class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 	/**
 	 * @inheritDoc
 	 *
@@ -69,7 +69,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$title = Title::newFromID( $page_id );
 
 		if ( !( $title instanceof Title ) || !$title->exists() ) {
-			$this->dieWithError( $this->msg( "wssearch-api-invalid-pageid" ) );
+			$this->dieWithError( $this->msg( "wikisearch-api-invalid-pageid" ) );
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $size, $limit );
@@ -143,7 +143,7 @@ class ApiQueryWSSearchHighlight extends ApiQueryBase {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
 		try {
-			$required_rights = $config->get( "WSSearchAPIRequiredRights" );
+			$required_rights = $config->get( "WikiSearchAPIRequiredRights" );
 			$this->checkUserRightsAny( $required_rights );
 		} catch ( \ConfigException $e ) {
 			// Something went wrong; to be safe we block the access

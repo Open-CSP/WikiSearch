@@ -1,13 +1,13 @@
 <?php
 
-namespace WSSearch\QueryEngine\Factory;
+namespace WikiSearch\QueryEngine\Factory;
 
 use MediaWiki\MediaWikiServices;
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WSSearch\QueryEngine\Highlighter\DefaultHighlighter;
-use WSSearch\QueryEngine\QueryEngine;
-use WSSearch\SearchEngineConfig;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
+use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;
+use WikiSearch\QueryEngine\QueryEngine;
+use WikiSearch\SearchEngineConfig;
 
 class QueryEngineFactory {
 	/**
@@ -17,7 +17,7 @@ class QueryEngineFactory {
 	 */
 	public static function fromNull(): QueryEngine {
 		$mw_config = MediaWikiServices::getInstance()->getMainConfig();
-		$index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+		$index = $mw_config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
 
 		return new QueryEngine( $index, self::getElasticSearchHosts() );
 	}
@@ -30,7 +30,7 @@ class QueryEngineFactory {
 	 */
 	public static function fromSearchEngineConfig( SearchEngineConfig $config = null ): QueryEngine {
 		$mw_config = MediaWikiServices::getInstance()->getMainConfig();
-		$index = $mw_config->get( "WSSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+		$index = $mw_config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
 		$query_engine = new QueryEngine( $index, self::getElasticSearchHosts() );
 
 		$aggregation_size = $config->getSearchParameter( "aggregation size" ) !== false ?
@@ -66,7 +66,7 @@ class QueryEngineFactory {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
 		try {
-			$hosts = $config->get( "WSSearchElasticSearchHosts" );
+			$hosts = $config->get( "WikiSearchElasticSearchHosts" );
 		} catch ( \ConfigException $e ) {
 			$hosts = [];
 		}

@@ -1,11 +1,11 @@
 <?php
 
-namespace WSSearch\QueryEngine\Aggregation;
+namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\RangeAggregation;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyRangeAggregation
@@ -13,7 +13,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  * A multi-bucket value source based aggregation that enables the user to define a
  * set of ranges - each representing a bucket.
  *
- * @package WSSearch\QueryEngine\Aggregation
+ * @package WikiSearch\QueryEngine\Aggregation
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
  */
 class PropertyRangeAggregation implements PropertyAggregation {

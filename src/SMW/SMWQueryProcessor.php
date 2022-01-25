@@ -1,9 +1,9 @@
 <?php
 
-namespace WSSearch\SMW;
+namespace WikiSearch\SMW;
 
 use SMW\Elastic\ElasticFactory;
-use WSSearch\Logger;
+use WikiSearch\Logger;
 
 class SMWQueryProcessor {
 	/**

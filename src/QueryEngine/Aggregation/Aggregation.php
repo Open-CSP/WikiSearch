@@ -1,14 +1,14 @@
 <?php
 
-namespace WSSearch\QueryEngine\Aggregation;
+namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
-use WSSearch\QueryEngine\QueryConvertable;
+use WikiSearch\QueryEngine\QueryConvertable;
 
 /**
  * Interface Aggregation
  *
- * @package WSSearch\QueryEngine\Aggregation
+ * @package WikiSearch\QueryEngine\Aggregation
  */
 interface Aggregation extends QueryConvertable {
 	/**

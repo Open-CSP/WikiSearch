@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,17 +19,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WikiSearch;
 
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
-use WSSearch\SMW\PropertyFieldMapper;
-use WSSearch\SMW\SMWQueryProcessor;
+use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SMW\SMWQueryProcessor;
 
 /**
  * Class SearchEngineConfig
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class SearchEngineConfig {
 	// phpcs:ignore
@@ -339,7 +339,7 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
 	 * are the properties prefixed with a "?".
 	 *
-	 * @return \WSSearch\SMW\PropertyFieldMapper[]
+	 * @return \WikiSearch\SMW\PropertyFieldMapper[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;

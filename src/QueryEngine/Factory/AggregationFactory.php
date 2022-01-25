@@ -1,17 +1,17 @@
 <?php
 
-namespace WSSearch\QueryEngine\Factory;
+namespace WikiSearch\QueryEngine\Factory;
 
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Aggregation\Aggregation;
+use WikiSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
+use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class AggregationFactory
  *
- * @package WSSearch\QueryEngine\Factory
+ * @package WikiSearch\QueryEngine\Factory
  */
 class AggregationFactory {
 	/**

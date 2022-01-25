@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WSSearch\SearchEngineException;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SearchEngineException;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class SearchTermFilter
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  */
 class SearchTermFilter extends AbstractFilter {
 	use QueryPreparationTrait;

@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Factory;
+namespace WikiSearch\QueryEngine\Factory;
 
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Sort\PropertySort;
-use WSSearch\QueryEngine\Sort\Sort;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Sort\PropertySort;
+use WikiSearch\QueryEngine\Sort\Sort;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class SortFactory
  *
- * @package WSSearch\QueryEngine\Factory
+ * @package WikiSearch\QueryEngine\Factory
  */
 class SortFactory {
 	/**

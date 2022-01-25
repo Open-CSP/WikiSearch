@@ -1,10 +1,10 @@
 <?php
 
-namespace WSSearch;
+namespace WikiSearch;
 
-use WSSearch\QueryEngine\Factory\AggregationFactory;
-use WSSearch\QueryEngine\Factory\FilterFactory;
-use WSSearch\QueryEngine\Factory\SortFactory;
+use WikiSearch\QueryEngine\Factory\AggregationFactory;
+use WikiSearch\QueryEngine\Factory\FilterFactory;
+use WikiSearch\QueryEngine\Factory\SortFactory;
 
 class SearchEngineFactory {
 	/**
@@ -106,7 +106,7 @@ class SearchEngineFactory {
 		$filters = json_decode( $filters, true );
 
 		if ( !is_array( $filters ) || json_last_error() !== JSON_ERROR_NONE ) {
-			$message = wfMessage( "wssearch-api-invalid-json", "filter", json_last_error_msg() );
+			$message = wfMessage( "wikisearch-api-invalid-json", "filter", json_last_error_msg() );
 			throw new SearchEngineException( $message );
 		}
 
@@ -117,7 +117,7 @@ class SearchEngineFactory {
 		$all_filters_valid = count( array_filter( $filters, "is_null" ) ) === 0;
 
 		if ( !$all_filters_valid ) {
-			throw new SearchEngineException( wfMessage( "wssearch-invalid-filter" ) );
+			throw new SearchEngineException( wfMessage( "wikisearch-invalid-filter" ) );
 		}
 
 		foreach ( $filters as $filter ) {
@@ -135,7 +135,7 @@ class SearchEngineFactory {
 		$aggregations = json_decode( $aggregations, true );
 
 		if ( !is_array( $aggregations ) || json_last_error() !== JSON_ERROR_NONE ) {
-			$message = wfMessage( "wssearch-api-invalid-json", "aggregations", json_last_error_msg() );
+			$message = wfMessage( "wikisearch-api-invalid-json", "aggregations", json_last_error_msg() );
 			throw new SearchEngineException( $message );
 		}
 
@@ -143,7 +143,7 @@ class SearchEngineFactory {
 		$all_aggregations_valid = count( array_filter( $aggregations, "is_null" ) ) === 0;
 
 		if ( !$all_aggregations_valid ) {
-			throw new SearchEngineException( wfMessage( "wssearch-invalid-aggregation" ) );
+			throw new SearchEngineException( wfMessage( "wikisearch-invalid-aggregation" ) );
 		}
 
 		foreach ( $aggregations as $aggregation ) {
@@ -161,7 +161,7 @@ class SearchEngineFactory {
 		$sortings = json_decode( $sortings, true );
 
 		if ( !is_array( $sortings ) || json_last_error() !== JSON_ERROR_NONE ) {
-			$message = wfMessage( "wssearch-api-invalid-json", "sortings", json_last_error_msg() );
+			$message = wfMessage( "wikisearch-api-invalid-json", "sortings", json_last_error_msg() );
 			throw new SearchEngineException( $message );
 		}
 
@@ -169,7 +169,7 @@ class SearchEngineFactory {
 		$all_sortings_valid = count( array_filter( $sortings, "is_null" ) ) === 0;
 
 		if ( !$all_sortings_valid ) {
-			throw new SearchEngineException( wfMessage( "wssearch-invalid-sort" ) );
+			throw new SearchEngineException( wfMessage( "wikisearch-invalid-sort" ) );
 		}
 
 		foreach ( $sortings as $sort ) {

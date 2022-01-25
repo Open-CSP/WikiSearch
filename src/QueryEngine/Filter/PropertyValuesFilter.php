@@ -1,12 +1,12 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermsQuery;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyPagesFilter
@@ -16,7 +16,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
  */
 class PropertyValuesFilter extends PropertyFilter {

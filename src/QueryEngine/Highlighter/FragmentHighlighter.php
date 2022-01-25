@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Highlighter;
+namespace WikiSearch\QueryEngine\Highlighter;
 
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class FragmentHighlighter
  *
  * Simple highlighter that takes a fragment size and some properties and constructs a highlighter.
  *
- * @package WSSearch\QueryEngine\Highlighter
+ * @package WikiSearch\QueryEngine\Highlighter
  */
 class FragmentHighlighter implements Highlighter {
 	/**

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WikiSearch;
 
 use Content;
 use ContentHandler;
@@ -39,9 +39,9 @@ use WikiPage;
 /**
  * Class SearchHooks
  *
- * @package WSSearch
+ * @package WikiSearch
  */
-abstract class WSSearchHooks {
+abstract class WikiSearchHooks {
 	/**
 	 * Occurs after the delete article request has been processed.
 	 *
@@ -121,7 +121,7 @@ abstract class WSSearchHooks {
 	 * @throws MWException
 	 */
 	public static function onLoadExtensionSchemaUpdates( DatabaseUpdater $updater ) {
-		$directory = $GLOBALS['wgExtensionDirectory'] . '/WSSearch/sql';
+		$directory = $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/sql';
 		$type = $updater->getDB()->getType();
 
 		$tables = [
@@ -132,7 +132,7 @@ abstract class WSSearchHooks {
 
 		foreach ( $tables as $table ) {
 			if ( !file_exists( $table ) ) {
-				throw new MWException( wfMessage( 'wssearch-invalid-dbms', $type )->parse() );
+				throw new MWException( wfMessage( 'wikisearch-invalid-dbms', $type )->parse() );
 			}
 		}
 
@@ -148,8 +148,8 @@ abstract class WSSearchHooks {
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
 		try {
-			$parser->setFunctionHook( "WSSearchConfig", [ self::class, "searchConfigCallback" ] );
-			$parser->setFunctionHook( "WSSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
+			$parser->setFunctionHook( "WikiSearchConfig", [ self::class, "searchConfigCallback" ] );
+			$parser->setFunctionHook( "WikiSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 		} catch ( MWException $e ) {
 			Logger::getLogger()->alert( 'Unable to register parser hooks: {e}', [
@@ -171,7 +171,7 @@ abstract class WSSearchHooks {
 		}
 
 		$config = MediaWikiServices::getInstance()->getMainConfig();
-		$search_field_override = $config->get( "WSSearchSearchFieldOverride" );
+		$search_field_override = $config->get( "WikiSearchSearchFieldOverride" );
 
 		if ( $search_field_override === false ) {
 			return;
@@ -213,7 +213,7 @@ abstract class WSSearchHooks {
 				'e' => $exception
 			] );
 
-			return self::error( "wssearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
+			return self::error( "wikisearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
 		}
 
 		$database = wfGetDB( DB_PRIMARY );
@@ -239,12 +239,12 @@ abstract class WSSearchHooks {
 		if ( $config === null ) {
 			Logger::getLogger()->alert( 'Tried to load front-end with an invalid SearchEngineConfig' );
 
-			return self::error( "wssearch-invalid-engine-config" );
+			return self::error( "wikisearch-invalid-engine-config" );
 		}
 
-		$result = self::error( "wssearch-missing-frontend" );
+		$result = self::error( "wikisearch-missing-frontend" );
 
-		\Hooks::run( "WSSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
+		\Hooks::run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
 
 		return $result;
 	}

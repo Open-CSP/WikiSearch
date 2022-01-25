@@ -1,10 +1,10 @@
 <?php
 
-namespace WSSearch\QueryEngine;
+namespace WikiSearch\QueryEngine;
 
 use InvalidArgumentException;
 use MWException;
-use WSSearch\Logger;
+use WikiSearch\Logger;
 
 /**
  * Class QueryCombinator
@@ -14,7 +14,7 @@ use WSSearch\Logger;
  * $query_combinator = new QueryCombinator( $query1 );
  * $combined_query = $query_combinator->add( $query2 )->add( $query3 )->getQuery();
  *
- * @package WSSearch\QueryEngine
+ * @package WikiSearch\QueryEngine
  */
 class QueryCombinator {
 	/**
