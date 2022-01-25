@@ -36,8 +36,11 @@ use WSSearch\Logger;
  * @package WSSearch
  */
 class PropertyFieldMapper {
-	// phpcs:ignore
-	const SPECIAL_PROPERTIES = [
+	// The default property weight
+	public const DEFAULT_PROPERTY_WEIGHT = 1;
+
+	// Array of special properties which should not be translated
+	public const SPECIAL_PROPERTIES = [
 		"attachment-author",
 		"attachment-title",
 		"attachment-content",
@@ -82,13 +85,18 @@ class PropertyFieldMapper {
 	private $property_name;
 
 	/**
+	 * @var int The weight this property was given
+	 */
+	private $property_weight;
+
+	/**
 	 * @var PropertyFieldMapper The property field mapper for the chained property
 	 *
 	 * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
 	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
 	 */
-	private $chained_property_field_mapper = null;
+	private $chained_property_field_mapper;
 
 	/**
 	 * PropertyFieldMapper constructor.
@@ -106,21 +114,11 @@ class PropertyFieldMapper {
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}
 
-		// Split the property name on "." to account for chained properties
-		$property_name_chain = explode( ".", $property_name );
-		$this->property_name = array_pop( $property_name_chain );
-		$chained_property_name = implode( ".", $property_name_chain );
+		list( $this->chained_property_field_mapper, $property_name ) = $this->parseChainedProperty( $property_name );
+		list( $this->property_weight, $property_name ) = $this->parsePropertyWeight( $property_name );
 
-		// Check whether we are the property at the beginning of the chain
-		if ( $chained_property_name !== "" ) {
-			$this->chained_property_field_mapper = new PropertyFieldMapper( $chained_property_name );
-		}
-
-		$this->property_key = str_replace(
-			" ",
-			"_",
-			$this->translateSpecialProperties( $this->property_name )
-		);
+		$this->property_name = $property_name;
+		$this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $this->property_name ) );
 
 		$data_item_property = new DIProperty( $this->property_key );
 
@@ -178,6 +176,15 @@ class PropertyFieldMapper {
 	}
 
 	/**
+	 * Returns the weight this property was given.
+	 *
+	 * @return int
+	 */
+	public function getPropertyWeight(): int {
+		return $this->property_weight;
+	}
+
+	/**
 	 * Returns the field associated with this property.
 	 *
 	 * @param bool $requires_keyword Give the keyword field for this property instead, if it is available
@@ -190,20 +197,19 @@ class PropertyFieldMapper {
 			return str_replace( "-", ".", $this->property_name );
 		}
 
-		$suffix = $requires_keyword === true && $this->hasKeywordField() ? ".keyword" : "";
-		$pid = $this->getPID();
-		$type = $this->getPropertyType();
+		$suffix = $requires_keyword === true && $this->hasKeywordField() ?
+			".keyword" : "";
 
-		return sprintf( "%s.%s%s", $pid, $type, $suffix );
+		return $this->getPID() . '.' . $this->getPropertyType() . $suffix;
 	}
 
 	/**
-	 * Returns the property's page field identifier.
+	 * Returns the field associated with this property, with the weight.
 	 *
 	 * @return string
 	 */
-	public function getPropertyPageFieldIdentifier(): string {
-		return sprintf( "%s.wpgID", $this->getPID() );
+	public function getWeightedPropertyField(): string {
+		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
 	}
 
 	/**
@@ -259,7 +265,62 @@ class PropertyFieldMapper {
 	 * @param string $property_name
 	 * @return string
 	 */
-	private function translateSpecialProperties( string $property_name ): string {
+	private static function translateSpecialProperties( string $property_name ): string {
 		return PropertyAliasMapper::findPropertyKey( $property_name );
+	}
+
+	/**
+	 * Parses the given property name, and returns the result in the form of:
+	 *
+	 *  [$weight, $remainder_property_name]
+	 *
+	 * If the property name does not explicitly specify a weight, the default weight is returned.
+	 *
+	 * @param string $property_name
+	 * @return array
+	 */
+	private static function parsePropertyWeight( string $property_name ): array {
+		// Split the property name on "^" to account for weights
+		$parts = explode( "^", $property_name );
+
+		// Pop the last element from the parts so we can inspect it
+		$maybe_property_weight = array_pop( $parts );
+
+		if ( preg_match( '/^[0-9]+$/', $maybe_property_weight ) === 1 ) {
+			// We have a property weight
+			$property_weight = intval( $maybe_property_weight );
+		} else {
+			// We don't have an explicit property weight
+			$property_weight = self::DEFAULT_PROPERTY_WEIGHT;
+			array_push( $parts, $maybe_property_weight );
+		}
+
+		return [ $property_weight, implode( "^", $parts ) ];
+	}
+
+	/**
+	 * Parses the given property name, and returns the result in the form of:
+	 *
+	 *  [$chained_property_field_mapper, $remainder_property_name]
+	 *
+	 * A chained property takes the form of "foo.bar.quz".
+	 *
+	 * @param string $property_name
+	 * @return array
+	 */
+	private static function parseChainedProperty( string $property_name ): array {
+		// Split on the last period in the property name
+		$property_name_chain = explode( ".", $property_name );
+		$final_property_name = array_pop( $property_name_chain );
+		$chained_property_name = implode( ".", $property_name_chain );
+
+		if ( $chained_property_name !== "" ) {
+			// Recursively construct the chained field mapper, if this is a chained property
+			$chained_field_mapper = new PropertyFieldMapper( $chained_property_name );
+		} else {
+			$chained_field_mapper = null;
+		}
+
+		return [ $chained_field_mapper, $final_property_name ];
 	}
 }

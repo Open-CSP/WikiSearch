@@ -85,7 +85,8 @@ class PagesPropertyFilter extends PropertyFilter {
 	 * @return BoolQuery
 	 */
 	public function toQuery(): BoolQuery {
-		$terms_query = new TermsQuery( $this->property->getPropertyPageFieldIdentifier(), $this->property_values );
+		$field = sprintf( "%s.wpgID", $this->property->getPID() );
+		$terms_query = new TermsQuery( $field, $this->property_values );
 
 		$bool_query = new BoolQuery();
 		$bool_query->add( $terms_query, BoolQuery::FILTER );
