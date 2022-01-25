@@ -51,7 +51,9 @@ class AggregationFactory {
 		$aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
 
 		if ( !is_string( $aggregation_name ) && $aggregation_name !== null ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertyRangeAggregation from array: invalid/missing aggregation name' );
+			Logger::getLogger()->debug(
+				'Failed to construct PropertyRangeAggregation from array: invalid/missing aggregation name'
+			);
 
 			return null;
 		}
@@ -98,13 +100,17 @@ class AggregationFactory {
 		$aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
 
 		if ( !is_string( $aggregation_name ) ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertyValueAggregation from array: missing/invalid "name"' );
+			Logger::getLogger()->debug(
+				'Failed to construct PropertyValueAggregation from array: missing/invalid "name"'
+			);
 
 			return null;
 		}
 
 		if ( !isset( $array["property"] ) ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertyValueAggregation from array: missing "property"' );
+			Logger::getLogger()->debug(
+				'Failed to construct PropertyValueAggregation from array: missing "property"'
+			);
 
 			return null;
 		}

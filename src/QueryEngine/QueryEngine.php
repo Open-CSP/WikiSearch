@@ -4,7 +4,6 @@ namespace WSSearch\QueryEngine;
 
 use MediaWiki\MediaWikiServices;
 use MWException;
-use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
@@ -88,12 +87,12 @@ class QueryEngine {
 	public function __construct( string $index, array $hosts ) {
 		$this->elasticsearch_index = $index;
 		$this->elasticsearch_hosts = $hosts;
-        $this->elasticsearch_search = new Search();
+		$this->elasticsearch_search = new Search();
 
 		$default_result_limit = MediaWikiServices::getInstance()->getMainConfig()->get( "WSSearchDefaultResultLimit" );
 
-        $this->constant_score_filters = new BoolQuery();
-        $this->function_score_filters = new BoolQuery();
+		$this->constant_score_filters = new BoolQuery();
+		$this->function_score_filters = new BoolQuery();
 
 		$this->elasticsearch_search->setSize( $default_result_limit );
 		$this->elasticsearch_search->addQuery( new ConstantScoreQuery( $this->constant_score_filters ) );
@@ -205,7 +204,7 @@ class QueryEngine {
 			$elastic_search_query = $query_processor->toElasticSearchQuery();
 		} catch ( MWException $exception ) {
 			// The query is invalid
-            Logger::getLogger()->critical( 'Tried to set invalid query as the base query' );
+			Logger::getLogger()->critical( 'Tried to set invalid query as the base query' );
 			return;
 		}
 

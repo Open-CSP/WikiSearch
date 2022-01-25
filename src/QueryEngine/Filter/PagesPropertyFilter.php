@@ -39,7 +39,7 @@ class PagesPropertyFilter extends PropertyFilter {
 	public function __construct( PropertyFieldMapper $property, array $property_values ) {
 		foreach ( $property_values as $property_value ) {
 			if ( !is_int( $property_value ) ) {
-				throw new InvalidArgumentException('$property_values must be an array of integers');
+				throw new InvalidArgumentException( '$property_values must be an array of integers' );
 			}
 		}
 
@@ -71,11 +71,11 @@ class PagesPropertyFilter extends PropertyFilter {
 	 * @param int[] $property_values
 	 */
 	public function setPropertyValues( array $property_values ): void {
-        foreach ( $property_values as $property_value ) {
-            if ( !is_int( $property_value ) ) {
-                throw new InvalidArgumentException('$property_values must be an array of integers');
-            }
-        }
+		foreach ( $property_values as $property_value ) {
+			if ( !is_int( $property_value ) ) {
+				throw new InvalidArgumentException( '$property_values must be an array of integers' );
+			}
+		}
 
 		$this->property_values = $property_values;
 	}

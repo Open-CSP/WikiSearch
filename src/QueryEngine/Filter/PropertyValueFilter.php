@@ -43,26 +43,26 @@ class PropertyValueFilter extends PropertyFilter {
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
 			Logger::getLogger()->critical(
-			    'Tried to construct a PropertyValueFilter with an invalid property: {property}',
-                [
-				    'property' => $property
-                ]
-            );
+				'Tried to construct a PropertyValueFilter with an invalid property: {property}',
+				[
+					'property' => $property
+				]
+			);
 
 			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		if ( !in_array( gettype( $property_value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
 			Logger::getLogger()->critical(
-			    'Tried to construct a PropertyValueFilter with an invalid property value: {propertyValue}',
-                [
-				    'propertyValue' => $property_value
-			    ]
-            );
+				'Tried to construct a PropertyValueFilter with an invalid property value: {propertyValue}',
+				[
+					'propertyValue' => $property_value
+				]
+			);
 
 			throw new InvalidArgumentException(
-			    '$property_value must be a of type boolean, string, integer, double or float'
-            );
+				'$property_value must be a of type boolean, string, integer, double or float'
+			);
 		}
 
 		$this->property = $property;
@@ -94,16 +94,16 @@ class PropertyValueFilter extends PropertyFilter {
 	 */
 	public function setPropertyValue( $property_value ): void {
 		if ( !in_array( gettype( $property_value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-            Logger::getLogger()->critical(
-                'Tried to set an invalid property value: {propertyValue}',
-                [
-                    'propertyValue' => $property_value
-                ]
-            );
+			Logger::getLogger()->critical(
+				'Tried to set an invalid property value: {propertyValue}',
+				[
+					'propertyValue' => $property_value
+				]
+			);
 
-            throw new InvalidArgumentException(
-                '$property_value must be a of type boolean, string, integer, double or float'
-            );
+			throw new InvalidArgumentException(
+				'$property_value must be a of type boolean, string, integer, double or float'
+			);
 		}
 
 		$this->property_value = $property_value;

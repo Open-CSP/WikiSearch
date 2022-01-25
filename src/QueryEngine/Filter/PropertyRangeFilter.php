@@ -49,9 +49,12 @@ class PropertyRangeFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertyRangeFilter with an invalid property: {property}', [
-				'property' => $property
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct a PropertyRangeFilter with an invalid property: {property}',
+				[
+					'property' => $property
+				]
+			);
 
 			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}

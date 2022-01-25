@@ -118,9 +118,12 @@ class ApiQueryWSSearch extends ApiQueryBase {
 			$required_rights = $config->get( "WSSearchAPIRequiredRights" );
 			$this->checkUserRightsAny( $required_rights );
 		} catch ( \ConfigException $e ) {
-			Logger::getLogger()->critical( 'Caught exception while trying to get required rights for WSSearch API: {e}', [
-				'e' => $e
-			] );
+			Logger::getLogger()->critical(
+				'Caught exception while trying to get required rights for WSSearch API: {e}',
+				[
+					'e' => $e
+				]
+			);
 
 			// Something went wrong; to be safe we block the access
 			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );

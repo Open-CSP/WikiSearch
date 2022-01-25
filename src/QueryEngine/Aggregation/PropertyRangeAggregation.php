@@ -45,9 +45,12 @@ class PropertyRangeAggregation implements PropertyAggregation {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertyRangeAggregation with an invalid property: {property}', [
-				'property' => $property
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct a PropertyRangeAggregation with an invalid property: {property}',
+				[
+					'property' => $property
+				]
+			);
 
 			throw new \InvalidArgumentException();
 		}

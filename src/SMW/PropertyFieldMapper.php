@@ -107,9 +107,12 @@ class PropertyFieldMapper {
 		$store = ApplicationFactory::getInstance()->getStore();
 
 		if ( !$store instanceof ElasticStore ) {
-			Logger::getLogger()->critical( 'Tried to construct PropertyFieldMapper for property {propertyName} without an ElasticStore', [
-				'propertyName' => $property_name
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct PropertyFieldMapper for property {propertyName} without an ElasticStore',
+				[
+					'propertyName' => $property_name
+				]
+			);
 
 			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
 		}

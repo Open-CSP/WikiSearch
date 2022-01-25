@@ -16,16 +16,16 @@ use WSSearch\SMW\PropertyFieldMapper;
  * @package WSSearch\QueryEngine\Highlighter
  */
 class DefaultHighlighter implements Highlighter {
-    const FALLBACK_HIGHLIGHT_FIELDS = [
-        "text_raw",
-        "text_copy",
-        "attachment.content"
-    ];
+	private const FALLBACK_HIGHLIGHT_FIELDS = [
+		"text_raw",
+		"text_copy",
+		"attachment.content"
+	];
 
-    /**
-     * @var SearchEngineConfig
-     */
-    private SearchEngineConfig $config;
+	/**
+	 * @var SearchEngineConfig
+	 */
+	private SearchEngineConfig $config;
 
 	/**
 	 * @var array The fields to apply the highlight to
@@ -36,6 +36,7 @@ class DefaultHighlighter implements Highlighter {
 	 * @var array The settings applied to each field of the highlight. This specifies for instance the fragment
 	 * size or the number of fragments per field.
 	 *
+     * phpcs:ignore
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.7/search-request-highlighting.html#highlighting-settings
 	 */
 	private array $field_settings;
@@ -100,12 +101,12 @@ class DefaultHighlighter implements Highlighter {
 				}
 
 				if ( $property instanceof PropertyFieldMapper ) {
-                    return $property->getPropertyField();
-                }
+					return $property->getPropertyField();
+				}
 
 				throw new LogicException(
-				    '"search term properties" is a propertylist, but did not consist of only properties'
-                );
+					'"search term properties" is a propertylist, but did not consist of only properties'
+				);
 			}, $properties );
 
 			return $properties;

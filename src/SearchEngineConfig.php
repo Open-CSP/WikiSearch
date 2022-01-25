@@ -21,7 +21,6 @@
 
 namespace WSSearch;
 
-use Database;
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
 use WSSearch\SMW\PropertyFieldMapper;

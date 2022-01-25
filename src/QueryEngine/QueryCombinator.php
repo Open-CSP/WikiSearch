@@ -22,17 +22,17 @@ class QueryCombinator {
 	 */
 	private array $query;
 
-    /**
-     * QueryCombinator constructor.
-     *
-     * @param array $initial_query
-     */
+	/**
+	 * QueryCombinator constructor.
+	 *
+	 * @param array $initial_query
+	 */
 	public function __construct( array $initial_query ) {
-        if ( !isset( $initial_query["body"]["query"] ) ) {
-            Logger::getLogger()->error( 'Tried to create combinator for invalid query' );
+		if ( !isset( $initial_query["body"]["query"] ) ) {
+			Logger::getLogger()->error( 'Tried to create combinator for invalid query' );
 
-            throw new InvalidArgumentException( 'Trie dto create a combinator for invalid query' );
-        }
+			throw new InvalidArgumentException( 'Trie dto create a combinator for invalid query' );
+		}
 
 		$this->query = $initial_query;
 	}

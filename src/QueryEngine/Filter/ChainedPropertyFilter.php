@@ -62,16 +62,16 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @throws SearchEngineException
 	 */
 	public function toQuery(): BoolQuery {
-        $query = $this->constructSubqueryFromFilter( $this->filter );
-        $terms = $this->getTermsFromSubquery( $query );
+		$query = $this->constructSubqueryFromFilter( $this->filter );
+		$terms = $this->getTermsFromSubquery( $query );
 
-        $filter = new PagesPropertyFilter( $this->property, $terms );
+		$filter = new PagesPropertyFilter( $this->property, $terms );
 
-        if ( $this->property->isChained() ) {
-            $filter = new ChainedPropertyFilter( $filter, $this->property->getChainedPropertyFieldMapper() );
-        }
+		if ( $this->property->isChained() ) {
+			$filter = new ChainedPropertyFilter( $filter, $this->property->getChainedPropertyFieldMapper() );
+		}
 
-        return $filter->toQuery();
+		return $filter->toQuery();
 	}
 
 	/**

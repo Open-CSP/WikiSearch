@@ -108,7 +108,10 @@ class FilterFactory {
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @return PropertyValuesFilter|PropertyValueFilter|null
 	 */
-	private static function valueFilterFromValue( $value, PropertyFieldMapper $property_field_mapper ): ?AbstractFilter {
+	private static function valueFilterFromValue(
+		$value,
+		PropertyFieldMapper $property_field_mapper
+	): ?AbstractFilter {
 		if ( $value === "+" ) {
 			return self::hasPropertyFilterFromProperty( $property_field_mapper );
 		}
@@ -173,9 +176,9 @@ class FilterFactory {
 	 * @return PropertyRangeFilter
 	 */
 	private static function rangeFilterFromRange(
-	    array $range,
-        PropertyFieldMapper $property_field_mapper
-    ): PropertyRangeFilter {
+		array $range,
+		PropertyFieldMapper $property_field_mapper
+	): PropertyRangeFilter {
 		return new PropertyRangeFilter( $property_field_mapper, $range );
 	}
 
@@ -185,9 +188,9 @@ class FilterFactory {
 	 * @return PropertyValueFilter
 	 */
 	private static function propertyValueFilterFromValue(
-	    $value,
-        PropertyFieldMapper $property_field_mapper
-    ): PropertyValueFilter {
+		$value,
+		PropertyFieldMapper $property_field_mapper
+	): PropertyValueFilter {
 		return new PropertyValueFilter( $property_field_mapper, $value );
 	}
 
@@ -210,8 +213,8 @@ class FilterFactory {
 	 * @return HasPropertyFilter
 	 */
 	private static function hasPropertyFilterFromProperty(
-	    PropertyFieldMapper $property_field_mapper
-    ): HasPropertyFilter {
+		PropertyFieldMapper $property_field_mapper
+	): HasPropertyFilter {
 		return new HasPropertyFilter( $property_field_mapper );
 	}
 
