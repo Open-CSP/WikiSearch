@@ -523,6 +523,14 @@ properties do need to be part of the search space.
 The `search term properties` configuration parameter can be used to specify alternate properties to search through when doing a free-text search. These
 properties may also be chained properties.
 
+A weight can be added to each field in the search term properties by using the `^%d` syntax. For example, to give additional weight to the title, you can do the following:
+
+```
+|search term properties=Title^10,Content^2,Pdf.attachment-content
+```
+
+The weight determines the ranking when sorting on relevance. A match in a field with a higher weight will count more towards the relevance score than a match in a field with a lower weight. When no weight is given, the weight is set to `1`.
+
 ##### `default operator`
 
 The `default operator` configuration parameter can be used to change the default operator of the free-text search. The default operator inserted between
