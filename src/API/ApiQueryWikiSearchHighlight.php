@@ -58,7 +58,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 		$size = $this->getParameter( "size" );
 
 		if ( $size === null ) {
-			$size = 1;
+			$size = 250;
 		}
 
 		$properties = explode( ",", $properties );
@@ -167,24 +167,19 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 			}
 		}
 
-        $words = array_map( function ( string $word ): string {
-            return preg_replace( "/(^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$)/", "", $word );
-        }, $words );
+        // DIRTY HACK
+        // Needed because the ElasticSearch highlighter does not work with hyphens
+		$highlighted_source = implode( ' ', $words );
+		$words = [];
 
-		$words_filtered = [];
+		preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9](@@_HIGHLIGHT([- ])HIGHLIGHT_@@)?)+(@@_HIGHLIGHT|$)/", $highlighted_source, $matches );
 
-        foreach ( $words as $word ) {
-            // DIRTY HACK
-            // Needed because the ElasticSearch highlighter does not work with hyphens
-            preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9](@@_HIGHLIGHT([- ])HIGHLIGHT_@@)?)+(@@_HIGHLIGHT|$)/", $word, $matches );
+		if ( isset( $matches[0] ) ) {
+		    foreach ( $matches[0] as $match ) {
+				$words[] = str_replace(['HIGHLIGHT_@@', '@@_HIGHLIGHT'], '', $match);
+		    }
+		}
 
-            if ( isset( $matches[0] ) ) {
-                foreach ( $matches[0] as $match ) {
-                    $words_filtered[] = str_replace(['HIGHLIGHT_@@', '@@_HIGHLIGHT'], '', $match);
-                }
-            }
-        }
-
-		return array_values( array_unique( $words_filtered ) );
+		return array_values( array_unique( $words ) );
 	}
 }
