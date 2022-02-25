@@ -174,10 +174,14 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 		$words_filtered = [];
 
         foreach ( $words as $word ) {
-            $match = preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9]*)(@@_HIGHLIGHT|$)/", $word, $matches );
+            // DIRTY HACK
+            // Needed because the ElasticSearch highlighter does not work with hyphens
+            preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9](@@_HIGHLIGHT([- ])HIGHLIGHT_@@)?)+(@@_HIGHLIGHT|$)/", $word, $matches );
 
-            if ( $match !== false && isset( $matches[2] ) ) {
-                $words_filtered[] = implode( ' ', $matches[2] );
+            if ( isset( $matches[0] ) ) {
+                foreach ( $matches[0] as $match ) {
+                    $words_filtered[] = str_replace(['HIGHLIGHT_@@', '@@_HIGHLIGHT'], '', $match);
+                }
             }
         }
 
