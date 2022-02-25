@@ -87,9 +87,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 			->build()
 			->search( $query_engine->toArray() );
 
-		$words = $this->wordsFromResult( $results );
-
-		$this->getResult()->addValue( null, 'words', $words_filtered );
+		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $results ) );
 	}
 
 	/**
