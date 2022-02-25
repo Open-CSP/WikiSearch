@@ -88,19 +88,6 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 			->search( $query_engine->toArray() );
 
 		$words = $this->wordsFromResult( $results );
-		$words = array_map( function ( string $word ): string {
-			return preg_replace( "/(^([^a-zA-Z0-9]+)|[^a-zA-Z0-9]+$)/", "", $word );
-		}, $words );
-
-		$words_filtered = [];
-
-		foreach ( $words as $word ) {
-			$match = preg_match( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9]*)(@@_HIGHLIGHT|$)/", $word, $matches );
-
-			if ( $match === 1 && isset( $matches[2] ) ) {
-				$words_filtered[] = $matches[2];
-			}
-		}
 
 		$this->getResult()->addValue( null, 'words', $words_filtered );
 	}
@@ -167,7 +154,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 	 * @return array
 	 */
 	private function wordsFromResult( array $result ): array {
-		$buffer = [];
+		$words = [];
 
 		$hits = $result["hits"]["hits"];
 		foreach ( $hits as $hit ) {
@@ -178,10 +165,24 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 			$highlights = $hit["highlight"];
 
 			foreach ( $highlights as $highlight ) {
-				$buffer = array_merge( $buffer, $highlight );
+				$words = array_merge( $words, $highlight );
 			}
 		}
 
-		return array_values( array_unique( $buffer ) );
+        $words = array_map( function ( string $word ): string {
+            return preg_replace( "/(^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$)/", "", $word );
+        }, $words );
+
+		$words_filtered = [];
+
+        foreach ( $words as $word ) {
+            $match = preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9]*)(@@_HIGHLIGHT|$)/", $word, $matches );
+
+            if ( $match !== false && isset( $matches[2] ) ) {
+                $words_filtered[] = implode( ' ', $matches[2] );
+            }
+        }
+
+		return array_values( array_unique( $words_filtered ) );
 	}
 }
