@@ -118,10 +118,14 @@ class PropertyFieldMapper {
 		list( $this->property_weight, $property_name ) = $this->parsePropertyWeight( $property_name );
 
 		$this->property_name = $property_name;
-		$this->property_key = PropertyAliasMapper::findPropertyKey( $this->property_name );
+
+		if ( $this->isInternalProperty() ) {
+		    $this->property_key = str_replace( "-", ".", $this->property_name );
+        } else {
+            $this->property_key = PropertyAliasMapper::findPropertyKey( $this->property_name );
+        }
 
 		$data_item_property = new DIProperty( $this->property_key );
-
         $this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
 		$this->property_type = str_replace(
 			'_',
@@ -194,13 +198,17 @@ class PropertyFieldMapper {
 	 */
 	public function getPropertyField( bool $requires_keyword = false ): string {
 		if ( $this->isInternalProperty() ) {
-			return str_replace( "-", ".", $this->property_name );
+		    // Internal properties are represented by their key and do not have an ID
+			return $this->property_key;
 		}
 
-		$suffix = $requires_keyword === true && $this->hasKeywordField() ?
-			".keyword" : "";
+		$field = $this->getPID() . '.' . $this->getPropertyType();
 
-		return $this->getPID() . '.' . $this->getPropertyType() . $suffix;
+		if ( $requires_keyword === true && $this->hasKeywordField() ) {
+		    $field .= '.keyword';
+        }
+
+		return $field;
 	}
 
 	/**
