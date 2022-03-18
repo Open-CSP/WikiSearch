@@ -39,8 +39,8 @@ class PropertyFieldMapper {
 	// The default property weight
 	public const DEFAULT_PROPERTY_WEIGHT = 1;
 
-	// Array of special properties which should not be translated
-	public const SPECIAL_PROPERTIES = [
+	// List of special pre-defined properties in SemanticMediaWiki that do not appear on Special:Browse
+	public const INTERNAL_PROPERTIES = [
 		"attachment-author",
 		"attachment-title",
 		"attachment-content",
@@ -121,11 +121,15 @@ class PropertyFieldMapper {
 		list( $this->property_weight, $property_name ) = $this->parsePropertyWeight( $property_name );
 
 		$this->property_name = $property_name;
-		$this->property_key = str_replace( " ", "_", $this->translateSpecialProperties( $this->property_name ) );
+
+		if ( $this->isInternalProperty() ) {
+		    $this->property_key = str_replace( "-", ".", $this->property_name );
+        } else {
+            $this->property_key = PropertyAliasMapper::findPropertyKey( $this->property_name );
+        }
 
 		$data_item_property = new DIProperty( $this->property_key );
-
-		$this->property_id = $store->getObjectIds()->getSMWPropertyID( $data_item_property );
+        $this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
 		$this->property_type = str_replace(
 			'_',
 			'',
@@ -196,14 +200,18 @@ class PropertyFieldMapper {
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
 	 */
 	public function getPropertyField( bool $requires_keyword = false ): string {
-		if ( $this->isSpecialProperty() ) {
-			return str_replace( "-", ".", $this->property_name );
+		if ( $this->isInternalProperty() ) {
+		    // Internal properties are represented by their key and do not have an ID
+			return $this->property_key;
 		}
 
-		$suffix = $requires_keyword === true && $this->hasKeywordField() ?
-			".keyword" : "";
+		$field = $this->getPID() . '.' . $this->getPropertyType();
 
-		return $this->getPID() . '.' . $this->getPropertyType() . $suffix;
+		if ( $requires_keyword === true && $this->hasKeywordField() ) {
+		    $field .= '.keyword';
+        }
+
+		return $field;
 	}
 
 	/**
@@ -258,18 +266,8 @@ class PropertyFieldMapper {
 	 *
 	 * @return bool
 	 */
-	public function isSpecialProperty(): bool {
-		return in_array( $this->property_name, self::SPECIAL_PROPERTIES, true );
-	}
-
-	/**
-	 * Translates the given property name to a special property key if it is a special property.
-	 *
-	 * @param string $property_name
-	 * @return string
-	 */
-	private static function translateSpecialProperties( string $property_name ): string {
-		return PropertyAliasMapper::findPropertyKey( $property_name );
+	public function isInternalProperty(): bool {
+		return in_array( $this->property_name, self::INTERNAL_PROPERTIES, true );
 	}
 
 	/**
