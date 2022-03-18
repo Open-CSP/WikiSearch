@@ -1,73 +1,76 @@
 {
-	"name": "WSSearch",
+	"name": "WikiSearch",
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "3.8.0",
-	"url": "https://www.mediawiki.org/wiki/Extension:WSSearch",
-	"descriptionmsg": "wssearch-desc",
+	"version": "4.0.0",
+	"url": "https://www.mediawiki.org/wiki/Extension:WikiSearch",
+	"descriptionmsg": "wikisearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.31.0",
+		"MediaWiki": ">= 1.35.0",
 		"extensions": {
 			"SemanticMediaWiki": ">= 3.0"
+		},
+		"platform": {
+			"php": ">= 7.4"
 		}
 	},
 	"MessagesDirs": {
-		"WSSearch": [
+		"WikiSearch": [
 			"i18n"
 		]
 	},
 	"AutoloadNamespaces": {
-		"WSSearch\\": "src/"
+		"WikiSearch\\": "src/"
 	},
 	"ExtensionMessagesFiles": {
-		"WSSearchMagic": "i18n/WSSearch.i18n.php"
+		"WikiSearchMagic": "i18n/WikiSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  	"WSSearch": "WSSearch\\API\\ApiQueryWSSearch",
-		"WSSearchHighlight": "WSSearch\\API\\ApiQueryWSSearchHighlight"
+	  	"WikiSearch": "WikiSearch\\API\\ApiQueryWikiSearch",
+		"WikiSearchHighlight": "WikiSearch\\API\\ApiQueryWikiSearchHighlight"
   	},
 	"AvailableRights": [
-		"wssearch-execute-api"
+		"wikisearch-execute-api"
 	],
 	"Hooks": {
-		"ParserFirstCallInit": "WSSearch\\WSSearchHooks::onParserFirstCallInit",
-		"ArticleDeleteComplete": "WSSearch\\WSSearchHooks::onArticleDeleteComplete",
-		"PageContentSaveComplete": "WSSearch\\WSSearchHooks::onPageContentSaveComplete",
-		"LoadExtensionSchemaUpdates": "WSSearch\\WSSearchHooks::onLoadExtensionSchemaUpdates",
-		"BeforePageDisplay": "WSSearch\\WSSearchHooks::onBeforePageDisplay"
+		"ParserFirstCallInit": "WikiSearch\\WikiSearchHooks::onParserFirstCallInit",
+		"ArticleDeleteComplete": "WikiSearch\\WikiSearchHooks::onArticleDeleteComplete",
+		"PageContentSaveComplete": "WikiSearch\\WikiSearchHooks::onPageContentSaveComplete",
+		"LoadExtensionSchemaUpdates": "WikiSearch\\WikiSearchHooks::onLoadExtensionSchemaUpdates",
+		"BeforePageDisplay": "WikiSearch\\WikiSearchHooks::onBeforePageDisplay"
 	},
 	"config": {
-		"WSSearchElasticStoreIndex": {
+		"WikiSearchElasticStoreIndex": {
 			"value": false
 		},
-		"WSSearchDefaultResultLimit": {
+		"WikiSearchDefaultResultLimit": {
 			"value": 10
 		},
-		"WSSearchHighlightFragmentSize": {
+		"WikiSearchHighlightFragmentSize": {
 			"value": 250
 		},
-		"WSSearchHighlightNumberOfFragments": {
+		"WikiSearchHighlightNumberOfFragments": {
 			"value": 1
 		},
-		"WSSearchElasticSearchHosts": {
+		"WikiSearchElasticSearchHosts": {
 			"value": []
 		},
-		"WSSearchAPIRequiredRights": {
+		"WikiSearchAPIRequiredRights": {
 			"value": [
 				"read",
-				"wssearch-execute-api"
+				"wikisearch-execute-api"
 			]
 		},
-		"WSSearchSearchFieldOverride": {
+		"WikiSearchSearchFieldOverride": {
 			"value": false
 		},
-		"WSSearchEnableDebugMode": {
+		"WikiSearchEnableDebugMode": {
 			"value": false
 		},
-		"WSSearchMaxChainedQuerySize": {
+		"WikiSearchMaxChainedQuerySize": {
 			"value": 500
 		}
 	},

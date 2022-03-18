@@ -1,18 +1,18 @@
 <?php
 
-namespace WSSearch;
+namespace WikiSearch;
 
 use Elasticsearch\ClientBuilder;
 use Parser;
-use WSSearch\QueryEngine\Aggregation\FilterAggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\QueryEngine\Filter\PropertyRangeFilter;
+use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
+use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
+use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 
 /**
  * Class PropertyValuesParserFunction
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class PropertyValuesParserFunction {
 	/**
@@ -23,7 +23,7 @@ class PropertyValuesParserFunction {
 	 * @return string
 	 * @throws \MWException
 	 */
-	public function execute( Parser $parser, ...$args ) {
+	public function execute( Parser $parser, ...$args ): string {
 		if ( !class_exists( "\WSArrays" ) ) {
 			return "WSArrays must be installed.";
 		}

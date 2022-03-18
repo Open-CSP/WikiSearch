@@ -1,6 +1,6 @@
-# WSSearch
+# WikiSearch
 
-This document describes how to use WSSearch. It is meant for both wiki-administrators as well as external users using the
+This document describes how to use WikiSearch. It is meant for both wiki-administrators as well as external users using the
 API endpoint.
 
 ## Performing a search
@@ -27,7 +27,7 @@ Example request (cURL):
 curl https://wiki.example.org/api.php \
 -d action=query \
 -d format=json \
--d meta=WSSearch \
+-d meta=WikiSearch \
 -d filter=[{"value":"5","key":"Average rating","range":{"gte":5,"lte":6}}] \
 -d from=0 \
 -d limit=10 \
@@ -377,7 +377,7 @@ The highlight API has the following properties:
 
 ## Chained properties
 
-WSSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
+WikiSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
 
 ```
 {
@@ -403,18 +403,18 @@ For example, if you want to search through PDF files linked through the `Pdf` pr
 
 ## Hooks
 
-### `WSSearchBeforeElasticQuery`
+### `WikiSearchBeforeElasticQuery`
 
 This hook is called right before the query is sent to ElasticSearch. It has the following signature:
 
 ```php
-function onWSSearchBeforeElasticQuery( array &$query, array &$hosts ) {}
+function onWikiSearchBeforeElasticQuery( array &$query, array &$hosts ) {}
 ```
 
 The hook has access to and can alter the given `$query`. It can also add or remove hosts from the
 `$hosts` array.
 
-### `WSSearchApplyResultTranslations`
+### `WikiSearchApplyResultTranslations`
 
 This hook is called right before returning the final results to the API. It can be used
 to alter the `$results` array. This can be useful to filter any pages the user is not allowed
@@ -423,18 +423,18 @@ to see or add additional data to the query result.
 It has the following signature:
 
 ```php
-function onWSSearchApplyResultTranslations( array &$results ) {}
+function onWikiSearchApplyResultTranslations( array &$results ) {}
 ```
 
-### `WSSearchOnLoadFrontend`
+### `WikiSearchOnLoadFrontend`
 
-This hook must be implemented by any WSSearch frontend. It gets called when the `#loadSeachEngine` parser function
+This hook must be implemented by any WikiSearch frontend. It gets called when the `#loadSeachEngine` parser function
 is called. It has the following signature:
 
 ```php
-function onWSSearchOnLoadFrontend( 
+function onWikiSearchOnLoadFrontend( 
     string &$result, 
-    \WSSearch\SearchEngineConfig $config, 
+    \WikiSearch\SearchEngineConfig $config, 
     Parser $parser, 
     array $parameters 
 ) {}
@@ -460,39 +460,39 @@ function onWSSearchOnLoadFrontend(
 
 ## Config variables
 
-WSSearch has several configuration variables that influence its default behaviour.
+WikiSearch has several configuration variables that influence its default behaviour.
 
-* `$wgWSSearchElasticStoreIndex`: Sets the name of the ElasticStore index to use (defaults to `"smw-data-" . strtolower( wfWikiID() )`)
-* `$wgWSSearchDefaultResultLimit`: Sets the number of results to return when no explicit limit is given (defaults to `10`)
-* `$wgWSSearchHighlightFragmentSize`: Sets the maximum number of characters in the highlight fragment (defaults to `250`)
-* `$wgWSSearchHighlightNumberOfFragments`: Sets the maximum number of highlight fragments to return per result (defaults to `1`)
-* `$wgWSSearchElasticSearchHosts`: Sets the list of ElasticSearch hosts to use (defaults to `["localhost:9200"]`)
-* `$wgWSSearchAPIRequiredRights`: Sets the list of rights required to query the WSSearch API (defaults to `["read", "wssearch-execute-api"]`)
-* `$wgWSSearchSearchFieldOverride`: Sets the search page to redirect to when using Special:Search. The user is redirected to the specified wiki article with the query parameter `search_query` specified through the search page if it is available. Does not change the behaviour of the search snippets shown when using the inline search field.
-* `$wgWSSearchMaxChainedQuerySize`: Sets the maximum number of results to retrieve for a chained property query (defaults to `1000`). Setting this to an extreme value may cause ElasticSearch to run out of memory when performing a large chained query.
+* `$wgWikiSearchElasticStoreIndex`: Sets the name of the ElasticStore index to use (defaults to `"smw-data-" . strtolower( wfWikiID() )`)
+* `$wgWikiSearchDefaultResultLimit`: Sets the number of results to return when no explicit limit is given (defaults to `10`)
+* `$wgWikiSearchHighlightFragmentSize`: Sets the maximum number of characters in the highlight fragment (defaults to `250`)
+* `$wgWikiSearchHighlightNumberOfFragments`: Sets the maximum number of highlight fragments to return per result (defaults to `1`)
+* `$wgWikiSearchElasticSearchHosts`: Sets the list of ElasticSearch hosts to use (defaults to `["localhost:9200"]`)
+* `$wgWikiSearchAPIRequiredRights`: Sets the list of rights required to query the WikiSearch API (defaults to `["read", "wikisearch-execute-api"]`)
+* `$wgWikiSearchSearchFieldOverride`: Sets the search page to redirect to when using Special:Search. The user is redirected to the specified wiki article with the query parameter `search_query` specified through the search page if it is available. Does not change the behaviour of the search snippets shown when using the inline search field.
+* `$wgWikiSearchMaxChainedQuerySize`: Sets the maximum number of results to retrieve for a chained property query (defaults to `1000`). Setting this to an extreme value may cause ElasticSearch to run out of memory when performing a large chained query.
 
 ### Debug mode
 
-To enable debug mode, set `$wgWSSearchEnableDebugMode` to `true`.
+To enable debug mode, set `$wgWikiSearchEnableDebugMode` to `true`.
 
 ## Parser functions
 
-WSSearch defines two parser functions.
+WikiSearch defines two parser functions.
 
-### `#WSSearchConfig` (case-sensitive)
+### `#WikiSearchConfig` (case-sensitive)
 
-The `#WSSearchConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
+The `#WikiSearchConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
 reasons. It sets the search condition for that page, the list of facet properties, and the list of result properties.
 
 ```
-{{#WSSearchConfig:
+{{#WikiSearchConfig:
   |<facet property>
   |?<result property>
 }}
 ```
 
 ```
-{{#WSSearchConfig:
+{{#WikiSearchConfig:
   |Version
   |Tag
   |Space
@@ -501,7 +501,7 @@ reasons. It sets the search condition for that page, the list of facet propertie
 }}
 ```
 
-Note: Only one call to `#WSSearchConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
+Note: Only one call to `#WikiSearchConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
 
 #### Search parameters
 
@@ -543,16 +543,16 @@ of a regular filter. This parameter takes a comma-separated list of property nam
 will be added as a post filter. The difference between post filters and regular filters is explained [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-post-filter.html).
 This configuration parameter is especially useful when you have disjunct checkbox properties.
 
-### `#WSSearchFrontend` (case-sensitive)
+### `#WikiSearchFrontend` (case-sensitive)
 
-The `#WSSearchFrontend` parser function is used to load the frontend. The parameters and return value of this parser function
+The `#WikiSearchFrontend` parser function is used to load the frontend. The parameters and return value of this parser function
 depend completely on the frontend.
 
 ## Installation
 
-* Download and place the file(s) in a directory called WSSearch in your extensions/ folder.
+* Download and place the file(s) in a directory called WikiSearch in your extensions/ folder.
 * Add the following code at the bottom of your LocalSettings.php:
-  * wfLoadExtension( 'WSSearch' );
+  * wfLoadExtension( 'WikiSearch' );
 * Run the update script which will automatically create the necessary database tables that this extension needs.
 * Run Composer.
 * Navigate to Special:Version on your wiki to verify that the extension is successfully installed.

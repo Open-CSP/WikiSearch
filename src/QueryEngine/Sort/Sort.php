@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Sort;
+namespace WikiSearch\QueryEngine\Sort;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
-use WSSearch\QueryEngine\QueryConvertable;
+use WikiSearch\QueryEngine\QueryConvertable;
 
 /**
  * Interface Sort
  *
  * Represents a class that can be converted to a sort class that can be applied to a query.
  *
- * @package WSSearch\QueryEngine\Highlighter
+ * @package WikiSearch\QueryEngine\Highlighter
  */
 interface Sort extends QueryConvertable {
 	/**

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,35 +19,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WikiSearch;
 
 use Elasticsearch\ClientBuilder;
+use Exception;
 use Hooks;
 use MWNamespace;
-use WSSearch\QueryEngine\Factory\QueryEngineFactory;
-use WSSearch\QueryEngine\Filter\SearchTermFilter;
-use WSSearch\QueryEngine\QueryEngine;
+use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\SearchTermFilter;
+use WikiSearch\QueryEngine\QueryEngine;
 
 /**
  * Class Search
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class SearchEngine {
 	/**
 	 * @var SearchEngineConfig
 	 */
-	private $config = null;
+	private ?SearchEngineConfig $config = null;
 
 	/**
 	 * @var array
 	 */
-	private $translations;
+	private array $translations;
 
 	/**
 	 * @var QueryEngine
 	 */
-	private $query_engine;
+	private QueryEngine $query_engine;
 
 	/**
 	 * Search constructor.
@@ -84,11 +85,11 @@ class SearchEngine {
 	 * @param array $query
 	 * @param array $hosts
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function doQuery( array $query, array $hosts ): array {
 		// Allow other extensions to modify the query
-		Hooks::run( "WSSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query, &$hosts ] );
 
 		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
@@ -117,7 +118,7 @@ class SearchEngine {
 	 *
 	 * @return array
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function doSearch(): array {
 		$elastic_query = $this->query_engine->toArray();
@@ -137,14 +138,14 @@ class SearchEngine {
 	 *
 	 * @param array $results
 	 * @return array
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	private function applyResultTranslations( array $results ): array {
 		$results = $this->doFacetTranslations( $results );
 		$results = $this->doNamespaceTranslations( $results );
 
 		// Allow other extensions to modify the result
-		Hooks::run( "WSSearchApplyResultTranslations", [ &$results ] );
+		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results ] );
 
 		return $results;
 	}

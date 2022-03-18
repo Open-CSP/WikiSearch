@@ -1,11 +1,11 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyExistsFilter
@@ -14,14 +14,14 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
  */
 class HasPropertyFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * PropertyExistsFilter constructor.
@@ -34,9 +34,12 @@ class HasPropertyFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a HasPropertyFilter with an invalid property: {property}', [
-				'property' => $property
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct a HasPropertyFilter with an invalid property: {property}',
+				[
+					'property' => $property
+				]
+			);
 
 			throw new \InvalidArgumentException();
 		}
@@ -58,7 +61,7 @@ class HasPropertyFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setPropertyName( PropertyFieldMapper $property ) {
+	public function setPropertyName( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 

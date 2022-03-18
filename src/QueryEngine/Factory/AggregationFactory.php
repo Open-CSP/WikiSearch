@@ -1,17 +1,17 @@
 <?php
 
-namespace WSSearch\QueryEngine\Factory;
+namespace WikiSearch\QueryEngine\Factory;
 
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Aggregation\Aggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
-use WSSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Aggregation\Aggregation;
+use WikiSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
+use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class AggregationFactory
  *
- * @package WSSearch\QueryEngine\Factory
+ * @package WikiSearch\QueryEngine\Factory
  */
 class AggregationFactory {
 	/**
@@ -21,7 +21,7 @@ class AggregationFactory {
 	 * @param array $array
 	 * @return Aggregation|null
 	 */
-	public static function fromArray( array $array ) {
+	public static function fromArray( array $array ): ?Aggregation {
 		Logger::getLogger()->debug( 'Constructing Aggregation from array' );
 
 		if ( !isset( $array["type"] ) ) {
@@ -47,11 +47,13 @@ class AggregationFactory {
 	 * @param array $array
 	 * @return PropertyRangeAggregation|null
 	 */
-	private static function propertyRangeAggregationFromArray( array $array ) {
+	private static function propertyRangeAggregationFromArray( array $array ): ?PropertyRangeAggregation {
 		$aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
 
 		if ( !is_string( $aggregation_name ) && $aggregation_name !== null ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertyRangeAggregation from array: invalid/missing aggregation name' );
+			Logger::getLogger()->debug(
+				'Failed to construct PropertyRangeAggregation from array: invalid/missing aggregation name'
+			);
 
 			return null;
 		}
@@ -94,17 +96,21 @@ class AggregationFactory {
 	 * @param array $array
 	 * @return PropertyValueAggregation|null
 	 */
-	private static function propertyAggregationFromArray( array $array ) {
+	private static function propertyAggregationFromArray( array $array ): ?PropertyValueAggregation {
 		$aggregation_name = isset( $array["name"] ) ? $array["name"] : null;
 
 		if ( !is_string( $aggregation_name ) ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertyValueAggregation from array: missing/invalid "name"' );
+			Logger::getLogger()->debug(
+				'Failed to construct PropertyValueAggregation from array: missing/invalid "name"'
+			);
 
 			return null;
 		}
 
 		if ( !isset( $array["property"] ) ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertyValueAggregation from array: missing "property"' );
+			Logger::getLogger()->debug(
+				'Failed to construct PropertyValueAggregation from array: missing "property"'
+			);
 
 			return null;
 		}

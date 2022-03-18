@@ -1,40 +1,41 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
-use WSSearch\Logger;
-use WSSearch\SMW\WikiPageObjectIdLookup;
+use Title;
+use WikiSearch\Logger;
+use WikiSearch\SMW\WikiPageObjectIdLookup;
 
 /**
  * Class PageFilter
  *
  * Filters out everything except for the specified page.
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  */
 class PageFilter extends AbstractFilter {
 	/**
-	 * @var \Title
+	 * @var Title
 	 */
-	private $title;
+	private Title $title;
 
 	/**
 	 * PageFilter constructor.
 	 *
-	 * @param \Title $title
+	 * @param Title $title
 	 */
-	public function __construct( \Title $title ) {
+	public function __construct( Title $title ) {
 		$this->title = $title;
 	}
 
 	/**
 	 * Sets the page to filter on.
 	 *
-	 * @param \Title $title
+	 * @param Title $title
 	 */
-	public function setPage( \Title $title ) {
+	public function setPage( Title $title ): void {
 		$this->title = $title;
 	}
 

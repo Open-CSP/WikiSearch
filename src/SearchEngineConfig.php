@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,17 +19,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WikiSearch;
 
-use Database;
 use Title;
-use WSSearch\SMW\PropertyFieldMapper;
-use WSSearch\SMW\SMWQueryProcessor;
+use Wikimedia\Rdbms\DBConnRef;
+use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SMW\SMWQueryProcessor;
 
 /**
  * Class SearchEngineConfig
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class SearchEngineConfig {
 	// phpcs:ignore
@@ -45,42 +45,42 @@ class SearchEngineConfig {
 	/**
 	 * @var Title
 	 */
-	private $title;
+	private Title $title;
 
 	/**
 	 * @var array
 	 */
-	private $search_parameters;
+	private array $search_parameters;
 
 	/**
 	 * @var array
 	 */
-	private $facet_properties;
+	private array $facet_properties;
 
 	/**
 	 * @var array
 	 */
-	private $result_properties;
+	private array $result_properties;
 
 	/**
 	 * @var array
 	 */
-	private $facet_property_ids = [];
+	private array $facet_property_ids = [];
 
 	/**
 	 * @var array
 	 */
-	private $result_property_ids = [];
+	private array $result_property_ids = [];
 
 	/**
 	 * @var array
 	 */
-	private $translations = [];
+	private array $translations = [];
 
 	/**
 	 * @var array
 	 */
-	private $search_parameters_cache = [];
+	private array $search_parameters_cache = [];
 
 	/**
 	 * Constructs a new SearchEngineConfig object from the values in the database identified by $page. If no
@@ -136,9 +136,9 @@ class SearchEngineConfig {
 		try {
 			return new SearchEngineConfig( $page, $search_parameters, $facet_properties, $result_properties );
 		} catch ( \InvalidArgumentException $e ) {
-			Logger::getLogger()->alert('Exception caught while trying to construct a new SearchEngineConfig: {e}', [
+			Logger::getLogger()->alert( 'Exception caught while trying to construct a new SearchEngineConfig: {e}', [
 				'e' => $e
-			]);
+			] );
 
 			return null;
 		}
@@ -229,9 +229,9 @@ class SearchEngineConfig {
 				$query_processor = new SMWQueryProcessor( $search_parameters["base query"] );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
-				Logger::getLogger()->alert('Exception caught while trying to parse a base query: {e}', [
+				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
 					'e' => $exception
-				]);
+				] );
 
 				// The query is invalid
 				throw new \InvalidArgumentException( "Invalid base query" );
@@ -339,7 +339,7 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
 	 * are the properties prefixed with a "?".
 	 *
-	 * @return \WSSearch\SMW\PropertyFieldMapper[]
+	 * @return \WikiSearch\SMW\PropertyFieldMapper[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;
@@ -357,9 +357,9 @@ class SearchEngineConfig {
 	/**
 	 * Updates/adds this SearchEngineConfig object in the database with the current values.
 	 *
-	 * @param Database $database
+	 * @param DBConnRef $database
 	 */
-	public function update( $database ) {
+	public function update( DBConnRef $database ): void {
 		$id = $this->title->getArticleID();
 
 		Logger::getLogger()->debug( 'Updating search engine configuration for page ID {id}', [
@@ -379,9 +379,9 @@ class SearchEngineConfig {
 	 * into account whether the current object might already have been saved and may throw an error if the object
 	 * is saved twice. Use $this->update() instead.
 	 *
-	 * @param Database $database
+	 * @param DBConnRef $database
 	 */
-	public function insert( $database ) {
+	public function insert( DBConnRef $database ): void {
 		$page_id = $this->title->getArticleID();
 
 		$facet_properties = array_unique( $this->facet_properties );
@@ -428,10 +428,10 @@ class SearchEngineConfig {
 	/**
 	 * Deletes the SearchEngineConfig object associated with the given $page_id from the database.
 	 *
-	 * @param Database $database
+	 * @param DBConnRef $database
 	 * @param int $page_id
 	 */
-	public static function delete( $database, int $page_id ) {
+	public static function delete( DBConnRef $database, int $page_id ): void {
 		$database->delete(
 			"search_facets",
 			[ "page_id" => $page_id ]

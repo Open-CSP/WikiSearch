@@ -1,8 +1,8 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 abstract class PropertyFilter extends AbstractFilter {
 	/**

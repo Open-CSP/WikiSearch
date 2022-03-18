@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2021  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,21 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch\SMW;
+namespace WikiSearch\SMW;
 
 use BadMethodCallException;
 use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
-use WSSearch\Logger;
+use WikiSearch\Logger;
 
 /**
  * Class PropertyFieldMapper
  *
  * @see https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/1f4bbda9bb8f7826ffabf00159cfdc0760043ca3/src/Elastic/docs/technical.md#field-mapping
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class PropertyFieldMapper {
 	// The default property weight
@@ -67,27 +67,27 @@ class PropertyFieldMapper {
 	/**
 	 * @var int The unique ID of the property
 	 */
-	private $property_id;
+	private int $property_id;
 
 	/**
 	 * @var string The kind/datatype of the property
 	 */
-	private $property_type;
+	private string $property_type;
 
 	/**
 	 * @var string The key of the property as a string
 	 */
-	private $property_key;
+	private string $property_key;
 
 	/**
 	 * @var string The human-readable name of the property as a string
 	 */
-	private $property_name;
+	private string $property_name;
 
 	/**
 	 * @var int The weight this property was given
 	 */
-	private $property_weight;
+	private int $property_weight;
 
 	/**
 	 * @var PropertyFieldMapper The property field mapper for the chained property
@@ -96,7 +96,7 @@ class PropertyFieldMapper {
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
 	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
 	 */
-	private $chained_property_field_mapper;
+	private ?PropertyFieldMapper $chained_property_field_mapper = null;
 
 	/**
 	 * PropertyFieldMapper constructor.
@@ -107,11 +107,14 @@ class PropertyFieldMapper {
 		$store = ApplicationFactory::getInstance()->getStore();
 
 		if ( !$store instanceof ElasticStore ) {
-			Logger::getLogger()->critical( 'Tried to construct PropertyFieldMapper for property {propertyName} without an ElasticStore', [
-				'propertyName' => $property_name
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct PropertyFieldMapper for property {propertyName} without an ElasticStore',
+				[
+					'propertyName' => $property_name
+				]
+			);
 
-			throw new BadMethodCallException( "WSSearch requires ElasticSearch to be installed" );
+			throw new BadMethodCallException( "WikiSearch requires ElasticSearch to be installed" );
 		}
 
 		list( $this->chained_property_field_mapper, $property_name ) = $this->parseChainedProperty( $property_name );
@@ -227,9 +230,9 @@ class PropertyFieldMapper {
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
 	 * information about "Verrijking". This field is "null" if this is the property at the beginning of the chain.
 	 *
-	 * @return PropertyFieldMapper
+	 * @return PropertyFieldMapper|null
 	 */
-	public function getChainedPropertyFieldMapper() {
+	public function getChainedPropertyFieldMapper(): ?PropertyFieldMapper {
 		return $this->chained_property_field_mapper;
 	}
 

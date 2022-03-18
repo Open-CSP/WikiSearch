@@ -1,8 +1,8 @@
 <?php
 
-namespace WSSearch\QueryEngine\Aggregation;
+namespace WikiSearch\QueryEngine\Aggregation;
 
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 interface PropertyAggregation extends Aggregation {
 	/**

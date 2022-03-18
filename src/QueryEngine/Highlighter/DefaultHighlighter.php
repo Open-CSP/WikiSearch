@@ -1,36 +1,45 @@
 <?php
 
-namespace WSSearch\QueryEngine\Highlighter;
+namespace WikiSearch\QueryEngine\Highlighter;
 
+use LogicException;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\SearchEngineConfig;
+use WikiSearch\SearchEngineConfig;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
  *
- * The default highlighter applied to all WSSearch searches.
+ * The default highlighter applied to all WikiSearch searches.
  *
- * @package WSSearch\QueryEngine\Highlighter
+ * @package WikiSearch\QueryEngine\Highlighter
  */
 class DefaultHighlighter implements Highlighter {
+	private const FALLBACK_HIGHLIGHT_FIELDS = [
+		"text_raw",
+		"text_copy",
+		"attachment.content"
+	];
+
+	/**
+	 * @var SearchEngineConfig
+	 */
+	private SearchEngineConfig $config;
+
 	/**
 	 * @var array The fields to apply the highlight to
 	 */
-	private $fields;
+	private array $fields;
 
 	/**
 	 * @var array The settings applied to each field of the highlight. This specifies for instance the fragment
 	 * size or the number of fragments per field.
 	 *
+     * phpcs:ignore
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.7/search-request-highlighting.html#highlighting-settings
 	 */
-	private $field_settings;
-
-	/**
-	 * @var SearchEngineConfig
-	 */
-	private $config;
+	private array $field_settings;
 
 	/**
 	 * DefaultHighlighter constructor.
@@ -54,8 +63,8 @@ class DefaultHighlighter implements Highlighter {
 			$config = MediaWikiServices::getInstance()->getMainConfig();
 
 			$this->field_settings = [
-				"fragment_size" => $config->get( "WSSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $config->get( "WSSearchHighlightNumberOfFragments" )
+				"fragment_size" => $config->get( "WikiSearchHighlightFragmentSize" ),
+				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" )
 			];
 		}
 	}
@@ -91,17 +100,19 @@ class DefaultHighlighter implements Highlighter {
 					return $property;
 				}
 
-				return $property->getPropertyField();
+				if ( $property instanceof PropertyFieldMapper ) {
+					return $property->getPropertyField();
+				}
+
+				throw new LogicException(
+					'"search term properties" is a propertylist, but did not consist of only properties'
+				);
 			}, $properties );
 
 			return $properties;
 		}
 
 		// Fallback fields if no field is specified in the highlighted properties or search term properties
-		return [
-			"text_raw",
-			"text_copy",
-			"attachment.content"
-		];
+		return self::FALLBACK_HIGHLIGHT_FIELDS;
 	}
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
 /**
  * Trait QueryPreparationTrait
  *
  * This trait contains a method that can be used to prepare bare queries for use with ElasticSearch.
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  */
 trait QueryPreparationTrait {
 	/**

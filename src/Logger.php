@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WSSearch MediaWiki extension
+ * WikiSearch MediaWiki extension
  * Copyright (C) 2022  Wikibase Solutions
  *
  * This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WSSearch;
+namespace WikiSearch;
 
 use MediaWiki\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
@@ -27,16 +27,16 @@ use Psr\Log\LoggerInterface;
 /**
  * Class Logger
  *
- * @package WSSearch
+ * @package WikiSearch
  */
 class Logger {
 	// The logging channel for this extension
-	const LOGGING_CHANNEL = 'wssearch';
+	public const LOGGING_CHANNEL = 'wikisearch';
 
 	/**
 	 * @var LoggerInterface An instance of a logger
 	 */
-	private static $loggerInstance;
+	private static LoggerInterface $loggerInstance;
 
 	/**
 	 * Returns the logger instance.
@@ -44,8 +44,8 @@ class Logger {
 	 * @return LoggerInterface
 	 */
 	public static function getLogger(): LoggerInterface {
-		if (!isset(self::$loggerInstance)) {
-			self::$loggerInstance = LoggerFactory::getInstance(self::LOGGING_CHANNEL);
+		if ( !isset( self::$loggerInstance ) ) {
+			self::$loggerInstance = LoggerFactory::getInstance( self::LOGGING_CHANNEL );
 		}
 
 		return self::$loggerInstance;

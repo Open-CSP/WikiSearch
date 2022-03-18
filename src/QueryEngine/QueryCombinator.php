@@ -1,8 +1,10 @@
 <?php
 
-namespace WSSearch\QueryEngine;
+namespace WikiSearch\QueryEngine;
 
-use WSSearch\Logger;
+use InvalidArgumentException;
+use MWException;
+use WikiSearch\Logger;
 
 /**
  * Class QueryCombinator
@@ -12,13 +14,13 @@ use WSSearch\Logger;
  * $query_combinator = new QueryCombinator( $query1 );
  * $combined_query = $query_combinator->add( $query2 )->add( $query3 )->getQuery();
  *
- * @package WSSearch\QueryEngine
+ * @package WikiSearch\QueryEngine
  */
 class QueryCombinator {
 	/**
 	 * @var array
 	 */
-	private $query;
+	private array $query;
 
 	/**
 	 * QueryCombinator constructor.
@@ -26,6 +28,12 @@ class QueryCombinator {
 	 * @param array $initial_query
 	 */
 	public function __construct( array $initial_query ) {
+		if ( !isset( $initial_query["body"]["query"] ) ) {
+			Logger::getLogger()->error( 'Tried to create combinator for invalid query' );
+
+			throw new InvalidArgumentException( 'Trie dto create a combinator for invalid query' );
+		}
+
 		$this->query = $initial_query;
 	}
 
@@ -44,7 +52,7 @@ class QueryCombinator {
 	 * @param array $query
 	 * @return QueryCombinator
 	 *
-	 * @throws \MWException
+	 * @throws MWException
 	 */
 	public function combine( array $query ): QueryCombinator {
 		return $this->add( $query );
@@ -57,13 +65,13 @@ class QueryCombinator {
 	 * @param array $query
 	 * @return QueryCombinator
 	 *
-	 * @throws \MWException If the queries cannot be combined
+	 * @throws MWException If the queries cannot be combined
 	 */
 	public function add( array $query ): QueryCombinator {
 		if ( !isset( $query["body"]["query"] ) ) {
 			Logger::getLogger()->error( 'Tried to combine invalid queries' );
 
-			throw new \MWException( "Invalid query returned by Semantic MediaWiki" );
+			throw new MWException( "Invalid query returned by Semantic MediaWiki" );
 		}
 
 		$add_query_body = $query["body"]["query"];

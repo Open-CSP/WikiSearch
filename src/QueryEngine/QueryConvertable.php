@@ -1,6 +1,6 @@
 <?php
 
-namespace WSSearch\QueryEngine;
+namespace WikiSearch\QueryEngine;
 
 use ONGR\ElasticsearchDSL\BuilderInterface;
 
@@ -9,7 +9,7 @@ use ONGR\ElasticsearchDSL\BuilderInterface;
  *
  * Represents an object that can be converted to a BuilderInterface.
  *
- * @package WSSearch\QueryEngine
+ * @package WikiSearch\QueryEngine
  */
 interface QueryConvertable {
 	/**

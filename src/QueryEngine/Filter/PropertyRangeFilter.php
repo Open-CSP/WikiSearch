@@ -1,11 +1,12 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DateRangeFilter
@@ -15,24 +16,24 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
  */
 class PropertyRangeFilter extends PropertyFilter {
 	/**
-	 * @var \WSSearch\SMW\PropertyFieldMapper The property to apply the filter to
+	 * @var PropertyFieldMapper The property to apply the filter to
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var array The options for this filter
 	 */
-	private $options;
+	private array $options;
 
 	/**
 	 * DateRangeFilter constructor.
 	 *
-	 * @param \WSSearch\SMW\PropertyFieldMapper|string $property The property to apply the filter to
+	 * @param PropertyFieldMapper|string $property The property to apply the filter to
 	 * @param array $options The options for this filter, for instance:
 	 *  [
 	 *      RangeQuery::GTE => 10,
@@ -48,11 +49,14 @@ class PropertyRangeFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertyRangeFilter with an invalid property: {property}', [
-				'property' => $property
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct a PropertyRangeFilter with an invalid property: {property}',
+				[
+					'property' => $property
+				]
+			);
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		$this->property = $property;

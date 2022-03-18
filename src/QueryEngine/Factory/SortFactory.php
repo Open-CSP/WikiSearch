@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Factory;
+namespace WikiSearch\QueryEngine\Factory;
 
-use WSSearch\Logger;
-use WSSearch\QueryEngine\Sort\PropertySort;
-use WSSearch\QueryEngine\Sort\Sort;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Sort\PropertySort;
+use WikiSearch\QueryEngine\Sort\Sort;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class SortFactory
  *
- * @package WSSearch\QueryEngine\Factory
+ * @package WikiSearch\QueryEngine\Factory
  */
 class SortFactory {
 	/**
@@ -20,7 +20,7 @@ class SortFactory {
 	 * @param array $array
 	 * @return Sort|null
 	 */
-	public static function fromArray( array $array ) {
+	public static function fromArray( array $array ): Sort {
 		Logger::getLogger()->debug( 'Constructing Sort from array' );
 
 		if ( !isset( $array["type"] ) ) {
@@ -45,7 +45,7 @@ class SortFactory {
 	 * @param array $array
 	 * @return PropertySort|null
 	 */
-	private static function propertySortFromArray( array $array ) {
+	private static function propertySortFromArray( array $array ): PropertySort {
 		if ( !isset( $array["property"] ) ) {
 			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: missing "property"' );
 

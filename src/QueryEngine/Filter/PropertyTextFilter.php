@@ -1,11 +1,12 @@
 <?php
 
-namespace WSSearch\QueryEngine\Filter;
+namespace WikiSearch\QueryEngine\Filter;
 
+use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WSSearch\Logger;
-use WSSearch\SMW\PropertyFieldMapper;
+use WikiSearch\Logger;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class PropertyTextFilter
@@ -15,7 +16,7 @@ use WSSearch\SMW\PropertyFieldMapper;
  *
  * @see ChainedPropertyFilter for a filter that takes property chains into account
  *
- * @package WSSearch\QueryEngine\Filter
+ * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
  */
 class PropertyTextFilter extends PropertyFilter {
@@ -24,17 +25,17 @@ class PropertyTextFilter extends PropertyFilter {
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
-	private $property;
+	private PropertyFieldMapper $property;
 
 	/**
 	 * @var string The query string used to match the property value
 	 */
-	private $property_value_query;
+	private string $property_value_query;
 
 	/**
 	 * @var string The default operator to use
 	 */
-	private $default_operator;
+	private string $default_operator;
 
 	/**
 	 * PropertyFilter constructor.
@@ -51,11 +52,14 @@ class PropertyTextFilter extends PropertyFilter {
 		}
 
 		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertyTextFilter with an invalid property: {property}', [
-				'property' => $property
-			] );
+			Logger::getLogger()->critical(
+				'Tried to construct a PropertyTextFilter with an invalid property: {property}',
+				[
+					'property' => $property
+				]
+			);
 
-			throw new \InvalidArgumentException();
+			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
 		$this->property = $property;
@@ -77,7 +81,7 @@ class PropertyTextFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper $property
 	 */
-	public function setPropertyName( PropertyFieldMapper $property ) {
+	public function setPropertyName( PropertyFieldMapper $property ): void {
 		$this->property = $property;
 	}
 
@@ -86,7 +90,7 @@ class PropertyTextFilter extends PropertyFilter {
 	 *
 	 * @param string $property_value_query
 	 */
-	public function setPropertyValueQuery( string $property_value_query ) {
+	public function setPropertyValueQuery( string $property_value_query ): void {
 		$this->property_value_query = $property_value_query;
 	}
 

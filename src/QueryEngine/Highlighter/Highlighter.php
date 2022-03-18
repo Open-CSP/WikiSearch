@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Highlighter;
+namespace WikiSearch\QueryEngine\Highlighter;
 
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
-use WSSearch\QueryEngine\QueryConvertable;
+use WikiSearch\QueryEngine\QueryConvertable;
 
 /**
  * Interface Highlighter
  *
  * Represents a class that can be converted to a "Highlight" class that can be applied to a query.
  *
- * @package WSSearch\QueryEngine\Highlighter
+ * @package WikiSearch\QueryEngine\Highlighter
  */
 interface Highlighter extends QueryConvertable {
 	/**

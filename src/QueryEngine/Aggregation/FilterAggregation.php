@@ -1,16 +1,16 @@
 <?php
 
-namespace WSSearch\QueryEngine\Aggregation;
+namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
-use WSSearch\QueryEngine\Filter\AbstractFilter;
+use WikiSearch\QueryEngine\Filter\AbstractFilter;
 
 /**
  * Class PropertyValuesAggregation
  *
  * A single bucket of all the documents in the current document set context that match a specified filter.
  *
- * @package WSSearch\QueryEngine\Aggregation
+ * @package WikiSearch\QueryEngine\Aggregation
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
  */
 class FilterAggregation implements Aggregation {

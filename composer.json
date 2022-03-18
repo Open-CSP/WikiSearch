@@ -1,10 +1,11 @@
 {
-    "name": "wikibase-solutions/w-s-search",
+    "name": "open-csp/wiki-search",
     "type": "mediawiki-extension",
-    "description": "Faceted search for MediaWiki",
+    "description": "Faceted search for Semantic MediaWiki",
     "keywords": ["mediawiki", "search", "extension"],
     "license": "GPL-2.0-or-later",
     "require": {
+        "php": "^7.4",
         "elasticsearch/elasticsearch": "^5.3|^6.0",
         "ongr/elasticsearch-dsl": "~6.0"
     },
