@@ -172,7 +172,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryBase {
 		$highlighted_source = implode( ' ', $words );
 		$words = [];
 
-		preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9](@@_HIGHLIGHT([-‑ ]+)HIGHLIGHT_@@)?)+(@@_HIGHLIGHT|$)/", $highlighted_source, $matches );
+		preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9:](@@_HIGHLIGHT([^a-zA-Z0-9]+)HIGHLIGHT_@@)?)+(@@_HIGHLIGHT|$)/", $highlighted_source, $matches );
 
 		if ( isset( $matches[0] ) ) {
 			foreach ($matches[0] as $match) {
