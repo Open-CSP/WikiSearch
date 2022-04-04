@@ -82,7 +82,6 @@ class PropertyValuesParserFunction {
 
 		$query_engine = QueryEngineFactory::fromNull();
 		$query_engine->addAggregation( $aggregation );
-		$query_engine->setLimit( 9999 );
 
 		$query = $query_engine->toArray();
 
@@ -98,7 +97,7 @@ class PropertyValuesParserFunction {
 
 		$buckets = $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"];
 
-		if ( !is_array( $results ) ) {
+		if ( !is_array( $buckets ) ) {
 			// The aggregations are not valid
 			return "";
 		}
