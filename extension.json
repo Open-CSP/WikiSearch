@@ -30,7 +30,8 @@
 	},
 	"APIMetaModules": {
 	  	"WikiSearch": "WikiSearch\\API\\ApiQueryWikiSearch",
-		"WikiSearchHighlight": "WikiSearch\\API\\ApiQueryWikiSearchHighlight"
+		"WikiSearchHighlight": "WikiSearch\\API\\ApiQueryWikiSearchHighlight",
+		"WikiSearchCombobox": "WikiSearch\\API\\ApiQueryWikiSearchCombobox"
   	},
 	"AvailableRights": [
 		"wikisearch-execute-api"

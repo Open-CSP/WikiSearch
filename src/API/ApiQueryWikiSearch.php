@@ -22,7 +22,6 @@
 namespace WikiSearch\API;
 
 use ApiBase;
-use ApiQueryBase;
 use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
@@ -38,7 +37,7 @@ use WikiSearch\SearchEngineFactory;
  *
  * @package WikiSearch
  */
-class ApiQueryWikiSearch extends ApiQueryBase {
+class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 	/**
 	 * @inheritDoc
 	 * @throws ApiUsageException
@@ -104,30 +103,6 @@ class ApiQueryWikiSearch extends ApiQueryBase {
 				ApiBase::PARAM_TYPE => 'integer'
 			]
 		];
-	}
-
-	/**
-	 * Checks applicable user rights.
-	 *
-	 * @throws ApiUsageException
-	 */
-	private function checkUserRights(): void {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-
-		try {
-			$required_rights = $config->get( "WikiSearchAPIRequiredRights" );
-			$this->checkUserRightsAny( $required_rights );
-		} catch ( \ConfigException $e ) {
-			Logger::getLogger()->critical(
-				'Caught exception while trying to get required rights for WikiSearch API: {e}',
-				[
-					'e' => $e
-				]
-			);
-
-			// Something went wrong; to be safe we block the access
-			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
-		}
 	}
 
 	/**
