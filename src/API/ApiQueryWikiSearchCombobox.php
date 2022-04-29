@@ -85,7 +85,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
             ],
             'term' => [
                 ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_REQUIRED => true
+                ApiBase::PARAM_DFLT => ''
             ],
             'limit' => [
                 ApiBase::PARAM_TYPE => 'integer',
