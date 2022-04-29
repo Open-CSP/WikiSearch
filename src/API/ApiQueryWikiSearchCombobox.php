@@ -29,7 +29,9 @@ use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
+use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class ApiQueryWikiSearchCombobox
@@ -50,7 +52,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
         $term = $this->getParameter( "term" );
         $size = $this->getParameter( "limit" );
 
-        $value_filter = new PropertyValueFilter( $property, $term );
+        $value_filter = new SearchTermFilter( $term, [new PropertyFieldMapper( $property )] );
         $filter_aggregation = new FilterAggregation( $value_filter, [
             new PropertyValueAggregation( $property, null, $size )
         ], 'combobox_values' );
@@ -63,7 +65,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
             ->build()
             ->search( $query_engine->toArray() );
 
-        $this->getResult()->addValue( null, 'result', $results );
+        $this->getResult()->addValue( null, 'result', json_encode( $results['aggregations'] ) );
     }
 
     /**
