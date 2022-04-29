@@ -48,7 +48,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 
         $property = $this->getParameter( "property" );
         $term = $this->getParameter( "term" );
-        $size = $this->getParameter( "size" );
+        $size = $this->getParameter( "limit" );
 
         $value_filter = new PropertyValueFilter( $property, $term );
         $filter_aggregation = new FilterAggregation( $value_filter, [
@@ -79,7 +79,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
                 ApiBase::PARAM_TYPE => 'string',
                 ApiBase::PARAM_REQUIRED => true
             ],
-            'size' => [
+            'limit' => [
                 ApiBase::PARAM_TYPE => 'integer',
                 ApiBase::PARAM_MIN => 1,
                 ApiBase::PARAM_MAX => 25000,

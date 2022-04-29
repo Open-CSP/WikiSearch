@@ -28,5 +28,9 @@
   "apihelp-query+WikiSearchHighlight-param-page_id": "The page for which you want to generate highlights",
   "apihelp-query+WikiSearchHighlight-param-limit": "The maximum number of highlights to return",
   "apihelp-query+WikiSearchHighlight-param-size": "The size of the snippets to return (leave blank to highlight individual words)",
-  "apihelp-query+WikiSearchHighlight-summary": "Create highlight snippets from an ElasticSearch search query"
+  "apihelp-query+WikiSearchHighlight-summary": "Create highlight snippets from an ElasticSearch search query",
+  "apihelp-query+WikiSearchCombobox-summary": "Create combobox aggregations for a property",
+  "apihelp-query+WikiSearchCombobox-param-property": "The property to create the combobox aggregation for",
+  "apihelp-query+WikiSearchCombobox-param-limit": "The maximum number of aggregations to return",
+  "apihelp-query+WikiSearchCombobox-param-term": "The term to filter on"
 }
