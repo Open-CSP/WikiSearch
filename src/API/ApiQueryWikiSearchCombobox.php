@@ -39,6 +39,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
+    private const AGGREGATION_NAME = 'combobox_values';
+
     /**
      * @inheritDoc
      *
@@ -55,7 +57,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
         $value_filter = new SearchTermFilter( $term, [new PropertyFieldMapper( $property )] );
         $filter_aggregation = new FilterAggregation( $value_filter, [
             new PropertyValueAggregation( $property, null, $size )
-        ], 'combobox_values' );
+        ], self::AGGREGATION_NAME );
 
         $query_engine = $this->getEngine();
         $query_engine->addAggregation( $filter_aggregation );
@@ -65,7 +67,11 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
             ->build()
             ->search( $query_engine->toArray() );
 
-        $this->getResult()->addValue( null, 'result', json_encode( $results['aggregations'] ) );
+        $this->getResult()->addValue(
+            null,
+            'result',
+            $this->getAggregationsFromResult( $results, $property )
+        );
     }
 
     /**
@@ -97,5 +103,16 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
      */
     private function getEngine(): QueryEngine {
         return QueryEngineFactory::fromNull();
+    }
+
+    /**
+     * Extracts the aggregations from the ElasticSearch result.
+     *
+     * @param array $result
+     * @param string $property The property for which to get the aggregations
+     * @return array
+     */
+    private function getAggregationsFromResult( array $result, string $property ): array {
+        return $result['aggregations'][self::AGGREGATION_NAME][self::AGGREGATION_NAME][$property]['buckets'] ?? [];
     }
 }
