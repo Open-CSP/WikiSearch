@@ -116,7 +116,7 @@ class PropertyValueFilter extends PropertyFilter {
 	 */
 	public function toQuery(): BoolQuery {
 		$term_query = new TermQuery(
-			$this->property->getPropertyField( true ),
+			$this->property->getKeywordFieldIfAvailable(),
 			$this->property_value
 		);
 
