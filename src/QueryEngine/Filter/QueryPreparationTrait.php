@@ -10,6 +10,8 @@ namespace WikiSearch\QueryEngine\Filter;
  * @package WikiSearch\QueryEngine\Filter
  */
 trait QueryPreparationTrait {
+    private array $disabled_search_operators = [ '/', ':', '+', '=' ];
+
 	/**
 	 * Prepares the query for use with ElasticSearch.
 	 *
@@ -24,26 +26,12 @@ trait QueryPreparationTrait {
 			return "*";
 		}
 
-		// Disable regex searches by replacing each "/" with " "
-		$search_term = str_replace( "/", ' ', $search_term );
-
-		// Disable certain search operators by escaping them
-		$search_term = str_replace( ":", '\:', $search_term );
-		$search_term = str_replace( "+", '\+', $search_term );
-		$search_term = str_replace( "=", '\=', $search_term );
+        foreach ( $this->disabled_search_operators as $operator ) {
+            $search_term = str_replace( $operator, '\\' . $operator, $search_term );
+        }
 
 		// Don't insert wildcard around terms when the user is performing an "advanced query"
-		$advanced_search_chars = [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ];
-		$is_advanced_query = array_reduce( $advanced_search_chars, function ( bool $carry, $char ) use ( $search_term )
-		{
-			return $carry ?: strpos( $search_term, $char ) !== false;
-		}, false );
-
-		if ( !$is_advanced_query ) {
-			$search_term = $this->insertWildcards( $search_term );
-		}
-
-		return $search_term;
+        return $this->isAdvancedQuery( $search_term ) ? $search_term : $this->insertWildcards( $search_term );
 	}
 
 	/**
@@ -79,4 +67,22 @@ trait QueryPreparationTrait {
 		// Join everything together again to get the search string
 		return implode( "", $terms );
 	}
+
+    /**
+     * Returns true if and only if this is an advanced search query.
+     *
+     * @param string $search_term
+     * @return bool
+     */
+    private function isAdvancedQuery( string $search_term ): bool {
+        $advanced_search_chars = [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ];
+
+        foreach ( $advanced_search_chars as $advanced_search_char ) {
+            if ( mb_strpos( $search_term, $advanced_search_char ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

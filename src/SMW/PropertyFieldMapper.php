@@ -223,6 +223,15 @@ class PropertyFieldMapper {
 		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
 	}
 
+    /**
+     * Returns the keyword field associated with this property, with the weight.
+     *
+     * @return string
+     */
+    public function getWeightedPropertyKeywordField(): string {
+        return sprintf( "%s^%d", $this->getPropertyField( true ), $this->property_weight );
+    }
+
 	/**
 	 * Returns the property field mapper for the chained property.
 	 *
