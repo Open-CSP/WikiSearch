@@ -41,31 +41,15 @@ trait QueryPreparationTrait {
 	 * @return string
 	 */
 	public function insertWildcards( string $search_string ): string {
-		$word_character_set = "a-zA-Z_\-0-9";
-		$terms = preg_split(
-			"/((?<=[$word_character_set])(?=$|[^$word_character_set])\s*)/",
-			$search_string,
-			-1,
-			PREG_SPLIT_DELIM_CAPTURE
-		);
-
-		// $terms is now an array where every even element is a term (0 is a term, 2 is a term, etc.), and
-		// every odd element the delimiter between that term and the next term. Calling implode() on
-		// $terms gives back the original search string
-
+        $terms = explode( ' ', $search_string );
 		$num_terms = count( $terms );
 
-		// Insert quotes around each term
 		for ( $idx = 0; $idx < $num_terms; $idx++ ) {
-			$is_term = ( $idx % 2 ) === 0 && !empty( $terms[$idx] );
-
-			if ( $is_term ) {
-				$terms[$idx] = "*{$terms[$idx]}*";
-			}
+            $terms[$idx] = "*{$terms[$idx]}*";
 		}
 
 		// Join everything together again to get the search string
-		return implode( "", $terms );
+		return implode( ' ', $terms );
 	}
 
     /**
