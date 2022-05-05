@@ -217,20 +217,12 @@ class PropertyFieldMapper {
 	/**
 	 * Returns the field associated with this property, with the weight.
 	 *
+     * @param bool $requires_keyword Give the keyword field for this property instead, if it is available
 	 * @return string
 	 */
-	public function getWeightedPropertyField(): string {
-		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
+	public function getWeightedPropertyField( bool $requires_keyword = false ): string {
+		return sprintf( "%s^%d", $this->getPropertyField( $requires_keyword ), $this->property_weight );
 	}
-
-    /**
-     * Returns the keyword field associated with this property, with the weight.
-     *
-     * @return string
-     */
-    public function getWeightedPropertyKeywordField(): string {
-        return sprintf( "%s^%d", $this->getPropertyField( true ), $this->property_weight );
-    }
 
 	/**
 	 * Returns the property field mapper for the chained property.
