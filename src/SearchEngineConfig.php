@@ -265,42 +265,28 @@ class SearchEngineConfig {
 		}
 
 		$search_parameter_value_raw = $this->search_parameters[$parameter];
-		$search_parameter_type = isset( self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ) ?
-			self::SEARCH_PARAMETER_KEYS[$parameter]["type"] : "untyped";
+		$search_parameter_type = self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ?? "string";
 
 		switch ( $search_parameter_type ) {
 			case "integer":
-				$search_parameter_value = intval( $search_parameter_value_raw );
-				break;
+                return $this->search_parameters_cache[$parameter] = intval( $search_parameter_value_raw );
 			case "string":
-				$search_parameter_value = trim( $search_parameter_value_raw );
-				break;
+                return $this->search_parameters_cache[$parameter] = trim( $search_parameter_value_raw );
 			case "list":
-				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				break;
+                return $this->search_parameters_cache[$parameter] = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
 			case "propertyfieldlist":
-				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				$search_parameter_value = array_map( function ( $property ): string {
+                return $this->search_parameters_cache[$parameter] = array_map( function ( $property ): string {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) )->getPropertyField();
-				}, $search_parameter_value );
-				break;
+				}, $this->parsePropertyList( $search_parameter_value_raw ) );
 			case "propertylist":
-				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				$search_parameter_value = array_map( function ( $property ): PropertyFieldMapper {
+                return $this->search_parameters_cache[$parameter] = array_map( function ( $property ): PropertyFieldMapper {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) );
-				}, $search_parameter_value );
-				break;
+				}, $this->parsePropertyList( $search_parameter_value_raw ) );
 			default:
-				$search_parameter_value = $search_parameter_value_raw;
+                return $this->search_parameters_cache[$parameter] = $search_parameter_value_raw;
 		}
-
-		$this->search_parameters_cache[$parameter] = $search_parameter_value;
-
-		return $this->search_parameters_cache[$parameter];
 	}
 
 	/**
@@ -449,4 +435,22 @@ class SearchEngineConfig {
 			[ "page_id" => $page_id ]
 		);
 	}
+
+    /**
+     * Parses the given list of property names.
+     *
+     * @param string $value
+     * @return string[]
+     */
+    private function parsePropertyList( string $value ): array {
+        return array_unique(
+            array_filter(
+                array_map(
+                    "trim",
+                    explode( ",", $value )
+                ),
+                fn ( string $v ): bool => !empty( $v )
+            )
+        );
+    }
 }

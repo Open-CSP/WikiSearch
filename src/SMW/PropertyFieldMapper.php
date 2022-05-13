@@ -22,10 +22,12 @@
 namespace WikiSearch\SMW;
 
 use BadMethodCallException;
+use Exception;
 use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
+use SMW\Exception\PropertyLabelNotResolvedException;
 use WikiSearch\Logger;
 
 /**
@@ -90,7 +92,7 @@ class PropertyFieldMapper {
 	private int $property_weight;
 
 	/**
-	 * @var PropertyFieldMapper The property field mapper for the chained property
+	 * @var PropertyFieldMapper|null The property field mapper for the chained property
 	 *
 	 * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
@@ -128,13 +130,30 @@ class PropertyFieldMapper {
             $this->property_key = PropertyAliasMapper::findPropertyKey( $this->property_name );
         }
 
-		$data_item_property = new DIProperty( $this->property_key );
-        $this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
-		$this->property_type = str_replace(
-			'_',
-			'',
-			DataTypeRegistry::getInstance()->getFieldType( $data_item_property->findPropertyValueType() )
-		);
+        try {
+            $data_item_property = new DIProperty( $this->property_key );
+
+            $this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
+            $this->property_type = str_replace(
+                '_',
+                '',
+                DataTypeRegistry::getInstance()->getFieldType( $data_item_property->findPropertyValueType() )
+            );
+        } catch ( Exception $exception ) {
+            Logger::getLogger()->critical(
+                'Failed to construct DIProperty for property {propertyName}: {e}',
+                [
+                    'propertyName' => $property_name,
+                    'e' => $exception
+                ]
+            );
+
+            // Some fallback values
+            $this->property_id = 0;
+            $this->property_type = 'txt';
+        }
+
+
 	}
 
 	/**
