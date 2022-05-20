@@ -3,7 +3,7 @@
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "4.1.1",
+	"version": "4.2.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSearch",
 	"descriptionmsg": "wikisearch-desc",
 	"license-name": "GPL-2.0-or-later",
