@@ -280,6 +280,7 @@ class SearchEngineConfig {
 				break;
 			case "propertyfieldlist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
 				$search_parameter_value = array_map( function ( $property ): string {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) )->getPropertyField();
@@ -287,6 +288,7 @@ class SearchEngineConfig {
 				break;
 			case "propertylist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
 				$search_parameter_value = array_map( function ( $property ): PropertyFieldMapper {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) );
