@@ -80,7 +80,7 @@ class SearchTermFilter extends AbstractFilter {
 	 * @throws SearchEngineException
 	 * @throws \MWException
 	 */
-	public function toQuery(): BoolQuery {
+	public function filterToQuery(): BoolQuery {
 		$search_term = $this->prepareQuery( $this->search_term );
 
 		$bool_query = new BoolQuery();

@@ -44,7 +44,7 @@ class PageFilter extends AbstractFilter {
 	 *
 	 * @return BoolQuery
 	 */
-	public function toQuery(): BoolQuery {
+	public function filterToQuery(): BoolQuery {
 		$object_id = WikiPageObjectIdLookup::getObjectIdForTitle( $this->title );
 
 		if ( $object_id === null ) {

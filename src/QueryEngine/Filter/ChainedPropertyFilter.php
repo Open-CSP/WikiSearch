@@ -59,9 +59,8 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 *
 	 * @return BoolQuery
 	 * @throws MWException
-	 * @throws SearchEngineException
-	 */
-	public function toQuery(): BoolQuery {
+     */
+	public function filterToQuery(): BoolQuery {
 		$query = $this->constructSubqueryFromFilter( $this->filter );
 		$terms = $this->getTermsFromSubquery( $query );
 
