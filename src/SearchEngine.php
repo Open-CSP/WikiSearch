@@ -30,7 +30,7 @@ use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 
 /**
- * Class Search
+ * Class SearchEngine
  *
  * @package WikiSearch
  */

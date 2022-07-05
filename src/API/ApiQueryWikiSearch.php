@@ -150,7 +150,7 @@ class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 		$search_engine_factory = new SearchEngineFactory( $engine_config );
 
 		try {
-			$search_engine = $search_engine_factory->fromParameters(
+			$search_engine = $search_engine_factory->fromAPIParameters(
 				$this->getParameter( "term" ),
 				$this->getParameter( "from" ),
 				$this->getParameter( "limit" ),
