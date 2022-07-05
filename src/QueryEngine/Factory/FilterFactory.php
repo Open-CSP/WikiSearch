@@ -149,7 +149,7 @@ class FilterFactory {
 		array $array,
 		PropertyFieldMapper $property_field_mapper,
 		SearchEngineConfig $config
-	): PropertyTextFilter {
+	): ?PropertyTextFilter {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
