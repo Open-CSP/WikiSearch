@@ -20,8 +20,6 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
  */
 class PropertyTextFilter extends PropertyFilter {
-	use QueryPreparationTrait;
-
 	/**
 	 * @var PropertyFieldMapper The property to filter on
 	 */
@@ -99,10 +97,8 @@ class PropertyTextFilter extends PropertyFilter {
 	 *
 	 * @return BoolQuery
 	 */
-	public function toQuery(): BoolQuery {
-		$search_term = $this->prepareQuery( $this->property_value_query );
-
-		$query_string_query = new QueryStringQuery( $search_term );
+	public function filterToQuery(): BoolQuery {
+		$query_string_query = new QueryStringQuery( $this->property_value_query );
 		$query_string_query->setParameters( [
 			"fields" => [ $this->property->getPropertyField() ],
 			"default_operator" => $this->default_operator

@@ -13,8 +13,6 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch\QueryEngine\Filter
  */
 class SearchTermFilter extends AbstractFilter {
-	use QueryPreparationTrait;
-
 	/**
 	 * @var array
 	 */
@@ -80,20 +78,18 @@ class SearchTermFilter extends AbstractFilter {
 	 * @throws SearchEngineException
 	 * @throws \MWException
 	 */
-	public function toQuery(): BoolQuery {
-		$search_term = $this->prepareQuery( $this->search_term );
-
+	public function filterToQuery(): BoolQuery {
 		$bool_query = new BoolQuery();
 
 		foreach ( $this->chained_properties as $property ) {
 			// Construct a new chained subquery for each chained property and add it to the bool query
-			$property_text_filter = new PropertyTextFilter( $property, $search_term, $this->default_operator );
+			$property_text_filter = new PropertyTextFilter( $property, $this->search_term, $this->default_operator );
 			$filter = new ChainedPropertyFilter( $property_text_filter, $property->getChainedPropertyFieldMapper() );
 			$bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
 		}
 
 		if ( $this->property_fields !== [] ) {
-			$query_string_query = new QueryStringQuery( $search_term );
+			$query_string_query = new QueryStringQuery( $this->search_term );
 			$query_string_query->setParameters( [
 				"fields" => $this->property_fields,
 				"default_operator" => $this->default_operator,

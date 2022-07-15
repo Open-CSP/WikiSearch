@@ -52,6 +52,10 @@ class FilterFactory {
 			$filter->setPostFilter();
 		}
 
+        if ( isset( $array["negate"] ) && $array["negate"] === true ) {
+            $filter->setNegated();
+        }
+
 		if ( $filter !== null && $property_field_mapper->isChained() ) {
 			// This is a chained filter property
 			return new ChainedPropertyFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
@@ -149,7 +153,7 @@ class FilterFactory {
 		array $array,
 		PropertyFieldMapper $property_field_mapper,
 		SearchEngineConfig $config
-	): PropertyTextFilter {
+	): ?PropertyTextFilter {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
