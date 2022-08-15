@@ -194,12 +194,12 @@ class PropertyFieldMapper {
 	/**
 	 * Returns the field associated with this property.
 	 *
-	 * @param bool $requires_keyword Give the keyword field for this property instead, if it is available
+	 * @param bool $keyword Give the keyword field for this property instead, if it is available
 	 * @return string
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
 	 */
-	public function getPropertyField( bool $requires_keyword = false ): string {
+	public function getPropertyField( bool $keyword = false ): string {
 		if ( $this->isInternalProperty() ) {
 		    // Internal properties are represented by their key and do not have an ID
 			return $this->property_key;
@@ -207,7 +207,7 @@ class PropertyFieldMapper {
 
 		$field = $this->getPID() . '.' . $this->getPropertyType();
 
-		if ( $requires_keyword === true && $this->hasKeywordField() ) {
+		if ( $keyword === true && $this->hasKeywordField() ) {
 		    $field .= '.keyword';
         }
 
@@ -217,10 +217,11 @@ class PropertyFieldMapper {
 	/**
 	 * Returns the field associated with this property, with the weight.
 	 *
+	 * @param bool $keyword Whether to use the keyword field
 	 * @return string
 	 */
-	public function getWeightedPropertyField(): string {
-		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
+	public function getWeightedPropertyField( bool $keyword = false ): string {
+		return sprintf( "%s^%d", $this->getPropertyField( $keyword ), $this->property_weight );
 	}
 
 	/**
