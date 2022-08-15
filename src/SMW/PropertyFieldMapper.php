@@ -75,7 +75,7 @@ class PropertyFieldMapper {
 	/**
 	 * @var string The kind/datatype of the property
 	 */
-	private string $property_type;
+	private string $property_field_type;
 
 	/**
 	 * @var string The key of the property as a string
@@ -133,7 +133,7 @@ class PropertyFieldMapper {
 
 		$data_item_property = new DIProperty( $this->property_key );
         $this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
-		$this->property_type = str_replace(
+		$this->property_field_type = str_replace(
 			'_',
 			'',
 			DataTypeRegistry::getInstance()->getFieldType( $data_item_property->findPropertyValueType() )
@@ -155,7 +155,7 @@ class PropertyFieldMapper {
 	 * @return string
 	 */
 	public function getPropertyType(): string {
-		return $this->property_type;
+		return sprintf( "%sField", $this->property_field_type );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class PropertyFieldMapper {
 			return $this->property_key;
 		}
 
-		$field = sprintf( "%s.%sField", $this->getPID(), $this->property_type );
+		$field = sprintf( "%s.%sField", $this->getPID(), $this->property_field_type );
 
 		return $keyword === true && $this->hasKeywordField() ?
 			sprintf( "%s.keyword", $field ) :
@@ -253,7 +253,7 @@ class PropertyFieldMapper {
 	 * @return bool
 	 */
 	public function hasKeywordField(): bool {
-		return in_array( $this->getPropertyType(), self::KEYWORD_TYPES, true );
+		return in_array( $this->property_field_type, self::KEYWORD_TYPES, true );
 	}
 
 	/**
