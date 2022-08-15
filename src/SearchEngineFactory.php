@@ -39,7 +39,7 @@ class SearchEngineFactory {
 	 * @return SearchEngine
 	 * @throws SearchEngineException
 	 */
-	public function fromParameters( $term, $from, $limit, $filters, $aggregations, $sortings ): SearchEngine {
+	public function fromAPIParameters( $term, $from, $limit, $filters, $aggregations, $sortings ): SearchEngine {
 		$this->engine = new SearchEngine( $this->config );
 
 		if ( $term !== null ) {
