@@ -64,6 +64,9 @@ class PropertyFieldMapper {
 		"text_raw"
 	];
 
+	// List of field types that have a keyword subfield
+	public const KEYWORD_TYPES = ["txt", "uri", "wpg", "num", "dat"];
+
 	/**
 	 * @var int The unique ID of the property
 	 */
@@ -90,7 +93,7 @@ class PropertyFieldMapper {
 	private int $property_weight;
 
 	/**
-	 * @var PropertyFieldMapper The property field mapper for the chained property
+	 * @var PropertyFieldMapper|null The property field mapper for the chained property
 	 *
 	 * For instance, given the property name "Verrijking.Inhoudsindicatie", the current PropertyFieldMapper would
 	 * contain information about "Inhoudsindicatie" and the field mapper contained in this class field would contain
@@ -152,7 +155,7 @@ class PropertyFieldMapper {
 	 * @return string
 	 */
 	public function getPropertyType(): string {
-		return $this->property_type . "Field";
+		return $this->property_type;
 	}
 
 	/**
@@ -194,7 +197,7 @@ class PropertyFieldMapper {
 	/**
 	 * Returns the field associated with this property.
 	 *
-	 * @param bool $keyword Give the keyword field for this property instead, if it is available
+	 * @param bool $keyword Give the keyword field for this property instead, if it exists
 	 * @return string
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
@@ -205,13 +208,11 @@ class PropertyFieldMapper {
 			return $this->property_key;
 		}
 
-		$field = $this->getPID() . '.' . $this->getPropertyType();
+		$field = sprintf( "%s.%sField", $this->getPID(), $this->property_type );
 
-		if ( $keyword === true && $this->hasKeywordField() ) {
-		    $field .= '.keyword';
-        }
-
-		return $field;
+		return $keyword === true && $this->hasKeywordField() ?
+			sprintf( "%s.keyword", $field ) :
+			$field;
 	}
 
 	/**
@@ -252,13 +253,7 @@ class PropertyFieldMapper {
 	 * @return bool
 	 */
 	public function hasKeywordField(): bool {
-		switch ( $this->property_type ) {
-			case "num":
-			case "boo":
-				return false;
-		}
-
-		return true;
+		return in_array( $this->getPropertyType(), self::KEYWORD_TYPES, true );
 	}
 
 	/**
@@ -294,7 +289,7 @@ class PropertyFieldMapper {
 		} else {
 			// We don't have an explicit property weight
 			$property_weight = self::DEFAULT_PROPERTY_WEIGHT;
-			array_push( $parts, $maybe_property_weight );
+			$parts[] = $maybe_property_weight;
 		}
 
 		return [ $property_weight, implode( "^", $parts ) ];

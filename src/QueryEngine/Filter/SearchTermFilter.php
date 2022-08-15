@@ -21,7 +21,13 @@ class SearchTermFilter extends AbstractFilter {
 	/**
 	 * @var array
 	 */
-	private array $property_fields = [];
+	private array $property_fields = [
+		"subject.title^8",
+		"text_copy^5",
+		"text_raw",
+		"attachment.title^3",
+		"attachment.content"
+	];
 
 	/**
 	 * @var string The search term to filter on
@@ -45,21 +51,13 @@ class SearchTermFilter extends AbstractFilter {
 		$this->default_operator = $default_operator;
 
 		if ( $properties !== [] ) {
+			$this->property_fields = [];
+
 			foreach ( $properties as $mapper ) {
-				if ( $mapper->isChained() ) {
-					$this->chained_properties[] = $mapper;
-				} else {
+				$mapper->isChained() ?
+					$this->chained_properties[] = $mapper :
 					$this->property_fields[] = $mapper->getWeightedPropertyField( true );
-				}
 			}
-		} else {
-			$this->property_fields = [
-				"subject.title^8",
-				"text_copy^5",
-				"text_raw",
-				"attachment.title^3",
-				"attachment.content"
-			];
 		}
 	}
 

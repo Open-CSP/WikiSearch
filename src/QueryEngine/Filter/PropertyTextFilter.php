@@ -49,7 +49,7 @@ class PropertyTextFilter extends PropertyFilter {
 			$property = new PropertyFieldMapper( $property );
 		}
 
-		if ( !( $property instanceof PropertyFieldMapper ) ) {
+		if ( !$property instanceof PropertyFieldMapper ) {
 			Logger::getLogger()->critical(
 				'Tried to construct a PropertyTextFilter with an invalid property: {property}',
 				[
@@ -100,7 +100,7 @@ class PropertyTextFilter extends PropertyFilter {
 	public function filterToQuery(): BoolQuery {
 		$query_string_query = new QueryStringQuery( $this->property_value_query );
 		$query_string_query->setParameters( [
-			"fields" => [ $this->property->getPropertyField() ],
+			"fields" => [ $this->property->getPropertyField( true ) ],
 			"default_operator" => $this->default_operator
 		] );
 
