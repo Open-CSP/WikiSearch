@@ -4,6 +4,7 @@ namespace WikiSearch\QueryEngine\Filter;
 
 use ConfigException;
 use Elasticsearch\ClientBuilder;
+use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
@@ -26,25 +27,21 @@ use WikiSearch\SMW\PropertyFieldMapper;
  */
 class ChainedPropertyFilter extends PropertyFilter {
 	/**
-	 * @var PropertyFieldMapper The property to filter on
+	 * @var PropertyFilter The initial filter to use to get the terms for the to be constructed Terms filter
 	 */
-	private PropertyFieldMapper $property;
+	private PropertyFilter $filter;
 
 	/**
-	 * @var AbstractFilter The initial filter to use to get the terms for the to be constructed Terms filter
-	 */
-	private AbstractFilter $filter;
-
-	/**
-	 * ChainedPropertyTermsFilter constructor.
+	 * ChainedPropertyFilter constructor.
 	 *
-	 * @param AbstractFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
-	 * @param PropertyFieldMapper $property The property to filter on; if this property is also a property
-	 * chain, the class will return a ChainedPropertyTermsFilter containing the constructed TermsFilter
+	 * @param PropertyFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
 	 */
-	public function __construct( AbstractFilter $filter, PropertyFieldMapper $property ) {
+	public function __construct( PropertyFilter $filter ) {
 		$this->filter = $filter;
-		$this->property = $property;
+
+		if ( !$filter->getProperty()->isChained() ) {
+			throw new InvalidArgumentException( "The given filter must be applied to chained property" );
+		}
 	}
 
 	/**
@@ -53,7 +50,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return PropertyFieldMapper
 	 */
 	public function getProperty(): PropertyFieldMapper {
-		return $this->property;
+		return $this->filter->getProperty()->getChainedPropertyFieldMapper();
 	}
 
 	/**
@@ -65,11 +62,12 @@ class ChainedPropertyFilter extends PropertyFilter {
 	public function filterToQuery(): BoolQuery {
 		$query = $this->constructSubqueryFromFilter( $this->filter );
 		$terms = $this->getTermsFromSubquery( $query );
+		$property = $this->getProperty();
 
-		$filter = new PagesPropertyFilter( $this->property, $terms );
+		$filter = new PagesPropertyFilter( $property, $terms );
 
-		if ( $this->property->isChained() ) {
-			$filter = new ChainedPropertyFilter( $filter, $this->property->getChainedPropertyFieldMapper() );
+		if ( $property->isChained() ) {
+			$filter = new ChainedPropertyFilter( $filter );
 		}
 
 		return $filter->toQuery();

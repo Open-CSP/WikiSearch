@@ -6,6 +6,7 @@ use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Filter\AbstractFilter;
 use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WikiSearch\QueryEngine\Filter\HasPropertyFilter;
+use WikiSearch\QueryEngine\Filter\PropertyFilter;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WikiSearch\QueryEngine\Filter\PropertyTextFilter;
 use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
@@ -43,12 +44,12 @@ class FilterFactory {
 		}
 
 		$property_field_mapper = $array["key"] instanceof PropertyFieldMapper ?
-			$array["key"] : new PropertyFieldMapper( $array["key"] );
+			$array["key"] :
+			new PropertyFieldMapper( $array["key"] );
+
 		$filter = self::filterFromArray( $array, $property_field_mapper, $config );
 
-		$post_filter_properties = $config->getSearchParameter( "post filter properties" );
-
-		if ( in_array( $array["key"], $post_filter_properties, true ) ) {
+		if ( in_array( $array["key"], $config->getSearchParameter( "post filter properties" ), true ) ) {
 			$filter->setPostFilter();
 		}
 
@@ -57,11 +58,9 @@ class FilterFactory {
         }
 
 		if ( $filter !== null && $property_field_mapper->isChained() ) {
-			// This is a chained filter property
-			return new ChainedPropertyFilter( $filter, $property_field_mapper->getChainedPropertyFieldMapper() );
+			$filter = new ChainedPropertyFilter( $filter );
 		}
 
-		// This is not a chained filter property, so simply return the constructed filter (or null on failure)
 		return $filter;
 	}
 
@@ -77,7 +76,7 @@ class FilterFactory {
 		array $array,
 		PropertyFieldMapper $property_field_mapper,
 		SearchEngineConfig $config
-	): ?AbstractFilter {
+	): ?PropertyFilter {
 		if ( isset( $array["range"] ) ) {
 			if ( !is_array( $array["range"] ) ) {
 				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "range"' );
@@ -115,7 +114,7 @@ class FilterFactory {
 	private static function valueFilterFromValue(
 		$value,
 		PropertyFieldMapper $property_field_mapper
-	): ?AbstractFilter {
+	): ?PropertyFilter {
 		if ( $value === "+" ) {
 			return self::hasPropertyFilterFromProperty( $property_field_mapper );
 		}
