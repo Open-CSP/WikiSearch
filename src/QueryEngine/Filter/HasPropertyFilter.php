@@ -70,7 +70,7 @@ class HasPropertyFilter extends PropertyFilter {
 	 *
 	 * @return BoolQuery
 	 */
-	public function toQuery(): BoolQuery {
+	public function filterToQuery(): BoolQuery {
 		$exists_query = new ExistsQuery(
 			$this->property->getPropertyField()
 		);

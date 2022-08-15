@@ -81,7 +81,7 @@ class PropertyRangeFilter extends PropertyFilter {
 	/**
 	 * @inheritDoc
 	 */
-	public function toQuery(): BoolQuery {
+	public function filterToQuery(): BoolQuery {
 		$range_query = new RangeQuery(
 			$this->property->getPropertyField(),
 			$this->options
