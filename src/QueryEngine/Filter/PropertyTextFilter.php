@@ -38,8 +38,6 @@ class PropertyTextFilter extends PropertyFilter {
 	/**
 	 * PropertyFilter constructor.
 	 *
-	 * Note: This filter requires a valid SearchEngineConfig to be defined via SearchEngine::$config.
-	 *
 	 * @param PropertyFieldMapper|string $property The name or object of the property to filter on
 	 * @param string $property_value_query The query string used to match the property value
 	 * @param string $default_operator The default operator to insert between words
@@ -100,7 +98,7 @@ class PropertyTextFilter extends PropertyFilter {
 	public function filterToQuery(): BoolQuery {
 		$query_string_query = new QueryStringQuery( $this->property_value_query );
 		$query_string_query->setParameters( [
-			"fields" => [ $this->property->getPropertyField( true ) ],
+			"fields" => [ $this->property->getPropertyField(), $this->property->getPropertyField( true ) ],
 			"default_operator" => $this->default_operator
 		] );
 

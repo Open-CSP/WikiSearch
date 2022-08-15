@@ -19,6 +19,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * recursively constructs a new filter from the results of the initial filter until the end of the
  * property chain is reached.
  *
+ * This filter only works on a single property field mapper.
+ *
  * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
  */
@@ -85,18 +87,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 		$query_engine->addConstantScoreFilter( $filter );
 
 		$config = MediaWikiServices::getInstance()->getMainConfig();
-
-		try {
-			$limit = $config->get( "WikiSearchMaxChainedQuerySize" );
-		} catch ( ConfigException $e ) {
-			$limit = 1000;
-
-			Logger::getLogger()->alert( 'Failed to get $wgWikiSearchMaxChainedQuerySize, falling back to {limit}', [
-				'limit' => $limit
-			] );
-		}
-
-		$query_engine->setLimit( $limit );
+		$query_engine->setLimit( $config->get( "WikiSearchMaxChainedQuerySize" ) );
 
 		return $query_engine->toArray();
 	}

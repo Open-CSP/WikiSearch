@@ -54,9 +54,12 @@ class SearchTermFilter extends AbstractFilter {
 			$this->property_fields = [];
 
 			foreach ( $properties as $mapper ) {
-				$mapper->isChained() ?
-					$this->chained_properties[] = $mapper :
+				if ( $mapper->isChained() ) {
+					$this->chained_properties[] = $mapper;
+				} else {
+					$this->property_fields[] = $mapper->getWeightedPropertyField();
 					$this->property_fields[] = $mapper->getWeightedPropertyField( true );
+				}
 			}
 		}
 	}

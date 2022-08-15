@@ -65,7 +65,7 @@ class PropertyFieldMapper {
 	];
 
 	// List of field types that have a keyword subfield
-	public const KEYWORD_TYPES = ["txt", "uri", "wpg", "num", "dat"];
+	public const KEYWORD_FIELD_TYPES = ["txt", "uri", "wpg", "num", "dat"];
 
 	/**
 	 * @var int The unique ID of the property
@@ -253,7 +253,7 @@ class PropertyFieldMapper {
 	 * @return bool
 	 */
 	public function hasKeywordField(): bool {
-		return in_array( $this->property_field_type, self::KEYWORD_TYPES, true );
+		return in_array( $this->property_field_type, self::KEYWORD_FIELD_TYPES, true );
 	}
 
 	/**
