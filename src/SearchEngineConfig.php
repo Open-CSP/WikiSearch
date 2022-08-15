@@ -35,7 +35,7 @@ class SearchEngineConfig {
 	// phpcs:ignore
 	const SEARCH_PARAMETER_KEYS = [
 		"base query" 			 =>	[ "type" => "string" ],
-		"highlighted properties" => [ "type" => "propertyfieldlist" ],
+		"highlighted properties" => [ "type" => "propertylist" ],
 		"search term properties" => [ "type" => "propertylist" ],
 		"default operator" 		 => [ "type" => "string" ],
 		"aggregation size" 		 =>	[ "type" => "integer" ],
@@ -265,8 +265,7 @@ class SearchEngineConfig {
 		}
 
 		$search_parameter_value_raw = $this->search_parameters[$parameter];
-		$search_parameter_type = isset( self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ) ?
-			self::SEARCH_PARAMETER_KEYS[$parameter]["type"] : "untyped";
+		$search_parameter_type = self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ?? "untyped";
 
 		switch ( $search_parameter_type ) {
 			case "integer":
@@ -277,14 +276,6 @@ class SearchEngineConfig {
 				break;
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				break;
-			case "propertyfieldlist":
-				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				$search_parameter_value = array_map( function ( $property ): string {
-					// Map the property name to its field
-					return ( new PropertyFieldMapper( $property ) )->getPropertyField();
-				}, $search_parameter_value );
 				break;
 			case "propertylist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
