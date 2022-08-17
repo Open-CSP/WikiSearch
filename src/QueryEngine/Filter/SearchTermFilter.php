@@ -14,12 +14,12 @@ use WikiSearch\SMW\PropertyFieldMapper;
  */
 class SearchTermFilter extends AbstractFilter {
 	/**
-	 * @var array
+	 * @var PropertyFieldMapper[]
 	 */
 	private array $chained_properties = [];
 
 	/**
-	 * @var array
+	 * @var string[]|PropertyFieldMapper[]
 	 */
 	private array $property_fields = [
 		"subject.title^8",
@@ -35,11 +35,11 @@ class SearchTermFilter extends AbstractFilter {
 	private string $search_term;
 
 	/**
-	 * @var string
+	 * @var string The default operator to use
 	 */
 	private string $default_operator;
 
-	/**
+    /**
 	 * SearchTermFilter constructor.
 	 *
 	 * @param string $search_term
@@ -55,10 +55,10 @@ class SearchTermFilter extends AbstractFilter {
 
 			foreach ( $properties as $mapper ) {
 				if ( $mapper->isChained() ) {
+                    // Chained properties need to be handled differently, see filterToQuery
 					$this->chained_properties[] = $mapper;
 				} else {
 					$this->property_fields[] = $mapper->getWeightedPropertyField();
-					$this->property_fields[] = $mapper->getWeightedPropertyField( true );
 				}
 			}
 		}
@@ -75,19 +75,13 @@ class SearchTermFilter extends AbstractFilter {
 
 	/**
 	 * @inheritDoc
-	 *
-	 * @throws SearchEngineException
-	 * @throws \MWException
-	 */
+     */
 	public function filterToQuery(): BoolQuery {
 		$bool_query = new BoolQuery();
 
 		foreach ( $this->chained_properties as $property ) {
-			// Construct a new chained subquery for each chained property and add it to the bool query
-			$filter = new ChainedPropertyFilter(
-				new PropertyTextFilter( $property, $this->search_term, $this->default_operator )
-			);
-
+			// Construct a new chained sub query for each chained property and add it to the bool query
+			$filter = new ChainedPropertyFilter( new PropertyTextFilter( $property, $this->search_term, $this->default_operator ) );
 			$bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
 		}
 
