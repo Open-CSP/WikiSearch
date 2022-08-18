@@ -101,7 +101,7 @@ class DefaultHighlighter implements Highlighter {
             foreach ( $properties as $property ) {
                 $res[] = $property->getPropertyField();
 
-                if ( $property->hasSearchField() ) {
+                if ( $property->hasSearchSubfield() ) {
                     $res[] = $property->getSearchField();
                 }
             }
