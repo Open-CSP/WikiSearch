@@ -69,7 +69,9 @@ class PropertySort implements Sort {
 				break;
 		}
 
-		$this->field = $property->getKeywordField();
+		$this->field = $property->hasKeywordSubfield() ?
+            $property->getKeywordField() :
+            $property->getPropertyField();;
 	}
 
 	/**

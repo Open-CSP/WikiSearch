@@ -228,31 +228,28 @@ class PropertyFieldMapper {
 	}
 
     /**
-     * Returns the keyword field associated with this property, but falls back to the property field if this
-     * property does not have a keyword field.
+     * Returns the keyword field associated with this property. The caller is responsible for checking if this field
+     * exists.
      *
      * @return string
      */
     public function getKeywordField(): string {
-        $propertyField = $this->getPropertyField();
-
-        return $this->hasKeywordSubfield() ? $propertyField . '.keyword' : $propertyField;
+        return sprintf( "%s.keyword", $this->getPropertyField() );
     }
 
     /**
-     * Returns the search field associated with this property, but falls back to the property field if this
-     * property does not have a keyword field.
+     * Returns the search field associated with this property. The caller is responsible for checking if this field
+     * exists.
      *
      * @return string
      */
     public function getSearchField(): string {
-        $propertyField = $this->getPropertyField();
-
-        return $this->hasSearchSubfield() ? $propertyField . '.search' : $propertyField;
+        return sprintf( "%s.search", $this->getPropertyField() );
     }
 
 	/**
-	 * Returns the field associated with this property, with the weight.
+	 * Returns the field associated with this property, with the weight. The caller is responsible for checking if this
+     * field exists.
 	 *
 	 * @return string
 	 */
@@ -261,7 +258,8 @@ class PropertyFieldMapper {
 	}
 
     /**
-     * Returns the keyword subfield associated with this property, if it exists, with the weight.
+     * Returns the keyword subfield associated with this property, if it exists, with the weight. The caller is
+     * responsible for checking if this field exists.
      *
      * @return string
      */
@@ -270,7 +268,8 @@ class PropertyFieldMapper {
     }
 
     /**
-     * Returns the search subfield associated with this property, if it exists, with the weight.
+     * Returns the search subfield associated with this property, if it exists, with the weight. The caller is
+     * responsible for checking if this field exists.
      *
      * @return string
      */
@@ -310,7 +309,8 @@ class PropertyFieldMapper {
             return in_array( $this->property_key, self::KEYWORD_INTERNAL_PROPERTIES, true );
         } else {
             return in_array( $this->property_field_type, self::KEYWORD_FIELD_TYPES, true );
-        }	}
+        }
+    }
 
     /**
      * Returns true if and only if this property has a search subfield.
