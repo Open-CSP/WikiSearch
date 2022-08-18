@@ -60,8 +60,6 @@ class SearchTermFilter extends AbstractFilter {
                     // Chained properties need to be handled differently, see filterToQuery
 					$this->chained_properties[] = $mapper;
 				} else {
-                    // Add both the regular property field and the search field to the query
-					$this->property_fields[] = $mapper->getWeightedPropertyField();
                     $this->property_fields[] = $mapper->getWeightedSearchField();
 				}
 			}

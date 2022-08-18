@@ -98,7 +98,7 @@ class PropertyTextFilter extends PropertyFilter {
 	public function filterToQuery(): BoolQuery {
 		$query_string_query = new QueryStringQuery( $this->property_value_query );
 		$query_string_query->setParameters( [
-			"fields" => [ $this->property->getPropertyField(), $this->property->getSearchField() ],
+			"fields" => [ $this->property->getSearchField() ],
 			"default_operator" => $this->default_operator
 		] );
 

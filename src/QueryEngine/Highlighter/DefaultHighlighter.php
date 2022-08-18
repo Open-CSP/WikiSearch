@@ -96,14 +96,7 @@ class DefaultHighlighter implements Highlighter {
 			$this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
-            $res = [];
-
-            foreach ( $properties as $property ) {
-                $res[] = $property->getPropertyField();
-                $res[] = $property->getSearchField();
-            }
-
-			return $res;
+			return array_map( fn ( PropertyFieldMapper $property ): string => $property->getSearchField(), $properties );
 		}
 
 		// Fallback fields if no field is specified in the highlighted properties or search term properties
