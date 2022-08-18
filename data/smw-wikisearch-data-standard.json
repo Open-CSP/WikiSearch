@@ -219,7 +219,7 @@
 					"fields": {
 						"search": {
 							"type": "text",
-							"analzyer": "whitespace"
+							"analyzer": "whitespace"
 						}
 					}
 				},
@@ -229,7 +229,7 @@
 					"fields": {
 						"search": {
 							"type": "text",
-							"analzyer": "whitespace"
+							"analyzer": "whitespace"
 						}
 					}
 				},
@@ -247,7 +247,7 @@
 						},
 						"search": {
 							"type": "text",
-							"analzyer": "whitespace"
+							"analyzer": "whitespace"
 						}
 					}
 				},
