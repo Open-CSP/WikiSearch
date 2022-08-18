@@ -94,7 +94,7 @@ class PropertyValueAggregation implements PropertyAggregation {
 	public function toQuery(): AbstractAggregation {
 		$terms_aggregation = new TermsAggregation(
 			$this->aggregation_name,
-			$this->property->getPropertyField( true )
+			$this->property->getKeywordField()
 		);
 
 		if ( $this->size !== null ) {

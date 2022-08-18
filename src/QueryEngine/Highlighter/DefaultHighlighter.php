@@ -18,7 +18,9 @@ use WikiSearch\SMW\PropertyFieldMapper;
 class DefaultHighlighter implements Highlighter {
 	private const FALLBACK_HIGHLIGHT_FIELDS = [
 		"text_raw",
+        "text_raw.search",
 		"text_copy",
+        "text_copy.search",
 		"attachment.content"
 	];
 
@@ -89,11 +91,19 @@ class DefaultHighlighter implements Highlighter {
 	 * @return array
 	 */
 	private function getDefaultFields(): array {
-		$properties = $this->config->getSearchParameter( "highlighted properties" ) ?:
+		$properties =
+            $this->config->getSearchParameter( "highlighted properties" ) ?:
 			$this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
-			return array_map( fn ( PropertyFieldMapper $property ): string => $property->getPropertyField(), $properties );
+            $res = [];
+
+            foreach ( $properties as $property ) {
+                $res[] = $property->getPropertyField();
+                $res[] = $property->getSearchField();
+            }
+
+			return $res;
 		}
 
 		// Fallback fields if no field is specified in the highlighted properties or search term properties

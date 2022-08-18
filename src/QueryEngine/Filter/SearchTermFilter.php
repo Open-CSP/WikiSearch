@@ -22,9 +22,12 @@ class SearchTermFilter extends AbstractFilter {
 	 * @var string[]|PropertyFieldMapper[]
 	 */
 	private array $property_fields = [
-		"subject.title^8",
-		"text_copy^5",
-		"text_raw",
+		"subject.title.search^8",
+        "subject.title^8",
+		"text_copy.search^5",
+        "text_copy^5",
+		"text_raw.search",
+        "text_raw",
 		"attachment.title^3",
 		"attachment.content"
 	];
@@ -52,13 +55,14 @@ class SearchTermFilter extends AbstractFilter {
 
 		if ( $properties !== [] ) {
 			$this->property_fields = [];
-
 			foreach ( $properties as $mapper ) {
 				if ( $mapper->isChained() ) {
                     // Chained properties need to be handled differently, see filterToQuery
 					$this->chained_properties[] = $mapper;
 				} else {
+                    // Add both the regular property field and the search field to the query
 					$this->property_fields[] = $mapper->getWeightedPropertyField();
+                    $this->property_fields[] = $mapper->getWeightedSearchField();
 				}
 			}
 		}

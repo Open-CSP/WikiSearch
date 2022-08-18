@@ -301,7 +301,7 @@ class QueryEngine {
 			$filter_property = $filter instanceof PropertyFilter ? $filter->getProperty() : null;
 			$filter_belongs_to_aggregation = $aggregation_property !== null &&
 				$filter_property !== null &&
-				$aggregation_property->getPropertyField( false ) === $filter_property->getPropertyField( false );
+				$aggregation_property->getPropertyField() === $filter_property->getPropertyField();
 
 			// If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
 			if ( !$filter_belongs_to_aggregation ) {
