@@ -32,27 +32,27 @@ use WikiSearch\Logger;
  * @package WikiSearch
  */
 abstract class ApiQueryWikiSearchBase extends ApiQueryBase {
-    /**
-     * Checks applicable user rights.
-     *
-     * @throws ApiUsageException
-     */
-    protected function checkUserRights(): void {
-        $config = MediaWikiServices::getInstance()->getMainConfig();
+	/**
+	 * Checks applicable user rights.
+	 *
+	 * @throws ApiUsageException
+	 */
+	protected function checkUserRights(): void {
+		$config = MediaWikiServices::getInstance()->getMainConfig();
 
-        try {
-            $required_rights = $config->get( "WikiSearchAPIRequiredRights" );
-            $this->checkUserRightsAny( $required_rights );
-        } catch ( \ConfigException $e ) {
-            Logger::getLogger()->critical(
-                'Caught exception while trying to get required rights for WikiSearch API: {e}',
-                [
-                    'e' => $e
-                ]
-            );
+		try {
+			$required_rights = $config->get( "WikiSearchAPIRequiredRights" );
+			$this->checkUserRightsAny( $required_rights );
+		} catch ( \ConfigException $e ) {
+			Logger::getLogger()->critical(
+				'Caught exception while trying to get required rights for WikiSearch API: {e}',
+				[
+					'e' => $e
+				]
+			);
 
-            // Something went wrong; to be safe we block the access
-            $this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
-        }
-    }
+			// Something went wrong; to be safe we block the access
+			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-read" ) ] );
+		}
+	}
 }

@@ -96,11 +96,11 @@ class PropertyTextFilter extends PropertyFilter {
 	 * @return BoolQuery
 	 */
 	public function filterToQuery(): BoolQuery {
-        $fields = [$this->property->getWeightedPropertyField()];
+		$fields = [ $this->property->getWeightedPropertyField() ];
 
-        if ( $this->property->hasSearchSubfield() ) {
-            $fields[] = $this->property->getWeightedSearchField();
-        }
+		if ( $this->property->hasSearchSubfield() ) {
+			$fields[] = $this->property->getWeightedSearchField();
+		}
 
 		$query_string_query = new QueryStringQuery( $this->property_value_query );
 		$query_string_query->setParameters( [

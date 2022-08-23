@@ -104,9 +104,9 @@ class PropertyValuesFilter extends PropertyFilter {
 	 * @return BoolQuery
 	 */
 	public function filterToQuery(): BoolQuery {
-        $field = $this->property->hasKeywordSubfield() ?
-            $this->property->getKeywordField() :
-            $this->property->getPropertyField();
+		$field = $this->property->hasKeywordSubfield() ?
+			$this->property->getKeywordField() :
+			$this->property->getPropertyField();
 
 		$terms_query = new TermsQuery(
 			$field,

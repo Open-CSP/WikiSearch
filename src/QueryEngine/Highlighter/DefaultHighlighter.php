@@ -2,11 +2,9 @@
 
 namespace WikiSearch\QueryEngine\Highlighter;
 
-use LogicException;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WikiSearch\SearchEngineConfig;
-use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
@@ -18,9 +16,9 @@ use WikiSearch\SMW\PropertyFieldMapper;
 class DefaultHighlighter implements Highlighter {
 	private const FALLBACK_HIGHLIGHT_FIELDS = [
 		"text_raw",
-        "text_raw.search",
+		"text_raw.search",
 		"text_copy",
-        "text_copy.search",
+		"text_copy.search",
 		"attachment.content"
 	];
 
@@ -92,21 +90,21 @@ class DefaultHighlighter implements Highlighter {
 	 */
 	private function getDefaultFields(): array {
 		$properties =
-            $this->config->getSearchParameter( "highlighted properties" ) ?:
+			$this->config->getSearchParameter( "highlighted properties" ) ?:
 			$this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
-            $res = [];
+			$res = [];
 
-            foreach ( $properties as $property ) {
-                $res[] = $property->getPropertyField();
+			foreach ( $properties as $property ) {
+				$res[] = $property->getPropertyField();
 
-                if ( $property->hasSearchSubfield() ) {
-                    $res[] = $property->getSearchField();
-                }
-            }
+				if ( $property->hasSearchSubfield() ) {
+					$res[] = $property->getSearchField();
+				}
+			}
 
-            return $res;
+			return $res;
 		}
 
 		// Fallback fields if no field is specified in the highlighted properties or search term properties

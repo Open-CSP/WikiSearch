@@ -53,9 +53,9 @@ class FilterFactory {
 			$filter->setPostFilter();
 		}
 
-        if ( isset( $array["negate"] ) && $array["negate"] === true ) {
-            $filter->setNegated();
-        }
+		if ( isset( $array["negate"] ) && $array["negate"] === true ) {
+			$filter->setNegated();
+		}
 
 		if ( $filter !== null && $property_field_mapper->isChained() ) {
 			$filter = new ChainedPropertyFilter( $filter );

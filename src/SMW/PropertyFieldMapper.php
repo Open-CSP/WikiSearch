@@ -65,16 +65,16 @@ class PropertyFieldMapper {
 	];
 
 	// List of field types that have a keyword subfield
-	public const KEYWORD_FIELD_TYPES = ["txt", "uri", "wpg", "num", "dat"];
+	public const KEYWORD_FIELD_TYPES = [ "txt", "uri", "wpg", "num", "dat" ];
 
-    // List of internal properties that have a keyword subfield
-    public const KEYWORD_INTERNAL_PROPERTIES = ["subject.title", "subject.interwiki", "subject.subobject", "subject.sortkey"];
+	// List of internal properties that have a keyword subfield
+	public const KEYWORD_INTERNAL_PROPERTIES = [ "subject.title", "subject.interwiki", "subject.subobject", "subject.sortkey" ];
 
-    // List of field types that have a search subfield
-    public const SEARCH_FIELD_TYPES = ["txt"];
+	// List of field types that have a search subfield
+	public const SEARCH_FIELD_TYPES = [ "txt" ];
 
-    // List of internal properties that have a search subfield
-    public const SEARCH_INTERNAL_PROPERTIES = ["text_raw", "text_copy", "subject.title"];
+	// List of internal properties that have a search subfield
+	public const SEARCH_INTERNAL_PROPERTIES = [ "text_raw", "text_copy", "subject.title" ];
 
 	/**
 	 * @var int The unique ID of the property
@@ -135,13 +135,13 @@ class PropertyFieldMapper {
 		$this->property_name = $property_name;
 
 		if ( $this->isInternalProperty() ) {
-		    $this->property_key = str_replace( "-", ".", $this->property_name );
-        } else {
-            $this->property_key = PropertyAliasMapper::findPropertyKey( $this->property_name );
-        }
+			$this->property_key = str_replace( "-", ".", $this->property_name );
+		} else {
+			$this->property_key = PropertyAliasMapper::findPropertyKey( $this->property_name );
+		}
 
 		$data_item_property = new DIProperty( $this->property_key );
-        $this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
+		$this->property_id = $store->getObjectIds()->getSMWPropertyId( $data_item_property );
 		$this->property_field_type = str_replace(
 			'_',
 			'',
@@ -149,15 +149,15 @@ class PropertyFieldMapper {
 		);
 	}
 
-    /**
-     * Returns the type of this property.
-     *
-     * @return string
-     * @deprecated Use getPropertyFieldType() instead
-     */
-    public function getPropertyType(): string {
-        return sprintf( "%sField", $this->property_field_type );
-    }
+	/**
+	 * Returns the type of this property.
+	 *
+	 * @return string
+	 * @deprecated Use getPropertyFieldType() instead
+	 */
+	public function getPropertyType(): string {
+		return sprintf( "%sField", $this->property_field_type );
+	}
 
 	/**
 	 * Returns the ID of the property.
@@ -168,14 +168,14 @@ class PropertyFieldMapper {
 		return $this->property_id;
 	}
 
-    /**
-     * Returns the field type of this property.
-     *
-     * @return string
-     */
-    public function getPropertyFieldType(): string {
-        return $this->property_field_type;
-    }
+	/**
+	 * Returns the field type of this property.
+	 *
+	 * @return string
+	 */
+	public function getPropertyFieldType(): string {
+		return $this->property_field_type;
+	}
 
 	/**
 	 * Returns the key of this property.
@@ -220,36 +220,36 @@ class PropertyFieldMapper {
 	 */
 	public function getPropertyField(): string {
 		if ( $this->isInternalProperty() ) {
-		    // Internal properties are represented by their key and do not have an ID
+			// Internal properties are represented by their key and do not have an ID
 			return $this->property_key;
 		}
 
 		return sprintf( "%s.%sField", $this->getPID(), $this->getPropertyFieldType() );
 	}
 
-    /**
-     * Returns the keyword field associated with this property. The caller is responsible for checking if this field
-     * exists.
-     *
-     * @return string
-     */
-    public function getKeywordField(): string {
-        return sprintf( "%s.keyword", $this->getPropertyField() );
-    }
+	/**
+	 * Returns the keyword field associated with this property. The caller is responsible for checking if this field
+	 * exists.
+	 *
+	 * @return string
+	 */
+	public function getKeywordField(): string {
+		return sprintf( "%s.keyword", $this->getPropertyField() );
+	}
 
-    /**
-     * Returns the search field associated with this property. The caller is responsible for checking if this field
-     * exists.
-     *
-     * @return string
-     */
-    public function getSearchField(): string {
-        return sprintf( "%s.search", $this->getPropertyField() );
-    }
+	/**
+	 * Returns the search field associated with this property. The caller is responsible for checking if this field
+	 * exists.
+	 *
+	 * @return string
+	 */
+	public function getSearchField(): string {
+		return sprintf( "%s.search", $this->getPropertyField() );
+	}
 
 	/**
 	 * Returns the field associated with this property, with the weight. The caller is responsible for checking if this
-     * field exists.
+	 * field exists.
 	 *
 	 * @return string
 	 */
@@ -257,25 +257,25 @@ class PropertyFieldMapper {
 		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
 	}
 
-    /**
-     * Returns the keyword subfield associated with this property, if it exists, with the weight. The caller is
-     * responsible for checking if this field exists.
-     *
-     * @return string
-     */
-    public function getWeightedKeywordField(): string {
-        return sprintf( "%s^%d", $this->getKeywordField(), $this->property_weight );
-    }
+	/**
+	 * Returns the keyword subfield associated with this property, if it exists, with the weight. The caller is
+	 * responsible for checking if this field exists.
+	 *
+	 * @return string
+	 */
+	public function getWeightedKeywordField(): string {
+		return sprintf( "%s^%d", $this->getKeywordField(), $this->property_weight );
+	}
 
-    /**
-     * Returns the search subfield associated with this property, if it exists, with the weight. The caller is
-     * responsible for checking if this field exists.
-     *
-     * @return string
-     */
-    public function getWeightedSearchField(): string {
-        return sprintf( "%s^%d", $this->getSearchField(), $this->property_weight );
-    }
+	/**
+	 * Returns the search subfield associated with this property, if it exists, with the weight. The caller is
+	 * responsible for checking if this field exists.
+	 *
+	 * @return string
+	 */
+	public function getWeightedSearchField(): string {
+		return sprintf( "%s^%d", $this->getSearchField(), $this->property_weight );
+	}
 
 	/**
 	 * Returns the property field mapper for the chained property.
@@ -305,25 +305,25 @@ class PropertyFieldMapper {
 	 * @return bool
 	 */
 	public function hasKeywordSubfield(): bool {
-        if ( $this->isInternalProperty() ) {
-            return in_array( $this->property_key, self::KEYWORD_INTERNAL_PROPERTIES, true );
-        } else {
-            return in_array( $this->property_field_type, self::KEYWORD_FIELD_TYPES, true );
-        }
-    }
+		if ( $this->isInternalProperty() ) {
+			return in_array( $this->property_key, self::KEYWORD_INTERNAL_PROPERTIES, true );
+		} else {
+			return in_array( $this->property_field_type, self::KEYWORD_FIELD_TYPES, true );
+		}
+	}
 
-    /**
-     * Returns true if and only if this property has a search subfield.
-     *
-     * @return bool
-     */
-    public function hasSearchSubfield(): bool {
-        if ( $this->isInternalProperty() ) {
-            return in_array( $this->property_key, self::SEARCH_INTERNAL_PROPERTIES, true );
-        } else {
-            return in_array( $this->property_field_type, self::SEARCH_FIELD_TYPES, true );
-        }
-    }
+	/**
+	 * Returns true if and only if this property has a search subfield.
+	 *
+	 * @return bool
+	 */
+	public function hasSearchSubfield(): bool {
+		if ( $this->isInternalProperty() ) {
+			return in_array( $this->property_key, self::SEARCH_INTERNAL_PROPERTIES, true );
+		} else {
+			return in_array( $this->property_field_type, self::SEARCH_FIELD_TYPES, true );
+		}
+	}
 
 	/**
 	 * Returns true if and only if this property is not a regular property, but a special property that does not

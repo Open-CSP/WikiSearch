@@ -31,8 +31,8 @@ class PropertyAliasMapper {
 	 */
 	public static function findPropertyKey( string $property_label ): string {
 		$property_key = ( PropertyRegistry::getInstance() )->findPropertyIdByLabel(
-		    str_replace( '_', ' ', $property_label )
-        );
+			str_replace( '_', ' ', $property_label )
+		);
 
 		if ( $property_key === false ) {
 			Logger::getLogger()->debug( 'Could not find property ID by label {label}', [
@@ -41,7 +41,7 @@ class PropertyAliasMapper {
 
 			return str_replace( ' ', '_', $property_label );
 		} else {
-		    return str_replace( ' ', '_', $property_key );
-        }
+			return str_replace( ' ', '_', $property_key );
+		}
 	}
 }

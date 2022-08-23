@@ -4,7 +4,6 @@ namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WikiSearch\SearchEngineException;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -23,11 +22,11 @@ class SearchTermFilter extends AbstractFilter {
 	 */
 	private array $property_fields = [
 		"subject.title.search^8",
-        "subject.title^8",
+		"subject.title^8",
 		"text_copy.search^5",
-        "text_copy^5",
+		"text_copy^5",
 		"text_raw.search",
-        "text_raw",
+		"text_raw",
 		"attachment.title^3",
 		"attachment.content"
 	];
@@ -42,7 +41,7 @@ class SearchTermFilter extends AbstractFilter {
 	 */
 	private string $default_operator;
 
-    /**
+	/**
 	 * SearchTermFilter constructor.
 	 *
 	 * @param string $search_term
@@ -57,14 +56,14 @@ class SearchTermFilter extends AbstractFilter {
 			$this->property_fields = [];
 			foreach ( $properties as $mapper ) {
 				if ( $mapper->isChained() ) {
-                    // Chained properties need to be handled differently, see filterToQuery
+					// Chained properties need to be handled differently, see filterToQuery
 					$this->chained_properties[] = $mapper;
 				} else {
-                    $this->property_fields[] = $mapper->getWeightedPropertyField();
+					$this->property_fields[] = $mapper->getWeightedPropertyField();
 
-                    if ( $mapper->hasSearchSubfield() ) {
-                        $this->property_fields[] = $mapper->getWeightedSearchField();
-                    }
+					if ( $mapper->hasSearchSubfield() ) {
+						$this->property_fields[] = $mapper->getWeightedSearchField();
+					}
 				}
 			}
 		}
@@ -81,7 +80,7 @@ class SearchTermFilter extends AbstractFilter {
 
 	/**
 	 * @inheritDoc
-     */
+	 */
 	public function filterToQuery(): BoolQuery {
 		$bool_query = new BoolQuery();
 
