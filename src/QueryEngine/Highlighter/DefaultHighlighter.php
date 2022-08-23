@@ -77,7 +77,14 @@ class DefaultHighlighter implements Highlighter {
 		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
 		foreach ( $this->fields as $field ) {
-			$highlight->addField( $field, $this->field_settings );
+			if ( is_string( $field ) ) {
+				$highlight->addField( $field, $this->field_settings );
+			} else {
+				$field_settings = $this->field_settings;
+				$field_settings['matched_fields'] = $field;
+
+				$highlight->addField( $field[0], $field_settings );
+			}
 		}
 
 		return $highlight;
@@ -97,10 +104,13 @@ class DefaultHighlighter implements Highlighter {
 			$res = [];
 
 			foreach ( $properties as $property ) {
-				$res[] = $property->getPropertyField();
-
-				if ( $property->hasSearchSubfield() ) {
-					$res[] = $property->getSearchField();
+				if ( !$property->hasSearchSubfield() ) {
+					$res[] = $property->getPropertyField();
+				} else {
+					$res[] = [
+						$property->getPropertyField(),
+						$property->getSearchField()
+					];
 				}
 			}
 
