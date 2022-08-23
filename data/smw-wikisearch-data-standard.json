@@ -65,6 +65,7 @@
 						"match_mapping_type": "*",
 						"mapping": {
 							"type": "text",
+							"term_vector": "with_positions_offsets",
 							"copy_to": "text_copy",
 							"fields": {
 								"sort": {
@@ -79,7 +80,8 @@
 								},
 								"search": {
 									"type": "text",
-									"analyzer": "whitespace"
+									"analyzer": "whitespace",
+									"term_vector": "with_positions_offsets"
 								}
 							}
 						}
@@ -91,6 +93,7 @@
 						"match_mapping_type": "*",
 						"mapping": {
 							"type": "text",
+							"term_vector": "with_positions_offsets",
 							"copy_to": "text_copy",
 							"fields": {
 								"sort": {
@@ -117,6 +120,7 @@
 						"match_mapping_type": "*",
 						"mapping": {
 							"type": "text",
+							"term_vector": "with_positions_offsets",
 							"copy_to": "text_copy",
 							"fields": {
 								"sort": {
@@ -215,26 +219,31 @@
 				},
 				"text_copy": {
 					"type": "text",
+					"term_vector": "with_positions_offsets",
 					"doc_values": false,
 					"fields": {
 						"search": {
 							"type": "text",
-							"analyzer": "whitespace"
+							"analyzer": "whitespace",
+							"term_vector": "with_positions_offsets"
 						}
 					}
 				},
 				"text_raw": {
 					"type": "text",
+					"term_vector": "with_positions_offsets",
 					"doc_values": false,
 					"fields": {
 						"search": {
 							"type": "text",
-							"analyzer": "whitespace"
+							"analyzer": "whitespace",
+							"term_vector": "with_positions_offsets"
 						}
 					}
 				},
 				"subject.title": {
 					"type": "text",
+					"term_vector": "with_positions_offsets",
 					"fields": {
 						"sort": {
 							"type": "keyword",
@@ -247,12 +256,14 @@
 						},
 						"search": {
 							"type": "text",
-							"analyzer": "whitespace"
+							"analyzer": "whitespace",
+							"term_vector": "with_positions_offsets"
 						}
 					}
 				},
 				"subject.interwiki": {
 					"type": "text",
+					"term_vector": "with_positions_offsets",
 					"fields": {
 						"keyword": {
 							"type": "keyword",
@@ -262,6 +273,7 @@
 				},
 				"subject.subobject": {
 					"type": "text",
+					"term_vector": "with_positions_offsets",
 					"fields": {
 						"keyword": {
 							"type": "keyword",
@@ -271,6 +283,7 @@
 				},
 				"subject.sortkey": {
 					"type": "text",
+					"term_vector": "with_positions_offsets",
 					"copy_to": "text_copy",
 					"fields": {
 						"sort": {
