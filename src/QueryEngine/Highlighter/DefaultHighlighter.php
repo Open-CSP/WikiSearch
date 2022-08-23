@@ -64,7 +64,8 @@ class DefaultHighlighter implements Highlighter {
 
 			$this->field_settings = [
 				"fragment_size" => $config->get( "WikiSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" )
+				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" ),
+				"type" => "fvh" // Use the fast vector highlighter for combining snippets
 			];
 		}
 	}
