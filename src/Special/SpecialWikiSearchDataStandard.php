@@ -78,6 +78,8 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * @return string|bool
      */
     public function formCallback( array $formData ) {
+        echo json_encode( $formData, JSON_PRETTY_PRINT );
+
         // TODO
         return true;
     }
@@ -92,13 +94,26 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
         $form = HTMLForm::factory( 'ooui', $descriptor, $this->getContext() );
 
         $form->setSubmitCallback( [$this, 'formCallback'] );
-        $form->setSubmitTextMsg( 'wikisearch-special-data-standard-submit-text' );
-        $form->setSubmitDestructive();
-
+        $form->suppressDefaultSubmit();
         $form->showCancel();
         $form->setCancelTarget( $this->getFullTitle() );
-
         $form->setTokenSalt( 'wikisearchdatastandard' );
+
+        $form->addButton( [
+            'name' => 'submit',
+            'value' => 'update',
+            'class' => ['mw-htmlform-submit'],
+            'label-message' => 'wikisearch-special-data-standard-submit-and-update-text',
+            'flags' => [ 'primary', 'destructive' ]
+        ] );
+
+        $form->addButton( [
+            'name' => 'submit',
+            'value' => 'save',
+            'class' => ['mw-htmlform-submit'],
+            'label-message' => 'wikisearch-special-data-standard-submit-text',
+            'flags' => [ 'primary', 'progressive' ]
+        ] );
 
         $form->show();
     }
