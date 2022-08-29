@@ -108,8 +108,10 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
         }
 
         if ( $formData['update'] ) {
-            $pid = $this->spawnUpdate();
-            $this->getOutput()->addWikiMsg( 'wikisearch-special-data-standard-save-and-update-success', $pid );
+            $log = '';
+            $pid = $this->spawnUpdate( $log );
+
+            $this->getOutput()->addWikiMsg( 'wikisearch-special-data-standard-save-and-update-success', $pid, $log );
         } else {
             $this->getOutput()->addWikiMsg( 'wikisearch-special-data-standard-save-only-success' );
         }
@@ -168,10 +170,18 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
     /**
      * Spawn a process to update the ElasticSearch indices.
      *
-     * @return int The PID of the spawned process
+     * @return string The PID of the spawned process
      */
-    private function spawnUpdate(): int {
-        // TODO
-        return 9999;
+    private function spawnUpdate( string &$log ): string {
+        $pidFile = __DIR__ . '/pidfile';
+        $logFile = __DIR__ . '/logfile';
+
+        exec( sprintf( "%s > %s 2>&1 & echo $! > %s", "php {$GLOBALS['wgExtensionDirectory']}/SemanticMediaWiki/maintenance/rebuildElasticIndex.php --with-maintenance-log --auto-recovery --debug", $logFile, $pidFile ) );
+        sleep( 10 );
+
+        $pid = file_get_contents( $pidFile );
+        $log = file_get_contents( $logFile );
+
+        return trim( $pid );
     }
 }
