@@ -109,6 +109,8 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
 
         if ( $formData['update'] ) {
             // TODO
+        } else {
+            $this->getOutput()->addWikiMsg( 'wikisearch-special-data-standard-save-only-success' );
         }
 
         return Status::newGood();

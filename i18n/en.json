@@ -22,6 +22,7 @@
   "wikisearch-special-data-standard-could-not-read-title": "Could not read data standard",
   "wikisearch-special-data-standard-could-not-read-text": "The data standard located at <b>$1</b> could not be read.",
   "wikisearch-special-data-standard-write-failed": "Failed to save the data standard. Is it writable?",
+  "wikisearch-special-data-standard-save-only-success": "The data standard has been saved. To update the data standard and rebuild the ElasticSearch indices, run <code>rebuildElasticIndex.php</code> or resubmit the form with \"{{int:wikisearch-special-data-standard-update-text}}\" checked.<br/><br/>Return to [[Special:WikiSearchDataStandard]].",
   "right-wikisearch-execute-api": "Query the WikiSearch API",
   "action-wikisearch-execute-api": "query the WikiSearch API",
   "apihelp-query+WikiSearch-summary": "Perform advanced search queries against an ElasticSearch backend",
