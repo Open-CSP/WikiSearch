@@ -75,6 +75,9 @@
 			"value": 500
 		}
 	},
+	"SpecialPages": {
+		"WikiSearchDataStandard": "WikiSearch\\Special\\SpecialWikiSearchDataStandard"
+	},
 	"load_composer_autoloader": true,
 	"manifest_version": 2
 }
