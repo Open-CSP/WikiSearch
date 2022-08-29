@@ -72,6 +72,17 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
     }
 
     /**
+     * Called upon submitting the form.
+     *
+     * @param array $formData
+     * @return string|bool
+     */
+    public function formCallback( array $formData ) {
+        // TODO
+        return true;
+    }
+
+    /**
      * Shows the edit form.
      *
      * @param array $descriptor
