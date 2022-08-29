@@ -51,7 +51,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * @return bool|string
      */
     public function checkDataStandard( string $dataStandard ) {
-        if ( is_array( json_decode( $dataStandard ) ) ) {
+        if ( is_array( json_decode( $dataStandard, true ) ) ) {
             return true;
         }
 
