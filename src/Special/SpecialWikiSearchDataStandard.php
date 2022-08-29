@@ -182,6 +182,9 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
         $pid = file_get_contents( $pidFile );
         $log = file_get_contents( $logFile );
 
+        // Format the logfile
+        $log = str_replace( version_compare( PHP_VERSION, '7.3', '<' ) ? "\r" : "\033[0G", "\n", $log );
+
         return trim( $pid );
     }
 }
