@@ -13,6 +13,7 @@
   "wikisearch-api-invalid-pageid": "The given page ID is invalid: the page does not exist or has no config associated with it",
   "wikisearch-api-missing-pageid": "Missing required parameter 'pageid'",
   "wikisearch-invalid-dbms": "WikiSearch does not support database type `$1`",
+  "wikisearch-special-data-standard-submit-text": "Save",
   "right-wikisearch-execute-api": "Query the WikiSearch API",
   "action-wikisearch-execute-api": "query the WikiSearch API",
   "apihelp-query+WikiSearch-summary": "Perform advanced search queries against an ElasticSearch backend",

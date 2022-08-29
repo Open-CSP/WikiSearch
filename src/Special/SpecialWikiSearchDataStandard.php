@@ -53,8 +53,12 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
         $form = HTMLForm::factory( 'ooui', $descriptor, $this->getContext() );
 
         $form->setSubmitCallback( [$this, 'formCallback'] );
+        $form->setSubmitTextMsg( 'wikisearch-special-data-standard-submit-text' );
         $form->setSubmitDestructive();
-        $form->showCancel( $this->getFullTitle() );
+
+        $form->showCancel();
+        $form->setCancelTarget( $this->getFullTitle() );
+
         $form->setTokenSalt( 'wikisearchdatastandard' );
 
         $form->show();
@@ -71,9 +75,40 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
             'data' => [
                 'type' => 'textarea',
                 'rows' => 32,
-                'default' => $dataStandard
+                'default' => $dataStandard,
+                'required' => true,
+                'validation-callback' => [$this, 'checkDataStandard'],
+                'filter-callback' => [$this, 'formatDataStandard']
             ]
         ];
+    }
+
+    /**
+     * Validates the given data standard. This only validates the formatting, and not the actual contents of the data
+     * standard.
+     *
+     * @param string $dataStandard
+     * @return bool|string
+     */
+    private function checkDataStandard( string $dataStandard ) {
+        if ( is_array( json_decode( $dataStandard ) ) ) {
+            return true;
+        }
+
+        return 'Invalid JSON: ' . json_last_error_msg();
+    }
+
+    /**
+     * @param string $dataStandard
+     * @return string
+     */
+    private function formatDataStandard( string $dataStandard ): string {
+        if ( !$this->checkDataStandard( $dataStandard ) ) {
+            // Nothing to format if the standard is invalid
+            return $dataStandard;
+        }
+
+        return json_encode( json_decode( $dataStandard ), JSON_PRETTY_PRINT );
     }
 
     /**
