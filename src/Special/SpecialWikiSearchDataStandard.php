@@ -63,7 +63,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * @return string
      */
     public function formatDataStandard( string $dataStandard ): string {
-        if ( !$this->checkDataStandard( $dataStandard ) ) {
+        if ( $this->checkDataStandard( $dataStandard ) !== true ) {
             // Nothing to format if the standard is invalid
             return $dataStandard;
         }
