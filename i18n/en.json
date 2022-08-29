@@ -15,6 +15,7 @@
   "wikisearch-invalid-dbms": "WikiSearch does not support database type `$1`",
   "wikisearch-special-data-standard-submit-text": "Save only",
   "wikisearch-special-data-standard-submit-and-update-text": "Save and update",
+  "wikisearch-special-data-standard-update-text": "Update and rebuild the ElasticSearch index (expensive!)",
   "right-wikisearch-execute-api": "Query the WikiSearch API",
   "action-wikisearch-execute-api": "query the WikiSearch API",
   "apihelp-query+WikiSearch-summary": "Perform advanced search queries against an ElasticSearch backend",

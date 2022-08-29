@@ -74,11 +74,12 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
     /**
      * Called upon submitting the form.
      *
-     * @param array $formData
+     * @param array $formData The data that was submitted
+     * @param HTMLForm $form The form that was submitted
      * @return string|bool
      */
-    public function formCallback( array $formData ) {
-        echo json_encode( $formData, JSON_PRETTY_PRINT );
+    public function formCallback( array $formData, HTMLForm $form ) {
+
 
         // TODO
         return true;
@@ -91,24 +92,13 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * @return void
      */
     private function showForm( array $descriptor ): void {
-        $form = HTMLForm::factory( 'ooui', $descriptor, $this->getContext() );
-
-        $form->setSubmitName( 'wpSubmit' );
-        $form->setSubmitTextMsg( 'wikisearch-special-data-standard-submit-text' );
-        $form->setSubmitCallback( [$this, 'formCallback'] );
-        $form->showCancel();
-        $form->setCancelTarget( $this->getFullTitle() );
-        $form->setTokenSalt( 'wikisearchdatastandard' );
-
-        $form->addButton( [
-            'name' => 'wpUpdate',
-            'value' => '1',
-            'class' => ['mw-htmlform-submit'],
-            'label-message' => 'wikisearch-special-data-standard-submit-and-update-text',
-            'flags' => [ 'primary', 'destructive' ]
-        ] );
-
-        $form->show();
+        HTMLForm::factory( 'ooui', $descriptor, $this->getContext() )
+            ->setTokenSalt( 'wikisearchdatastandard' )
+            ->setSubmitTextMsg( 'wikisearch-special-data-standard-submit-text' )
+            ->setSubmitCallback( [$this, 'formCallback'] )
+            ->setCancelTarget( $this->getFullTitle() )
+            ->showCancel()
+            ->show();
     }
 
     /**
@@ -119,13 +109,17 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      */
     private function getFormDescriptor( string $dataStandard ): array {
         return [
-            'data' => [
+            'datastandard' => [
                 'type' => 'textarea',
                 'rows' => 32,
                 'default' => $dataStandard,
                 'required' => true,
                 'validation-callback' => [$this, 'checkDataStandard'],
                 'filter-callback' => [$this, 'formatDataStandard']
+            ],
+            'update' => [
+                'type' => 'check',
+                'label' => 'wikiguard-special-data-standard-update'
             ]
         ];
     }
