@@ -44,6 +44,34 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
     }
 
     /**
+     * Validates the given data standard. This only validates the formatting, and not the actual contents of the data
+     * standard.
+     *
+     * @param string $dataStandard
+     * @return bool|string
+     */
+    public function checkDataStandard( string $dataStandard ) {
+        if ( is_array( json_decode( $dataStandard ) ) ) {
+            return true;
+        }
+
+        return 'Invalid JSON: ' . json_last_error_msg();
+    }
+
+    /**
+     * @param string $dataStandard
+     * @return string
+     */
+    public function formatDataStandard( string $dataStandard ): string {
+        if ( !$this->checkDataStandard( $dataStandard ) ) {
+            // Nothing to format if the standard is invalid
+            return $dataStandard;
+        }
+
+        return json_encode( json_decode( $dataStandard ), JSON_PRETTY_PRINT );
+    }
+
+    /**
      * Shows the edit form.
      *
      * @param array $descriptor
@@ -81,34 +109,6 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
                 'filter-callback' => [$this, 'formatDataStandard']
             ]
         ];
-    }
-
-    /**
-     * Validates the given data standard. This only validates the formatting, and not the actual contents of the data
-     * standard.
-     *
-     * @param string $dataStandard
-     * @return bool|string
-     */
-    private function checkDataStandard( string $dataStandard ) {
-        if ( is_array( json_decode( $dataStandard ) ) ) {
-            return true;
-        }
-
-        return 'Invalid JSON: ' . json_last_error_msg();
-    }
-
-    /**
-     * @param string $dataStandard
-     * @return string
-     */
-    private function formatDataStandard( string $dataStandard ): string {
-        if ( !$this->checkDataStandard( $dataStandard ) ) {
-            // Nothing to format if the standard is invalid
-            return $dataStandard;
-        }
-
-        return json_encode( json_decode( $dataStandard ), JSON_PRETTY_PRINT );
     }
 
     /**
