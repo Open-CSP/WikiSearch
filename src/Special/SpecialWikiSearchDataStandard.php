@@ -108,7 +108,8 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
         }
 
         if ( $formData['update'] ) {
-            // TODO
+            $pid = $this->spawnUpdate();
+            $this->getOutput()->addWikiMsg( 'wikisearch-special-data-standard-save-and-update-success', $pid );
         } else {
             $this->getOutput()->addWikiMsg( 'wikisearch-special-data-standard-save-only-success' );
         }
@@ -162,5 +163,15 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
     private function checkDataStandardLocation(): bool {
         return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . '/data/elastic/smw-data-standard.json' // The location must not be the default SMW location
             && $this->dataStandardLocation !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json'; // The location must not be the template location
+    }
+
+    /**
+     * Spawn a process to update the ElasticSearch indices.
+     *
+     * @return int The PID of the spawned process
+     */
+    private function spawnUpdate(): int {
+        // TODO
+        return 9999;
     }
 }
