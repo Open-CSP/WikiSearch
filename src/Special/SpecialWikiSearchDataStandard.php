@@ -10,7 +10,12 @@ use SpecialPage;
  * Implements Special:WikiSearchDataStandard.
  */
 class SpecialWikiSearchDataStandard extends SpecialPage {
+    public function __construct() {
+        parent::__construct( 'WikiSearchDataStandard', 'wikisearch-edit-data-standard', false );
+    }
+
     /**
+     * @inheritDoc
      * @throws PermissionsError
      */
     public function execute($subPage ) {
