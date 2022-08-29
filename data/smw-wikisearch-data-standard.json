@@ -7,6 +7,12 @@
 		"index.max_result_window": "50000",
 		"analysis": {
 			"filter": {
+				"synonym": {
+					"type": "synonym",
+					"synonyms": [],
+					"tokenizer": "whitespace",
+					"ignore_case": true
+				},
 				"uri_stopwords_filter": {
 					"type": "stop",
 					"stopwords": [ "http", "https", "ftp", "www" ]
@@ -23,6 +29,11 @@
 				}
 			},
 			"analyzer": {
+				"search": {
+					"type": "custom",
+					"tokenizer": "whitespace",
+					"filter": [ "synonym" ]
+				},
 				"uri_lowercase_with_stopwords": {
 					"type": "custom",
 					"tokenizer": "lowercase",
@@ -79,7 +90,7 @@
 								},
 								"search": {
 									"type": "text",
-									"analyzer": "whitespace"
+									"analyzer": "search"
 								}
 							}
 						}
@@ -219,7 +230,7 @@
 					"fields": {
 						"search": {
 							"type": "text",
-							"analyzer": "whitespace"
+							"analyzer": "search"
 						}
 					}
 				},
@@ -229,7 +240,7 @@
 					"fields": {
 						"search": {
 							"type": "text",
-							"analyzer": "whitespace"
+							"analyzer": "search"
 						}
 					}
 				},
@@ -247,7 +258,7 @@
 						},
 						"search": {
 							"type": "text",
-							"analyzer": "whitespace"
+							"analyzer": "search"
 						}
 					}
 				},
