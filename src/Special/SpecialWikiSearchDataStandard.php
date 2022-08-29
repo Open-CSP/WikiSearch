@@ -5,11 +5,17 @@ namespace WikiSearch\Special;
 use HTMLForm;
 use PermissionsError;
 use SpecialPage;
+use Status;
 
 /**
  * Implements Special:WikiSearchDataStandard.
  */
 class SpecialWikiSearchDataStandard extends SpecialPage {
+    /**
+     * @var string The location of the data standard
+     */
+    private string $dataStandardLocation;
+
     public function __construct() {
         parent::__construct( 'WikiSearchDataStandard', 'wikisearch-edit-data-standard', false );
     }
@@ -23,24 +29,39 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
         $this->checkPermissions();
 
         if ( !isset( $GLOBALS['smwgElasticsearchConfig']['index_def']['data'] ) ) {
-            return 'Missing data standard location.';
+            $this->getOutput()->showErrorPage(
+                'wikisearch-special-data-standard-missing-path-title',
+                'wikisearch-special-data-standard-missing-path-text'
+            );
+
+            return;
         }
 
-        $dataStandardLocation = $GLOBALS['smwgElasticsearchConfig']['index_def']['data'];
+        $this->dataStandardLocation = $GLOBALS['smwgElasticsearchConfig']['index_def']['data'];
 
-        if ( !$this->checkDataStandardLocation( $dataStandardLocation ) ) {
-            return 'Invalid location.';
+        if ( !$this->checkDataStandardLocation() ) {
+            $this->getOutput()->showErrorPage(
+                'wikisearch-special-data-standard-invalid-path-title',
+                'wikisearch-special-data-standard-invalid-path-text',
+                [ $this->dataStandardLocation ]
+            );
+
+            return;
         }
 
-        $dataStandard = file_get_contents( $dataStandardLocation );
+        $dataStandard = file_get_contents( $this->dataStandardLocation );
 
         if ( $dataStandard === false ) {
-            return 'Could not read.';
+            $this->getOutput()->showErrorPage(
+                'wikisearch-special-data-standard-could-not-read-title',
+                'wikisearch-special-data-standard-could-not-read-text',
+                [ $this->dataStandardLocation ]
+            );
+
+            return;
         }
 
         $this->showForm( $this->getFormDescriptor( $dataStandard ) );
-
-        return $dataStandard;
     }
 
     /**
@@ -75,14 +96,22 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * Called upon submitting the form.
      *
      * @param array $formData The data that was submitted
-     * @param HTMLForm $form The form that was submitted
-     * @return string|bool
+     * @return Status
      */
-    public function formCallback( array $formData, HTMLForm $form ) {
+    public function formCallback( array $formData ): Status {
+        // $dataStandard is validated and can be used directly
+        $dataStandard = $formData['datastandard'];
+        $result = file_put_contents( $this->dataStandardLocation, $dataStandard, LOCK_EX );
 
+        if ( $result === false ) {
+            return Status::newFatal( 'wikisearch-special-data-standard-write-failed' );
+        }
 
-        // TODO
-        return true;
+        if ( $formData['update'] ) {
+            // TODO
+        }
+
+        return Status::newGood();
     }
 
     /**
@@ -96,6 +125,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
             ->setTokenSalt( 'wikisearchdatastandard' )
             ->setSubmitTextMsg( 'wikisearch-special-data-standard-submit-text' )
             ->setSubmitCallback( [$this, 'formCallback'] )
+            ->setSubmitDestructive()
             ->setCancelTarget( $this->getFullTitle() )
             ->showCancel()
             ->show();
@@ -119,17 +149,16 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
             ],
             'update' => [
                 'type' => 'check',
-                'label' => 'wikiguard-special-data-standard-update'
+                'label-message' => 'wikisearch-special-data-standard-update-text'
             ]
         ];
     }
 
     /**
-     * @param string $location
      * @return bool
      */
-    private function checkDataStandardLocation( string $location ): bool {
-        return $location !== $GLOBALS['smwgIP'] . '/data/elastic/smw-data-standard.json' // The location must not be the default SMW location
-            && $location !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json'; // The location must not be the template location
+    private function checkDataStandardLocation(): bool {
+        return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . '/data/elastic/smw-data-standard.json' // The location must not be the default SMW location
+            && $this->dataStandardLocation !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json'; // The location must not be the template location
     }
 }
