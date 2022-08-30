@@ -13,8 +13,9 @@
   "wikisearch-api-invalid-pageid": "The given page ID is invalid: the page does not exist or has no config associated with it",
   "wikisearch-api-missing-pageid": "Missing required parameter 'pageid'",
   "wikisearch-invalid-dbms": "WikiSearch does not support database type `$1`",
+  "wikisearch-special-data-standard-invalid-json": "Invalid JSON: $1",
   "wikisearch-special-data-standard-submit-text": "Save data standard",
-  "wikisearch-special-data-standard-update-text": "Update and rebuild the ElasticSearch index (expensive!)",
+  "wikisearch-special-data-standard-update-text": "<span style=\"color: #d33; font-weight: bold\">Update and rebuild the ElasticSearch index (expensive!)</span>",
   "wikisearch-special-data-standard-missing-path-title": "Missing data standard",
   "wikisearch-special-data-standard-missing-path-text": "Could not find the path to the data standard. Please make sure <b>$smwgElasticsearchConfig['index_def']['data']</b> is set.",
   "wikisearch-special-data-standard-invalid-path-title": "Invalid data standard path",
@@ -26,6 +27,7 @@
   "wikisearch-special-data-standard-save-and-update-success": "The data standard has been saved and the ElasticSearch indices will be rebuilt shortly. To monitor the progress, you can use the PID of the spawned process: <b>$1</b>. For your convenience, you can find the first 10 seconds of the script's execution log below:<br/><pre>$2</pre><br/><br/>Return to [[Special:WikiSearchDataStandard]].",
   "right-wikisearch-execute-api": "Query the WikiSearch API",
   "action-wikisearch-execute-api": "query the WikiSearch API",
+  "action-wikisearch-edit-data-standard": "edit the WikiSearch data standard",
   "apihelp-query+WikiSearch-summary": "Perform advanced search queries against an ElasticSearch backend",
   "apihelp-query+WikiSearch-param-pageid": "The page ID of the page that contains the search engine config for the current request",
   "apihelp-query+WikiSearch-param-term": "The search query term used for full-text search",
@@ -43,5 +45,6 @@
   "apihelp-query+WikiSearchCombobox-summary": "Create combobox aggregations for a property",
   "apihelp-query+WikiSearchCombobox-param-property": "The property to create the combobox aggregation for",
   "apihelp-query+WikiSearchCombobox-param-limit": "The maximum number of aggregations to return",
-  "apihelp-query+WikiSearchCombobox-param-term": "The term to filter on"
+  "apihelp-query+WikiSearchCombobox-param-term": "The term to filter on",
+  "wikisearchdatastandard": "WikiSearchDataStandard"
 }

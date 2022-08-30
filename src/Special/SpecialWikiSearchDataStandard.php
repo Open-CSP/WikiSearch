@@ -76,7 +76,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
             return true;
         }
 
-        return 'Invalid JSON: ' . json_last_error_msg();
+        return $this->msg( "wikisearch-special-data-standard-invalid-json", json_last_error_msg() )->parse();
     }
 
     /**
@@ -163,28 +163,37 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * @return bool
      */
     private function checkDataStandardLocation(): bool {
-        return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . '/data/elastic/smw-data-standard.json' // The location must not be the default SMW location
-            && $this->dataStandardLocation !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json'; // The location must not be the template location
+        // The location must not be the default SMW location
+        return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . '/data/elastic/smw-data-standard.json'
+            // The location must not be the template location
+            && $this->dataStandardLocation !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json';
     }
 
     /**
      * Spawn a process to update the ElasticSearch indices.
      *
-     * @return string The PID of the spawned process
+     * @return int|false The PID of the spawned process, or false on failure
      */
-    private function spawnUpdate( string &$log ): string {
+    private function spawnUpdate( string &$log ) {
         $pidFile = __DIR__ . '/pidfile';
         $logFile = __DIR__ . '/logfile';
 
-        exec( sprintf( "%s > %s 2>&1 & echo $! > %s", "php {$GLOBALS['wgExtensionDirectory']}/SemanticMediaWiki/maintenance/rebuildElasticIndex.php --with-maintenance-log --auto-recovery --debug", $logFile, $pidFile ) );
+        $command = "php {$GLOBALS['wgExtensionDirectory']}/SemanticMediaWiki/maintenance/rebuildElasticIndex.php";
+        $result = exec( sprintf( "%s > %s 2>&1 & echo $! > %s", $command, $logFile, $pidFile ) );
+
+        if ( $result === false ) {
+            return false;
+        }
+
         sleep( 10 );
 
-        $pid = file_get_contents( $pidFile );
-        $log = file_get_contents( $logFile );
+        $pid = file_get_contents( $pidFile ) ?: 'unknown';
+        $log = file_get_contents( $logFile ) ?: '';
 
         // Format the logfile
-        $log = str_replace( version_compare( PHP_VERSION, '7.3', '<' ) ? "\r" : "\033[0G", "\n", $log );
+        $search = version_compare( PHP_VERSION, '7.3', '<' ) ? "\r" : "\033[0G";
+        $log = str_replace( $search, "\n", $log );
 
-        return trim( $pid );
+        return intval( trim( $pid ) );
     }
 }
