@@ -164,7 +164,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      */
     private function checkDataStandardLocation(): bool {
         // The location must not be the default SMW location
-        return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . '/data/elastic/smw-data-standard.json'
+        return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . 'data/elastic/smw-data-standard.json'
             // The location must not be the template location
             && $this->dataStandardLocation !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json';
     }
