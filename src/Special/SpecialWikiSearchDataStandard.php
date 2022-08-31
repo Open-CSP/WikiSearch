@@ -12,7 +12,7 @@ use Status;
  */
 class SpecialWikiSearchDataStandard extends SpecialPage {
     /**
-     * @var string The location of the data standard
+     * @var string The canonical location of the data standard
      */
     private string $dataStandardLocation;
 
@@ -37,7 +37,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
             return;
         }
 
-        $this->dataStandardLocation = $GLOBALS['smwgElasticsearchConfig']['index_def']['data'];
+        $this->dataStandardLocation = realpath( $GLOBALS['smwgElasticsearchConfig']['index_def']['data'] );
 
         if ( !$this->checkDataStandardLocation() ) {
             $this->getOutput()->showErrorPage(
@@ -164,9 +164,9 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      */
     private function checkDataStandardLocation(): bool {
         // The location must not be the default SMW location
-        return $this->dataStandardLocation !== $GLOBALS['smwgIP'] . 'data/elastic/smw-data-standard.json'
+        return $this->dataStandardLocation !== realpath( $GLOBALS['smwgIP'] . 'data/elastic/smw-data-standard.json' )
             // The location must not be the template location
-            && $this->dataStandardLocation !== $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json';
+            && $this->dataStandardLocation !== realpath( $GLOBALS['wgExtensionDirectory'] . '/WikiSearch/data_templates/smw-wikisearch-data-standard-template.json' );
     }
 
     /**
