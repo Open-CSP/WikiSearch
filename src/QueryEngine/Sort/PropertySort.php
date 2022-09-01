@@ -70,8 +70,8 @@ class PropertySort implements Sort {
 		}
 
 		$this->field = $property->hasKeywordSubfield() ?
-            $property->getKeywordField() :
-            $property->getPropertyField();;
+			$property->getKeywordField() :
+			$property->getPropertyField();
 	}
 
 	/**

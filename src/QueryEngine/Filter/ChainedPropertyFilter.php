@@ -2,15 +2,12 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use ConfigException;
 use Elasticsearch\ClientBuilder;
 use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
-use WikiSearch\SearchEngineException;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -58,7 +55,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 *
 	 * @return BoolQuery
 	 * @throws MWException
-     */
+	 */
 	public function filterToQuery(): BoolQuery {
 		$query = $this->constructSubqueryFromFilter( $this->filter );
 		$terms = $this->getTermsFromSubquery( $query );

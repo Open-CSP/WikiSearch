@@ -92,9 +92,9 @@ class PropertyValueAggregation implements PropertyAggregation {
 	 * @inheritDoc
 	 */
 	public function toQuery(): AbstractAggregation {
-        $field = $this->property->hasKeywordSubfield() ?
-            $this->property->getKeywordField() :
-            $this->property->getPropertyField();
+		$field = $this->property->hasKeywordSubfield() ?
+			$this->property->getKeywordField() :
+			$this->property->getPropertyField();
 
 		$terms_aggregation = new TermsAggregation(
 			$this->aggregation_name,

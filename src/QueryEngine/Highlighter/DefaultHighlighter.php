@@ -2,11 +2,9 @@
 
 namespace WikiSearch\QueryEngine\Highlighter;
 
-use LogicException;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WikiSearch\SearchEngineConfig;
-use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
@@ -18,9 +16,9 @@ use WikiSearch\SMW\PropertyFieldMapper;
 class DefaultHighlighter implements Highlighter {
 	private const FALLBACK_HIGHLIGHT_FIELDS = [
 		"text_raw",
-        "text_raw.search",
+		"text_raw.search",
 		"text_copy",
-        "text_copy.search",
+		"text_copy.search",
 		"attachment.content"
 	];
 
@@ -66,7 +64,8 @@ class DefaultHighlighter implements Highlighter {
 
 			$this->field_settings = [
 				"fragment_size" => $config->get( "WikiSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" )
+				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" ),
+				"type" => "fvh" // Use the fast vector highlighter for combining snippets
 			];
 		}
 	}
@@ -79,7 +78,14 @@ class DefaultHighlighter implements Highlighter {
 		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
 		foreach ( $this->fields as $field ) {
-			$highlight->addField( $field, $this->field_settings );
+			if ( is_string( $field ) ) {
+				$highlight->addField( $field, $this->field_settings );
+			} else {
+				$field_settings = $this->field_settings;
+				$field_settings['matched_fields'] = $field;
+
+				$highlight->addField( $field[0], $field_settings );
+			}
 		}
 
 		return $highlight;
@@ -92,21 +98,24 @@ class DefaultHighlighter implements Highlighter {
 	 */
 	private function getDefaultFields(): array {
 		$properties =
-            $this->config->getSearchParameter( "highlighted properties" ) ?:
+			$this->config->getSearchParameter( "highlighted properties" ) ?:
 			$this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
-            $res = [];
+			$res = [];
 
-            foreach ( $properties as $property ) {
-                $res[] = $property->getPropertyField();
+			foreach ( $properties as $property ) {
+				if ( !$property->hasSearchSubfield() ) {
+					$res[] = $property->getPropertyField();
+				} else {
+					$res[] = [
+						$property->getPropertyField(),
+						$property->getSearchField()
+					];
+				}
+			}
 
-                if ( $property->hasSearchSubfield() ) {
-                    $res[] = $property->getSearchField();
-                }
-            }
-
-            return $res;
+			return $res;
 		}
 
 		// Fallback fields if no field is specified in the highlighted properties or search term properties

@@ -28,7 +28,6 @@ use MWException;
 use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
-use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SMW\PropertyFieldMapper;
@@ -39,80 +38,80 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
-    private const AGGREGATION_NAME = 'combobox_values';
+	private const AGGREGATION_NAME = 'combobox_values';
 
-    /**
-     * @inheritDoc
-     *
-     * @throws ApiUsageException
-     * @throws MWException
-     */
-    public function execute() {
-        $this->checkUserRights();
+	/**
+	 * @inheritDoc
+	 *
+	 * @throws ApiUsageException
+	 * @throws MWException
+	 */
+	public function execute() {
+		$this->checkUserRights();
 
-        $property = $this->getParameter( "property" );
-        $term = $this->getParameter( "term" );
-        $size = $this->getParameter( "limit" );
+		$property = $this->getParameter( "property" );
+		$term = $this->getParameter( "term" );
+		$size = $this->getParameter( "limit" );
 
-        $value_filter = new SearchTermFilter( $term, [new PropertyFieldMapper( $property )] );
-        $filter_aggregation = new FilterAggregation( $value_filter, [
-            new PropertyValueAggregation( $property, null, $size )
-        ], self::AGGREGATION_NAME );
+		$value_filter = new SearchTermFilter( $term, [ new PropertyFieldMapper( $property ) ] );
+		$filter_aggregation = new FilterAggregation( $value_filter, [
+			new PropertyValueAggregation( $property, null, $size )
+		], self::AGGREGATION_NAME );
 
-        $query_engine = $this->getEngine();
-        $query_engine->addAggregation( $filter_aggregation );
+		$query_engine = $this->getEngine();
+		$query_engine->addAggregation( $filter_aggregation );
 
-        $results = ClientBuilder::create()
-            ->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-            ->build()
-            ->search( $query_engine->toArray() );
+		$results = ClientBuilder::create()
+			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
+			->build()
+			->search( $query_engine->toArray() );
 
-        $this->getResult()->addValue(
-            null,
-            'result',
-            $this->getAggregationsFromResult( $results, $property )
-        );
-    }
+		$this->getResult()->addValue(
+			null,
+			'result',
+			$this->getAggregationsFromResult( $results, $property )
+		);
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function getAllowedParams() {
-        return [
-            'property' => [
-                ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_REQUIRED => true
-            ],
-            'term' => [
-                ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_DFLT => ''
-            ],
-            'limit' => [
-                ApiBase::PARAM_TYPE => 'integer',
-                ApiBase::PARAM_MIN => 1,
-                ApiBase::PARAM_MAX => 25000,
-                ApiBase::PARAM_DFLT => 50
-            ]
-        ];
-    }
+	/**
+	 * @inheritDoc
+	 */
+	public function getAllowedParams() {
+		return [
+			'property' => [
+				ApiBase::PARAM_TYPE => 'string',
+				ApiBase::PARAM_REQUIRED => true
+			],
+			'term' => [
+				ApiBase::PARAM_TYPE => 'string',
+				ApiBase::PARAM_DFLT => ''
+			],
+			'limit' => [
+				ApiBase::PARAM_TYPE => 'integer',
+				ApiBase::PARAM_MIN => 1,
+				ApiBase::PARAM_MAX => 25000,
+				ApiBase::PARAM_DFLT => 50
+			]
+		];
+	}
 
-    /**
-     * Creates the QueryEngine from the current request.
-     *
-     * @return QueryEngine
-     */
-    private function getEngine(): QueryEngine {
-        return QueryEngineFactory::fromNull();
-    }
+	/**
+	 * Creates the QueryEngine from the current request.
+	 *
+	 * @return QueryEngine
+	 */
+	private function getEngine(): QueryEngine {
+		return QueryEngineFactory::fromNull();
+	}
 
-    /**
-     * Extracts the aggregations from the ElasticSearch result.
-     *
-     * @param array $result
-     * @param string $property The property for which to get the aggregations
-     * @return array
-     */
-    private function getAggregationsFromResult( array $result, string $property ): array {
-        return $result['aggregations'][self::AGGREGATION_NAME][self::AGGREGATION_NAME][$property]['buckets'] ?? [];
-    }
+	/**
+	 * Extracts the aggregations from the ElasticSearch result.
+	 *
+	 * @param array $result
+	 * @param string $property The property for which to get the aggregations
+	 * @return array
+	 */
+	private function getAggregationsFromResult( array $result, string $property ): array {
+		return $result['aggregations'][self::AGGREGATION_NAME][self::AGGREGATION_NAME][$property]['buckets'] ?? [];
+	}
 }
