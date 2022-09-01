@@ -99,7 +99,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * @return Status
      */
     public function formCallback( array $formData ): Status {
-        // $dataStandard is validated and can be used directly
+        // $dataStandard is validated and formatted, and may be used directly
         $dataStandard = $formData['datastandard'];
         $result = file_put_contents( $this->dataStandardLocation, $dataStandard, LOCK_EX );
 
@@ -140,7 +140,7 @@ class SpecialWikiSearchDataStandard extends SpecialPage {
      * Returns the form descriptor for the edit form.
      *
      * @param string $dataStandard
-     * @return void
+     * @return array
      */
     private function getFormDescriptor( string $dataStandard ): array {
         return [
