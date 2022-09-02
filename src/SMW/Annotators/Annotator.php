@@ -7,7 +7,9 @@ use SMW\SemanticData;
 
 interface Annotator {
     public const ANNOTATORS = [
-        AltTextAnnotator::class
+        AltTextAnnotator::class,
+        ImagesAnnotator::class,
+        LinksAnnotator::class
     ];
 
     /**

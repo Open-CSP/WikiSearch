@@ -2,9 +2,7 @@
 
 namespace WikiSearch\SMW\Annotators;
 
-use Exception;
 use ParserOutput;
-use PHPHtmlParser\Dom;
 use SMW\DIProperty;
 use SMW\SemanticData;
 use SMWDIBlob;
