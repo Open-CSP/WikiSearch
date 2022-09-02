@@ -9,9 +9,9 @@ use SMWDIBlob;
 use Title;
 
 /**
- * This annotator contains information about links that are used on a page.
+ * This annotator contains information about internal links that are used on a page.
  */
-class LinksAnnotator implements Annotator {
+class InternalLinksAnnotator implements Annotator {
     /**
      * @inheritDoc
      */
@@ -30,14 +30,14 @@ class LinksAnnotator implements Annotator {
      * @inheritDoc
      */
     public static function getId(): string {
-        return '__wikisearch_links';
+        return '__wikisearch_internal_links';
     }
 
     /**
      * @inheritDoc
      */
     public static function getLabel(): string {
-        return 'Links';
+        return 'Internal links';
     }
 
     /**

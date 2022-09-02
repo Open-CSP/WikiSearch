@@ -9,7 +9,8 @@ interface Annotator {
     public const ANNOTATORS = [
         AltTextAnnotator::class,
         ImagesAnnotator::class,
-        LinksAnnotator::class
+        InternalLinksAnnotator::class,
+        ExternalLinksAnnotator::class
     ];
 
     /**
