@@ -39,14 +39,14 @@ class AltTextAnnotator implements Annotator {
      * @inheritDoc
      */
     public static function getId(): string {
-        return '__wikisearch_image_alt_text';
+        return '__wikisearch_image_alt_texts';
     }
 
     /**
      * @inheritDoc
      */
     public static function getLabel(): string {
-        return 'Image alt text';
+        return 'Image alt texts';
     }
 
     /**

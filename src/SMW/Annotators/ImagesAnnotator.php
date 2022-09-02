@@ -29,14 +29,14 @@ class ImagesAnnotator implements Annotator {
      * @inheritDoc
      */
     public static function getId(): string {
-        return '__wikisearch_image_link';
+        return '__wikisearch_image_links';
     }
 
     /**
      * @inheritDoc
      */
     public static function getLabel(): string {
-        return 'Image link';
+        return 'Image links';
     }
 
     /**
