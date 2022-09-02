@@ -41,7 +41,8 @@
 		"ArticleDeleteComplete": "WikiSearch\\WikiSearchHooks::onArticleDeleteComplete",
 		"PageContentSaveComplete": "WikiSearch\\WikiSearchHooks::onPageContentSaveComplete",
 		"LoadExtensionSchemaUpdates": "WikiSearch\\WikiSearchHooks::onLoadExtensionSchemaUpdates",
-		"BeforePageDisplay": "WikiSearch\\WikiSearchHooks::onBeforePageDisplay"
+		"BeforePageDisplay": "WikiSearch\\WikiSearchHooks::onBeforePageDisplay",
+		"SMW::Store::BeforeDataUpdateComplete": "WikiSearch\\WikiSearchHooks::onBeforeDataUpdateComplete"
 	},
 	"config": {
 		"WikiSearchElasticStoreIndex": {

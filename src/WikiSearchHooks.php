@@ -31,10 +31,14 @@ use OutputPage;
 use Parser;
 use Revision;
 use Skin;
+use SMW\SemanticData;
+use SMW\Store;
 use Status;
 use Title;
 use User;
 use WikiPage;
+use WikiSearch\SMW\Annotators\Annotator;
+use WikiSearch\SMW\AnnotatorStore;
 
 /**
  * Class SearchHooks
@@ -196,6 +200,32 @@ abstract class WikiSearchHooks {
 
 		exit();
 	}
+
+    /**
+     * Hook to extend the SemanticData object before the update is completed.
+     *
+     * @param Store $store
+     * @param SemanticData $semanticData
+     * @return void
+     * @throws MWException
+     * @link https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/master/docs/technical/hooks/hook.store.beforedataupdatecomplete.md
+     */
+    public static function onBeforeDataUpdateComplete( Store $store, SemanticData $semanticData ) {
+        $subjectTitle = $semanticData->getSubject()->getTitle();
+
+        if ( $subjectTitle === null ) {
+            return;
+        }
+
+        $page = WikiPage::factory( $subjectTitle );
+        $content = $page->getContent();
+        $output = $content->getParserOutput( $subjectTitle );
+
+        foreach ( Annotator::ANNOTATORS as $annotator ) {
+            // Decorate the semantic data object with the annotation
+            $annotator::addAnnotation( $output, $semanticData );
+        }
+    }
 
 	/**
 	 * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
