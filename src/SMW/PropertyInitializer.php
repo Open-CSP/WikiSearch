@@ -3,6 +3,7 @@
 namespace WikiSearch\SMW;
 
 use SMW\PropertyRegistry;
+use WikiSearch\SMW\Annotators\Annotator;
 
 /**
  * Initializes the predefined properties that may be used for search.
@@ -67,7 +68,7 @@ class PropertyInitializer {
      */
     public function getPropertyDefinitions(): array {
         $definitions = [];
-        $annotators = AnnotatorStore::ANNOTATORS;
+        $annotators = Annotator::ANNOTATORS;
 
         foreach ( $annotators as $annotation ) {
             $definitions[$annotation::getId()] = $annotation::getDefinition();
