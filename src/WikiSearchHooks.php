@@ -31,6 +31,7 @@ use OutputPage;
 use Parser;
 use Revision;
 use Skin;
+use SMW\PropertyRegistry;
 use SMW\SemanticData;
 use SMW\Store;
 use Status;
@@ -39,6 +40,7 @@ use User;
 use WikiPage;
 use WikiSearch\SMW\Annotators\Annotator;
 use WikiSearch\SMW\AnnotatorStore;
+use WikiSearch\SMW\PropertyInitializer;
 
 /**
  * Class SearchHooks
@@ -200,6 +202,18 @@ abstract class WikiSearchHooks {
 
 		exit();
 	}
+
+    /**
+     * Hook to add additional predefined properties.
+     *
+     * @param PropertyRegistry $propertyRegistry
+     * @return void
+     * @link https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/master/docs/examples/hook.property.initproperties.md
+     */
+    public static function onInitProperties( PropertyRegistry $propertyRegistry ): void {
+        $propertyInitializer = new PropertyInitializer( $propertyRegistry );
+        $propertyInitializer->initProperties();
+    }
 
     /**
      * Hook to extend the SemanticData object before the update is completed.

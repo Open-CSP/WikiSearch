@@ -42,7 +42,8 @@
 		"PageContentSaveComplete": "WikiSearch\\WikiSearchHooks::onPageContentSaveComplete",
 		"LoadExtensionSchemaUpdates": "WikiSearch\\WikiSearchHooks::onLoadExtensionSchemaUpdates",
 		"BeforePageDisplay": "WikiSearch\\WikiSearchHooks::onBeforePageDisplay",
-		"SMW::Store::BeforeDataUpdateComplete": "WikiSearch\\WikiSearchHooks::onBeforeDataUpdateComplete"
+		"SMW::Store::BeforeDataUpdateComplete": "WikiSearch\\WikiSearchHooks::onBeforeDataUpdateComplete",
+		"SMW::Property::initProperties": "WikiSearch\\WikiSearchHooks::onInitProperties"
 	},
 	"config": {
 		"WikiSearchElasticStoreIndex": {
