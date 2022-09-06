@@ -294,8 +294,8 @@ class QueryEngine {
 		Aggregation $aggregation,
 		array $post_filters
 	): FilterAggregation {
-		$compound_filter = new BoolQuery();
-		$aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
+        $compound_filter = new BoolQuery();
+        $aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
 
 		foreach ( $post_filters as $filter ) {
 			$filter_property = $filter instanceof PropertyFilter ? $filter->getProperty() : null;
@@ -303,15 +303,15 @@ class QueryEngine {
 				$filter_property !== null &&
 				$aggregation_property->getPropertyField() === $filter_property->getPropertyField();
 
-			// If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
-			if ( !$filter_belongs_to_aggregation ) {
-				$compound_filter->add( $filter->toQuery(), BoolQuery::FILTER );
-			}
-		}
+            // If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
+            if ( !$filter_belongs_to_aggregation ) {
+                $compound_filter->add( $filter->toQuery(), BoolQuery::FILTER );
+            }
+        }
 
-		$filter_aggregation = new FilterAggregation( $aggregation->getName(), $compound_filter );
-		$filter_aggregation->addAggregation( $aggregation->toQuery() );
+        $filter_aggregation = new FilterAggregation( $aggregation->getName(), $compound_filter );
+        $filter_aggregation->addAggregation( $aggregation->toQuery() );
 
-		return $filter_aggregation;
+        return $filter_aggregation;
 	}
 }
