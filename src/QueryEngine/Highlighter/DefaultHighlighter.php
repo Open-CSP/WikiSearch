@@ -2,11 +2,9 @@
 
 namespace WikiSearch\QueryEngine\Highlighter;
 
-use LogicException;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WikiSearch\SearchEngineConfig;
-use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
@@ -18,7 +16,9 @@ use WikiSearch\SMW\PropertyFieldMapper;
 class DefaultHighlighter implements Highlighter {
 	private const FALLBACK_HIGHLIGHT_FIELDS = [
 		"text_raw",
+		"text_raw.search",
 		"text_copy",
+		"text_copy.search",
 		"attachment.content"
 	];
 
@@ -64,7 +64,8 @@ class DefaultHighlighter implements Highlighter {
 
 			$this->field_settings = [
 				"fragment_size" => $config->get( "WikiSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" )
+				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" ),
+				"type" => "fvh" // Use the fast vector highlighter for combining snippets
 			];
 		}
 	}
@@ -77,7 +78,14 @@ class DefaultHighlighter implements Highlighter {
 		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
 		foreach ( $this->fields as $field ) {
-			$highlight->addField( $field, $this->field_settings );
+			if ( is_string( $field ) ) {
+				$highlight->addField( $field, $this->field_settings );
+			} else {
+				$field_settings = $this->field_settings;
+				$field_settings['matched_fields'] = $field;
+
+				$highlight->addField( $field[0], $field_settings );
+			}
 		}
 
 		return $highlight;
@@ -89,27 +97,25 @@ class DefaultHighlighter implements Highlighter {
 	 * @return array
 	 */
 	private function getDefaultFields(): array {
-		if ( $this->config->getSearchParameter( "highlighted properties" ) ) {
-			return $this->config->getSearchParameter( "highlighted properties" );
-		}
+		$properties =
+			$this->config->getSearchParameter( "highlighted properties" ) ?:
+			$this->config->getSearchParameter( "search term properties" );
 
-		if ( $this->config->getSearchParameter( "search term properties" ) ) {
-			$properties = $this->config->getSearchParameter( "search term properties" );
-			$properties = array_map( function ( $property ): string {
-				if ( is_string( $property ) ) {
-					return $property;
+		if ( $properties !== false ) {
+			$res = [];
+
+			foreach ( $properties as $property ) {
+				if ( !$property->hasSearchSubfield() ) {
+					$res[] = $property->getPropertyField();
+				} else {
+					$res[] = [
+						$property->getPropertyField(),
+						$property->getSearchField()
+					];
 				}
+			}
 
-				if ( $property instanceof PropertyFieldMapper ) {
-					return $property->getPropertyField();
-				}
-
-				throw new LogicException(
-					'"search term properties" is a propertylist, but did not consist of only properties'
-				);
-			}, $properties );
-
-			return $properties;
+			return $res;
 		}
 
 		// Fallback fields if no field is specified in the highlighted properties or search term properties

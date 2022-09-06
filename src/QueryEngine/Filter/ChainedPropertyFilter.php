@@ -2,14 +2,12 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use ConfigException;
 use Elasticsearch\ClientBuilder;
+use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
-use WikiSearch\SearchEngineException;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -19,30 +17,28 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * recursively constructs a new filter from the results of the initial filter until the end of the
  * property chain is reached.
  *
+ * This filter only works on a single property field mapper.
+ *
  * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
  */
 class ChainedPropertyFilter extends PropertyFilter {
 	/**
-	 * @var PropertyFieldMapper The property to filter on
+	 * @var PropertyFilter The initial filter to use to get the terms for the to be constructed Terms filter
 	 */
-	private PropertyFieldMapper $property;
+	private PropertyFilter $filter;
 
 	/**
-	 * @var AbstractFilter The initial filter to use to get the terms for the to be constructed Terms filter
-	 */
-	private AbstractFilter $filter;
-
-	/**
-	 * ChainedPropertyTermsFilter constructor.
+	 * ChainedPropertyFilter constructor.
 	 *
-	 * @param AbstractFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
-	 * @param PropertyFieldMapper $property The property to filter on; if this property is also a property
-	 * chain, the class will return a ChainedPropertyTermsFilter containing the constructed TermsFilter
+	 * @param PropertyFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
 	 */
-	public function __construct( AbstractFilter $filter, PropertyFieldMapper $property ) {
+	public function __construct( PropertyFilter $filter ) {
 		$this->filter = $filter;
-		$this->property = $property;
+
+		if ( !$filter->getProperty()->isChained() ) {
+			throw new InvalidArgumentException( "The given filter must be applied to chained property" );
+		}
 	}
 
 	/**
@@ -51,7 +47,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return PropertyFieldMapper
 	 */
 	public function getProperty(): PropertyFieldMapper {
-		return $this->property;
+		return $this->filter->getProperty()->getChainedPropertyFieldMapper();
 	}
 
 	/**
@@ -59,15 +55,16 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 *
 	 * @return BoolQuery
 	 * @throws MWException
-     */
+	 */
 	public function filterToQuery(): BoolQuery {
 		$query = $this->constructSubqueryFromFilter( $this->filter );
 		$terms = $this->getTermsFromSubquery( $query );
+		$property = $this->getProperty();
 
-		$filter = new PagesPropertyFilter( $this->property, $terms );
+		$filter = new PagesPropertyFilter( $property, $terms );
 
-		if ( $this->property->isChained() ) {
-			$filter = new ChainedPropertyFilter( $filter, $this->property->getChainedPropertyFieldMapper() );
+		if ( $property->isChained() ) {
+			$filter = new ChainedPropertyFilter( $filter );
 		}
 
 		return $filter->toQuery();
@@ -85,18 +82,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 		$query_engine->addConstantScoreFilter( $filter );
 
 		$config = MediaWikiServices::getInstance()->getMainConfig();
-
-		try {
-			$limit = $config->get( "WikiSearchMaxChainedQuerySize" );
-		} catch ( ConfigException $e ) {
-			$limit = 1000;
-
-			Logger::getLogger()->alert( 'Failed to get $wgWikiSearchMaxChainedQuerySize, falling back to {limit}', [
-				'limit' => $limit
-			] );
-		}
-
-		$query_engine->setLimit( $limit );
+		$query_engine->setLimit( $config->get( "WikiSearchMaxChainedQuerySize" ) );
 
 		return $query_engine->toArray();
 	}

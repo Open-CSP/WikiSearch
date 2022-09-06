@@ -4,7 +4,6 @@ namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WikiSearch\SearchEngineException;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -14,14 +13,23 @@ use WikiSearch\SMW\PropertyFieldMapper;
  */
 class SearchTermFilter extends AbstractFilter {
 	/**
-	 * @var array
+	 * @var PropertyFieldMapper[]
 	 */
 	private array $chained_properties = [];
 
 	/**
-	 * @var array
+	 * @var string[]|PropertyFieldMapper[]
 	 */
-	private array $property_fields = [];
+	private array $property_fields = [
+		"subject.title.search^8",
+		"subject.title^8",
+		"text_copy.search^5",
+		"text_copy^5",
+		"text_raw.search",
+		"text_raw",
+		"attachment.title^3",
+		"attachment.content"
+	];
 
 	/**
 	 * @var string The search term to filter on
@@ -29,7 +37,7 @@ class SearchTermFilter extends AbstractFilter {
 	private string $search_term;
 
 	/**
-	 * @var string
+	 * @var string The default operator to use
 	 */
 	private string $default_operator;
 
@@ -45,21 +53,19 @@ class SearchTermFilter extends AbstractFilter {
 		$this->default_operator = $default_operator;
 
 		if ( $properties !== [] ) {
+			$this->property_fields = [];
 			foreach ( $properties as $mapper ) {
 				if ( $mapper->isChained() ) {
+					// Chained properties need to be handled differently, see filterToQuery
 					$this->chained_properties[] = $mapper;
 				} else {
 					$this->property_fields[] = $mapper->getWeightedPropertyField();
+
+					if ( $mapper->hasSearchSubfield() ) {
+						$this->property_fields[] = $mapper->getWeightedSearchField();
+					}
 				}
 			}
-		} else {
-			$this->property_fields = [
-				"subject.title^8",
-				"text_copy^5",
-				"text_raw",
-				"attachment.title^3",
-				"attachment.content"
-			];
 		}
 	}
 
@@ -74,17 +80,13 @@ class SearchTermFilter extends AbstractFilter {
 
 	/**
 	 * @inheritDoc
-	 *
-	 * @throws SearchEngineException
-	 * @throws \MWException
 	 */
 	public function filterToQuery(): BoolQuery {
 		$bool_query = new BoolQuery();
 
 		foreach ( $this->chained_properties as $property ) {
-			// Construct a new chained subquery for each chained property and add it to the bool query
-			$property_text_filter = new PropertyTextFilter( $property, $this->search_term, $this->default_operator );
-			$filter = new ChainedPropertyFilter( $property_text_filter, $property->getChainedPropertyFieldMapper() );
+			// Construct a new chained sub query for each chained property and add it to the bool query
+			$filter = new ChainedPropertyFilter( new PropertyTextFilter( $property, $this->search_term, $this->default_operator ) );
 			$bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
 		}
 

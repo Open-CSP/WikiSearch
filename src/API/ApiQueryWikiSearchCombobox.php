@@ -41,7 +41,7 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
-    private const AGGREGATION_NAME = 'combobox_values';
+	private const AGGREGATION_NAME = 'combobox_values';
 
     /**
      * @inheritDoc

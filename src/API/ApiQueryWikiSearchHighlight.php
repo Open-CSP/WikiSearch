@@ -156,8 +156,8 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		preg_match_all( "/(HIGHLIGHT_@@|^)([a-zA-Z0-9:](@@_HIGHLIGHT([^a-zA-Z0-9]+)HIGHLIGHT_@@)?)+(@@_HIGHLIGHT|$)/", $highlighted_source, $matches );
 
 		if ( isset( $matches[0] ) ) {
-			foreach ($matches[0] as $match) {
-				$words[] = str_replace(['HIGHLIGHT_@@', '@@_HIGHLIGHT'], '', $match);
+			foreach ( $matches[0] as $match ) {
+				$words[] = str_replace( [ 'HIGHLIGHT_@@', '@@_HIGHLIGHT' ], '', $match );
 			}
 		}
 

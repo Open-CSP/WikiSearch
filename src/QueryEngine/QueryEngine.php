@@ -297,11 +297,11 @@ class QueryEngine {
         $compound_filter = new BoolQuery();
         $aggregation_property = $aggregation instanceof PropertyAggregation ? $aggregation->getProperty() : null;
 
-        foreach ( $post_filters as $filter ) {
-            $filter_property = $filter instanceof PropertyFilter ? $filter->getProperty() : null;
-            $filter_belongs_to_aggregation = $aggregation_property !== null &&
-                $filter_property !== null &&
-                $aggregation_property->getPropertyField( false ) === $filter_property->getPropertyField( false );
+		foreach ( $post_filters as $filter ) {
+			$filter_property = $filter instanceof PropertyFilter ? $filter->getProperty() : null;
+			$filter_belongs_to_aggregation = $aggregation_property !== null &&
+				$filter_property !== null &&
+				$aggregation_property->getPropertyField() === $filter_property->getPropertyField();
 
             // If the post-filter belongs to the aggregation, it should NOT be added to the filter aggregation
             if ( !$filter_belongs_to_aggregation ) {

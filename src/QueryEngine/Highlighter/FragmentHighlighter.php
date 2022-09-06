@@ -56,11 +56,19 @@ class FragmentHighlighter implements Highlighter {
 	) {
 		$this->size = $size;
 		$this->limit = $limit;
-		$this->fields = array_map( function ( PropertyFieldMapper $property ): string {
-			return $property->getPropertyField();
-		}, $properties );
 		$this->tag_left = $tag_left;
 		$this->tag_right = $tag_right;
+
+		foreach ( $properties as $property ) {
+			if ( !$property->hasSearchSubfield() ) {
+				$this->fields[] = $property->getPropertyField();
+			} else {
+				$this->fields[] = [
+					$property->getPropertyField(),
+					$property->getSearchField()
+				];
+			}
+		}
 	}
 
 	/**
@@ -71,10 +79,18 @@ class FragmentHighlighter implements Highlighter {
 		$highlight->setTags( [ $this->tag_left ], [ $this->tag_right ] );
 
 		foreach ( $this->fields as $field ) {
-			$highlight->addField( $field, [
+			$field_settings = [
 				"fragment_size" => $this->size,
-				"number_of_fragments" => $this->limit
-			] );
+				"number_of_fragments" => $this->limit,
+				"type" => "fvh"
+			];
+
+			if ( is_string( $field ) ) {
+				$highlight->addField( $field, $field_settings );
+			} else {
+				$field_settings['matched_fields'] = $field;
+				$highlight->addField( $field[0], $field_settings );
+			}
 		}
 
 		return $highlight;
