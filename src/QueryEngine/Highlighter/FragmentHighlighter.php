@@ -38,12 +38,12 @@ class FragmentHighlighter implements Highlighter {
 	 */
 	private string $tag_right;
 
-    /**
-     * @var string|null
-     */
-    private ?string $highlighter_type;
+	/**
+	 * @var string|null
+	 */
+	private ?string $highlighter_type;
 
-    /**
+	/**
 	 * FieldHighlighter constructor.
 	 *
 	 * @param PropertyFieldMapper[] $properties The fields to apply the highlight to
@@ -54,13 +54,13 @@ class FragmentHighlighter implements Highlighter {
 	 */
 	public function __construct(
 		array $properties,
-        ?string $highlighter_type = null,
+		?string $highlighter_type = null,
 		int $size = 1,
 		int $limit = 128,
 		string $tag_left = "HIGHLIGHT_@@",
 		string $tag_right = "@@_HIGHLIGHT"
 	) {
-        $this->highlighter_type = $highlighter_type;
+		$this->highlighter_type = $highlighter_type;
 		$this->size = $size;
 		$this->limit = $limit;
 		$this->tag_left = $tag_left;
@@ -91,9 +91,9 @@ class FragmentHighlighter implements Highlighter {
 				"number_of_fragments" => $this->limit
 			];
 
-            if ( $this->highlighter_type !== null ) {
-                $field_settings["type"] = $this->highlighter_type;
-            }
+			if ( $this->highlighter_type !== null ) {
+				$field_settings["type"] = $this->highlighter_type;
+			}
 
 			if ( is_string( $field ) ) {
 				$highlight->addField( $field, $field_settings );

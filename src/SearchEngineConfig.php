@@ -40,7 +40,7 @@ class SearchEngineConfig {
 		"default operator" 		 => [ "type" => "string" ],
 		"aggregation size" 		 =>	[ "type" => "integer" ],
 		"post filter properties" => [ "type" => "list" ],
-        "highlighter type"       => [ "type" => "string" ]
+		"highlighter type"       => [ "type" => "string" ]
 	];
 
 	/**

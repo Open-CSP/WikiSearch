@@ -54,7 +54,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$page_id = $this->getParameter( "page_id" );
 
 		$size = $this->getParameter( "size" );
-        $highlighter_type = $this->getParameter( "highlighter_type" );
+		$highlighter_type = $this->getParameter( "highlighter_type" );
 
 		if ( $size === null ) {
 			$size = 250;
@@ -115,9 +115,9 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => 250
 			],
-            'highlighter_type' => [
-                ApiBase::PARAM_TYPE => 'string'
-            ]
+			'highlighter_type' => [
+				ApiBase::PARAM_TYPE => 'string'
+			]
 		];
 	}
 
