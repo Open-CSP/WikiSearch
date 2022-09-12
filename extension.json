@@ -34,7 +34,8 @@
 		"WikiSearchCombobox": "WikiSearch\\API\\ApiQueryWikiSearchCombobox"
   	},
 	"AvailableRights": [
-		"wikisearch-execute-api"
+		"wikisearch-execute-api",
+		"wikisearch-edit-data-standard"
 	],
 	"Hooks": {
 		"ParserFirstCallInit": "WikiSearch\\WikiSearchHooks::onParserFirstCallInit",
