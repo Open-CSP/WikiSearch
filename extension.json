@@ -76,6 +76,9 @@
 		},
 		"WikiSearchMaxChainedQuerySize": {
 			"value": 500
+		},
+		"WikiSearchEscape": {
+			"value": false
 		}
 	},
 	"SpecialPages": {
