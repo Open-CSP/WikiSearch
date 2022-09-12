@@ -60,13 +60,18 @@ class DefaultHighlighter implements Highlighter {
 		if ( $field_settings !== null ) {
 			$this->field_settings = $field_settings;
 		} else {
-			$config = MediaWikiServices::getInstance()->getMainConfig();
+			$main_config = MediaWikiServices::getInstance()->getMainConfig();
 
 			$this->field_settings = [
-				"fragment_size" => $config->get( "WikiSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $config->get( "WikiSearchHighlightNumberOfFragments" ),
-				"type" => "fvh" // Use the fast vector highlighter for combining snippets
+				"fragment_size" => $main_config->get( "WikiSearchHighlightFragmentSize" ),
+				"number_of_fragments" => $main_config->get( "WikiSearchHighlightNumberOfFragments" )
 			];
+
+            $highlighter_type = $config->getSearchParameter( "highlighter type" );
+
+            if ( $highlighter_type ) {
+                $this->field_settings["type"] = $highlighter_type;
+            }
 		}
 	}
 
