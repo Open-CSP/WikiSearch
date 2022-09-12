@@ -39,7 +39,8 @@ class SearchEngineConfig {
 		"search term properties" => [ "type" => "propertylist" ],
 		"default operator" 		 => [ "type" => "string" ],
 		"aggregation size" 		 =>	[ "type" => "integer" ],
-		"post filter properties" => [ "type" => "list" ]
+		"post filter properties" => [ "type" => "list" ],
+		"highlighter type"       => [ "type" => "string" ]
 	];
 
 	/**

@@ -54,6 +54,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$page_id = $this->getParameter( "page_id" );
 
 		$size = $this->getParameter( "size" );
+		$highlighter_type = $this->getParameter( "highlighter_type" );
 
 		if ( $size === null ) {
 			$size = 250;
@@ -70,7 +71,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 			$this->dieWithError( $this->msg( "wikisearch-api-invalid-pageid" ) );
 		}
 
-		$highlighter = new FragmentHighlighter( $properties, $size, $limit );
+		$highlighter = new FragmentHighlighter( $properties, $highlighter_type, $size, $limit );
 		$search_term_filter = new SearchTermFilter( $query, $properties );
 		$page_filter = new PageFilter( $title );
 
@@ -113,6 +114,9 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 				ApiBase::PARAM_TYPE => 'integer',
 				ApiBase::PARAM_MIN => 1,
 				ApiBase::PARAM_MAX => 250
+			],
+			'highlighter_type' => [
+				ApiBase::PARAM_TYPE => 'string'
 			]
 		];
 	}
