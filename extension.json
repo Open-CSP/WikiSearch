@@ -3,7 +3,7 @@
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "6.0.1",
+	"version": "6.1.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSearch",
 	"descriptionmsg": "wikisearch-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -75,6 +75,9 @@
 		},
 		"WikiSearchMaxChainedQuerySize": {
 			"value": 500
+		},
+		"WikiSearchEscape": {
+			"value": false
 		}
 	},
 	"SpecialPages": {
