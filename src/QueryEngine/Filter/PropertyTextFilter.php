@@ -20,7 +20,7 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
  */
 class PropertyTextFilter extends PropertyFilter {
-    use QueryPreparationTrait;
+	use QueryPreparationTrait;
 
 	/**
 	 * @var PropertyFieldMapper The property to filter on

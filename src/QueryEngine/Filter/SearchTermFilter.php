@@ -12,7 +12,7 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch\QueryEngine\Filter
  */
 class SearchTermFilter extends AbstractFilter {
-    use QueryPreparationTrait;
+	use QueryPreparationTrait;
 
 	/**
 	 * @var PropertyFieldMapper[]
@@ -84,7 +84,7 @@ class SearchTermFilter extends AbstractFilter {
 	 * @inheritDoc
 	 */
 	public function filterToQuery(): BoolQuery {
-        $search_term = $this->prepareQuery( $this->search_term );
+		$search_term = $this->prepareQuery( $this->search_term );
 		$bool_query = new BoolQuery();
 
 		foreach ( $this->chained_properties as $property ) {
