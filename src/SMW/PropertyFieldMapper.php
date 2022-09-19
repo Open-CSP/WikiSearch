@@ -41,25 +41,25 @@ class PropertyFieldMapper {
 
 	// List of special pre-defined properties in SemanticMediaWiki that do not appear on Special:Browse
 	public const INTERNAL_PROPERTIES = [
-		"attachment.author",
-		"attachment.title",
-		"attachment.content",
-		"attachment.content_length",
-		"attachment.content_type",
-		"attachment.date",
-		"attachment.language",
+		"attachment-author",
+		"attachment-title",
+		"attachment-content",
+		"attachment-content_length",
+		"attachment-content_type",
+		"attachment-date",
+		"attachment-language",
 		"file_path",
 		"file_sha1",
 		"noop",
-		"subject.title",
-		"subject.subobject",
-		"subject.namespace",
-		"subject.interwiki",
-		"subject.sortkey",
-		"subject.serialization",
-		"subject.sha1",
-		"subject.rev_id",
-		"subject.namespacename",
+		"subject-title",
+		"subject-subobject",
+		"subject-namespace",
+		"subject-interwiki",
+		"subject-sortkey",
+		"subject-serialization",
+		"subject-sha1",
+		"subject-rev_id",
+		"subject-namespacename",
 		"text_copy",
 		"text_raw"
 	];
@@ -335,7 +335,7 @@ class PropertyFieldMapper {
 	 * @return bool
 	 */
 	public function isInternalProperty(): bool {
-		return in_array( $this->property_key, self::INTERNAL_PROPERTIES, true );
+		return in_array( $this->property_name, self::INTERNAL_PROPERTIES, true );
 	}
 
     /**
