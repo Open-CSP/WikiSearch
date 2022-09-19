@@ -65,48 +65,36 @@ class FragmentHighlighter implements Highlighter {
 		$this->limit = $limit;
 		$this->tag_left = $tag_left;
 		$this->tag_right = $tag_right;
-
-		foreach ( $properties as $property ) {
-			if ( !$property->hasSearchSubfield() ) {
-				$this->fields[] = $property->getPropertyField();
-			} else {
-				$this->fields[] = [
-					$property->getPropertyField(),
-					$property->getSearchField()
-				];
-			}
-		}
+        $this->fields = $properties;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function toQuery(): Highlight {
-		$highlight = new Highlight();
-		$highlight->setTags( [ $this->tag_left ], [ $this->tag_right ] );
+    /**
+     * @inheritDoc
+     */
+    public function toQuery(): Highlight {
+        $highlight = new Highlight();
+        $highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
-		foreach ( $this->fields as $field ) {
-			$field_settings = [
-				"fragment_size" => $this->size,
-				"number_of_fragments" => $this->limit
-			];
+        $common_field_settings = [
+            "fragment_size" => $this->size,
+            "number_of_fragments" => $this->limit
+        ];
 
-			if ( is_string( $field ) ) {
-                if ( $this->highlighter_type !== null && !( new PropertyFieldMapper( $field ) )->isInternalProperty() ) {
-                    $field_settings["type"] = $this->highlighter_type;
-                }
+        foreach ( $this->fields as $field ) {
+            $field_settings = $common_field_settings;
 
-				$highlight->addField( $field, $field_settings );
-			} else {
-                if ( $this->highlighter_type !== null ) {
-                    $field_settings["type"] = $this->highlighter_type;
-                }
+            if ( $this->highlighter_type === "fvh" && $field->supportsFVH() ) {
+                // TODO: Support different highlighter types
+                $field_settings['type'] = $this->highlighter_type;
+            }
 
-				$field_settings['matched_fields'] = $field;
-				$highlight->addField( $field[0], $field_settings );
-			}
-		}
+            if ( $field->hasSearchSubfield() ) {
+                $field_settings['matched_fields'] = [$field->getPropertyField(), $field->getSearchField()];
+            }
 
-		return $highlight;
-	}
+            $highlight->addField( $field->getPropertyField(), $field_settings );
+        }
+
+        return $highlight;
+    }
 }

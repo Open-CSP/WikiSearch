@@ -41,25 +41,25 @@ class PropertyFieldMapper {
 
 	// List of special pre-defined properties in SemanticMediaWiki that do not appear on Special:Browse
 	public const INTERNAL_PROPERTIES = [
-		"attachment-author",
-		"attachment-title",
-		"attachment-content",
-		"attachment-content_length",
-		"attachment-content_type",
-		"attachment-date",
-		"attachment-language",
+		"attachment.author",
+		"attachment.title",
+		"attachment.content",
+		"attachment.content_length",
+		"attachment.content_type",
+		"attachment.date",
+		"attachment.language",
 		"file_path",
 		"file_sha1",
 		"noop",
-		"subject-title",
-		"subject-subobject",
-		"subject-namespace",
-		"subject-interwiki",
-		"subject-sortkey",
-		"subject-serialization",
-		"subject-sha1",
-		"subject-rev_id",
-		"subject-namespacename",
+		"subject.title",
+		"subject.subobject",
+		"subject.namespace",
+		"subject.interwiki",
+		"subject.sortkey",
+		"subject.serialization",
+		"subject.sha1",
+		"subject.rev_id",
+		"subject.namespacename",
 		"text_copy",
 		"text_raw"
 	];
@@ -75,6 +75,9 @@ class PropertyFieldMapper {
 
 	// List of internal properties that have a search subfield
 	public const SEARCH_INTERNAL_PROPERTIES = [ "text_raw", "text_copy", "subject.title" ];
+
+    // List of internal properties that support fast vector highlighting
+    public const FVH_INTERNAL_PROPERTIES = [ "noop", "text_copy", "text_raw", "subject.title", "subject.interwiki", "subject.subobject", "subject.sortkey", "subject.rev_id" ];
 
 	/**
 	 * @var int The unique ID of the property
@@ -332,8 +335,17 @@ class PropertyFieldMapper {
 	 * @return bool
 	 */
 	public function isInternalProperty(): bool {
-		return in_array( $this->property_name, self::INTERNAL_PROPERTIES, true );
+		return in_array( $this->property_key, self::INTERNAL_PROPERTIES, true );
 	}
+
+    /**
+     * Returns true if and only if this property supports fast vector highlighting.
+     *
+     * @return bool
+     */
+    public function supportsFVH(): bool {
+        return !$this->isInternalProperty() || in_array( $this->property_key, self::FVH_INTERNAL_PROPERTIES, true );
+    }
 
 	/**
 	 * Parses the given property name, and returns the result in the form of:

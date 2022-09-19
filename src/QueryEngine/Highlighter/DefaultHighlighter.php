@@ -15,14 +15,6 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch\QueryEngine\Highlighter
  */
 class DefaultHighlighter implements Highlighter {
-	private const FALLBACK_HIGHLIGHT_FIELDS = [
-		"text_raw",
-		"text_raw.search",
-		"text_copy",
-		"text_copy.search",
-		"attachment.content"
-	];
-
 	/**
 	 * @var SearchEngineConfig
 	 */
@@ -76,24 +68,21 @@ class DefaultHighlighter implements Highlighter {
 		$highlight = new Highlight();
 		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
+        $highlighter_type = $this->config->getSearchParameter( "highlighter type" );
+
 		foreach ( $this->fields as $field ) {
             $field_settings = $this->common_field_settings;
-            $highlighter_type = $this->config->getSearchParameter( "highlighter type" );
 
-			if ( is_string( $field ) ) {
-                if ( $highlighter_type !== null && !( new PropertyFieldMapper( $field ) )->isInternalProperty() ) {
-                    $field_settings["type"] = $highlighter_type;
-                }
+            if ( $highlighter_type === "fvh" && $field->supportsFVH() ) {
+                // TODO: Support different highlighter types
+                $field_settings['type'] = $highlighter_type;
+            }
 
-				$highlight->addField( $field, $field_settings );
-			} else {
-                if ( $highlighter_type !== null ) {
-                    $field_settings['type'] = $highlighter_type;
-                }
+            if ( $field->hasSearchSubfield() ) {
+                $field_settings['matched_fields'] = [$field->getPropertyField(), $field->getSearchField()];
+            }
 
-				$field_settings['matched_fields'] = $field;
-				$highlight->addField( $field[0], $field_settings );
-			}
+            $highlight->addField( $field->getPropertyField(), $field_settings );
 		}
 
 		return $highlight;
@@ -102,7 +91,7 @@ class DefaultHighlighter implements Highlighter {
 	/**
 	 * Returns an array of fields to highlight if no specific fields are given in the constructor.
 	 *
-	 * @return array
+	 * @return PropertyFieldMapper[]
 	 */
 	private function getDefaultFields(): array {
 		$properties =
@@ -110,23 +99,14 @@ class DefaultHighlighter implements Highlighter {
 			$this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
-			$res = [];
-
-			foreach ( $properties as $property ) {
-				if ( !$property->hasSearchSubfield() ) {
-					$res[] = $property->getPropertyField();
-				} else {
-					$res[] = [
-						$property->getPropertyField(),
-						$property->getSearchField()
-					];
-				}
-			}
-
-			return $res;
+			return $properties;
 		}
 
-		// Fallback fields if no field is specified in the highlighted properties or search term properties
-		return self::FALLBACK_HIGHLIGHT_FIELDS;
+        // Fallback fields if no field is specified in the highlighted properties or search term properties
+        return [
+            new PropertyFieldMapper( "text_raw" ),
+            new PropertyFieldMapper( "text_copy" ),
+            new PropertyFieldMapper( "attachment-content" )
+        ];
 	}
 }
