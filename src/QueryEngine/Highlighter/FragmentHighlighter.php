@@ -91,13 +91,17 @@ class FragmentHighlighter implements Highlighter {
 				"number_of_fragments" => $this->limit
 			];
 
-			if ( $this->highlighter_type !== null ) {
-				$field_settings["type"] = $this->highlighter_type;
-			}
-
 			if ( is_string( $field ) ) {
+                if ( $this->highlighter_type !== null && !( new PropertyFieldMapper( $field ) )->isInternalProperty() ) {
+                    $field_settings["type"] = $this->highlighter_type;
+                }
+
 				$highlight->addField( $field, $field_settings );
 			} else {
+                if ( $this->highlighter_type !== null ) {
+                    $field_settings["type"] = $this->highlighter_type;
+                }
+
 				$field_settings['matched_fields'] = $field;
 				$highlight->addField( $field[0], $field_settings );
 			}

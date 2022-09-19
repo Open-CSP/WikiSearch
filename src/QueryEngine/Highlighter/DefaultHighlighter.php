@@ -5,6 +5,7 @@ namespace WikiSearch\QueryEngine\Highlighter;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Highlight\Highlight;
 use WikiSearch\SearchEngineConfig;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Class DefaultHighlighter
@@ -39,7 +40,7 @@ class DefaultHighlighter implements Highlighter {
 	 * phpcs:ignore
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.7/search-request-highlighting.html#highlighting-settings
 	 */
-	private array $field_settings;
+	private array $common_field_settings;
 
 	/**
 	 * DefaultHighlighter constructor.
@@ -58,20 +59,13 @@ class DefaultHighlighter implements Highlighter {
 		}
 
 		if ( $field_settings !== null ) {
-			$this->field_settings = $field_settings;
+			$this->common_field_settings = $field_settings;
 		} else {
 			$main_config = MediaWikiServices::getInstance()->getMainConfig();
-
-			$this->field_settings = [
+			$this->common_field_settings = [
 				"fragment_size" => $main_config->get( "WikiSearchHighlightFragmentSize" ),
 				"number_of_fragments" => $main_config->get( "WikiSearchHighlightNumberOfFragments" )
 			];
-
-			$highlighter_type = $config->getSearchParameter( "highlighter type" );
-
-			if ( $highlighter_type ) {
-				$this->field_settings["type"] = $highlighter_type;
-			}
 		}
 	}
 
@@ -83,12 +77,21 @@ class DefaultHighlighter implements Highlighter {
 		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
 		foreach ( $this->fields as $field ) {
-			if ( is_string( $field ) ) {
-				$highlight->addField( $field, $this->field_settings );
-			} else {
-				$field_settings = $this->field_settings;
-				$field_settings['matched_fields'] = $field;
+            $field_settings = $this->common_field_settings;
+            $highlighter_type = $this->config->getSearchParameter( "highlighter type" );
 
+			if ( is_string( $field ) ) {
+                if ( $highlighter_type !== null && !( new PropertyFieldMapper( $field ) )->isInternalProperty() ) {
+                    $field_settings["type"] = $highlighter_type;
+                }
+
+				$highlight->addField( $field, $field_settings );
+			} else {
+                if ( $highlighter_type !== null ) {
+                    $field_settings['type'] = $highlighter_type;
+                }
+
+				$field_settings['matched_fields'] = $field;
 				$highlight->addField( $field[0], $field_settings );
 			}
 		}
