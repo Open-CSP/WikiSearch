@@ -157,6 +157,8 @@ abstract class WikiSearchHooks {
 			$parser->setFunctionHook( "WikiSearchConfig", [ self::class, "searchConfigCallback" ] );
 			$parser->setFunctionHook( "WikiSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
+
+            $parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );
 		} catch ( MWException $e ) {
 			Logger::getLogger()->alert( 'Unable to register parser hooks: {e}', [
 				'e' => $e
