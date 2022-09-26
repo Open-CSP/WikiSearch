@@ -2,6 +2,7 @@
 
 namespace WikiSearch\SMW\Annotators;
 
+use Content;
 use ParserOutput;
 use SMW\DIProperty;
 use SMW\SemanticData;
@@ -15,7 +16,7 @@ class ExternalLinksAnnotator implements Annotator {
     /**
      * @inheritDoc
      */
-    public static function addAnnotation( ParserOutput $parserOutput, SemanticData $semanticData ): void {
+    public static function addAnnotation( Content $content, ParserOutput $parserOutput, SemanticData $semanticData ): void {
         $links = array_keys( $parserOutput->getExternalLinks() );
 
         foreach ( $links as $link ) {

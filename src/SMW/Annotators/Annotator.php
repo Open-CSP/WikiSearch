@@ -2,6 +2,7 @@
 
 namespace WikiSearch\SMW\Annotators;
 
+use Content;
 use ParserOutput;
 use SMW\SemanticData;
 
@@ -16,10 +17,11 @@ interface Annotator {
     /**
      * Analyze the given parser output and decorate the given semantic data object with the results.
      *
+     * @param Content $content
      * @param ParserOutput $parserOutput
      * @param SemanticData $semanticData
      */
-    public static function addAnnotation( ParserOutput $parserOutput, SemanticData $semanticData ): void;
+    public static function addAnnotation( Content $content, ParserOutput $parserOutput, SemanticData $semanticData ): void;
 
     /**
      * Returns the ID of annotation that will be added.

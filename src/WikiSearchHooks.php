@@ -232,12 +232,22 @@ abstract class WikiSearchHooks {
         }
 
         $page = WikiPage::factory( $subjectTitle );
+
+        if ( $page === null ) {
+            return;
+        }
+
         $content = $page->getContent();
+
+        if ( $content === null ) {
+            return;
+        }
+
         $output = $content->getParserOutput( $subjectTitle );
 
         foreach ( Annotator::ANNOTATORS as $annotator ) {
             // Decorate the semantic data object with the annotation
-            $annotator::addAnnotation( $output, $semanticData );
+            $annotator::addAnnotation( $content, $output, $semanticData );
         }
     }
 

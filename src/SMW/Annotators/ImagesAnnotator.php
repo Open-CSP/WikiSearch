@@ -2,6 +2,7 @@
 
 namespace WikiSearch\SMW\Annotators;
 
+use Content;
 use ParserOutput;
 use SMW\DIProperty;
 use SMW\SemanticData;
@@ -14,7 +15,7 @@ class ImagesAnnotator implements Annotator {
     /**
      * @inheritDoc
      */
-    public static function addAnnotation( ParserOutput $parserOutput, SemanticData $semanticData ): void {
+    public static function addAnnotation( Content $content, ParserOutput $parserOutput, SemanticData $semanticData ): void {
         $images = array_keys( $parserOutput->getImages() );
 
         foreach ( $images as $image ) {

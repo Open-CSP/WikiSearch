@@ -2,6 +2,7 @@
 
 namespace WikiSearch\SMW\Annotators;
 
+use Content;
 use Exception;
 use ParserOutput;
 use PHPHtmlParser\Dom;
@@ -22,7 +23,7 @@ class AltTextAnnotator implements Annotator {
     /**
      * @inheritDoc
      */
-    public static function addAnnotation( ParserOutput $parserOutput, SemanticData $semanticData ): void {
+    public static function addAnnotation( Content $content, ParserOutput $parserOutput, SemanticData $semanticData ): void {
         // Get the HTML
         $text = $parserOutput->getText();
         $altTexts = self::getAltTexts( $text );
