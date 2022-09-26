@@ -11,7 +11,8 @@ interface Annotator {
         AltTextAnnotator::class,
         ImagesAnnotator::class,
         InternalLinksAnnotator::class,
-        ExternalLinksAnnotator::class
+        ExternalLinksAnnotator::class,
+        ParsedTextAnnotator::class
     ];
 
     /**
