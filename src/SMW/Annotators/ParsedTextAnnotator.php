@@ -78,7 +78,7 @@ class ParsedTextAnnotator implements Annotator {
         $selector = new \DOMXPath( $dom );
 
         // Filter out div elements with the class "smw-no-index"
-        $query = $selector->query( '//div[contains(attribute::class, "smw-no-index")]' );
+        $query = $selector->query( '//*[contains(attribute::class, "smw-no-index")]' );
         foreach ( $query as $element ) {
             $element->parentNode->removeChild( $element );
         }
