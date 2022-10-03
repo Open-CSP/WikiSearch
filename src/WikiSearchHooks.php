@@ -39,7 +39,6 @@ use Title;
 use User;
 use WikiPage;
 use WikiSearch\SMW\Annotators\Annotator;
-use WikiSearch\SMW\AnnotatorStore;
 use WikiSearch\SMW\PropertyInitializer;
 
 /**
@@ -158,7 +157,7 @@ abstract class WikiSearchHooks {
 			$parser->setFunctionHook( "WikiSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 
-            $parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );
+			$parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );
 		} catch ( MWException $e ) {
 			Logger::getLogger()->alert( 'Unable to register parser hooks: {e}', [
 				'e' => $e
@@ -205,53 +204,53 @@ abstract class WikiSearchHooks {
 		exit();
 	}
 
-    /**
-     * Hook to add additional predefined properties.
-     *
-     * @param PropertyRegistry $propertyRegistry
-     * @return void
-     * @link https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/master/docs/examples/hook.property.initproperties.md
-     */
-    public static function onInitProperties( PropertyRegistry $propertyRegistry ): void {
-        $propertyInitializer = new PropertyInitializer( $propertyRegistry );
-        $propertyInitializer->initProperties();
-    }
+	/**
+	 * Hook to add additional predefined properties.
+	 *
+	 * @param PropertyRegistry $propertyRegistry
+	 * @return void
+	 * @link https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/master/docs/examples/hook.property.initproperties.md
+	 */
+	public static function onInitProperties( PropertyRegistry $propertyRegistry ): void {
+		$propertyInitializer = new PropertyInitializer( $propertyRegistry );
+		$propertyInitializer->initProperties();
+	}
 
-    /**
-     * Hook to extend the SemanticData object before the update is completed.
-     *
-     * @param Store $store
-     * @param SemanticData $semanticData
-     * @return void
-     * @throws MWException
-     * @link https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/master/docs/technical/hooks/hook.store.beforedataupdatecomplete.md
-     */
-    public static function onBeforeDataUpdateComplete( Store $store, SemanticData $semanticData ) {
-        $subjectTitle = $semanticData->getSubject()->getTitle();
+	/**
+	 * Hook to extend the SemanticData object before the update is completed.
+	 *
+	 * @param Store $store
+	 * @param SemanticData $semanticData
+	 * @return void
+	 * @throws MWException
+	 * @link https://github.com/SemanticMediaWiki/SemanticMediaWiki/blob/master/docs/technical/hooks/hook.store.beforedataupdatecomplete.md
+	 */
+	public static function onBeforeDataUpdateComplete( Store $store, SemanticData $semanticData ) {
+		$subjectTitle = $semanticData->getSubject()->getTitle();
 
-        if ( $subjectTitle === null ) {
-            return;
-        }
+		if ( $subjectTitle === null ) {
+			return;
+		}
 
-        $page = WikiPage::factory( $subjectTitle );
+		$page = WikiPage::factory( $subjectTitle );
 
-        if ( $page === null ) {
-            return;
-        }
+		if ( $page === null ) {
+			return;
+		}
 
-        $content = $page->getContent();
+		$content = $page->getContent();
 
-        if ( $content === null ) {
-            return;
-        }
+		if ( $content === null ) {
+			return;
+		}
 
-        $output = $content->getParserOutput( $subjectTitle );
+		$output = $content->getParserOutput( $subjectTitle );
 
-        foreach ( Annotator::ANNOTATORS as $annotator ) {
-            // Decorate the semantic data object with the annotation
-            $annotator::addAnnotation( $content, $output, $semanticData );
-        }
-    }
+		foreach ( Annotator::ANNOTATORS as $annotator ) {
+			// Decorate the semantic data object with the annotation
+			$annotator::addAnnotation( $content, $output, $semanticData );
+		}
+	}
 
 	/**
 	 * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the

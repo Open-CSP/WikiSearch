@@ -47,7 +47,7 @@ class FragmentHighlighter implements Highlighter {
 	 * FieldHighlighter constructor.
 	 *
 	 * @param PropertyFieldMapper[] $properties The fields to apply the highlight to
-	 * @param int $size The fragment size
+	 * @param int|null $size The fragment size
 	 * @param int $limit The maximum number of words to return
 	 * @param string $tag_left The left highlight tag
 	 * @param string $tag_right The right highlight tag
@@ -65,36 +65,36 @@ class FragmentHighlighter implements Highlighter {
 		$this->limit = $limit;
 		$this->tag_left = $tag_left;
 		$this->tag_right = $tag_right;
-        $this->fields = $properties;
+		$this->fields = $properties;
 	}
 
-    /**
-     * @inheritDoc
-     */
-    public function toQuery(): Highlight {
-        $highlight = new Highlight();
-        $highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
+	/**
+	 * @inheritDoc
+	 */
+	public function toQuery(): Highlight {
+		$highlight = new Highlight();
+		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
-        $common_field_settings = [
-            "fragment_size" => $this->size,
-            "number_of_fragments" => $this->limit
-        ];
+		$common_field_settings = [
+			"fragment_size" => $this->size,
+			"number_of_fragments" => $this->limit
+		];
 
-        foreach ( $this->fields as $field ) {
-            $field_settings = $common_field_settings;
+		foreach ( $this->fields as $field ) {
+			$field_settings = $common_field_settings;
 
-            if ( $this->highlighter_type === "fvh" && $field->supportsFVH() ) {
-                // TODO: Support different highlighter types
-                $field_settings['type'] = $this->highlighter_type;
-            }
+			if ( $this->highlighter_type === "fvh" && $field->supportsFVH() ) {
+				// TODO: Support different highlighter types
+				$field_settings['type'] = $this->highlighter_type;
+			}
 
-            if ( $field->hasSearchSubfield() ) {
-                $field_settings['matched_fields'] = [$field->getPropertyField(), $field->getSearchField()];
-            }
+			if ( $field->hasSearchSubfield() ) {
+				$field_settings['matched_fields'] = [ $field->getPropertyField(), $field->getSearchField() ];
+			}
 
-            $highlight->addField( $field->getPropertyField(), $field_settings );
-        }
+			$highlight->addField( $field->getPropertyField(), $field_settings );
+		}
 
-        return $highlight;
-    }
+		return $highlight;
+	}
 }

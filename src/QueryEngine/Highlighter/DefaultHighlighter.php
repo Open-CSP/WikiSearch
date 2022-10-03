@@ -68,21 +68,21 @@ class DefaultHighlighter implements Highlighter {
 		$highlight = new Highlight();
 		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
 
-        $highlighter_type = $this->config->getSearchParameter( "highlighter type" );
+		$highlighter_type = $this->config->getSearchParameter( "highlighter type" );
 
 		foreach ( $this->fields as $field ) {
-            $field_settings = $this->common_field_settings;
+			$field_settings = $this->common_field_settings;
 
-            if ( $highlighter_type === "fvh" && $field->supportsFVH() ) {
-                // TODO: Support different highlighter types
-                $field_settings['type'] = $highlighter_type;
-            }
+			if ( $highlighter_type === "fvh" && $field->supportsFVH() ) {
+				// TODO: Support different highlighter types
+				$field_settings['type'] = $highlighter_type;
+			}
 
-            if ( $field->hasSearchSubfield() ) {
-                $field_settings['matched_fields'] = [$field->getPropertyField(), $field->getSearchField()];
-            }
+			if ( $field->hasSearchSubfield() ) {
+				$field_settings['matched_fields'] = [ $field->getPropertyField(), $field->getSearchField() ];
+			}
 
-            $highlight->addField( $field->getPropertyField(), $field_settings );
+			$highlight->addField( $field->getPropertyField(), $field_settings );
 		}
 
 		return $highlight;
@@ -102,11 +102,11 @@ class DefaultHighlighter implements Highlighter {
 			return $properties;
 		}
 
-        // Fallback fields if no field is specified in the highlighted properties or search term properties
-        return [
-            new PropertyFieldMapper( "text_raw" ),
-            new PropertyFieldMapper( "text_copy" ),
-            new PropertyFieldMapper( "attachment-content" )
-        ];
+		// Fallback fields if no field is specified in the highlighted properties or search term properties
+		return [
+			new PropertyFieldMapper( "text_raw" ),
+			new PropertyFieldMapper( "text_copy" ),
+			new PropertyFieldMapper( "attachment-content" )
+		];
 	}
 }
