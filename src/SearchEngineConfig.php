@@ -266,6 +266,11 @@ class SearchEngineConfig {
 		}
 
 		$search_parameter_value_raw = $this->search_parameters[$parameter];
+
+        if ( empty( $search_parameter_value_raw ) ) {
+            return false;
+        }
+
 		$search_parameter_type = self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ?? "untyped";
 
 		switch ( $search_parameter_type ) {
