@@ -271,18 +271,24 @@ class SearchEngineConfig {
             return false;
         }
 
-		$search_parameter_type = self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ?? "untyped";
+		$search_parameter_type = self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ?? "string";
+
+        if ( $search_parameter_value_raw === true && $search_parameter_type !== "flag" ) {
+            // Only a flag is valid without a value
+            return false;
+        }
 
 		switch ( $search_parameter_type ) {
 			case "integer":
-				$search_parameter_value = intval( $search_parameter_value_raw );
+				$search_parameter_value = intval( trim( $search_parameter_value_raw ) );
 				break;
 			case "string":
 				$search_parameter_value = trim( $search_parameter_value_raw );
 				break;
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				break;
+                $search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
+                break;
 			case "propertylist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
 				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
@@ -292,7 +298,9 @@ class SearchEngineConfig {
 				}, $search_parameter_value );
 				break;
 			default:
-				$search_parameter_value = $search_parameter_value_raw;
+                // Interpret as string
+                $search_parameter_value = trim( $search_parameter_value_raw );
+                break;
 		}
 
 		$this->search_parameters_cache[$parameter] = $search_parameter_value;
