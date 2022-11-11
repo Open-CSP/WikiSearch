@@ -55,25 +55,16 @@ class ScribuntoLuaLibrary extends \Scribunto_LuaLibraryBase {
      * @throws MWException
      */
     public function propValues( array $properties ): array {
-        $limit = $properties["limit"] ?? "100";
+        $limit = $properties["limit"] ?? 100;
         $property = $properties["property"] ?? "";
-        $arrayName = $properties["array"] ?? "";
         $dateProperty = $properties["date property"] ?? "Modification date";
-        $from = $properties["from"] ?? "1";
-        $to = $properties["to"] ?? "5000";
+        $from = $properties["from"] ?? 1;
+        $to = $properties["to"] ?? 5000;
         $baseQuery = $properties["query"] ?? null;
 
-        if ( !$property || !$arrayName ) {
+        if ( !$property || !is_int( $limit ) || !is_int( $from ) || !is_int( $to ) ) {
             return [ null ];
         }
-
-        if ( !ctype_digit( $from ) || !ctype_digit( $to ) || !ctype_digit( $limit ) ) {
-            return [ null ];
-        }
-
-        $from = intval( $from );
-        $to = intval( $to );
-        $limit = intval( $limit );
 
         if (
             $from < 0 || $from > 9999 || // From range check
