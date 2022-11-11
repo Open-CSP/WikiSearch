@@ -92,8 +92,7 @@
 								"search": {
 									"type": "text",
 									"analyzer": "search",
-									"term_vector": "with_positions_offsets",
-									"normalizer": "lowercase_normalizer"
+									"term_vector": "with_positions_offsets"
 								}
 							}
 						}
@@ -237,8 +236,7 @@
 						"search": {
 							"type": "text",
 							"analyzer": "search",
-							"term_vector": "with_positions_offsets",
-							"normalizer": "lowercase_normalizer"
+							"term_vector": "with_positions_offsets"
 						}
 					}
 				},
@@ -250,8 +248,7 @@
 						"search": {
 							"type": "text",
 							"analyzer": "search",
-							"term_vector": "with_positions_offsets",
-							"normalizer": "lowercase_normalizer"
+							"term_vector": "with_positions_offsets"
 						}
 					}
 				},
@@ -271,8 +268,7 @@
 						"search": {
 							"type": "text",
 							"analyzer": "search",
-							"term_vector": "with_positions_offsets",
-							"normalizer": "lowercase_normalizer"
+							"term_vector": "with_positions_offsets"
 						}
 					}
 				},
