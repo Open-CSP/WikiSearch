@@ -13,6 +13,7 @@ use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
  * Class PropertyValuesParserFunction
  *
  * @package WikiSearch
+ * @deprecated Use Lua function instead
  */
 class PropertyValuesParserFunction {
 	/**

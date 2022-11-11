@@ -38,6 +38,7 @@ use Status;
 use Title;
 use User;
 use WikiPage;
+use WikiSearch\Scribunto\ScribuntoLuaLibrary;
 use WikiSearch\SMW\Annotators\Annotator;
 use WikiSearch\SMW\PropertyInitializer;
 
@@ -215,6 +216,26 @@ abstract class WikiSearchHooks {
 		$propertyInitializer = new PropertyInitializer( $propertyRegistry );
 		$propertyInitializer->initProperties();
 	}
+
+    /**
+     * Allow extensions to add libraries to Scribunto.
+     *
+     * @link https://www.mediawiki.org/wiki/Extension:Scribunto/Hooks/ScribuntoExternalLibraries
+     *
+     * @param string $engine
+     * @param array $extraLibraries
+     * @return bool
+     */
+    public static function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ): bool {
+        if ( $engine !== 'lua' ) {
+            // Don't mess with other engines
+            return true;
+        }
+
+        $extraLibraries['wikisearch'] = ScribuntoLuaLibrary::class;
+
+        return true;
+    }
 
 	/**
 	 * Hook to extend the SemanticData object before the update is completed.
