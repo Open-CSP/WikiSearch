@@ -99,8 +99,8 @@ class SearchTermFilter extends AbstractFilter {
 				"fields" => $this->property_fields,
 				"default_operator" => $this->default_operator,
 				"analyze_wildcard" => true,
-                "tie_breaker" => 1,
-                "lenient" => true
+				"tie_breaker" => 1,
+				"lenient" => true
 			] );
 
 			$bool_query->add( $query_string_query, BoolQuery::SHOULD );

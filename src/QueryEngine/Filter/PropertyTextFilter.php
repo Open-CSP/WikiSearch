@@ -108,9 +108,9 @@ class PropertyTextFilter extends PropertyFilter {
 		$query_string_query->setParameters( [
 			"fields" => $fields,
 			"default_operator" => $this->default_operator,
-            "analyze_wildcard" => true,
-            "tie_breaker" => 1,
-            "lenient" => true
+			"analyze_wildcard" => true,
+			"tie_breaker" => 1,
+			"lenient" => true
 		] );
 
 		$bool_query = new BoolQuery();
