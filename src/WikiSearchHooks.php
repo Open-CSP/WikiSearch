@@ -334,7 +334,7 @@ abstract class WikiSearchHooks {
 	 */
 	private static function error( string $message, array $params = [] ): string {
 		return \Html::rawElement(
-			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->toString()
+			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->text()
 		);
 	}
 }
