@@ -22,7 +22,12 @@ class ParsedTextAnnotator implements Annotator {
 	 * @inheritDoc
 	 */
 	public static function addAnnotation( Content $content, ParserOutput $parserOutput, SemanticData $semanticData ): void {
-		$output = self::getParserOutput( $content, $semanticData->getSubject()->getTitle() ) ?? $parserOutput;
+		$output = self::getParserOutput( $content, $semanticData->getSubject()->getTitle() );
+
+		if ( $output === null ) {
+			// The content is not wikitext, so it does not make sense to add the parsed text annotation
+			return;
+		}
 
 		// Get the HTML from the ParserOutput object
 		$html = $output->getText();
@@ -114,7 +119,7 @@ class ParsedTextAnnotator implements Annotator {
 	 *
 	 * @param Content $content The content to get the parser output for
 	 * @param Title $title
-	 * @return ParserOutput
+	 * @return ParserOutput|null
 	 */
 	private static function getParserOutput( Content $content, Title $title ): ?ParserOutput {
 		if ( $content->getModel() !== CONTENT_MODEL_WIKITEXT ) {
