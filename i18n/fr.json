@@ -1,7 +1,7 @@
 {
-  "@métadonnées": {
-    "auteurs": [
-      "Marijn van Wezel"
+  "@metadata": {
+    "authors": [
+      "Bertrand Gorge"
     ]
   },
   "wikisearch-desc": "Recherche à facettes pour Semantic MediaWiki",
