@@ -3,7 +3,7 @@
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "6.3.1",
+	"version": "6.4.1",
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSearch",
 	"descriptionmsg": "wikisearch-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -44,7 +44,8 @@
 		"LoadExtensionSchemaUpdates": "WikiSearch\\WikiSearchHooks::onLoadExtensionSchemaUpdates",
 		"BeforePageDisplay": "WikiSearch\\WikiSearchHooks::onBeforePageDisplay",
 		"SMW::Store::BeforeDataUpdateComplete": "WikiSearch\\WikiSearchHooks::onBeforeDataUpdateComplete",
-		"SMW::Property::initProperties": "WikiSearch\\WikiSearchHooks::onInitProperties"
+		"SMW::Property::initProperties": "WikiSearch\\WikiSearchHooks::onInitProperties",
+		"ScribuntoExternalLibraries": "WikiSearch\\WikiSearchHooks::onScribuntoExternalLibraries"
 	},
 	"config": {
 		"WikiSearchElasticStoreIndex": {
