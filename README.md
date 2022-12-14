@@ -1,7 +1,6 @@
 # WikiSearch
 
-This document describes how to use WikiSearch. It is meant for both wiki-administrators as well as external users using the
-API endpoint.
+This document describes how to use the WikiSearch API. For a more beginner-friendly introduction to WikiSearch, you should read the documentation on the [MediaWiki extension page](https://www.mediawiki.org/wiki/Extension:WikiSearch).
 
 ## Performing a search
 
@@ -560,7 +559,7 @@ depend completely on the frontend.
 ## Copyright
 
 Faceted search for MediaWiki.
-Copyright (C) 2021 Marijn van Wezel, Robis Koopmans
+Copyright (C) 2021- Marijn van Wezel, Robis Koopmans
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
