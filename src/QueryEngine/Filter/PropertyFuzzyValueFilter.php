@@ -25,10 +25,10 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 	 */
 	private PropertyFieldMapper $property;
 
-    /**
-     * @var string|int The fuzziness to use, or "AUTO"
-     */
-    private $fuzziness;
+	/**
+	 * @var string|int The fuzziness to use, or "AUTO"
+	 */
+	private $fuzziness;
 
 	/**
 	 * @var mixed The value the property to filter on
@@ -40,7 +40,7 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 	 *
 	 * @param PropertyFieldMapper|string $property The name or object of the property to filter on
 	 * @param string $property_value The value the property to filter on
-     * @param string|int $fuzziness The fuzziness to use, or "AUTO"
+	 * @param string|int $fuzziness The fuzziness to use, or "AUTO"
 	 */
 	public function __construct( $property, string $property_value, $fuzziness = "AUTO" ) {
 		if ( is_string( $property ) ) {
@@ -58,22 +58,22 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
 		}
 
-        if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
-            Logger::getLogger()->critical(
-                'Tried to construct a PropertyFuzzyValueFilter with an invalid fuzziness parameter: {fuzziness}',
-                [
-                    'fuzziness' => $fuzziness
-                ]
-            );
+		if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
+			Logger::getLogger()->critical(
+				'Tried to construct a PropertyFuzzyValueFilter with an invalid fuzziness parameter: {fuzziness}',
+				[
+					'fuzziness' => $fuzziness
+				]
+			);
 
-            throw new InvalidArgumentException(
-                '$fuzziness must be "AUTO" or a positive integer'
-            );
-        }
+			throw new InvalidArgumentException(
+				'$fuzziness must be "AUTO" or a positive integer'
+			);
+		}
 
 		$this->property = $property;
 		$this->property_value = $property_value;
-        $this->fuzziness = $fuzziness;
+		$this->fuzziness = $fuzziness;
 	}
 
 	/**
@@ -103,26 +103,26 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 		$this->property_value = $property_value;
 	}
 
-    /**
-     * Sets the value of the fuzziness parameter this filter will use.
-     *
-     * @param string|int $fuzziness The fuzziness to use, or "AUTO"
-     * @return void
-     */
-    public function setFuzziness( $fuzziness ): void {
-        if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
-            Logger::getLogger()->critical(
-                'Tried to set an invalid value for fuzziness: {fuzziness}',
-                [
-                    'fuzziness' => $fuzziness
-                ]
-            );
+	/**
+	 * Sets the value of the fuzziness parameter this filter will use.
+	 *
+	 * @param string|int $fuzziness The fuzziness to use, or "AUTO"
+	 * @return void
+	 */
+	public function setFuzziness( $fuzziness ): void {
+		if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
+			Logger::getLogger()->critical(
+				'Tried to set an invalid value for fuzziness: {fuzziness}',
+				[
+					'fuzziness' => $fuzziness
+				]
+			);
 
-            throw new InvalidArgumentException(
-                '$fuzziness must be "AUTO" or a positive integer'
-            );
-        }
-    }
+			throw new InvalidArgumentException(
+				'$fuzziness must be "AUTO" or a positive integer'
+			);
+		}
+	}
 
 	/**
 	 * Converts the object to a BuilderInterface for use in the QueryEngine.
@@ -134,11 +134,11 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 			$this->property->getKeywordField() :
 			$this->property->getPropertyField();
 
-        $parameters = [
-            "fuzziness" => $this->fuzziness
-        ];
+		$parameters = [
+			"fuzziness" => $this->fuzziness
+		];
 
-        $fuzzy_query = new FuzzyQuery( $field, $this->property_value, $parameters );
+		$fuzzy_query = new FuzzyQuery( $field, $this->property_value, $parameters );
 
 		$bool_query = new BoolQuery();
 		$bool_query->add( $fuzzy_query, BoolQuery::FILTER );

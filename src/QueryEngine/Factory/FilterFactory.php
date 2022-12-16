@@ -52,9 +52,9 @@ class FilterFactory {
 
 		$filter = self::filterFromArray( $array, $property_field_mapper, $config );
 
-        if ( $filter === null ) {
-            return null;
-        }
+		if ( $filter === null ) {
+			return null;
+		}
 
 		if ( in_array( $array["key"], $config->getSearchParameter( "post filter properties" ), true ) ) {
 			$filter->setPostFilter();
@@ -171,22 +171,22 @@ class FilterFactory {
 				$default_operator = $config->getSearchParameter( "default operator" ) === "and" ?
 					"and" : "or";
 				return self::propertyTextFilterFromText( $array["value"], $default_operator, $property_field_mapper );
-            case "fuzzy":
-                if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
-                    Logger::getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+			case "fuzzy":
+				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
+					Logger::getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
 
-                    return null;
-                }
+					return null;
+				}
 
-                $fuzziness = $array["fuzziness"] ?? "AUTO";
+				$fuzziness = $array["fuzziness"] ?? "AUTO";
 
-                if ( $fuzziness !== "AUTO" &&  ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
-                    Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
+				if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
+					Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
 
-                    return null;
-                }
+					return null;
+				}
 
-                return self::propertyFuzzyValueFilterFromText( $array["value"], $fuzziness, $property_field_mapper );
+				return self::propertyFuzzyValueFilterFromText( $array["value"], $fuzziness, $property_field_mapper );
 			default:
 				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
 
@@ -256,17 +256,17 @@ class FilterFactory {
 		return new PropertyValuesFilter( $property_field_mapper, $values );
 	}
 
-    /**
-     * @param string $value
-     * @param string|int $fuzziness
-     * @param PropertyFieldMapper $property_field_mapper
-     * @return PropertyFuzzyValueFilter
-     */
-    private static function propertyFuzzyValueFilterFromText(
-        string $value,
-        $fuzziness,
-        PropertyFieldMapper $property_field_mapper
-    ): PropertyFuzzyValueFilter {
-        return new PropertyFuzzyValueFilter( $property_field_mapper, $value, $fuzziness );
-    }
+	/**
+	 * @param string $value
+	 * @param string|int $fuzziness
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return PropertyFuzzyValueFilter
+	 */
+	private static function propertyFuzzyValueFilterFromText(
+		string $value,
+		$fuzziness,
+		PropertyFieldMapper $property_field_mapper
+	): PropertyFuzzyValueFilter {
+		return new PropertyFuzzyValueFilter( $property_field_mapper, $value, $fuzziness );
+	}
 }
