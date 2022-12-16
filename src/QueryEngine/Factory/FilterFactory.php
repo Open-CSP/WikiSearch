@@ -18,6 +18,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
 /**
  * Class FilterFactory
  *
+ * TODO: Rewrite this relatively messy parser and add appropriate error messages.
+ *
  * @package WikiSearch\QueryEngine\Factory
  */
 class FilterFactory {
