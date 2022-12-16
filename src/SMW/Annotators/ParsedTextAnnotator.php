@@ -99,6 +99,11 @@ class ParsedTextAnnotator implements Annotator {
 			$element->parentNode->removeChild( $element );
 		}
 
+		$query = $selector->query( '//*[contains(attribute::class, "searchaux")]' );
+		foreach ( $query as $element ) {
+			$element->parentNode->removeChild( $element );
+		}
+
 		$html = $dom->saveHTML();
 
 		return str_replace( "<", " <", $html );
