@@ -52,6 +52,10 @@ class FilterFactory {
 
 		$filter = self::filterFromArray( $array, $property_field_mapper, $config );
 
+        if ( $filter === null ) {
+            return null;
+        }
+
 		if ( in_array( $array["key"], $config->getSearchParameter( "post filter properties" ), true ) ) {
 			$filter->setPostFilter();
 		}
@@ -60,7 +64,7 @@ class FilterFactory {
 			$filter->setNegated();
 		}
 
-		if ( $filter !== null && $property_field_mapper->isChained() ) {
+		if ( $property_field_mapper->isChained() ) {
 			$filter = new ChainedPropertyFilter( $filter );
 		}
 
