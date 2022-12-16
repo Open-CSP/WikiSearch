@@ -7,6 +7,7 @@ use WikiSearch\QueryEngine\Filter\AbstractFilter;
 use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WikiSearch\QueryEngine\Filter\HasPropertyFilter;
 use WikiSearch\QueryEngine\Filter\PropertyFilter;
+use WikiSearch\QueryEngine\Filter\PropertyFuzzyValueFilter;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WikiSearch\QueryEngine\Filter\PropertyTextFilter;
 use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
@@ -145,7 +146,7 @@ class FilterFactory {
 	 * @param array $array
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @param SearchEngineConfig $config
-	 * @return PropertyTextFilter|null
+	 * @return PropertyTextFilter|PropertyFuzzyValueFilter|null
 	 */
 	private static function typeFilterFromArray(
 		string $type,
@@ -164,6 +165,22 @@ class FilterFactory {
 				$default_operator = $config->getSearchParameter( "default operator" ) === "and" ?
 					"and" : "or";
 				return self::propertyTextFilterFromText( $array["value"], $default_operator, $property_field_mapper );
+            case "fuzzy":
+                if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
+                    Logger::getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+
+                    return null;
+                }
+
+                $fuzziness = $array["fuzziness"] ?? "AUTO";
+
+                if ( $fuzziness !== "AUTO" &&  ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
+                    Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
+
+                    return null;
+                }
+
+                return self::propertyFuzzyValueFilterFromText( $array["value"], $fuzziness, $property_field_mapper );
 			default:
 				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
 
@@ -232,4 +249,18 @@ class FilterFactory {
 	): PropertyValuesFilter {
 		return new PropertyValuesFilter( $property_field_mapper, $values );
 	}
+
+    /**
+     * @param string $value
+     * @param string|int $fuzziness
+     * @param PropertyFieldMapper $property_field_mapper
+     * @return PropertyFuzzyValueFilter
+     */
+    private static function propertyFuzzyValueFilterFromText(
+        string $value,
+        $fuzziness,
+        PropertyFieldMapper $property_field_mapper
+    ): PropertyFuzzyValueFilter {
+        return new PropertyFuzzyValueFilter( $property_field_mapper, $value, $fuzziness );
+    }
 }
