@@ -81,9 +81,9 @@ class QueryEngine {
     /**
      * List of properties to include in the "_source" field.
      *
-     * @var string
+     * @var array
      */
-    private string $sources;
+    private array $sources;
 
     /**
 	 * QueryEngine constructor.
@@ -185,7 +185,7 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
      */
     public function addSource( string $source ): void {
-        $this->sources = $source;
+        $this->sources[] = $source;
     }
 
 	/**
