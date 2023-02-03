@@ -50,6 +50,7 @@ class QueryEngineFactory {
             // Include this property and any sub-properties in the result
             $source = $result_property->getPropertyField() . ".*";
 
+            $query_engine->addSource( $source );
         }
 
 		// Configure the base query
