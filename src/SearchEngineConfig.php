@@ -202,7 +202,7 @@ class SearchEngineConfig {
 			$translation_pair = explode( "=", $property );
 			$property_name = $translation_pair[0];
 
-            $this->facet_properties[] = new PropertyFieldMapper( $property_name );
+			$this->facet_properties[] = new PropertyFieldMapper( $property_name );
 
 			if ( isset( $translation_pair[1] ) ) {
 				$this->translations[$property_name] = $translation_pair[1];
@@ -353,8 +353,8 @@ class SearchEngineConfig {
 		$page_id = $this->title->getArticleID();
 
 		$facet_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
-            return $property->getPropertyKey();
-        }, $this->facet_properties ) );
+			return $property->getPropertyKey();
+		}, $this->facet_properties ) );
 
 		$result_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
 			return $property->getPropertyKey();

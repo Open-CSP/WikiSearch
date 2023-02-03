@@ -78,14 +78,14 @@ class QueryEngine {
 	 */
 	private array $post_filters = [];
 
-    /**
-     * List of properties to include in the "_source" field.
-     *
-     * @var array
-     */
-    private array $sources;
+	/**
+	 * List of properties to include in the "_source" field.
+	 *
+	 * @var array
+	 */
+	private array $sources;
 
-    /**
+	/**
 	 * QueryEngine constructor.
 	 *
 	 * @param string $index The ElasticSearch index to create the queries for
@@ -173,20 +173,20 @@ class QueryEngine {
 		$this->elasticsearch_search->addSort( $sort->toQuery() );
 	}
 
-    /**
-     * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
-     * be returned from a search query.
-     *
-     * If no "_source" parameters are set, all fields are returned.
-     *
-     * @param string $source
-     * @return void
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
-     */
-    public function addSource( string $source ): void {
-        $this->sources[] = $source;
-    }
+	/**
+	 * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
+	 * be returned from a search query.
+	 *
+	 * If no "_source" parameters are set, all fields are returned.
+	 *
+	 * @param string $source
+	 * @return void
+	 *
+	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
+	 */
+	public function addSource( string $source ): void {
+		$this->sources[] = $source;
+	}
 
 	/**
 	 * Sets the "index" to use for the ElasticSearch query.
@@ -263,17 +263,17 @@ class QueryEngine {
 
 		$elasticsearch_search = clone $this->elasticsearch_search;
 
-        // Add aggregations and post-filters to the query
+		// Add aggregations and post-filters to the query
 		$elasticsearch_search = $this->applyAggregationsAndPostFilters(
 			$elasticsearch_search,
 			$this->aggregations,
 			$this->post_filters
 		);
 
-        // Add source filtering to the query
-        if ( !empty( $this->sources ) ) {
-            $this->elasticsearch_search->setSource( $this->sources );
-        }
+		// Add source filtering to the query
+		if ( !empty( $this->sources ) ) {
+			$this->elasticsearch_search->setSource( $this->sources );
+		}
 
 		$query = [
 			"index" => $this->elasticsearch_index,
@@ -281,8 +281,8 @@ class QueryEngine {
 		];
 
 		if ( isset( $this->base_query ) ) {
-            // Combine any base query with the generated query
-            $combinator = new QueryCombinator( $query );
+			// Combine any base query with the generated query
+			$combinator = new QueryCombinator( $query );
 			$query = $combinator->add( $this->base_query )->getQuery();
 		}
 

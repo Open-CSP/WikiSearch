@@ -46,12 +46,12 @@ class QueryEngineFactory {
 			$query_engine->addAggregation( $aggregation );
 		}
 
-        foreach ( $config->getResultProperties() as $result_property ) {
-            // Include this property and any sub-properties in the result
-            $source = $result_property->getPropertyField() . ".*";
+		foreach ( $config->getResultProperties() as $result_property ) {
+			// Include this property and any sub-properties in the result
+			$source = $result_property->getPID() . ".*";
 
-            $query_engine->addSource( $source );
-        }
+			$query_engine->addSource( $source );
+		}
 
 		// Configure the base query
 		if ( $config->getSearchParameter( "base query" ) !== false ) {

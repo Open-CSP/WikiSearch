@@ -7,7 +7,7 @@ use ParserOutput;
 use SMW\SemanticData;
 
 interface Annotator {
-    /**
+	/**
 	 * Analyze the given parser output and decorate the given semantic data object with the results.
 	 *
 	 * @param Content $content

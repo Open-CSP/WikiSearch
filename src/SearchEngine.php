@@ -158,7 +158,7 @@ class SearchEngine {
 		$aggregations = $results["aggregations"];
 
 		foreach ( $aggregations as $property_name => $aggregate_data ) {
-            $translations = $this->config->getPropertyTranslations();
+			$translations = $this->config->getPropertyTranslations();
 
 			if ( !isset( $translations[$property_name] ) ) {
 				// No translation available
