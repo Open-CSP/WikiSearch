@@ -273,6 +273,9 @@ class QueryEngine {
 		// Add source filtering to the query
 		if ( !empty( $this->sources ) ) {
 			$elasticsearch_search->setSource( $this->sources );
+		} else {
+			// No sources should be returned
+			$elasticsearch_search->setSource( false );
 		}
 
 		$query = [

@@ -180,6 +180,34 @@ class PropertyFieldMapper {
 	}
 
 	/**
+	 * Returns the type of this property.
+	 *
+	 * @return string
+	 * @deprecated Use getPropertyFieldType() instead
+	 */
+	public function getPropertyType(): string {
+		return sprintf( "%sField", $this->property_field_type );
+	}
+
+	/**
+	 * Returns the ID of the property.
+	 *
+	 * @return int
+	 */
+	public function getPropertyID(): int {
+		return $this->property_id;
+	}
+
+	/**
+	 * Returns the field type of this property.
+	 *
+	 * @return string
+	 */
+	public function getPropertyFieldType(): string {
+		return $this->property_field_type;
+	}
+
+	/**
 	 * Returns the field associated with this property.
 	 *
 	 * @return string
