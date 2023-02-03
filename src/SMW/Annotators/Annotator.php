@@ -7,15 +7,7 @@ use ParserOutput;
 use SMW\SemanticData;
 
 interface Annotator {
-	public const ANNOTATORS = [
-		AltTextAnnotator::class,
-		ImagesAnnotator::class,
-		InternalLinksAnnotator::class,
-		ExternalLinksAnnotator::class,
-		ParsedTextAnnotator::class
-	];
-
-	/**
+    /**
 	 * Analyze the given parser output and decorate the given semantic data object with the results.
 	 *
 	 * @param Content $content

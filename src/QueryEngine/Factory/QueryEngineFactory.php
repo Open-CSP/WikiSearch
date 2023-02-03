@@ -38,13 +38,19 @@ class QueryEngineFactory {
 
 		foreach ( $config->getFacetProperties() as $facet_property ) {
 			$aggregation = new PropertyValueAggregation(
-				explode( "=", $facet_property )[0],
+				$facet_property,
 				null,
 				$aggregation_size
 			);
 
 			$query_engine->addAggregation( $aggregation );
 		}
+
+        foreach ( $config->getResultProperties() as $result_property ) {
+            // Include this property and any sub-properties in the result
+            $source = $result_property->getPropertyField() . ".*";
+
+        }
 
 		// Configure the base query
 		if ( $config->getSearchParameter( "base query" ) !== false ) {

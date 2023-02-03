@@ -153,34 +153,6 @@ class PropertyFieldMapper {
 	}
 
 	/**
-	 * Returns the type of this property.
-	 *
-	 * @return string
-	 * @deprecated Use getPropertyFieldType() instead
-	 */
-	public function getPropertyType(): string {
-		return sprintf( "%sField", $this->property_field_type );
-	}
-
-	/**
-	 * Returns the ID of the property.
-	 *
-	 * @return int
-	 */
-	public function getPropertyID(): int {
-		return $this->property_id;
-	}
-
-	/**
-	 * Returns the field type of this property.
-	 *
-	 * @return string
-	 */
-	public function getPropertyFieldType(): string {
-		return $this->property_field_type;
-	}
-
-	/**
 	 * Returns the key of this property.
 	 *
 	 * @return string
@@ -205,15 +177,6 @@ class PropertyFieldMapper {
 	 */
 	public function getPID(): string {
 		return "P:{$this->property_id}";
-	}
-
-	/**
-	 * Returns the weight this property was given.
-	 *
-	 * @return int
-	 */
-	public function getPropertyWeight(): int {
-		return $this->property_weight;
 	}
 
 	/**
@@ -258,16 +221,6 @@ class PropertyFieldMapper {
 	 */
 	public function getWeightedPropertyField(): string {
 		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
-	}
-
-	/**
-	 * Returns the keyword subfield associated with this property, if it exists, with the weight. The caller is
-	 * responsible for checking if this field exists.
-	 *
-	 * @return string
-	 */
-	public function getWeightedKeywordField(): string {
-		return sprintf( "%s^%d", $this->getKeywordField(), $this->property_weight );
 	}
 
 	/**

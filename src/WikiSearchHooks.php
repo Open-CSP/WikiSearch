@@ -267,7 +267,7 @@ abstract class WikiSearchHooks {
 
 		$output = $content->getParserOutput( $subjectTitle );
 
-		foreach ( Annotator::ANNOTATORS as $annotator ) {
+		foreach ( PropertyInitializer::getAnnotators() as $annotator ) {
 			// Decorate the semantic data object with the annotation
 			$annotator::addAnnotation( $content, $output, $semanticData );
 		}
