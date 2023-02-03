@@ -190,7 +190,7 @@ class PropertyFieldMapper {
 			return $this->property_key;
 		}
 
-		return sprintf( "%s.%sField", $this->getPID(), $this->getPropertyFieldType() );
+		return sprintf( "%s.%sField", $this->getPID(), $this->property_field_type );
 	}
 
 	/**
