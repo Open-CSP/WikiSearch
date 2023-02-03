@@ -83,7 +83,10 @@ class QueryEngine {
 	 *
 	 * @var array
 	 */
-	private array $sources;
+	private array $sources = [
+		'subject.*', // Subject metadata
+		'P:29.*' // Modification date
+	];
 
 	/**
 	 * QueryEngine constructor.
@@ -271,12 +274,7 @@ class QueryEngine {
 		);
 
 		// Add source filtering to the query
-		if ( !empty( $this->sources ) ) {
-			$elasticsearch_search->setSource( $this->sources );
-		} else {
-			// No sources should be returned
-			$elasticsearch_search->setSource( false );
-		}
+		$elasticsearch_search->setSource( $this->sources );
 
 		$query = [
 			"index" => $this->elasticsearch_index,
