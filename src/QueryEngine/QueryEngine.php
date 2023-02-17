@@ -85,6 +85,7 @@ class QueryEngine {
 	 */
 	private array $sources = [
 		'subject.*', // Subject metadata
+        'P:16.*', // Display title of
 		'P:29.*' // Modification date
 	];
 
