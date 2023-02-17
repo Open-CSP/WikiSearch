@@ -353,11 +353,14 @@ class SearchEngineConfig {
 		$page_id = $this->title->getArticleID();
 
 		$facet_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
-			return $property->getPropertyKey();
+            // Use 'getPropertyName' here to make sure that the value in the database corresponds directly to the
+            // value present in the parser function call (otherwise it might be translated to something else, causing
+            // several problems in the front-end)
+			return $property->getPropertyName();
 		}, $this->facet_properties ) );
 
 		$result_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
-			return $property->getPropertyKey();
+			return $property->getPropertyName();
 		}, $this->result_properties ) );
 
 		// Insert this object's facet properties
