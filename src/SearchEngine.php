@@ -38,12 +38,7 @@ class SearchEngine {
 	/**
 	 * @var SearchEngineConfig
 	 */
-	private ?SearchEngineConfig $config = null;
-
-	/**
-	 * @var array
-	 */
-	private array $translations;
+	private SearchEngineConfig $config;
 
 	/**
 	 * @var QueryEngine
@@ -53,11 +48,10 @@ class SearchEngine {
 	/**
 	 * Search constructor.
 	 *
-	 * @param SearchEngineConfig|null $config
+	 * @param SearchEngineConfig $config
 	 */
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
-		$this->translations = $config->getPropertyTranslations();
 		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
 	}
 
@@ -164,12 +158,14 @@ class SearchEngine {
 		$aggregations = $results["aggregations"];
 
 		foreach ( $aggregations as $property_name => $aggregate_data ) {
-			if ( !isset( $this->translations[$property_name] ) ) {
+			$translations = $this->config->getPropertyTranslations();
+
+			if ( !isset( $translations[$property_name] ) ) {
 				// No translation available
 				continue;
 			}
 
-			$parts = explode( ":", $this->translations[$property_name] );
+			$parts = explode( ":", $translations[$property_name] );
 
 			if ( $parts[0] === "namespace" ) {
 				foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {

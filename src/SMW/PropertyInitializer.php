@@ -2,13 +2,26 @@
 
 namespace WikiSearch\SMW;
 
+use MediaWiki\MediaWikiServices;
 use SMW\PropertyRegistry;
-use WikiSearch\SMW\Annotators\Annotator;
+use WikiSearch\SMW\Annotators\AltTextAnnotator;
+use WikiSearch\SMW\Annotators\ExternalLinksAnnotator;
+use WikiSearch\SMW\Annotators\ImagesAnnotator;
+use WikiSearch\SMW\Annotators\InternalLinksAnnotator;
+use WikiSearch\SMW\Annotators\ParsedTextAnnotator;
 
 /**
  * Initializes the predefined properties that may be used for search.
  */
 class PropertyInitializer {
+	public const ANNOTATORS = [
+		AltTextAnnotator::class,
+		ImagesAnnotator::class,
+		InternalLinksAnnotator::class,
+		ExternalLinksAnnotator::class,
+		ParsedTextAnnotator::class
+	];
+
 	/**
 	 * @var PropertyRegistry The PropertyRegistry in which to initialise the predefined properties
 	 */
@@ -19,6 +32,20 @@ class PropertyInitializer {
 	 */
 	public function __construct( PropertyRegistry $registry ) {
 		$this->registry = $registry;
+	}
+
+	/**
+	 * Returns the array of enabled annotators. Annotators can be disabled by adding their ID to the
+	 * $wgWikiSearchDisabledAnnotators array.
+	 *
+	 * @return array
+	 */
+	public static function getAnnotators(): array {
+		$disabledAnnotators = MediaWikiServices::getInstance()->getMainConfig()->get( "WikiSearchDisabledAnnotators" );
+
+		return array_filter( self::ANNOTATORS, function ( $class ) use ( $disabledAnnotators ): bool {
+			return !in_array( $class::getId(), $disabledAnnotators, true );
+		} );
 	}
 
 	/**
@@ -67,9 +94,8 @@ class PropertyInitializer {
 	 */
 	public function getPropertyDefinitions(): array {
 		$definitions = [];
-		$annotators = Annotator::ANNOTATORS;
 
-		foreach ( $annotators as $annotation ) {
+		foreach ( self::getAnnotators() as $annotation ) {
 			$definitions[$annotation::getId()] = $annotation::getDefinition();
 		}
 

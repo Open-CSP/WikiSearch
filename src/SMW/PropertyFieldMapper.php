@@ -153,6 +153,33 @@ class PropertyFieldMapper {
 	}
 
 	/**
+	 * Returns the key of this property.
+	 *
+	 * @return string
+	 */
+	public function getPropertyKey(): string {
+		return $this->property_key;
+	}
+
+	/**
+	 * Returns the human-readable name of this property.
+	 *
+	 * @return string
+	 */
+	public function getPropertyName(): string {
+		return $this->property_name;
+	}
+
+	/**
+	 * Returns this property's PID.
+	 *
+	 * @return string
+	 */
+	public function getPID(): string {
+		return "P:{$this->property_id}";
+	}
+
+	/**
 	 * Returns the type of this property.
 	 *
 	 * @return string
@@ -181,42 +208,6 @@ class PropertyFieldMapper {
 	}
 
 	/**
-	 * Returns the key of this property.
-	 *
-	 * @return string
-	 */
-	public function getPropertyKey(): string {
-		return $this->property_key;
-	}
-
-	/**
-	 * Returns the human-readable name of this property.
-	 *
-	 * @return string
-	 */
-	public function getPropertyName(): string {
-		return $this->property_name;
-	}
-
-	/**
-	 * Returns this property's PID.
-	 *
-	 * @return string
-	 */
-	public function getPID(): string {
-		return "P:{$this->property_id}";
-	}
-
-	/**
-	 * Returns the weight this property was given.
-	 *
-	 * @return int
-	 */
-	public function getPropertyWeight(): int {
-		return $this->property_weight;
-	}
-
-	/**
 	 * Returns the field associated with this property.
 	 *
 	 * @return string
@@ -227,7 +218,7 @@ class PropertyFieldMapper {
 			return $this->property_key;
 		}
 
-		return sprintf( "%s.%sField", $this->getPID(), $this->getPropertyFieldType() );
+		return sprintf( "%s.%sField", $this->getPID(), $this->property_field_type );
 	}
 
 	/**
@@ -258,16 +249,6 @@ class PropertyFieldMapper {
 	 */
 	public function getWeightedPropertyField(): string {
 		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
-	}
-
-	/**
-	 * Returns the keyword subfield associated with this property, if it exists, with the weight. The caller is
-	 * responsible for checking if this field exists.
-	 *
-	 * @return string
-	 */
-	public function getWeightedKeywordField(): string {
-		return sprintf( "%s^%d", $this->getKeywordField(), $this->property_weight );
 	}
 
 	/**

@@ -54,24 +54,14 @@ class SearchEngineConfig {
 	private array $search_parameters;
 
 	/**
-	 * @var array
+	 * @var PropertyFieldMapper[]
 	 */
 	private array $facet_properties;
 
 	/**
-	 * @var array
+	 * @var PropertyFieldMapper[]
 	 */
 	private array $result_properties;
-
-	/**
-	 * @var array
-	 */
-	private array $facet_property_ids = [];
-
-	/**
-	 * @var array
-	 */
-	private array $result_property_ids = [];
 
 	/**
 	 * @var array
@@ -198,7 +188,6 @@ class SearchEngineConfig {
 		array $result_properties
 	) {
 		$this->title = $title;
-		$this->facet_properties = $facet_properties;
 		$this->search_parameters = $search_parameters;
 
 		$result_properties = array_filter( $result_properties, function ( string $property_name ) {
@@ -213,16 +202,11 @@ class SearchEngineConfig {
 			$translation_pair = explode( "=", $property );
 			$property_name = $translation_pair[0];
 
+			$this->facet_properties[] = new PropertyFieldMapper( $property_name );
+
 			if ( isset( $translation_pair[1] ) ) {
 				$this->translations[$property_name] = $translation_pair[1];
 			}
-
-			$facet_property = new PropertyFieldMapper( $property_name );
-			$this->facet_property_ids[$property_name] = $facet_property->getPropertyID();
-		}
-
-		foreach ( $this->result_properties as $property ) {
-			$this->result_property_ids[$property->getPropertyName()] = $property->getPropertyID();
 		}
 
 		if ( isset( $search_parameters["base query"] ) ) {
@@ -321,24 +305,10 @@ class SearchEngineConfig {
 	 * Returns the facet properties (properties that are not prefixed with "?"). This may be
 	 * the name of the facet property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar").
 	 *
-	 * @return string[]
+	 * @return PropertyFieldMapper[]
 	 */
 	public function getFacetProperties(): array {
 		return $this->facet_properties;
-	}
-
-	/**
-	 * Returns key-value pairs of the property ID with the corresponding property type:
-	 *
-	 * [
-	 *      745 => "txtField",
-	 *      752 => "txtField"
-	 * ]
-	 *
-	 * @return array
-	 */
-	public function getFacetPropertyIDs(): array {
-		return $this->facet_property_ids;
 	}
 
 	/**
@@ -346,19 +316,10 @@ class SearchEngineConfig {
 	 * is the property from which the value will be used as the page link. Result properties
 	 * are the properties prefixed with a "?".
 	 *
-	 * @return \WikiSearch\SMW\PropertyFieldMapper[]
+	 * @return PropertyFieldMapper[]
 	 */
 	public function getResultProperties(): array {
 		return $this->result_properties;
-	}
-
-	/**
-	 * Returns the IDs for the result properties.
-	 *
-	 * @return int[]
-	 */
-	public function getResultPropertyIDs(): array {
-		return $this->result_property_ids;
 	}
 
 	/**
@@ -391,11 +352,16 @@ class SearchEngineConfig {
 	public function insert( DBConnRef $database ): void {
 		$page_id = $this->title->getArticleID();
 
-		$facet_properties = array_unique( $this->facet_properties );
-		$result_properties = array_map( function ( PropertyFieldMapper $property ): string {
-			return $property->getPropertyKey();
-		}, $this->result_properties );
-		$result_properties = array_unique( $result_properties );
+		$facet_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
+            // Use 'getPropertyName' here to make sure that the value in the database corresponds directly to the
+            // value present in the parser function call (otherwise it might be translated to something else, causing
+            // several problems in the front-end)
+			return $property->getPropertyName();
+		}, $this->facet_properties ) );
+
+		$result_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
+			return $property->getPropertyName();
+		}, $this->result_properties ) );
 
 		// Insert this object's facet properties
 		foreach ( $facet_properties as $property ) {
