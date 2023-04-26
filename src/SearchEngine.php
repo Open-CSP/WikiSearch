@@ -141,7 +141,7 @@ class SearchEngine {
 		$properties = $this->config->getResultProperties();
 
 		// Allow other extensions to modify the result
-		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, &$template ,&$properties ] );
+		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
 
 		return $results;
 	}
