@@ -137,9 +137,11 @@ class SearchEngine {
 	private function applyResultTranslations( array $results ): array {
 		$results = $this->doFacetTranslations( $results );
 		$results = $this->doNamespaceTranslations( $results );
+		$template = $this->config->getSearchParameter( "result template" );
+		$properties = $this->config->getResultProperties();
 
 		// Allow other extensions to modify the result
-		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results ] );
+		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
 
 		return $results;
 	}
