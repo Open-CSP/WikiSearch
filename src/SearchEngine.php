@@ -24,6 +24,7 @@ namespace WikiSearch;
 use Elasticsearch\ClientBuilder;
 use Exception;
 use Hooks;
+use MediaWiki\MediaWikiServices;
 use MWNamespace;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
@@ -171,7 +172,9 @@ class SearchEngine {
 
 			if ( $parts[0] === "namespace" ) {
 				foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
-					$namespace = MWNamespace::getCanonicalName( $bucket_value['key'] );
+					$namespace = MediaWikiServices::getInstance()
+                        ->getNamespaceInfo()
+                        ->getCanonicalName( $bucket_value['key'] );
 					$results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
 				}
 			}
@@ -189,7 +192,9 @@ class SearchEngine {
 	private function doNamespaceTranslations( array $results ): array {
 		// Translate namespace IDs to their canonical name
 		foreach ( $results['hits']['hits'] as $key => $value ) {
-			$namespace = MWNamespace::getCanonicalName( $value['_source']['subject']['namespace'] );
+			$namespace = MediaWikiServices::getInstance()
+                ->getNamespaceInfo()
+                ->getCanonicalName( $value['_source']['subject']['namespace'] );
 			$results['hits']['hits'][$key]['_source']['subject']['namespacename'] = $namespace;
 		}
 
