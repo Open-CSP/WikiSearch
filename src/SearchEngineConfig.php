@@ -199,6 +199,7 @@ class SearchEngineConfig {
 			return new PropertyFieldMapper( $property_name );
 		}, $result_properties );
 
+        $this->facet_properties = [];
 		foreach ( $facet_properties as $property ) {
 			$translation_pair = explode( "=", $property );
 			$property_name = $translation_pair[0];
