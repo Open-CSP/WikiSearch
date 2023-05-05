@@ -25,7 +25,6 @@ use Elasticsearch\ClientBuilder;
 use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
-use MWNamespace;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;

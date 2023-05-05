@@ -26,10 +26,10 @@ use ContentHandler;
 use DatabaseUpdater;
 use LogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
 use MWException;
 use OutputPage;
 use Parser;
-use Revision;
 use Skin;
 use SMW\PropertyRegistry;
 use SMW\SemanticData;
@@ -81,7 +81,7 @@ abstract class WikiSearchHooks {
 	 * @param mixed $is_watch
 	 * @param mixed $section
 	 * @param mixed $flags
-	 * @param Revision|null $revision Revision object of the saved content
+	 * @param RevisionRecord|null $revision Revision object of the saved content
 	 * @param Status $status Status object about to be returned by doEditContent()
 	 * @param mixed $original_revision_id
 	 * @param mixed $undid_revision_id
