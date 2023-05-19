@@ -128,9 +128,9 @@ class SearchEngine {
 		$results = $this->applyResultTranslations( $results );
 
 		return [
-			"hits"  => json_encode( $results["hits"]["hits"] ),
-			"total" => $results["hits"]["total"],
-			"aggs"  => $results["aggregations"]
+			"hits"  => json_encode( $results["hits"]["hits"] ?? [] ),
+			"total" => $results["hits"]["total"] ?? 0,
+			"aggs"  => $results["aggregations"] ?? []
 		];
 	}
 
