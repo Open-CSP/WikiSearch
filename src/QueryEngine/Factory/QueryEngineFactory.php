@@ -8,6 +8,7 @@ use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
+use WikiMap; // Note: MW 1.40+ will have MediaWiki\WikiMap\WikiMap instead
 
 class QueryEngineFactory {
 	/**
@@ -17,7 +18,7 @@ class QueryEngineFactory {
 	 */
 	public static function fromNull(): QueryEngine {
 		$mw_config = MediaWikiServices::getInstance()->getMainConfig();
-		$index = $mw_config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+		$index = $mw_config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( WikiMap::getCurrentWikiId() );
 
 		return new QueryEngine( $index, self::getElasticSearchHosts() );
 	}
@@ -30,7 +31,7 @@ class QueryEngineFactory {
 	 */
 	public static function fromSearchEngineConfig( SearchEngineConfig $config = null ): QueryEngine {
 		$mw_config = MediaWikiServices::getInstance()->getMainConfig();
-		$index = $mw_config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( wfWikiID() );
+		$index = $mw_config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( WikiMap::getCurrentWikiId() );
 		$query_engine = new QueryEngine( $index, self::getElasticSearchHosts() );
 
 		$aggregation_size = $config->getSearchParameter( "aggregation size" ) !== false ?
