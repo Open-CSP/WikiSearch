@@ -49,7 +49,8 @@ class FilterFactory {
 
 		$filter = self::filterFromArray( $array, $property_field_mapper, $config );
 
-		if ( in_array( $array["key"], $config->getSearchParameter( "post filter properties" ), true ) ) {
+        $post_filter_properties = $config->getSearchParameter( "post filter properties" );
+		if ( $post_filter_properties && in_array( $array["key"], $post_filter_properties, true ) ) {
 			$filter->setPostFilter();
 		}
 
