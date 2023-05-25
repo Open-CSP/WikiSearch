@@ -264,7 +264,13 @@ abstract class WikiSearchHooks {
 			return;
 		}
 
-		$output = $content->getParserOutput( $subjectTitle );
+		$mwServices = MediaWikiServices::getInstance();
+		if (method_exists($mwServices, 'getContentRenderer')) {
+			// MW1.38+
+			$output = $mwServices->getContentRenderer()->getParserOutput($content, $subjectTitle);
+		} else {
+			$output = $content->getParserOutput( $subjectTitle );
+		}
 
 		foreach ( PropertyInitializer::getAnnotators() as $annotator ) {
 			// Decorate the semantic data object with the annotation
