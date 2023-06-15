@@ -2,7 +2,6 @@
 
 namespace WikiSearch\SMW;
 
-use SMW\ApplicationFactory;
 use SMW\SQLStore\SQLStore;
 use SMW\Store;
 use Title;
@@ -22,7 +21,12 @@ class WikiPageObjectIdLookup {
 		] );
 
 		/** @var Store $store */
-		$store = ApplicationFactory::getInstance()->getStore();
+        if ( class_exists( '\SMW\StoreFactory' ) ) {
+            $store = \SMW\StoreFactory::getStore();
+        } else {
+            $store = \SMW\ApplicationFactory::getInstance()->getStore();
+        }
+
 		$connection = $store->getConnection( "mw.db" );
 
 		$smw_title = $connection->addQuotes( str_replace( " ", "_", $title->getText() ) );

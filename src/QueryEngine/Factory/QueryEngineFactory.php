@@ -3,6 +3,7 @@
 namespace WikiSearch\QueryEngine\Factory;
 
 use MediaWiki\MediaWikiServices;
+use WikiMap;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;

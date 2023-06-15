@@ -25,7 +25,7 @@ use Elasticsearch\ClientBuilder;
 use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
-use NamespaceInfo;
+
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -47,11 +47,6 @@ class SearchEngine {
 	private QueryEngine $query_engine;
 
 	/**
-	 * @var NamespaceInfo for finding canonical names;
-	 */
-	private NamespaceInfo $namespace_info;
-
-	/**
 	 * Search constructor.
 	 *
 	 * @param SearchEngineConfig $config
@@ -59,7 +54,6 @@ class SearchEngine {
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
 		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
-		$this->namespace_info = MediaWikiServices::getInstance()->getNamespaceInfo();
 	}
 
 	/**
@@ -178,7 +172,9 @@ class SearchEngine {
 
 			if ( $parts[0] === "namespace" ) {
 				foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
-					$namespace = $this->namespace_info->getCanonicalName( $bucket_value['key'] );
+					$namespace = MediaWikiServices::getInstance()
+                        ->getNamespaceInfo()
+                        ->getCanonicalName( $bucket_value['key'] );
 					$results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
 				}
 			}
@@ -196,7 +192,9 @@ class SearchEngine {
 	private function doNamespaceTranslations( array $results ): array {
 		// Translate namespace IDs to their canonical name
 		foreach ( $results['hits']['hits'] as $key => $value ) {
-			$namespace = $this->namespace_info->getCanonicalName( $value['_source']['subject']['namespace'] );
+			$namespace = MediaWikiServices::getInstance()
+                ->getNamespaceInfo()
+                ->getCanonicalName( $value['_source']['subject']['namespace'] );
 			$results['hits']['hits'][$key]['_source']['subject']['namespacename'] = $namespace;
 		}
 
