@@ -21,11 +21,11 @@ class WikiPageObjectIdLookup {
 		] );
 
 		/** @var Store $store */
-        if ( class_exists( '\SMW\StoreFactory' ) ) {
-            $store = \SMW\StoreFactory::getStore();
-        } else {
-            $store = \SMW\ApplicationFactory::getInstance()->getStore();
-        }
+		if ( class_exists( '\SMW\StoreFactory' ) ) {
+			$store = \SMW\StoreFactory::getStore();
+		} else {
+			$store = \SMW\ApplicationFactory::getInstance()->getStore();
+		}
 
 		$connection = $store->getConnection( "mw.db" );
 

@@ -222,7 +222,7 @@ abstract class WikiSearchHooks {
 	 * @link https://www.mediawiki.org/wiki/Extension:Scribunto/Hooks/ScribuntoExternalLibraries
 	 *
 	 * @param string $engine
-	 * @param array &$extraLibraries
+	 * @param array $extraLibraries
 	 * @return bool
 	 */
 	public static function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ): bool {
@@ -265,9 +265,9 @@ abstract class WikiSearchHooks {
 		}
 
 		$mwServices = MediaWikiServices::getInstance();
-		if (method_exists($mwServices, 'getContentRenderer')) {
+		if ( method_exists( $mwServices, 'getContentRenderer' ) ) {
 			// MW1.38+
-			$output = $mwServices->getContentRenderer()->getParserOutput($content, $subjectTitle);
+			$output = $mwServices->getContentRenderer()->getParserOutput( $content, $subjectTitle );
 		} else {
 			$output = $content->getParserOutput( $subjectTitle );
 		}

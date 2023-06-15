@@ -97,9 +97,9 @@ class PropertyValuesParserFunction {
 			return "";
 		}
 
-        if ( class_exists( "\ComplexArray" ) ) {
-            \WSArrays::$arrays[$arrayName] = new \ComplexArray( $buckets );
-        }
+		if ( class_exists( "\ComplexArray" ) ) {
+			\WSArrays::$arrays[$arrayName] = new \ComplexArray( $buckets );
+		}
 
 		return "";
 	}

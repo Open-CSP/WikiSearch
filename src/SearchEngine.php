@@ -173,8 +173,8 @@ class SearchEngine {
 			if ( $parts[0] === "namespace" ) {
 				foreach ( $results['aggregations'][$property_name]['buckets'] as $bucket_key => $bucket_value ) {
 					$namespace = MediaWikiServices::getInstance()
-                        ->getNamespaceInfo()
-                        ->getCanonicalName( $bucket_value['key'] );
+						->getNamespaceInfo()
+						->getCanonicalName( $bucket_value['key'] );
 					$results['aggregations'][$property_name]['buckets'][$bucket_key]['name'] = $namespace;
 				}
 			}
@@ -193,8 +193,8 @@ class SearchEngine {
 		// Translate namespace IDs to their canonical name
 		foreach ( $results['hits']['hits'] as $key => $value ) {
 			$namespace = MediaWikiServices::getInstance()
-                ->getNamespaceInfo()
-                ->getCanonicalName( $value['_source']['subject']['namespace'] );
+				->getNamespaceInfo()
+				->getCanonicalName( $value['_source']['subject']['namespace'] );
 			$results['hits']['hits'][$key]['_source']['subject']['namespacename'] = $namespace;
 		}
 

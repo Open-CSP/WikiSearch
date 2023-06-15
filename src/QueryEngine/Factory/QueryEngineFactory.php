@@ -4,12 +4,14 @@ namespace WikiSearch\QueryEngine\Factory;
 
 use MediaWiki\MediaWikiServices;
 use WikiMap;
+use WikiMap;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
-use WikiMap; // Note: MW 1.40+ will have MediaWiki\WikiMap\WikiMap instead
+
+ // Note: MW 1.40+ will have MediaWiki\WikiMap\WikiMap instead
 
 class QueryEngineFactory {
 	/**

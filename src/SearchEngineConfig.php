@@ -199,7 +199,7 @@ class SearchEngineConfig {
 			return new PropertyFieldMapper( $property_name );
 		}, $result_properties );
 
-        $this->facet_properties = [];
+		$this->facet_properties = [];
 		foreach ( $facet_properties as $property ) {
 			$translation_pair = explode( "=", $property );
 			$property_name = $translation_pair[0];
@@ -355,9 +355,9 @@ class SearchEngineConfig {
 		$page_id = $this->title->getArticleID();
 
 		$facet_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
-            // Use 'getPropertyName' here to make sure that the value in the database corresponds directly to the
-            // value present in the parser function call (otherwise it might be translated to something else, causing
-            // several problems in the front-end)
+			// Use 'getPropertyName' here to make sure that the value in the database corresponds directly to the
+			// value present in the parser function call (otherwise it might be translated to something else, causing
+			// several problems in the front-end)
 			return $property->getPropertyName();
 		}, $this->facet_properties ) );
 
