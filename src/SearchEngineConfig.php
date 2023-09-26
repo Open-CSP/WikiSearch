@@ -57,7 +57,7 @@ class SearchEngineConfig {
 	/**
 	 * @var PropertyFieldMapper[]
 	 */
-	private array $facet_properties;
+	private array $facet_properties = [];
 
 	/**
 	 * @var PropertyFieldMapper[]
