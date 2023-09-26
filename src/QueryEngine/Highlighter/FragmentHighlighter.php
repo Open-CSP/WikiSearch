@@ -49,22 +49,16 @@ class FragmentHighlighter implements Highlighter {
 	 * @param PropertyFieldMapper[] $properties The fields to apply the highlight to
 	 * @param int|null $size The fragment size
 	 * @param int $limit The maximum number of words to return
-	 * @param string $tag_left The left highlight tag
-	 * @param string $tag_right The right highlight tag
 	 */
 	public function __construct(
 		array $properties,
 		?string $highlighter_type = null,
 		int $size = 1,
-		int $limit = 128,
-		string $tag_left = "HIGHLIGHT_@@",
-		string $tag_right = "@@_HIGHLIGHT"
+		int $limit = 128
 	) {
 		$this->highlighter_type = $highlighter_type;
 		$this->size = $size;
 		$this->limit = $limit;
-		$this->tag_left = $tag_left;
-		$this->tag_right = $tag_right;
 		$this->fields = $properties;
 	}
 
