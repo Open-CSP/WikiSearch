@@ -21,7 +21,9 @@
 
 namespace WikiSearch;
 
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Client;
+use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
@@ -96,7 +98,9 @@ class SearchEngine {
 			'query' => $query
 		] );
 
-		return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
+		return $this->buildClient( $hosts )
+            ->search( $query )
+            ->asArray();
 	}
 
 	/**
@@ -202,4 +206,24 @@ class SearchEngine {
 
 		return $results;
 	}
+
+    /**
+     * Builds a client for communicating with ElasticSearch.
+     *
+     * @return Client
+     * @throws AuthenticationException
+     */
+    private function buildClient( array $hosts ): Client {
+        $client = ClientBuilder::create()
+            ->setHosts( $hosts );
+
+        if ( $GLOBALS['wgWikiSearchBasicAuthenticationUsername'] && $GLOBALS['wgWikiSearchBasicAuthenticationPassword'] ) {
+            $client->setBasicAuthentication(
+                $GLOBALS['wgWikiSearchBasicAuthenticationUsername'],
+                $GLOBALS['wgWikiSearchBasicAuthenticationPassword']
+            );
+        }
+
+        return $client->build();
+    }
 }

@@ -83,6 +83,12 @@
 		},
 		"WikiSearchDisabledAnnotators": {
 			"value": []
+		},
+		"WikiSearchBasicAuthenticationUsername": {
+			"value": null
+		},
+		"WikiSearchBasicAuthenticationPassword": {
+			"value": null
 		}
 	},
 	"SpecialPages": {
