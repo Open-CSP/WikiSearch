@@ -79,9 +79,6 @@
 		"WikiSearchMaxChainedQuerySize": {
 			"value": 500
 		},
-		"WikiSearchEscape": {
-			"value": false
-		},
 		"WikiSearchDisabledAnnotators": {
 			"value": []
 		}
