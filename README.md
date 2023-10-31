@@ -307,6 +307,37 @@ The above filter executes the given query and only includes pages that matched t
 
 See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
 
+#### PropertyFuzzyValueFilter
+
+This filter only returns pages that have the specified property with approximately the specified value.
+
+```
+{
+    "key": "Class",
+    "value": "Manual",
+    "type": "fuzzy"
+}
+```
+
+The above filter only includes pages where the property `Class` has a value similar to `Manual`. The `value` must be
+a string.
+
+Additionally, the maximum edit distance can be specified through the `fuzziness` parameter:
+
+```
+{
+    "key": "Class",
+    "value": "Manual",
+    "type": "fuzzy",
+    "fuzziness": 6
+}
+```
+
+`fuzziness` must either be the string "AUTO" to automatically determine the appropriate fuzziness (default), or
+a positive integer specifying the maximum edit distance.
+
+See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-fuzzy-query.html
+
 ### Aggregations syntax
 
 The `aggregations` parameter takes a list of objects. These objects have the following form:

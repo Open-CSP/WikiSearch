@@ -67,7 +67,8 @@
 			"value": [
 				"read",
 				"wikisearch-execute-api"
-			]
+			],
+			"merge_strategy": "provide_default"
 		},
 		"WikiSearchSearchFieldOverride": {
 			"value": false

@@ -22,7 +22,6 @@
 namespace WikiSearch\SMW;
 
 use BadMethodCallException;
-use SMW\ApplicationFactory;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
@@ -119,7 +118,11 @@ class PropertyFieldMapper {
 	 * @param string $property_name The name of the property (chained property name allowed)
 	 */
 	public function __construct( string $property_name ) {
-		$store = ApplicationFactory::getInstance()->getStore();
+		if ( class_exists( '\SMW\StoreFactory' ) ) {
+			$store = \SMW\StoreFactory::getStore();
+		} else {
+			$store = \SMW\ApplicationFactory::getInstance()->getStore();
+		}
 
 		if ( !$store instanceof ElasticStore ) {
 			Logger::getLogger()->critical(
