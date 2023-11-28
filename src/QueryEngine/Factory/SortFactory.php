@@ -20,12 +20,11 @@ class SortFactory {
 	 * @param array $array
 	 * @return Sort|null
 	 */
-	public static function fromArray( array $array ): Sort {
+	public static function fromArray( array $array ): ?Sort {
 		Logger::getLogger()->debug( 'Constructing Sort from array' );
 
 		if ( !isset( $array["type"] ) ) {
 			Logger::getLogger()->debug( 'Failed to construct Sort from array: missing "type"' );
-
 			return null;
 		}
 
@@ -34,7 +33,6 @@ class SortFactory {
 				return self::propertySortFromArray( $array );
 			default:
 				Logger::getLogger()->debug( 'Failed to construct Sort from array: invalid "type"' );
-
 				return null;
 		}
 	}
@@ -45,10 +43,9 @@ class SortFactory {
 	 * @param array $array
 	 * @return PropertySort|null
 	 */
-	private static function propertySortFromArray( array $array ): PropertySort {
+	private static function propertySortFromArray( array $array ): ?PropertySort {
 		if ( !isset( $array["property"] ) ) {
 			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: missing "property"' );
-
 			return null;
 		}
 
@@ -56,12 +53,9 @@ class SortFactory {
 
 		if ( !is_string( $property ) && !( $property instanceof PropertyFieldMapper ) ) {
 			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: invalid "property"' );
-
 			return null;
 		}
 
-		$order = isset( $array["order"] ) ? $array["order"] : null;
-
-		return new PropertySort( $property, $order );
+		return new PropertySort( $property, $array["order"] ?? null );
 	}
 }

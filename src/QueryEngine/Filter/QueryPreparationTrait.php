@@ -19,11 +19,6 @@ trait QueryPreparationTrait {
 	 * @return string
 	 */
 	public function prepareQuery( string $search_term ): string {
-		if ( !MediaWikiServices::getInstance()->getMainConfig()->get( 'WikiSearchEscape' ) ) {
-			// Escaping in the back-end is disabled
-			return $search_term;
-		}
-
 		$search_term = trim( $search_term );
 		$term_length = strlen( $search_term );
 

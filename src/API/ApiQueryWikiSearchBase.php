@@ -33,15 +33,20 @@ use WikiSearch\Logger;
  */
 abstract class ApiQueryWikiSearchBase extends ApiQueryBase {
 	/**
+	 * @inheritDoc
+	 */
+	public function isReadMode() {
+		return in_array( 'read', $this->getConfig()->get( "WikiSearchAPIRequiredRights" ), true );
+	}
+
+	/**
 	 * Checks applicable user rights.
 	 *
 	 * @throws ApiUsageException
 	 */
 	protected function checkUserRights(): void {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-
 		try {
-			$required_rights = $config->get( "WikiSearchAPIRequiredRights" );
+			$required_rights = $this->getConfig()->get( "WikiSearchAPIRequiredRights" );
 			$this->checkUserRightsAny( $required_rights );
 		} catch ( \ConfigException $e ) {
 			Logger::getLogger()->critical(
