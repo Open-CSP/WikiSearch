@@ -230,7 +230,6 @@
 			"text_copy": {
 				"type": "text",
 				"term_vector": "with_positions_offsets",
-				"doc_values": false,
 				"fields": {
 					"search": {
 						"type": "text",
@@ -242,7 +241,6 @@
 			"text_raw": {
 				"type": "text",
 				"term_vector": "with_positions_offsets",
-				"doc_values": false,
 				"fields": {
 					"search": {
 						"type": "text",
