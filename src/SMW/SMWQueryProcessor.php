@@ -57,8 +57,13 @@ class SMWQueryProcessor {
 
 		Logger::getLogger()->debug( 'Constructing QueryEngine from ElasticFactory' );
 
+		if ( class_exists( '\SMW\StoreFactory' ) ) {
+			$store = \SMW\StoreFactory::getStore();
+		} else {
+			$store = \SMW\ApplicationFactory::getInstance()->getStore();
+		}
+
 		$elastic_factory = new ElasticFactory();
-		$store = \SMW\ApplicationFactory::getInstance()->getStore();
 		$query_engine = $elastic_factory->newQueryEngine( $store );
 
 		Logger::getLogger()->debug( 'Finished constructing QueryEngine from ElasticFactory' );

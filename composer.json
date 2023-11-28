@@ -2,11 +2,15 @@
     "name": "open-csp/wiki-search",
     "type": "mediawiki-extension",
     "description": "Faceted search for Semantic MediaWiki",
-    "keywords": ["mediawiki", "search", "extension"],
+    "keywords": [
+        "mediawiki",
+        "search",
+        "extension"
+    ],
     "license": "GPL-2.0-or-later",
     "require": {
         "php": "^8.0",
-        "elasticsearch/elasticsearch": "^8.0",
+        "elasticsearch/elasticsearch": "~8.10.0",
         "handcraftedinthealps/elasticsearch-dsl": "^8.0",
         "composer/installers": "1.*,>=1.0.1",
         "paquettg/php-html-parser": ">=3.0"

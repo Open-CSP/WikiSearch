@@ -3,7 +3,7 @@
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "7.0.2",
+	"version": "8.0.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSearch",
 	"descriptionmsg": "wikisearch-desc",
 	"license-name": "GPL-2.0-or-later",
@@ -67,7 +67,8 @@
 			"value": [
 				"read",
 				"wikisearch-execute-api"
-			]
+			],
+			"merge_strategy": "provide_default"
 		},
 		"WikiSearchSearchFieldOverride": {
 			"value": false
@@ -77,9 +78,6 @@
 		},
 		"WikiSearchMaxChainedQuerySize": {
 			"value": 500
-		},
-		"WikiSearchEscape": {
-			"value": false
 		},
 		"WikiSearchDisabledAnnotators": {
 			"value": []

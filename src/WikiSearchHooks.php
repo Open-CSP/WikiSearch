@@ -26,10 +26,10 @@ use ContentHandler;
 use DatabaseUpdater;
 use LogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionRecord;
 use MWException;
 use OutputPage;
 use Parser;
-use Revision;
 use Skin;
 use SMW\PropertyRegistry;
 use SMW\SemanticData;
@@ -81,7 +81,7 @@ abstract class WikiSearchHooks {
 	 * @param mixed $is_watch
 	 * @param mixed $section
 	 * @param mixed $flags
-	 * @param Revision|null $revision Revision object of the saved content
+	 * @param RevisionRecord|null $revision Revision object of the saved content
 	 * @param Status $status Status object about to be returned by doEditContent()
 	 * @param mixed $original_revision_id
 	 * @param mixed $undid_revision_id
@@ -222,7 +222,7 @@ abstract class WikiSearchHooks {
 	 * @link https://www.mediawiki.org/wiki/Extension:Scribunto/Hooks/ScribuntoExternalLibraries
 	 *
 	 * @param string $engine
-	 * @param array &$extraLibraries
+	 * @param array $extraLibraries
 	 * @return bool
 	 */
 	public static function onScribuntoExternalLibraries( string $engine, array &$extraLibraries ): bool {
@@ -265,9 +265,9 @@ abstract class WikiSearchHooks {
 		}
 
 		$mwServices = MediaWikiServices::getInstance();
-		if (method_exists($mwServices, 'getContentRenderer')) {
+		if ( method_exists( $mwServices, 'getContentRenderer' ) ) {
 			// MW1.38+
-			$output = $mwServices->getContentRenderer()->getParserOutput($content, $subjectTitle);
+			$output = $mwServices->getContentRenderer()->getParserOutput( $content, $subjectTitle );
 		} else {
 			$output = $content->getParserOutput( $subjectTitle );
 		}
