@@ -2,7 +2,7 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\ClientBuilder;
 use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
 use MWException;
