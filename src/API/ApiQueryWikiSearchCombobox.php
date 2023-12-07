@@ -23,7 +23,7 @@ namespace WikiSearch\API;
 
 use ApiBase;
 use ApiUsageException;
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\ClientBuilder;
 use MWException;
 use Title;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
