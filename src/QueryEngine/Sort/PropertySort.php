@@ -17,9 +17,9 @@ use WikiSearch\SMW\PropertyFieldMapper;
  */
 class PropertySort implements Sort {
 	/**
-	 * @var string The order of the sort
+	 * @var string|null The order of the sort
 	 */
-	private string $order;
+	private ?string $order;
 
 	/**
 	 * @var string The field to sort on

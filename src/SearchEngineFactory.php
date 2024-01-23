@@ -173,9 +173,6 @@ class SearchEngineFactory {
 			throw new SearchEngineException( wfMessage( "wikisearch-invalid-sort" ) );
 		}
 
-        $relevanceSorting = new RelevanceSort();
-        $sortings = array_merge([$relevanceSorting], $sortings);
-
 		foreach ( $sortings as $sort ) {
 			$this->engine->getQueryEngine()->addSort( $sort );
 		}

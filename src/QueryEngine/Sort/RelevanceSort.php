@@ -19,9 +19,9 @@ class RelevanceSort implements Sort {
     private const SCORE_FIELD = '_score';
 
 	/**
-	 * @var string The order of the sort
+	 * @var string|null The order of the sort
 	 */
-	private string $order;
+	private ?string $order;
 
 	/**
 	 * @var array Additional sort parameters to pass to the sort query
