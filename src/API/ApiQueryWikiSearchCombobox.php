@@ -62,7 +62,8 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		$results = ClientBuilder::create()
 			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
 			->build()
-			->search( $engine->toArray() );
+			->search( $engine->toArray() )
+            ->asArray();
 
 		$this->getResult()->addValue(
 			null,

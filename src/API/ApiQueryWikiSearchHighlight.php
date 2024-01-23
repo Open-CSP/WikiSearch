@@ -87,7 +87,8 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$results = ClientBuilder::create()
 			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
 			->build()
-			->search( $query_engine->toArray() );
+			->search( $query_engine->toArray() )
+            ->asArray();
 
 		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $results ) );
 	}
