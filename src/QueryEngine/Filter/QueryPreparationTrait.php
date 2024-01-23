@@ -48,8 +48,9 @@ trait QueryPreparationTrait {
             return '*';
         }
 
+        $wordChars = 'a-zA-Z_\-0-9:\/';
         $terms = preg_split(
-            '/((?<=[a-zA-Z_\-0-9])(?=$|[^a-zA-Z_\-0-9])\s*)/',
+            '/((?<=[' . $wordChars . '])(?=$|[^' . $wordChars . '])\s*)/',
             $term, -1, PREG_SPLIT_DELIM_CAPTURE
         );
 
