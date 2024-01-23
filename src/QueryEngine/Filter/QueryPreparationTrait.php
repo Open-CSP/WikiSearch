@@ -43,7 +43,7 @@ trait QueryPreparationTrait {
 	 * @param string $search_string
 	 * @return string
 	 */
-	public function insertWildcards( string $search_string ): string {
+	public function insertWildcards( string $term ): string {
         if ( !$term ) {
             return '*';
         }
