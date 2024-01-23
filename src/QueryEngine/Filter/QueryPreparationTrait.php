@@ -25,7 +25,7 @@ trait QueryPreparationTrait {
 			return "*";
 		}
 
-        $term = preg_replace( '/(:|\+|=|\/)/', '\\$1', $term );
+        $term = preg_replace( '/(:|\+|=|\/)/', '\\\\$1', $term );
 		$advancedQuery = array_reduce(
             [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
             function ( bool $carry, $char ) use ( $term ) {
