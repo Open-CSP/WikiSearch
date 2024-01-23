@@ -28,6 +28,7 @@ use MWException;
 use Title;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
@@ -41,6 +42,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
+    use QueryPreparationTrait;
+
 	private const AGGREGATION_NAME = 'combobox_values';
 
 	/**
@@ -122,7 +125,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		)->getQueryEngine();
 
 		$engine->addConstantScoreFilter( new SearchTermFilter(
-			$this->getParameter( "term" ),
+			$this->prepareQuery( $this->getParameter( "term" ) ),
 			[ new PropertyFieldMapper( $this->getParameter( "property" ) ) ]
 		) );
 		$engine->addAggregation(

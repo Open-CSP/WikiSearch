@@ -12,6 +12,7 @@ use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WikiSearch\QueryEngine\Filter\PropertyTextFilter;
 use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
 use WikiSearch\QueryEngine\Filter\PropertyValuesFilter;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SMW\PropertyFieldMapper;
 
@@ -23,6 +24,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch\QueryEngine\Factory
  */
 class FilterFactory {
+    use QueryPreparationTrait;
+
 	/**
 	 * Constructs a new Filter class from the given array. The given array directly corresponds to the array given by
 	 * the user through the API. Returns "null" on failure.
@@ -232,7 +235,7 @@ class FilterFactory {
 		string $default_operator,
 		PropertyFieldMapper $property_field_mapper
 	): PropertyTextFilter {
-		return new PropertyTextFilter( $property_field_mapper, $text, $default_operator );
+		return new PropertyTextFilter( $property_field_mapper, self::prepareQuery( $text ), $default_operator );
 	}
 
 	/**

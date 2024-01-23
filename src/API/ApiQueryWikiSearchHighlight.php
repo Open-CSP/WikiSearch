@@ -28,6 +28,7 @@ use MWException;
 use Title;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PageFilter;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\Highlighter\FragmentHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -39,6 +40,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
+    use QueryPreparationTrait;
+
 	/**
 	 * @inheritDoc
 	 *
@@ -72,7 +75,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $highlighter_type, $size, $limit );
-		$search_term_filter = new SearchTermFilter( $query, $properties );
+		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties );
 		$page_filter = new PageFilter( $title );
 
 		$query_engine = $this->getEngine();

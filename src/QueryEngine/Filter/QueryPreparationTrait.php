@@ -15,10 +15,10 @@ trait QueryPreparationTrait {
 	/**
 	 * Prepares the query for use with ElasticSearch.
 	 *
-	 * @param string $search_term
+	 * @param string $term
 	 * @return string
 	 */
-	public function prepareQuery( string $term ): string {
+	public static function prepareQuery( string $term ): string {
 		$term = trim( $term );
 
 		if ( strlen( $term ) === 0 ) {
@@ -37,18 +37,18 @@ trait QueryPreparationTrait {
         return $advancedQuery ? $term : self::insertWildcards( $term );
 	}
 
-	/**
-	 * Inserts wild cards around each term in the provided search string.
-	 *
-	 * @param string $search_string
-	 * @return string
-	 */
-	public function insertWildcards( string $term ): string {
+    /**
+     * Inserts wild cards around each term in the provided search string.
+     *
+     * @param string $term
+     * @return string
+     */
+	public static function insertWildcards( string $term ): string {
         if ( !$term ) {
             return '*';
         }
 
-        $wordChars = 'a-zA-Z_\-0-9:\/';
+        $wordChars = 'a-zA-Z_\-0-9:\/\\\\';
         $terms = preg_split(
             '/((?<=[' . $wordChars . '])(?=$|[^' . $wordChars . '])\s*)/',
             $term, -1, PREG_SPLIT_DELIM_CAPTURE

@@ -29,6 +29,7 @@ use Hooks;
 use MediaWiki\MediaWikiServices;
 
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 
@@ -38,6 +39,8 @@ use WikiSearch\QueryEngine\QueryEngine;
  * @package WikiSearch
  */
 class SearchEngine {
+    use QueryPreparationTrait;
+
 	/**
 	 * @var SearchEngineConfig
 	 */
@@ -104,7 +107,7 @@ class SearchEngine {
 	 */
 	public function addSearchTerm( string $search_term ) {
 		$search_term_filter = new SearchTermFilter(
-			$search_term,
+			$this->prepareQuery( $search_term ),
 			$this->config->getSearchParameter( "search term properties" ) ?: [],
 			$this->config->getSearchParameter( "default operator" ) ?: "or"
 		);
