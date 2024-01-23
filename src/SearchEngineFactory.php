@@ -5,6 +5,7 @@ namespace WikiSearch;
 use WikiSearch\QueryEngine\Factory\AggregationFactory;
 use WikiSearch\QueryEngine\Factory\FilterFactory;
 use WikiSearch\QueryEngine\Factory\SortFactory;
+use WikiSearch\QueryEngine\Sort\RelevanceSort;
 
 class SearchEngineFactory {
 	/**
@@ -171,6 +172,9 @@ class SearchEngineFactory {
 		if ( !$all_sortings_valid ) {
 			throw new SearchEngineException( wfMessage( "wikisearch-invalid-sort" ) );
 		}
+
+        $relevanceSorting = new RelevanceSort();
+        $sortings = array_merge([$relevanceSorting], $sortings);
 
 		foreach ( $sortings as $sort ) {
 			$this->engine->getQueryEngine()->addSort( $sort );
