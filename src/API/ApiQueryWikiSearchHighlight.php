@@ -33,6 +33,7 @@ use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\Highlighter\FragmentHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Class ApiQueryWikiSearchHighlight
@@ -75,7 +76,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $highlighter_type, $size, $limit );
-		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties );
+		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
 		$page_filter = new PageFilter( $title );
 
 		$query_engine = $this->getEngine();
@@ -84,10 +85,9 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$query_engine->addConstantScoreFilter( $page_filter );
 		$query_engine->addConstantScoreFilter( $search_term_filter );
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $query_engine->toArray() )
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $query_engine->toQuery() )
             ->asArray();
 
 		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $results ) );
@@ -131,7 +131,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 	 * @return QueryEngine
 	 */
 	private function getEngine(): QueryEngine {
-		return QueryEngineFactory::fromNull();
+		return QueryEngineFactory::newQueryEngine();
 	}
 
 	/**

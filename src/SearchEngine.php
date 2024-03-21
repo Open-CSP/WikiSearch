@@ -58,7 +58,7 @@ class SearchEngine {
 	 */
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
-		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
+		$this->query_engine = QueryEngineFactory::newQueryEngine( $config );
 	}
 
 	/**
@@ -83,19 +83,19 @@ class SearchEngine {
 	 * Executes the given ElasticSearch query and returns the result.
 	 *
 	 * @param array $query
-	 * @param array $hosts
 	 * @return array
 	 * @throws Exception
 	 */
-	public function doQuery( array $query, array $hosts ): array {
+	public function doQuery( array $query ): array {
 		// Allow other extensions to modify the query
-		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query ] );
 
 		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
 		] );
 
-		return $this->buildClient( $hosts )
+		return WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
             ->search( $query )
             ->asArray();
 	}
@@ -108,7 +108,7 @@ class SearchEngine {
 	public function addSearchTerm( string $search_term ) {
 		$search_term_filter = new SearchTermFilter(
 			$this->prepareQuery( $search_term ),
-			$this->config->getSearchParameter( "search term properties" ) ?: [],
+			$this->config->getSearchParameter( "search term properties" ) ?: null,
 			$this->config->getSearchParameter( "default operator" ) ?: "or"
 		);
 
@@ -123,9 +123,9 @@ class SearchEngine {
 	 * @throws Exception
 	 */
 	public function doSearch(): array {
-		$elastic_query = $this->query_engine->toArray();
+		$elastic_query = $this->query_engine->toQuery();
 
-		$results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
+		$results = $this->doQuery( $elastic_query );
 		$results = $this->applyResultTranslations( $results );
 
 		return [
@@ -207,24 +207,4 @@ class SearchEngine {
 
 		return $results;
 	}
-
-    /**
-     * Builds a client for communicating with ElasticSearch.
-     *
-     * @return Client
-     * @throws AuthenticationException
-     */
-    private function buildClient( array $hosts ): Client {
-        $client = ClientBuilder::create()
-            ->setHosts( $hosts );
-
-        if ( $GLOBALS['wgWikiSearchBasicAuthenticationUsername'] && $GLOBALS['wgWikiSearchBasicAuthenticationPassword'] ) {
-            $client->setBasicAuthentication(
-                $GLOBALS['wgWikiSearchBasicAuthenticationUsername'],
-                $GLOBALS['wgWikiSearchBasicAuthenticationPassword']
-            );
-        }
-
-        return $client->build();
-    }
 }

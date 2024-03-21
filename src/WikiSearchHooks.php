@@ -153,8 +153,8 @@ abstract class WikiSearchHooks {
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
 		try {
-			$parser->setFunctionHook( "WikiSearchConfig", [ self::class, "searchConfigCallback" ] );
-			$parser->setFunctionHook( "WikiSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
+			$parser->setFunctionHook( "wikisearchconfig", [ self::class, "searchConfigCallback" ] );
+			$parser->setFunctionHook( "wikisearchfrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 
 			$parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );

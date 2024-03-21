@@ -35,6 +35,7 @@ use WikiSearch\SearchEngineConfig;
 use WikiSearch\SearchEngineException;
 use WikiSearch\SearchEngineFactory;
 use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Class ApiQueryWikiSearchCombobox
@@ -59,10 +60,9 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		$engine_config = $this->getEngineConfigFromTitle( $title );
 		$engine = $this->getQueryEngine( $engine_config );
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $engine->toArray() )
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $engine->toQuery() )
             ->asArray();
 
 		$this->getResult()->addValue(

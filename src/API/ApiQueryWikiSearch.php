@@ -62,7 +62,7 @@ class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 			}
 
 			if ( $in_debug_mode === true ) {
-				$this->getResult()->addValue( null, 'query', $engine->getQueryEngine()->toArray() );
+				$this->getResult()->addValue( null, 'query', $engine->getQueryEngine()->toQuery() );
 			}
 
 			$this->getResult()->addValue( null, 'result', $result );

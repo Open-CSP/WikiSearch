@@ -69,21 +69,20 @@ class PropertyValuesParserFunction {
 
 		list( $from, $to ) = $this->convertDates( $from, $to );
 
-		$rangeFilter = new PropertyRangeFilter( $dateProperty, [ "to" => $to, "from" => $from ] );
+		$rangeFilter = new PropertyRangeFilter( $dateProperty, from: $from, to: $to );
 		$termsAggregation = new PropertyValueAggregation( $property, "common_values", $limit );
 		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 
-		$queryEngine = QueryEngineFactory::fromNull();
+		$queryEngine = QueryEngineFactory::newQueryEngine();
 		$queryEngine->addAggregation( $aggregation );
 
 		if ( isset( $baseQuery ) ) {
 			$queryEngine->setBaseQuery( $baseQuery );
 		}
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $queryEngine->toArray() );
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $queryEngine->toQuery() );
 
 		if ( !isset( $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ) ) {
 			// Failed to create aggregations

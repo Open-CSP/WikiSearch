@@ -88,14 +88,8 @@ class FilterFactory {
 		PropertyFieldMapper $property_field_mapper,
 		SearchEngineConfig $config
 	): ?PropertyFilter {
-		if ( isset( $array["range"] ) ) {
-			if ( !is_array( $array["range"] ) ) {
-				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "range"' );
-
-				return null;
-			}
-
-			return self::rangeFilterFromRange( $array["range"], $property_field_mapper );
+		if ( isset( $array["range"]["from"] ) && isset( $array["range"]["to"] ) ) {
+			return self::rangeFilterFromRange( $array["range"]["from"], $array["range"]["to"], $property_field_mapper );
 		}
 
 		if ( isset( $array["type"] ) ) {
@@ -198,18 +192,20 @@ class FilterFactory {
 		}
 	}
 
-	/**
-	 * Constructs a new range filter from the given range.
-	 *
-	 * @param array $range
-	 * @param PropertyFieldMapper $property_field_mapper
-	 * @return PropertyRangeFilter
-	 */
+    /**
+     * Constructs a new range filter from the given range.
+     *
+     * @param int $from
+     * @param int $to
+     * @param PropertyFieldMapper $property_field_mapper
+     * @return PropertyRangeFilter
+     */
 	private static function rangeFilterFromRange(
-		array $range,
+		int $from,
+        int $to,
 		PropertyFieldMapper $property_field_mapper
 	): PropertyRangeFilter {
-		return new PropertyRangeFilter( $property_field_mapper, $range );
+		return new PropertyRangeFilter( $property_field_mapper, from: $from, to: $to );
 	}
 
 	/**
