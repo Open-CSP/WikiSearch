@@ -2,14 +2,8 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use MediaWiki\MediaWikiServices;
-
 /**
- * Trait QueryPreparationTrait
- *
  * This trait contains a method that can be used to prepare bare queries for use with ElasticSearch.
- *
- * @package WikiSearch\QueryEngine\Filter
  */
 trait QueryPreparationTrait {
 	/**
@@ -18,7 +12,7 @@ trait QueryPreparationTrait {
 	 * @param string $term
 	 * @return string
 	 */
-	public static function prepareQuery( string $term ): string {
+	private static function prepareQuery( string $term ): string {
 		$term = trim( $term );
 
 		if ( strlen( $term ) === 0 ) {
@@ -29,7 +23,7 @@ trait QueryPreparationTrait {
 		$advancedQuery = array_reduce(
             [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
             function ( bool $carry, $char ) use ( $term ) {
-                return $carry ?: strpos( $term, $char ) !== false;
+                return $carry ?: str_contains( $term, $char );
             },
             false
         );

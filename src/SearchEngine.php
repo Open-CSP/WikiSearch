@@ -108,7 +108,7 @@ class SearchEngine {
 	public function addSearchTerm( string $search_term ) {
 		$search_term_filter = new SearchTermFilter(
 			$this->prepareQuery( $search_term ),
-			$this->config->getSearchParameter( "search term properties" ) ?: [],
+			$this->config->getSearchParameter( "search term properties" ) ?: null,
 			$this->config->getSearchParameter( "default operator" ) ?: "or"
 		);
 

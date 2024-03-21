@@ -74,7 +74,7 @@ class ScribuntoLuaLibrary extends \Scribunto_LuaLibraryBase {
 
 		list( $from, $to ) = $this->convertDates( $from, $to );
 
-		$rangeFilter = new PropertyRangeFilter( $dateProperty, [ "to" => $to, "from" => $from ] );
+		$rangeFilter = new PropertyRangeFilter( $dateProperty, from: $from, to: $to );
 		$termsAggregation = new PropertyValueAggregation( $property, "common_values", $limit );
 		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 

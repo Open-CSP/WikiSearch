@@ -76,7 +76,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $highlighter_type, $size, $limit );
-		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties );
+		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
 		$page_filter = new PageFilter( $title );
 
 		$query_engine = $this->getEngine();

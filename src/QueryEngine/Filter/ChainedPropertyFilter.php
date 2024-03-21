@@ -23,7 +23,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @param PropertyFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
 	 */
 	public function __construct(
-        public PropertyFilter $filter
+        private PropertyFilter $filter
     ) {}
 
 	/**

@@ -13,36 +13,6 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
  */
 class HasPropertyFilter extends PropertyFilter {
-	/**
-	 * @var PropertyFieldMapper The field to filter on
-	 */
-	private PropertyFieldMapper $field;
-
-	/**
-	 * @param PropertyFieldMapper|string $field The name or object of the property to filter on
-	 */
-	public function __construct( string|PropertyFieldMapper $field ) {
-		if ( is_string( $field ) ) {
-			$field = new PropertyFieldMapper( $field );
-		}
-
-		$this->field = $field;
-	}
-
-	/**
-	 * Returns the property field mapper corresponding to this filter.
-	 *
-	 * @return PropertyFieldMapper
-	 */
-	public function getField(): PropertyFieldMapper {
-		return $this->field;
-	}
-
-	/**
-	 * Converts the object to a BuilderInterface for use in the QueryEngine.
-	 *
-	 * @return BoolQuery
-	 */
 	public function filterToQuery(): BoolQuery {
 		$existsQuery = new ExistsQuery(
 			$this->field->getPropertyField()
