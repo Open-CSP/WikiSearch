@@ -8,11 +8,7 @@ use WikiSearch\SearchEngineConfig;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class DefaultHighlighter
- *
  * The default highlighter applied to all WikiSearch searches.
- *
- * @package WikiSearch\QueryEngine\Highlighter
  */
 class DefaultHighlighter implements Highlighter {
 	/**
@@ -31,29 +27,24 @@ class DefaultHighlighter implements Highlighter {
 	 *
 	 * @link https://www.elastic.co/guide/en/elasticsearch/reference/6.7/search-request-highlighting.html#highlighting-settings
 	 */
-	private array $common_field_settings;
+	private array $commonFieldSettings;
 
 	/**
 	 * DefaultHighlighter constructor.
 	 *
 	 * @param SearchEngineConfig $config
 	 * @param string[]|null $fields The fields to apply the highlight to, or null to highlight the default fields
-	 * @param array|null $field_settings
+	 * @param array|null $fieldSettings
 	 */
-	public function __construct( SearchEngineConfig $config, array $fields = null, array $field_settings = null ) {
+	public function __construct( SearchEngineConfig $config, array $fields = null, array $fieldSettings = null ) {
 		$this->config = $config;
+        $this->fields = $fields ?? $this->getDefaultFields();
 
-		if ( $fields !== null ) {
-			$this->fields = $fields;
-		} else {
-			$this->fields = $this->getDefaultFields();
-		}
-
-		if ( $field_settings !== null ) {
-			$this->common_field_settings = $field_settings;
+		if ( $fieldSettings !== null ) {
+			$this->commonFieldSettings = $fieldSettings;
 		} else {
 			$main_config = MediaWikiServices::getInstance()->getMainConfig();
-			$this->common_field_settings = [
+			$this->commonFieldSettings = [
 				"fragment_size" => $main_config->get( "WikiSearchHighlightFragmentSize" ),
 				"number_of_fragments" => $main_config->get( "WikiSearchHighlightNumberOfFragments" )
 			];
@@ -70,7 +61,7 @@ class DefaultHighlighter implements Highlighter {
 		$highlighter_type = $this->config->getSearchParameter( "highlighter type" );
 
 		foreach ( $this->fields as $field ) {
-			$field_settings = $this->common_field_settings;
+			$field_settings = $this->commonFieldSettings;
 
 			if ( $highlighter_type === "fvh" && $field->supportsFVH() ) {
 				// TODO: Support different highlighter types
