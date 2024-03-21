@@ -131,7 +131,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 	 * @return QueryEngine
 	 */
 	private function getEngine(): QueryEngine {
-		return QueryEngineFactory::fromNull();
+		return QueryEngineFactory::newQueryEngine();
 	}
 
 	/**

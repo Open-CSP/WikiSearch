@@ -58,7 +58,7 @@ class SearchEngine {
 	 */
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
-		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
+		$this->query_engine = QueryEngineFactory::newQueryEngine( $config );
 	}
 
 	/**

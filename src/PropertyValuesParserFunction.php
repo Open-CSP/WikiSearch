@@ -73,7 +73,7 @@ class PropertyValuesParserFunction {
 		$termsAggregation = new PropertyValueAggregation( $property, "common_values", $limit );
 		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 
-		$queryEngine = QueryEngineFactory::fromNull();
+		$queryEngine = QueryEngineFactory::newQueryEngine();
 		$queryEngine->addAggregation( $aggregation );
 
 		if ( isset( $baseQuery ) ) {

@@ -9,6 +9,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
+use WikiMap;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\Aggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyAggregation;
@@ -48,13 +49,6 @@ class QueryEngine {
 	private ?array $baseQuery = null;
 
 	/**
-	 * The configured ElasticSearch hosts.
-	 *
-	 * @var array
-	 */
-	private array $hosts;
-
-	/**
 	 * The main constant score boolean query filter.
 	 *
 	 * @var BoolQuery
@@ -82,15 +76,9 @@ class QueryEngine {
 		'P:29.*'
 	];
 
-	/**
-	 * QueryEngine constructor.
-	 *
-	 * @param string $index The ElasticSearch index to create the queries for
-	 * @param array $hosts The ElasticSearch hosts to use
-	 */
-	public function __construct( string $index, array $hosts ) {
+	public function __construct( string $index ) {
+        // TODO: Create service for retrieving index
 		$this->index = $index;
-		$this->hosts = $hosts;
 
 		$this->constantScoreFilters = new BoolQuery();
 		$this->functionScoreFilters = new BoolQuery();
