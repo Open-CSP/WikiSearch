@@ -47,6 +47,9 @@
 		"SMW::Property::initProperties": "WikiSearch\\WikiSearchHooks::onInitProperties",
 		"ScribuntoExternalLibraries": "WikiSearch\\WikiSearchHooks::onScribuntoExternalLibraries"
 	},
+	"ServiceWiringFiles": [
+		"src/WikiSearch.ServiceWiring.php"
+	],
 	"config": {
 		"WikiSearchElasticStoreIndex": {
 			"value": false
