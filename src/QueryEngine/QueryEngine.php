@@ -77,7 +77,6 @@ class QueryEngine {
 	];
 
 	public function __construct( string $index ) {
-        // TODO: Create service for retrieving index
 		$this->index = $index;
 
 		$this->constantScoreFilters = new BoolQuery();
@@ -89,14 +88,15 @@ class QueryEngine {
             ->addQuery( new FunctionScoreQuery( $this->functionScoreFilters ) );
 	}
 
-	/**
-	 * Adds an aggregation to the query.
-	 *
-	 * @param Aggregation $aggregation
-	 *
-	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
-	 */
-	public function addAggregation( Aggregation $aggregation ): void {
+    /**
+     * Adds an aggregation to the query.
+     *
+     * @param Aggregation $aggregation
+     * @return QueryEngine
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
+     */
+	public function addAggregation( Aggregation $aggregation ): self {
         $filterAggregation = new FilterAggregation( $aggregation->getName(), new BoolQuery() );
         $filterAggregation->addAggregation( $aggregation->toQuery() );
 
@@ -106,6 +106,8 @@ class QueryEngine {
         }
 
         $this->search->addAggregation( $filterAggregation );
+
+        return $this;
 	}
 
 	/**
@@ -113,16 +115,19 @@ class QueryEngine {
 	 *
 	 * @param AbstractFilter $filter
 	 * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
+     * @return QueryEngine
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
 	 */
-	public function addConstantScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
+	public function addConstantScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): self {
 		if ( $filter->isPostFilter() ) {
 			$this->addPostFilter( $filter, $occur );
 		} else {
 			$this->constantScoreFilters->add( $filter->toQuery(), $occur );
 		}
+
+        return $this;
 	}
 
 	/**
@@ -130,16 +135,19 @@ class QueryEngine {
 	 *
 	 * @param AbstractFilter $filter
 	 * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
+     * @return QueryEngine
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
 	 */
-	public function addFunctionScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
+	public function addFunctionScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): self {
         if ( $filter->isPostFilter() ) {
             $this->addPostFilter( $filter, $occur );
         } else {
             $this->functionScoreFilters->add( $filter->toQuery(), $occur );
         }
+
+        return $this;
 	}
 
     /**
@@ -147,10 +155,11 @@ class QueryEngine {
      *
      * @param AbstractFilter $filter
      * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
+     * @return QueryEngine
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-request-post-filter.html
      */
-    public function addPostFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
+    public function addPostFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): self {
         $filterQuery = $filter->toQuery();
         $this->search->addPostFilter( $filterQuery, $occur );
 
@@ -161,7 +170,7 @@ class QueryEngine {
         // add any post filter to the all other aggregations using a FilterAggregation.
 
         if ( !$filter instanceof PropertyFilter ) {
-            return;
+            return $this;
         }
 
         foreach ( $this->search->getAggregations() as $aggregation ) {
@@ -169,97 +178,107 @@ class QueryEngine {
                 continue;
             }
 
-            if ( isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) && $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getField() ) {
+            if (
+                isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) &&
+                $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getField()
+            ) {
                 // This aggregation affects the same property
                 continue;
             }
 
             $aggregationFilter = $aggregation->getFilter();
-
-            if ( !$aggregationFilter instanceof BoolQuery ) {
-                continue;
+            if ( $aggregationFilter instanceof BoolQuery ) {
+                $aggregationFilter->add( $filterQuery );;
             }
-
-            $aggregationFilter->add( $filterQuery );
         }
+
+        return $this;
     }
 
-	/**
-	 * Adds a highlighter to the query.
-	 *
-	 * @param Highlighter $highlighter
-	 */
-	public function addHighlighter( Highlighter $highlighter ): void {
+    /**
+     * Adds a highlighter to the query.
+     *
+     * @param Highlighter $highlighter
+     * @return QueryEngine
+     */
+	public function addHighlighter( Highlighter $highlighter ): self {
 		$this->search->addHighlight( $highlighter->toQuery() );
+
+        return $this;
 	}
 
-	/**
-	 * Adds a sort to the query.
-	 *
-	 * @param Sort $sort
-	 */
-	public function addSort( Sort $sort ): void {
+    /**
+     * Adds a sort to the query.
+     *
+     * @param Sort $sort
+     * @return QueryEngine
+     */
+	public function addSort( Sort $sort ): self {
 		$this->search->addSort( $sort->toQuery() );
+
+        return $this;
 	}
 
-	/**
-	 * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
-	 * be returned from a search query.
-	 *
-	 * If no "_source" parameters are set, all fields are returned.
-	 *
-	 * @param string $source
-	 * @return void
-	 *
-	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
-	 */
-	public function addSource( string $source ): void {
+    /**
+     * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
+     * be returned from a search query.
+     *
+     * If no "_source" parameters are set, all fields are returned.
+     *
+     * @param string $source
+     * @return QueryEngine
+     *
+     * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
+     */
+	public function addSource( string $source ): self {
 		$this->sources[] = $source;
+
+        return $this;
 	}
 
-	/**
-	 * Sets the "index" to use for the ElasticSearch query.
-	 *
-	 * @param string $index
-	 */
-	public function setIndex( string $index ): void {
-		$this->index = $index;
-	}
-
-	/**
-	 * Sets the offset for the search (i.e. the first n results to discard).
-	 *
-	 * @param int $offset
-	 */
-	public function setOffset( int $offset ): void {
+    /**
+     * Sets the offset for the search (i.e. the first n results to discard).
+     *
+     * @param int $offset
+     * @return QueryEngine
+     */
+	public function setOffset( int $offset ): self {
 		$this->search->setFrom( $offset );
+
+        return $this;
 	}
 
 	/**
 	 * Sets the (maximum) number of results to return.
 	 *
 	 * @param int $limit
+     * @return QueryEngine
 	 */
-	public function setLimit( int $limit ): void {
+	public function setLimit( int $limit ): self {
 		$this->search->setSize( $limit );
+
+        return $this;
 	}
 
-	/**
-	 * Sets the base Semantic MediaWiki query.
-	 *
-	 * @param string $baseQuery
-	 */
-	public function setBaseQuery( string $baseQuery ): void {
+    /**
+     * Sets the base Semantic MediaWiki query.
+     *
+     * @param string $baseQuery
+     * @return QueryEngine
+     */
+	public function setBaseQuery( string $baseQuery ): self {
 		try {
 			$queryProcessor = new SMWQueryProcessor( $baseQuery );
 			$query = $queryProcessor->toElasticSearchQuery();
-		} catch ( MWException $exception ) {
+		} catch ( MWException ) {
 			// The query is invalid
 			Logger::getLogger()->critical( 'Tried to set invalid query as the base query' );
-			return;
+			return $this;
 		}
 
 		$this->baseQuery = $query[0];
+
+        return $this;
 	}
 
 	/**
