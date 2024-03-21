@@ -31,8 +31,8 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 *
 	 * @return PropertyFieldMapper
 	 */
-	public function getProperty(): PropertyFieldMapper {
-		return $this->filter->getProperty()->getChainedPropertyFieldMapper();
+	public function getField(): PropertyFieldMapper {
+		return $this->filter->getField()->getChainedPropertyFieldMapper();
 	}
 
 	/**
@@ -43,7 +43,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	public function filterToQuery(): BoolQuery {
 		$query = $this->constructSubqueryFromFilter( $this->filter );
 		$terms = $this->getTermsFromSubquery( $query );
-		$property = $this->getProperty();
+		$property = $this->getField();
 
 		$filter = new PagesPropertyFilter( $property, $terms );
 

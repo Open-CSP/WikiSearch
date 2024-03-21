@@ -169,7 +169,7 @@ class QueryEngine {
                 continue;
             }
 
-            if ( isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) && $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getProperty() ) {
+            if ( isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) && $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getField() ) {
                 // This aggregation affects the same property
                 continue;
             }

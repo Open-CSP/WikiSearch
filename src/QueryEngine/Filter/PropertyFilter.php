@@ -10,5 +10,5 @@ abstract class PropertyFilter extends AbstractFilter {
 	 *
 	 * @return PropertyFieldMapper
 	 */
-	abstract public function getProperty(): PropertyFieldMapper;
+	abstract public function getField(): PropertyFieldMapper;
 }

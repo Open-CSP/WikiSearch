@@ -81,7 +81,7 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 	 *
 	 * @return PropertyFieldMapper
 	 */
-	public function getProperty(): PropertyFieldMapper {
+	public function getField(): PropertyFieldMapper {
 		return $this->property;
 	}
 
