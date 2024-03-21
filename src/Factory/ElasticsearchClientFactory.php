@@ -3,9 +3,6 @@
 namespace WikiSearch\Factory;
 
 use Config;
-use Elastic\Elasticsearch\Client;
-use Elastic\Elasticsearch\ClientBuilder;
-use Elastic\Elasticsearch\Exception\AuthenticationException;
 
 class ElasticsearchClientFactory {
     private Config $config;
@@ -20,35 +17,38 @@ class ElasticsearchClientFactory {
     /**
      * Construct a new Elasticsearch Client instance.
      *
-     * @return Client
-     * @throws AuthenticationException
+     * @return \Elastic\Elasticsearch\Client|\Elasticsearch\Client
      */
-    public function newElasticsearchClient(): Client {
-        $client = ClientBuilder::create();
+    public function newElasticsearchClient() {
+        if ( class_exists( "\Elastic\Elasticsearch\ClientBuilder" ) ) {
+            $clientBuilder = \Elastic\Elasticsearch\ClientBuilder::create();
+        } else {
+            $clientBuilder = \Elasticsearch\ClientBuilder::create();
+        }
 
-        $this->addHosts( $client );
-        $this->addBasicAuthentication( $client );
+        $this->addHosts( $clientBuilder );
+        $this->addBasicAuthentication( $clientBuilder );
 
-        return $client->build();
+        return $clientBuilder->build();
     }
 
     /**
      * Adds the Elasticsearch hosts.
      *
-     * @param ClientBuilder $builder
+     * @param \Elastic\Elasticsearch\ClientBuilder|\Elasticsearch\ClientBuilder $builder
      * @return void
      */
-    private function addHosts( ClientBuilder $builder ): void {
+    private function addHosts( $builder ): void {
         $builder->setHosts( $this->getElasticsearchHosts() );
     }
 
     /**
      * Adds basic authentication if available.
      *
-     * @param ClientBuilder $builder
+     * @param \Elastic\Elasticsearch\ClientBuilder|\Elasticsearch\ClientBuilder $builder
      * @return void
      */
-    private function addBasicAuthentication( ClientBuilder $builder ): void {
+    private function addBasicAuthentication( $builder ): void {
         $username = $this->config->get( 'WikiSearchBasicAuthenticationUsername' );
         $password = $this->config->get( 'WikiSearchBasicAuthenticationPassword' );
 
