@@ -130,9 +130,10 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 			[ new PropertyFieldMapper( $this->getParameter( "property" ) ) ]
 		) );
 		$engine->addAggregation(
-			new PropertyValueAggregation( $this->getParameter( "property" ),
-				self::AGGREGATION_NAME,
-				$this->getParameter( "limit" )
+			new PropertyValueAggregation(
+                $this->getParameter( "property" ),
+				$this->getParameter( "limit" ),
+                self::AGGREGATION_NAME
 			)
 		);
 

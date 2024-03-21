@@ -10,16 +10,23 @@ use WikiSearch\QueryEngine\QueryConvertable;
  *
  * @package WikiSearch\QueryEngine\Aggregation
  */
-interface Aggregation extends QueryConvertable {
+abstract class Aggregation implements QueryConvertable {
+    /**
+     * @param string $name The name of the aggregation
+     */
+    public function __construct(protected string $name ) {}
+
 	/**
 	 * Returns the name of the aggregation.
 	 *
 	 * @return string
 	 */
-	public function getName(): string;
+	public function getName(): string {
+        return $this->name;
+    }
 
 	/**
 	 * @inheritDoc
 	 */
-	public function toQuery(): AbstractAggregation;
+	abstract public function toQuery(): AbstractAggregation;
 }

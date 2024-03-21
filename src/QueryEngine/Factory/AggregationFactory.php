@@ -123,6 +123,6 @@ class AggregationFactory {
 			return null;
 		}
 
-		return new PropertyValueAggregation( $property, $aggregation_name );
+		return new PropertyValueAggregation( $property, null, $aggregation_name );
 	}
 }

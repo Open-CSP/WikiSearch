@@ -70,7 +70,7 @@ class PropertyValuesParserFunction {
 		list( $from, $to ) = $this->convertDates( $from, $to );
 
 		$rangeFilter = new PropertyRangeFilter( $dateProperty, from: $from, to: $to );
-		$termsAggregation = new PropertyValueAggregation( $property, "common_values", $limit );
+		$termsAggregation = new PropertyValueAggregation( $property, $limit, "common_values" );
 		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 
 		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();

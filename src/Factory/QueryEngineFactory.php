@@ -23,22 +23,16 @@ class QueryEngineFactory {
             return $queryEngine;
         }
 
-        $aggregation_size = $config->getSearchParameter( "aggregation size" );
+        $aggregationSize = $config->getSearchParameter( "aggregation size" );
 
-        foreach ( $config->getFacetProperties() as $facet_property ) {
-            $aggregation = new PropertyValueAggregation(
-                $facet_property,
-                null,
-                $aggregation_size
-            );
-
+        foreach ( $config->getFacetProperties() as $field ) {
+            $aggregation = new PropertyValueAggregation( $field, $aggregationSize, null );
             $queryEngine->addAggregation( $aggregation );
         }
 
         foreach ( $config->getResultProperties() as $result_property ) {
             // Include this property and any sub-properties in the result
             $source = $result_property->getPID() . ".*";
-
             $queryEngine->addSource( $source );
         }
 
@@ -53,6 +47,11 @@ class QueryEngineFactory {
         return $queryEngine;
 	}
 
+    /**
+     * Returns the configured Elasticsearch index.
+     *
+     * @return string
+     */
     private function getIndex(): string {
         if ( class_exists( '\MediaWiki\WikiMap\WikiMap' ) ) {
             // MW 1.40+
