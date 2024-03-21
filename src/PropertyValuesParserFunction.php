@@ -6,7 +6,7 @@ use Elastic\Elasticsearch\ClientBuilder;
 use Parser;
 use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 
 /**
@@ -73,7 +73,7 @@ class PropertyValuesParserFunction {
 		$termsAggregation = new PropertyValueAggregation( $property, "common_values", $limit );
 		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 
-		$queryEngine = QueryEngineFactory::newQueryEngine();
+		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 		$queryEngine->addAggregation( $aggregation );
 
 		if ( isset( $baseQuery ) ) {

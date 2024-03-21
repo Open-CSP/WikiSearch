@@ -236,62 +236,47 @@ class SearchEngineConfig {
 	}
 
 	/**
-	 * Returns the value of the given search term parameter, or false when the parameter
-	 * does not exist.
+	 * Returns the value of the given search term parameter, or NULL when the parameter does not exist.
 	 *
 	 * @param string $parameter
-	 * @return false|string|int|array
+	 * @return string|int|array|null
 	 */
-	public function getSearchParameter( string $parameter ) {
-		if ( isset( $this->search_parameters_cache[$parameter] ) ) {
-			return $this->search_parameters_cache[$parameter];
-		}
-
+	public function getSearchParameter( string $parameter ): int|array|string|null {
 		if ( !isset( $this->search_parameters[$parameter] ) ) {
-			return false;
+			return null;
 		}
 
 		$search_parameter_value_raw = $this->search_parameters[$parameter];
 
 		if ( empty( $search_parameter_value_raw ) ) {
-			return false;
+			return null;
 		}
 
 		$search_parameter_type = self::SEARCH_PARAMETER_KEYS[$parameter]["type"] ?? "string";
 
 		if ( $search_parameter_value_raw === true && $search_parameter_type !== "flag" ) {
 			// Only a flag is valid without a value
-			return false;
+			return null;
 		}
 
 		switch ( $search_parameter_type ) {
 			case "integer":
-				$search_parameter_value = intval( trim( $search_parameter_value_raw ) );
-				break;
-			case "string":
-				$search_parameter_value = trim( $search_parameter_value_raw );
-				break;
+				return intval( trim( $search_parameter_value_raw ) );
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
-				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				break;
+				return array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
 			case "propertylist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
 				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				$search_parameter_value = array_map( function ( $property ): PropertyFieldMapper {
+				return array_map( function ( $property ): PropertyFieldMapper {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) );
 				}, $search_parameter_value );
-				break;
+            case "string":
 			default:
 				// Interpret as string
-				$search_parameter_value = trim( $search_parameter_value_raw );
-				break;
+				return trim( $search_parameter_value_raw );
 		}
-
-		$this->search_parameters_cache[$parameter] = $search_parameter_value;
-
-		return $this->search_parameters_cache[$parameter];
 	}
 
 	/**

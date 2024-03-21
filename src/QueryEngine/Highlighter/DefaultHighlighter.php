@@ -85,8 +85,8 @@ class DefaultHighlighter implements Highlighter {
 	 */
 	private function getDefaultFields(): array {
 		$properties =
-			$this->config->getSearchParameter( "highlighted properties" ) ?:
-			$this->config->getSearchParameter( "search term properties" );
+			$this->config->getSearchParameter( "highlighted properties" ) ??
+			    $this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
 			return $properties;

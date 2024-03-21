@@ -5,7 +5,7 @@ namespace WikiSearch\QueryEngine\Filter;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 
@@ -54,7 +54,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return array
      */
 	private function constructSubqueryFromFilter( AbstractFilter $filter ): array {
-		$queryEngine = QueryEngineFactory::newQueryEngine();
+		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 		$queryEngine->addConstantScoreFilter( $filter );
 
 		$config = MediaWikiServices::getInstance()->getMainConfig();

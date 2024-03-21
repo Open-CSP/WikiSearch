@@ -28,7 +28,7 @@ use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
 
-use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -58,7 +58,7 @@ class SearchEngine {
 	 */
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
-		$this->query_engine = QueryEngineFactory::newQueryEngine( $config );
+		$this->query_engine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine( $config );
 	}
 
 	/**
@@ -108,8 +108,8 @@ class SearchEngine {
 	public function addSearchTerm( string $search_term ) {
 		$search_term_filter = new SearchTermFilter(
 			$this->prepareQuery( $search_term ),
-			$this->config->getSearchParameter( "search term properties" ) ?: null,
-			$this->config->getSearchParameter( "default operator" ) ?: "or"
+			$this->config->getSearchParameter( "search term properties" ),
+			$this->config->getSearchParameter( "default operator" ) ?? "or"
 		);
 
 		$this->query_engine->addFunctionScoreFilter( $search_term_filter );

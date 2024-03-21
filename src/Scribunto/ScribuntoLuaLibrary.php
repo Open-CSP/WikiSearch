@@ -25,7 +25,7 @@ use Elastic\Elasticsearch\ClientBuilder;
 use MWException;
 use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WikiSearch\WikiSearchServices;
 
@@ -78,7 +78,7 @@ class ScribuntoLuaLibrary extends \Scribunto_LuaLibraryBase {
 		$termsAggregation = new PropertyValueAggregation( $property, "common_values", $limit );
 		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 
-		$queryEngine = QueryEngineFactory::newQueryEngine();
+		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 		$queryEngine->addAggregation( $aggregation );
 
 		if ( isset( $baseQuery ) ) {

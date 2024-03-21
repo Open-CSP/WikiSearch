@@ -26,7 +26,7 @@ use ApiUsageException;
 use Elastic\Elasticsearch\ClientBuilder;
 use MWException;
 use Title;
-use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PageFilter;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
@@ -79,7 +79,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
 		$page_filter = new PageFilter( $title );
 
-		$query_engine = $this->getEngine();
+		$query_engine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 
 		$query_engine->addHighlighter( $highlighter );
 		$query_engine->addConstantScoreFilter( $page_filter );
@@ -123,15 +123,6 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 				ApiBase::PARAM_TYPE => 'string'
 			]
 		];
-	}
-
-	/**
-	 * Creates the QueryEngine from the current request.
-	 *
-	 * @return QueryEngine
-	 */
-	private function getEngine(): QueryEngine {
-		return QueryEngineFactory::newQueryEngine();
 	}
 
 	/**

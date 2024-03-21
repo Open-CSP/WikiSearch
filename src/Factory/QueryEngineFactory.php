@@ -1,35 +1,29 @@
 <?php
 
-namespace WikiSearch\QueryEngine\Factory;
+namespace WikiSearch\Factory;
 
-use MediaWiki\MediaWikiServices;
-// Note: MW 1.40+ will have MediaWiki\WikiMap\WikiMap instead
-use WikiMap;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
 
 class QueryEngineFactory {
+    public function __construct( private \Config $config ) {}
+
     /**
      * Constructs a new QueryEngine.
      *
      * @param SearchEngineConfig|null $config
      * @return QueryEngine
      */
-	public static function newQueryEngine( ?SearchEngineConfig $config = null ): QueryEngine {
-        $index = MediaWikiServices::getInstance()
-            ->getMainConfig()
-            ->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( WikiMap::getCurrentWikiId() );
-
-        $queryEngine = new QueryEngine( $index );
+	public function newQueryEngine( ?SearchEngineConfig $config = null ): QueryEngine {
+        $queryEngine = new QueryEngine( $this->getIndex() );
 
         if ( $config === null ) {
             return $queryEngine;
         }
 
-        $aggregation_size = $config->getSearchParameter( "aggregation size" ) !== false ?
-            $config->getSearchParameter( "aggregation size" ) : null;
+        $aggregation_size = $config->getSearchParameter( "aggregation size" );
 
         foreach ( $config->getFacetProperties() as $facet_property ) {
             $aggregation = new PropertyValueAggregation(
@@ -49,7 +43,7 @@ class QueryEngineFactory {
         }
 
         // Configure the base query
-        if ( $config->getSearchParameter( "base query" ) !== false ) {
+        if ( $config->getSearchParameter( "base query" ) !== null ) {
             $queryEngine->setBaseQuery( $config->getSearchParameter( "base query" ) );
         }
 
@@ -58,4 +52,15 @@ class QueryEngineFactory {
 
         return $queryEngine;
 	}
+
+    private function getIndex(): string {
+        if ( class_exists( '\MediaWiki\WikiMap\WikiMap' ) ) {
+            // MW 1.40+
+            $wikiMap = \MediaWiki\WikiMap\WikiMap::getCurrentWikiId();
+        } else {
+            $wikiMap = \WikiMap::getCurrentWikiId();
+        }
+
+        return $this->config->get( "WikiSearchElasticStoreIndex" ) ?: "smw-data-" . strtolower( $wikiMap );
+    }
 }

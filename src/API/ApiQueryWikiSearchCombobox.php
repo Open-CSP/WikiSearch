@@ -27,7 +27,7 @@ use Elastic\Elasticsearch\ClientBuilder;
 use MWException;
 use Title;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
-use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
