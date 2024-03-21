@@ -29,8 +29,7 @@ class DefaultHighlighter implements Highlighter {
 	 * @var array The settings applied to each field of the highlight. This specifies for instance the fragment
 	 * size or the number of fragments per field.
 	 *
-	 * phpcs:ignore
-	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.7/search-request-highlighting.html#highlighting-settings
+	 * @link https://www.elastic.co/guide/en/elasticsearch/reference/6.7/search-request-highlighting.html#highlighting-settings
 	 */
 	private array $common_field_settings;
 
