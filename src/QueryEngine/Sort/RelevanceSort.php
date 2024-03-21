@@ -9,22 +9,19 @@ use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class FieldSort
+ * Class RelevanceSort
  *
- * Sorts based on the value of the given property.
+ * Sorts based on relevance of the result.
  *
  * @package WikiSearch\QueryEngine\Sort
  */
-class PropertySort implements Sort {
+class RelevanceSort implements Sort {
+    private const SCORE_FIELD = '_score';
+
 	/**
 	 * @var string|null The order of the sort
 	 */
 	private ?string $order;
-
-	/**
-	 * @var string The field to sort on
-	 */
-	private string $field;
 
 	/**
 	 * @var array Additional sort parameters to pass to the sort query
@@ -37,19 +34,7 @@ class PropertySort implements Sort {
 	 * @param string|PropertyFieldMapper $property The property to sort on
 	 * @param string|null $order
 	 */
-	public function __construct( $property, string $order = null ) {
-		if ( is_string( $property ) ) {
-			$property = new PropertyFieldMapper( $property );
-		}
-
-		if ( !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->critical( 'Tried to construct a PropertySort with an invalid property: {property}', [
-				'property' => $property
-			] );
-
-			throw new InvalidArgumentException( '$property must be of type string or PropertyFieldMapper' );
-		}
-
+	public function __construct( string $order = null ) {
 		switch ( $order ) {
 			case "asc":
 			case "ascending":
@@ -68,10 +53,6 @@ class PropertySort implements Sort {
 				$this->order = null;
 				break;
 		}
-
-		$this->field = $property->hasKeywordSubfield() ?
-			$property->getKeywordField() :
-			$property->getPropertyField();
 	}
 
 	/**
@@ -88,6 +69,6 @@ class PropertySort implements Sort {
 	 * @inheritDoc
 	 */
 	public function toQuery(): BuilderInterface {
-		return new FieldSort( $this->field, $this->order, $this->parameters );
+		return new FieldSort( self::SCORE_FIELD, $this->order, $this->parameters );
 	}
 }
