@@ -95,7 +95,8 @@ class SearchEngine {
 			'query' => $query
 		] );
 
-		return $this->buildClient( $hosts )
+		return WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
             ->search( $query )
             ->asArray();
 	}
@@ -123,7 +124,7 @@ class SearchEngine {
 	 * @throws Exception
 	 */
 	public function doSearch(): array {
-		$elastic_query = $this->query_engine->toArray();
+		$elastic_query = $this->query_engine->toQuery();
 
 		$results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
 		$results = $this->applyResultTranslations( $results );
@@ -207,24 +208,4 @@ class SearchEngine {
 
 		return $results;
 	}
-
-    /**
-     * Builds a client for communicating with ElasticSearch.
-     *
-     * @return Client
-     * @throws AuthenticationException
-     */
-    private function buildClient( array $hosts ): Client {
-        $client = ClientBuilder::create()
-            ->setHosts( $hosts );
-
-        if ( $GLOBALS['wgWikiSearchBasicAuthenticationUsername'] && $GLOBALS['wgWikiSearchBasicAuthenticationPassword'] ) {
-            $client->setBasicAuthentication(
-                $GLOBALS['wgWikiSearchBasicAuthenticationUsername'],
-                $GLOBALS['wgWikiSearchBasicAuthenticationPassword']
-            );
-        }
-
-        return $client->build();
-    }
 }

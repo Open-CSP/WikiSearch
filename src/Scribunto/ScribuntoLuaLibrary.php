@@ -27,6 +27,7 @@ use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Register the Lua library.
@@ -84,10 +85,9 @@ class ScribuntoLuaLibrary extends \Scribunto_LuaLibraryBase {
 			$queryEngine->setBaseQuery( $baseQuery );
 		}
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $queryEngine->toArray() );
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $queryEngine->toQuery() );
 
 		if ( !isset( $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ) ) {
 			// Failed to create aggregations

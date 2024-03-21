@@ -4,6 +4,7 @@ namespace WikiSearch;
 
 use MediaWiki\MediaWikiServices;
 use Wikimedia\Services\ServiceContainer;
+use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
 
 /**
@@ -21,6 +22,10 @@ final class WikiSearchServices {
      * Disable the construction of this class by making the constructor private.
      */
     private function __construct() {
+    }
+
+    public static function getElasticsearchClientFactory( ?ServiceContainer $services = null ): ElasticsearchClientFactory {
+        return self::getService( "Factory.ElasticsearchClientFactory", $services );
     }
 
     public static function getQueryCombinatorFactory( ?ServiceContainer $services = null ): QueryCombinatorFactory {

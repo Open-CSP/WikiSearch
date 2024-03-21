@@ -9,6 +9,7 @@ use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Class ChainedPropertyTermsFilter
@@ -84,7 +85,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 		$query_engine->setLimit( $config->get( "WikiSearchMaxChainedQuerySize" ) );
 
-		return $query_engine->toArray();
+		return $query_engine->toQuery();
 	}
 
 	/**
@@ -94,9 +95,8 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return array
 	 */
 	private function getTermsFromSubquery( array $query ): array {
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
 			->search( $query );
 		$hits = $results["hits"]["hits"];
 

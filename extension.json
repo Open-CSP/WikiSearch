@@ -54,9 +54,6 @@
 		"WikiSearchElasticStoreIndex": {
 			"value": false
 		},
-		"WikiSearchDefaultResultLimit": {
-			"value": 10
-		},
 		"WikiSearchHighlightFragmentSize": {
 			"value": 250
 		},
@@ -64,7 +61,7 @@
 			"value": 1
 		},
 		"WikiSearchElasticSearchHosts": {
-			"value": []
+			"value": null
 		},
 		"WikiSearchAPIRequiredRights": {
 			"value": [

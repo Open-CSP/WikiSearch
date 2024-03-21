@@ -80,10 +80,9 @@ class PropertyValuesParserFunction {
 			$queryEngine->setBaseQuery( $baseQuery );
 		}
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $queryEngine->toArray() );
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $queryEngine->toQuery() );
 
 		if ( !isset( $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ) ) {
 			// Failed to create aggregations
