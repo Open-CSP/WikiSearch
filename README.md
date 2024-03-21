@@ -19,76 +19,7 @@ ElasticSearch query that was used to perform the search.
 | `aggregations` | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
 | `sorting`      | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
 
-### Example request
-
-Example request (cURL):
-```
-curl https://wiki.example.org/api.php \
--d action=query \
--d format=json \
--d meta=WikiSearch \
--d filter=[{"value":"5","key":"Average rating","range":{"gte":5,"lte":6}}] \
--d from=0 \
--d limit=10 \
--d pageid=698 \
--d aggregations=[
-    {"type":"range","ranges":[
-        {"from":1,"to":6,"key":"1"},
-        {"from":2,"to":6,"key":"2"},
-        {"from":3,"to":6,"key":"3"},
-        {"from":4,"to":6,"key":"4"},
-        {"from":5,"to":6,"key":"5"}
-    ],"property":"Average rating"}
-]
-```
-
-Example response:
-```
-{
-    "batchcomplete": "",
-    "result": {
-        "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
-        "total": 1,
-        "aggs": {
-            "Average rating": {
-                "meta": [],
-                "doc_count": 1,
-                "Average rating": {
-                    "buckets": {
-                        "1": {
-                            "from": 1,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "2": {
-                            "from": 2,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "3": {
-                            "from": 3,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "4": {
-                            "from": 4,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "5": {
-                            "from": 5,
-                            "to": 6,
-                            "doc_count": 1
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-### Parsing the response
+### Response
 
 This section assumes you have successfully made a request to the API using PHP and have stored the raw API result in the
 variable `$response`.
@@ -117,43 +48,9 @@ This `$result` field will look something like this:
 
 ```json
 {
-    "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
+    "hits": "[...]",
     "total": 1,
-    "aggs": {
-        "Average rating": {
-            "meta": [],
-            "doc_count": 1,
-            "Average rating": {
-                "buckets": {
-                    "1": {
-                        "from": 1,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "2": {
-                        "from": 2,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "3": {
-                        "from": 3,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "4": {
-                        "from": 4,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "5": {
-                        "from": 5,
-                        "to": 6,
-                        "doc_count": 1
-                    }
-                }
-            }
-        }
-    }
+    "aggs": { ... }
 }
 ```
 
@@ -431,75 +328,19 @@ There are a number of special properties defined by Semantic MediaWiki that are 
 
 For example, if you want to search through PDF files linked through the `Pdf` property, you can use the chained property `Pdf.attachment-content`.
 
-## Hooks
-
-### `WikiSearchBeforeElasticQuery`
-
-This hook is called right before the query is sent to ElasticSearch. It has the following signature:
-
-```php
-function onWikiSearchBeforeElasticQuery( array &$query, array &$hosts ) {}
-```
-
-The hook has access to and can alter the given `$query`. It can also add or remove hosts from the
-`$hosts` array.
-
-### `WikiSearchApplyResultTranslations`
-
-This hook is called right before returning the final results to the API. It can be used
-to alter the `$results` array. This can be useful to filter any pages the user is not allowed
-to see or add additional data to the query result.
-
-It has the following signature:
-
-```php
-function onWikiSearchApplyResultTranslations( array &$results ) {}
-```
-
-### `WikiSearchOnLoadFrontend`
-
-This hook must be implemented by any WikiSearch frontend. It gets called when the `#loadSeachEngine` parser function
-is called. It has the following signature:
-
-```php
-function onWikiSearchOnLoadFrontend( 
-    string &$result, 
-    \WikiSearch\SearchEngineConfig $config, 
-    Parser $parser, 
-    array $parameters 
-) {}
-```
-
-* `string &$result`: The result of the call to the parser function. This is the text that will be transcluded on the page.
-* `SearchEngineConfig $config`: The SearchEngineConfig object of the current page. The SearchEngineConfig object exposes the following methods:
-    * `getTitle(): Title`: The Title associated with this SearchEngineConfig
-    * `getConditionProperty(): PropertyInfo`: The PropertyInfo object associated with the property in the search condition (e.g. `Class` for `Class=Foobar`)
-        * The `PropertyInfo` class exposes the following methods:
-            * `getPropertyID(): int`: Returns the property ID
-            * `getPropertyType(): string`: Returns the property type (e.g. `txtField` or `wpgField`)
-            * `getPropertyName(): string`: Returns the name of the property (e.g. `Class`)
-    * `getConditionValue(): string`: Returns the value in the condition (e.g. `Foobar` in `Class=Foobar`)
-    * `getFacetProperties(): array`: Returns the facet properties in the config (facet properties are the properties that are **not** prefixed with `?`). May be the
-      name of a property (e.g. "Foobar") or a translation pair (e.g. "Foobar=Boofar")
-    * `getFacetPropertyIDs(): array`: Returns a key-value pair list where the key is the ID of the facet property and the value the type of that property
-    * `getResultProperties(): array`: Returns the result properties in the config as PropertyInfo objects (result properties are the properties prefixed with `?`)
-    * `getResultPropertyIDs(): array`: Returns a key-value pair list where the key is the name of the result property and the value the ID of that property
-    * `getSearchParameters(): array`: Returns a key-value pair list of additional search parameters
-* `Parser $parser`: The current Parser object
-* `array $parameters`: The parameters passed to the `#loadSearchEngine` call
-
 ## Config variables
 
 WikiSearch has several configuration variables that influence its default behaviour.
 
 * `$wgWikiSearchElasticStoreIndex`: Sets the name of the ElasticStore index to use (defaults to `"smw-data-" . strtolower( wfWikiID() )`)
-* `$wgWikiSearchDefaultResultLimit`: Sets the number of results to return when no explicit limit is given (defaults to `10`)
 * `$wgWikiSearchHighlightFragmentSize`: Sets the maximum number of characters in the highlight fragment (defaults to `250`)
 * `$wgWikiSearchHighlightNumberOfFragments`: Sets the maximum number of highlight fragments to return per result (defaults to `1`)
 * `$wgWikiSearchElasticSearchHosts`: Sets the list of ElasticSearch hosts to use (defaults to `["localhost:9200"]`)
 * `$wgWikiSearchAPIRequiredRights`: Sets the list of rights required to query the WikiSearch API (defaults to `["read", "wikisearch-execute-api"]`)
 * `$wgWikiSearchSearchFieldOverride`: Sets the search page to redirect to when using Special:Search. The user is redirected to the specified wiki article with the query parameter `search_query` specified through the search page if it is available. Does not change the behaviour of the search snippets shown when using the inline search field.
 * `$wgWikiSearchMaxChainedQuerySize`: Sets the maximum number of results to retrieve for a chained property query (defaults to `1000`). Setting this to an extreme value may cause ElasticSearch to run out of memory when performing a large chained query.
+* `$wgWikiSearchBasicAuthenticationUsername`: Sets the username to use for basic authentication
+* `wgWikiSearchBasicAuthenticationPassword`: Sets the password to use for basic authentication
 
 ### Debug mode
 
@@ -509,20 +350,20 @@ To enable debug mode, set `$wgWikiSearchEnableDebugMode` to `true`.
 
 WikiSearch defines two parser functions.
 
-### `#WikiSearchConfig` (case-sensitive)
+### `#wikisearchconfig` (case-sensitive)
 
-The `#WikiSearchConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
+The `#wikisearchconfig` parser function is used to set several configuration variables that cannot be passed to the API for security
 reasons. It sets the search condition for that page, the list of facet properties, and the list of result properties.
 
 ```
-{{#WikiSearchConfig:
+{{#wikisearchconfig:
   |<facet property>
   |?<result property>
 }}
 ```
 
 ```
-{{#WikiSearchConfig:
+{{#wikisearchconfig:
   |Version
   |Tag
   |Space
@@ -531,7 +372,7 @@ reasons. It sets the search condition for that page, the list of facet propertie
 }}
 ```
 
-Note: Only one call to `#WikiSearchConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
+Note: Only one call to `#wikisearchconfig` is allowed per page. Multiple calls will result in unexpected behaviour.
 
 #### Search parameters
 
@@ -584,7 +425,14 @@ depend completely on the frontend.
 * Add the following code at the bottom of your LocalSettings.php:
   * wfLoadExtension( 'WikiSearch' );
 * Run the update script which will automatically create the necessary database tables that this extension needs.
-* Run Composer.
+* Add the following dependencies to your `composer.local.json`:
+  * For Elasticsearch 8.x:
+    * `elasticsearch/elasticsearch` : `~8.x` (where `x` is the minor version)
+    * `handcraftedinthealps/elasticsearch-dsl`: : `^8.0`
+  * For Elasticsearch 7.x:
+    * `elasticsearch/elasticsearch` : `~7.x` (where `x` is the minor version)
+    * `handcraftedinthealps/elasticsearch-dsl`: : `^7.0`
+* Run `composer update` in your wiki's root folder.
 * Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
 
 ## Copyright
