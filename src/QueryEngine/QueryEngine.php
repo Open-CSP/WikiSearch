@@ -114,7 +114,7 @@ class QueryEngine {
 
         if ( $aggregation instanceof PropertyAggregation ) {
             // Store which property this aggregation affects
-            $filterAggregation->addParameter( self::AGGREGATION_PROPERTY_PARAMETER, $aggregation->getProperty() );
+            $filterAggregation->{self::AGGREGATION_PROPERTY_PARAMETER} = $aggregation->getProperty();
         }
 
         $this->search->addAggregation( $filterAggregation );
@@ -181,7 +181,7 @@ class QueryEngine {
                 continue;
             }
 
-            if ( $aggregation->getParameter( self::AGGREGATION_PROPERTY_PARAMETER ) === $filter->getProperty() ) {
+            if ( isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) && $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getProperty() ) {
                 // This aggregation affects the same property
                 continue;
             }
@@ -272,15 +272,6 @@ class QueryEngine {
 		}
 
 		$this->baseQuery = $query[0];
-	}
-
-	/**
-	 * Returns the configured ElasticSearch hosts.
-	 *
-	 * @return array
-	 */
-	public function getElasticHosts(): array {
-		return $this->hosts;
 	}
 
 	/**

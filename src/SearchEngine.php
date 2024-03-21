@@ -83,13 +83,12 @@ class SearchEngine {
 	 * Executes the given ElasticSearch query and returns the result.
 	 *
 	 * @param array $query
-	 * @param array $hosts
 	 * @return array
 	 * @throws Exception
 	 */
-	public function doQuery( array $query, array $hosts ): array {
+	public function doQuery( array $query ): array {
 		// Allow other extensions to modify the query
-		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query ] );
 
 		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
@@ -126,7 +125,7 @@ class SearchEngine {
 	public function doSearch(): array {
 		$elastic_query = $this->query_engine->toQuery();
 
-		$results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
+		$results = $this->doQuery( $elastic_query );
 		$results = $this->applyResultTranslations( $results );
 
 		return [
