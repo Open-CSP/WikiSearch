@@ -24,16 +24,9 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 */
 	public function __construct(
         private PropertyFilter $filter
-    ) {}
-
-	/**
-	 * Returns the property field mapper corresponding to this filter.
-	 *
-	 * @return PropertyFieldMapper
-	 */
-	public function getField(): PropertyFieldMapper {
-		return $this->filter->getField()->getChainedPropertyFieldMapper();
-	}
+    ) {
+        parent::__construct( $this->filter->getField()->getChainedPropertyFieldMapper() );
+    }
 
 	/**
 	 * @inheritDoc
@@ -77,6 +70,7 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return array
 	 */
 	private function getTermsFromSubquery( array $query ): array {
+        // FIXME: Don't use an actual search here
 		$results = WikiSearchServices::getElasticsearchClientFactory()
             ->newElasticsearchClient()
 			->search( $query );
