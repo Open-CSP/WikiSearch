@@ -10,8 +10,6 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">= 7.4 < 8.3",
-        "elasticsearch/elasticsearch": "^5.3|^6.0|^7.12",
-        "ongr/elasticsearch-dsl": "~6.0",
         "composer/installers": "1.*,>=1.0.1",
         "paquettg/php-html-parser": ">=3.0"
     },
