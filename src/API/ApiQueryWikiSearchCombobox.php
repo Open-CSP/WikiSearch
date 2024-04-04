@@ -24,6 +24,8 @@ namespace WikiSearch\API;
 use ApiBase;
 use ApiUsageException;
 use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MWException;
 use Title;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
@@ -60,15 +62,23 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		$engine_config = $this->getEngineConfigFromTitle( $title );
 		$engine = $this->getQueryEngine( $engine_config );
 
-		$results = WikiSearchServices::getElasticsearchClientFactory()
-            ->newElasticsearchClient()
-			->search( $engine->toQuery() )
-            ->asArray();
+        try {
+            $result = WikiSearchServices::getElasticsearchClientFactory()
+                ->newElasticsearchClient()
+                ->search( $engine->toQuery() );
+        } catch (ClientResponseException|ServerResponseException) {
+            $result = [];
+        }
+
+        if ( !is_array( $result ) ) {
+            // Elasticsearch >= 8.x
+            $result = $result->asArray();
+        }
 
 		$this->getResult()->addValue(
 			null,
 			'result',
-			$this->getAggregationsFromResult( $results )
+			$this->getAggregationsFromResult( $result )
 		);
 	}
 

@@ -24,6 +24,8 @@ namespace WikiSearch\API;
 use ApiBase;
 use ApiUsageException;
 use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MWException;
 use Title;
 use WikiSearch\Factory\QueryEngineFactory;
@@ -76,21 +78,30 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $highlighter_type, $size, $limit );
-		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
-		$page_filter = new PageFilter( $title );
+		$searchTermFilter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
+		$pageFilter = new PageFilter( $title );
 
-		$query_engine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
+        $query = WikiSearchServices::getQueryEngineFactory()
+            ->newQueryEngine()
+            ->addHighlighter( $highlighter )
+            ->addConstantScoreFilter( $pageFilter )
+            ->addConstantScoreFilter( $searchTermFilter )
+            ->toQuery();
 
-		$query_engine->addHighlighter( $highlighter );
-		$query_engine->addConstantScoreFilter( $page_filter );
-		$query_engine->addConstantScoreFilter( $search_term_filter );
+        try {
+            $result = WikiSearchServices::getElasticsearchClientFactory()
+                ->newElasticsearchClient()
+                ->search($query);
+        } catch (ClientResponseException|ServerResponseException) {
+            $result = [];
+        }
 
-		$results = WikiSearchServices::getElasticsearchClientFactory()
-            ->newElasticsearchClient()
-			->search( $query_engine->toQuery() )
-            ->asArray();
+        if ( !is_array( $result ) ) {
+            // Elasticsearch >= 8.x
+            $result = $result->asArray();
+        }
 
-		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $results ) );
+		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $result ) );
 	}
 
 	/**

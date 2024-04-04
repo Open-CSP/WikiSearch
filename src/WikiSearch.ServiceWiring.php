@@ -3,6 +3,7 @@
 use MediaWiki\MediaWikiServices;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
+use WikiSearch\Factory\QueryEngineFactory;
 
 /**
  * This file is loaded by MediaWiki\MediaWikiServices::getInstance() during the
@@ -17,5 +18,8 @@ return [
     },
     "WikiSearch.Factory.QueryCombinatorFactory" => static function (): QueryCombinatorFactory {
         return new QueryCombinatorFactory();
+    },
+    "WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
+        return new QueryEngineFactory( $services->getMainConfig() );
     }
 ];

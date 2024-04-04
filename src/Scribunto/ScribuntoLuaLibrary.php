@@ -22,6 +22,8 @@
 namespace WikiSearch\Scribunto;
 
 use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MWException;
 use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
@@ -85,16 +87,20 @@ class ScribuntoLuaLibrary extends \Scribunto_LuaLibraryBase {
 			$queryEngine->setBaseQuery( $baseQuery );
 		}
 
-		$results = WikiSearchServices::getElasticsearchClientFactory()
-            ->newElasticsearchClient()
-			->search( $queryEngine->toQuery() );
+        try {
+            $result = WikiSearchServices::getElasticsearchClientFactory()
+                ->newElasticsearchClient()
+                ->search($queryEngine->toQuery());
+        } catch (ClientResponseException|ServerResponseException) {
+            $result = [];
+        }
 
-		if ( !isset( $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ) ) {
-			// Failed to create aggregations
-			return [ null ];
-		}
+        if ( !is_array( $result ) ) {
+            // Elasticsearch >= 8.x
+            $result = $result->asArray();
+        }
 
-		$buckets = $results["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"];
+		$buckets = $result["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ?? null;
 
 		if ( !is_array( $buckets ) ) {
 			// The aggregations are not valid

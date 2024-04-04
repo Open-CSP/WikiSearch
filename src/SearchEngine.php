@@ -24,6 +24,8 @@ namespace WikiSearch;
 use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
@@ -84,7 +86,6 @@ class SearchEngine {
 	 *
 	 * @param array $query
 	 * @return array
-	 * @throws Exception
 	 */
 	public function doQuery( array $query ): array {
 		// Allow other extensions to modify the query
@@ -94,10 +95,20 @@ class SearchEngine {
 			'query' => $query
 		] );
 
-		return WikiSearchServices::getElasticsearchClientFactory()
-            ->newElasticsearchClient()
-            ->search( $query )
-            ->asArray();
+        try {
+            $result = WikiSearchServices::getElasticsearchClientFactory()
+                ->newElasticsearchClient()
+                ->search($query);
+        } catch (ClientResponseException|ServerResponseException) {
+            $result = [];
+        }
+
+        if ( !is_array( $result ) ) {
+            // Elasticsearch >= 8.x
+            $result = $result->asArray();
+        }
+
+        return $result;
 	}
 
 	/**

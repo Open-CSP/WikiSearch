@@ -2,6 +2,8 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
@@ -70,10 +72,19 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return array
 	 */
 	private function getTermsFromSubquery( array $query ): array {
-        // FIXME: Don't use an actual search here
-		$results = WikiSearchServices::getElasticsearchClientFactory()
-            ->newElasticsearchClient()
-			->search( $query );
+        try {
+            // FIXME: Don't use an actual search here
+            $results = WikiSearchServices::getElasticsearchClientFactory()
+                ->newElasticsearchClient()
+                ->search($query);
+        } catch (ClientResponseException|ServerResponseException) {
+            $results = [];
+        }
+
+        if ( !is_array( $results ) ) {
+            // Elasticsearch >= 8.x
+            $results = $results->asArray();
+        }
 
 		return array_map( function ( array $hit ): int {
 			return intval( $hit["_id"] );
