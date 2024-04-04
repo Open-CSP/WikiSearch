@@ -7,6 +7,7 @@ use Wikimedia\Services\ServiceContainer;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngineFactory;
+use WikiSearch\Factory\SearchEngineFactory;
 
 /**
  * Getter for all WikiSearch services. This class reduces the risk of mistyping
@@ -35,6 +36,10 @@ final class WikiSearchServices {
 
     public static function getQueryEngineFactory( ?ServiceContainer $services = null ): QueryEngineFactory {
         return self::getService( "Factory.QueryEngineFactory", $services );
+    }
+
+    public static function getSearchEngineFactory( ?ServiceContainer $services = null ): SearchEngineFactory {
+        return self::getService( "Factory.SearchEngineFactory", $services );
     }
 
     private static function getService( string $name, ?ServiceContainer $services ): object {

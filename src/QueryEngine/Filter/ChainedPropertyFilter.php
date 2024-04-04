@@ -52,10 +52,10 @@ class ChainedPropertyFilter extends PropertyFilter {
 	/**
 	 * Constructs a new ElasticSearch subquery from the given Filter.
 	 *
-	 * @param AbstractFilter $filter
+	 * @param Filter $filter
 	 * @return array
      */
-	private function constructSubqueryFromFilter( AbstractFilter $filter ): array {
+	private function constructSubqueryFromFilter(Filter $filter ): array {
 		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 		$queryEngine->addConstantScoreFilter( $filter );
 

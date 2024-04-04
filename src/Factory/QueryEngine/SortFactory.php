@@ -1,17 +1,12 @@
 <?php
 
-namespace WikiSearch\QueryEngine\Factory;
+namespace WikiSearch\Factory\QueryEngine;
 
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\QueryEngine\Sort\Sort;
 use WikiSearch\SMW\PropertyFieldMapper;
 
-/**
- * Class SortFactory
- *
- * @package WikiSearch\QueryEngine\Factory
- */
 class SortFactory {
 	/**
 	 * Constructs a new Sort class from the given array. The given array directly corresponds to the array given by

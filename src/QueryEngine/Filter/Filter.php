@@ -5,7 +5,7 @@ namespace WikiSearch\QueryEngine\Filter;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WikiSearch\QueryEngine\QueryConvertable;
 
-abstract class AbstractFilter implements QueryConvertable {
+abstract class Filter implements QueryConvertable {
 	/**
 	 * @var bool
 	 */
@@ -20,7 +20,7 @@ abstract class AbstractFilter implements QueryConvertable {
      * Sets the filter to be a "post"-filter.
      *
      * @param bool $isPostFilter
-     * @return AbstractFilter
+     * @return Filter
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/filter-search-results.html#post-filter
      */
@@ -34,7 +34,7 @@ abstract class AbstractFilter implements QueryConvertable {
      * Negates this filter.
      *
      * @param bool $isNegated
-     * @return AbstractFilter
+     * @return Filter
      */
 	public function setNegated( bool $isNegated = true ): self {
 		$this->isNegated = $isNegated;

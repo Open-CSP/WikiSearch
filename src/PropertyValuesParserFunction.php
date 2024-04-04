@@ -6,7 +6,7 @@ use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Parser;
-use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
+use WikiSearch\QueryEngine\Aggregation\FilterAbstractAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
@@ -20,12 +20,13 @@ use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 class PropertyValuesParserFunction {
 	/**
 	 * Callback for the parser function {{#prop_values}}.
+     *
+     * @deprecated Use the Lua function instead
 	 *
 	 * @param Parser $parser
 	 * @param string ...$args
 	 * @return string
-	 * @throws \MWException
-	 */
+     */
 	public function execute( Parser $parser, ...$args ): string {
 		if ( !class_exists( "\WSArrays" ) ) {
 			return "WSArrays must be installed.";
@@ -73,7 +74,7 @@ class PropertyValuesParserFunction {
 
 		$rangeFilter = new PropertyRangeFilter( $dateProperty, from: $from, to: $to );
 		$termsAggregation = new PropertyValueAggregation( $property, $limit, "common_values" );
-		$aggregation = new FilterAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
+		$aggregation = new FilterAbstractAggregation( $rangeFilter, [ $termsAggregation ], "property_values" );
 
 		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 		$queryEngine->addAggregation( $aggregation );

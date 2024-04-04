@@ -13,7 +13,7 @@ use WikiMap;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\Aggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyAggregation;
-use WikiSearch\QueryEngine\Filter\AbstractFilter;
+use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\PropertyFilter;
 use WikiSearch\QueryEngine\Highlighter\Highlighter;
 use WikiSearch\QueryEngine\Sort\Sort;
@@ -96,7 +96,7 @@ class QueryEngine {
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
      */
-	public function addAggregation( Aggregation $aggregation ): self {
+	public function addAggregation(Aggregation $aggregation ): self {
         $filterAggregation = new FilterAggregation( $aggregation->getName(), new BoolQuery() );
         $filterAggregation->addAggregation( $aggregation->toQuery() );
 
@@ -113,14 +113,14 @@ class QueryEngine {
 	/**
 	 * Adds a filter to the constant-score fragment of the query.
 	 *
-	 * @param AbstractFilter $filter
+	 * @param Filter $filter
 	 * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
      * @return QueryEngine
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-constant-score-query.html
 	 */
-	public function addConstantScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): self {
+	public function addConstantScoreFilter(Filter $filter, string $occur = BoolQuery::MUST ): self {
 		if ( $filter->isPostFilter() ) {
 			$this->addPostFilter( $filter, $occur );
 		} else {
@@ -133,14 +133,14 @@ class QueryEngine {
 	/**
 	 * Adds a filter to the function-score fragment of the query.
 	 *
-	 * @param AbstractFilter $filter
+	 * @param Filter $filter
 	 * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
      * @return QueryEngine
 	 *
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-bool-query.html
 	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-function-score-query.html
 	 */
-	public function addFunctionScoreFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): self {
+	public function addFunctionScoreFilter(Filter $filter, string $occur = BoolQuery::MUST ): self {
         if ( $filter->isPostFilter() ) {
             $this->addPostFilter( $filter, $occur );
         } else {
@@ -153,13 +153,13 @@ class QueryEngine {
     /**
      * Adds a post filter to the query.
      *
-     * @param AbstractFilter $filter
+     * @param Filter $filter
      * @param string $occur The occurrence type for the added filter (should be a BoolQuery constant)
      * @return QueryEngine
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-request-post-filter.html
      */
-    public function addPostFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): self {
+    public function addPostFilter(Filter $filter, string $occur = BoolQuery::MUST ): self {
         $filterQuery = $filter->toQuery();
         $this->search->addPostFilter( $filterQuery, $occur );
 

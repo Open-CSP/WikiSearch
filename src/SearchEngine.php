@@ -51,16 +51,16 @@ class SearchEngine {
 	/**
 	 * @var QueryEngine
 	 */
-	private QueryEngine $query_engine;
+	private QueryEngine $queryEngine;
 
 	/**
 	 * Search constructor.
 	 *
 	 * @param SearchEngineConfig $config
 	 */
-	public function __construct( SearchEngineConfig $config ) {
+	public function __construct( SearchEngineConfig $config, QueryEngine $queryEngine ) {
 		$this->config = $config;
-		$this->query_engine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine( $config );
+		$this->queryEngine = $queryEngine;
 	}
 
 	/**
@@ -78,7 +78,7 @@ class SearchEngine {
 	 * @return QueryEngine
 	 */
 	public function getQueryEngine(): QueryEngine {
-		return $this->query_engine;
+		return $this->queryEngine;
 	}
 
 	/**
@@ -123,7 +123,7 @@ class SearchEngine {
 			$this->config->getSearchParameter( "default operator" ) ?? "or"
 		);
 
-		$this->query_engine->addFunctionScoreFilter( $search_term_filter );
+		$this->queryEngine->addFunctionScoreFilter( $search_term_filter );
 	}
 
 	/**
@@ -134,7 +134,7 @@ class SearchEngine {
 	 * @throws Exception
 	 */
 	public function doSearch(): array {
-		$elastic_query = $this->query_engine->toQuery();
+		$elastic_query = $this->queryEngine->toQuery();
 
 		$results = $this->doQuery( $elastic_query );
 		$results = $this->applyResultTranslations( $results );

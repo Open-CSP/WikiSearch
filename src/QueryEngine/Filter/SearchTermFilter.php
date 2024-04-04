@@ -6,7 +6,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
 use WikiSearch\SMW\PropertyFieldMapper;
 
-class SearchTermFilter extends AbstractFilter {
+class SearchTermFilter extends Filter {
 	/**
 	 * @var PropertyFieldMapper[]
 	 */

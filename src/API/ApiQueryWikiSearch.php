@@ -26,11 +26,11 @@ use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
+use WikiSearch\Factory\SearchEngineFactory;
 use WikiSearch\Logger;
 use WikiSearch\SearchEngine;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SearchEngineException;
-use WikiSearch\SearchEngineFactory;
 
 /**
  * Class ApiQueryWikiSearch

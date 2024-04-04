@@ -4,7 +4,7 @@ namespace WikiSearch\QueryEngine\Filter;
 
 use WikiSearch\SMW\PropertyFieldMapper;
 
-abstract class PropertyFilter extends AbstractFilter {
+abstract class PropertyFilter extends Filter {
     protected PropertyFieldMapper $field;
 
     /**

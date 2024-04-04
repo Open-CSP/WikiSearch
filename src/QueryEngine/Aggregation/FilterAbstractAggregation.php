@@ -3,21 +3,21 @@
 namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
-use WikiSearch\QueryEngine\Filter\AbstractFilter;
+use WikiSearch\QueryEngine\Filter\Filter;
 
 /**
  * A single bucket of all the documents in the current document set context that match a specified filter.
  *
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
  */
-class FilterAggregation extends Aggregation {
+class FilterAbstractAggregation extends AbstractAggregation {
 	/**
      * @inheritDoc
-	 * @param AbstractFilter $filter
+	 * @param Filter $filter
 	 * @param Aggregation[] $aggregations
 	 * @param string $name
 	 */
-	public function __construct( private AbstractFilter $filter, private array $aggregations, string $name ) {
+	public function __construct(private Filter $filter, private array $aggregations, string $name ) {
 		parent::__construct( $name );
 	}
 

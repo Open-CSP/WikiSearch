@@ -4,6 +4,7 @@ use MediaWiki\MediaWikiServices;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngineFactory;
+use WikiSearch\WikiSearchServices;
 
 /**
  * This file is loaded by MediaWiki\MediaWikiServices::getInstance() during the
@@ -21,5 +22,8 @@ return [
     },
     "WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
         return new QueryEngineFactory( $services->getMainConfig() );
+    },
+    "WikiSearch.Factory.SearchEngineFactory" => static function ( MediaWikiServices $services ): \WikiSearch\Factory\SearchEngineFactory {
+        return new \WikiSearch\Factory\SearchEngineFactory( WikiSearchServices::getQueryEngineFactory( $services ) );
     }
 ];

@@ -1,10 +1,10 @@
 <?php
 
-namespace WikiSearch\QueryEngine\Factory;
+namespace WikiSearch\Factory\QueryEngine;
 
 use WikiSearch\Logger;
-use WikiSearch\QueryEngine\Filter\AbstractFilter;
 use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
+use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\HasPropertyFilter;
 use WikiSearch\QueryEngine\Filter\PropertyFilter;
 use WikiSearch\QueryEngine\Filter\PropertyFuzzyValueFilter;
@@ -16,13 +16,6 @@ use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SMW\PropertyFieldMapper;
 
-/**
- * Class FilterFactory
- *
- * TODO: Rewrite this relatively messy parser and add appropriate error messages.
- *
- * @package WikiSearch\QueryEngine\Factory
- */
 class FilterFactory {
     use QueryPreparationTrait;
 
@@ -32,9 +25,9 @@ class FilterFactory {
 	 *
 	 * @param array $array
 	 * @param SearchEngineConfig $config
-	 * @return AbstractFilter|null
+	 * @return Filter|null
 	 */
-	public static function fromArray( array $array, SearchEngineConfig $config ): ?AbstractFilter {
+	public static function fromArray( array $array, SearchEngineConfig $config ): ?Filter {
 		Logger::getLogger()->debug( 'Constructing Filter from array' );
 
 		if ( !isset( $array["key"] ) ) {
@@ -81,7 +74,7 @@ class FilterFactory {
 	 * @param array $array
 	 * @param PropertyFieldMapper $property_field_mapper
 	 * @param SearchEngineConfig $config
-	 * @return AbstractFilter|null
+	 * @return Filter|null
 	 */
 	private static function filterFromArray(
 		array $array,

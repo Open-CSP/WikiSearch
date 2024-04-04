@@ -1,6 +1,6 @@
 <?php
 
-namespace WikiSearch\QueryEngine\Factory;
+namespace WikiSearch\Factory\QueryEngine;
 
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\Aggregation;
@@ -8,12 +8,17 @@ use WikiSearch\QueryEngine\Aggregation\PropertyRangeAggregation;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\SMW\PropertyFieldMapper;
 
-/**
- * Class AggregationFactory
- *
- * @package WikiSearch\QueryEngine\Factory
- */
 class AggregationFactory {
+    /**
+     * Constructs a new aggregation object from the given spec.
+     *
+     * @param array $spec
+     * @return Aggregation
+     */
+    public function newAggregation( array $spec ): Aggregation {
+
+    }
+
 	/**
 	 * Constructs a new Aggregation class from the given array. The given array directly corresponds to the array given
 	 * by the user through the API. Returns null on failure.

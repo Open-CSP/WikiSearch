@@ -11,7 +11,7 @@ use WikiSearch\SMW\WikiPageObjectIdLookup;
 /**
  * Filters out everything except for the specified title.
  */
-class PageFilter extends AbstractFilter {
+class PageFilter extends Filter {
 	/**
 	 * PageFilter constructor.
 	 *
