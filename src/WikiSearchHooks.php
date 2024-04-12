@@ -107,10 +107,10 @@ abstract class WikiSearchHooks {
 
 		// Create an appropriate parser
 		$parser = MediaWikiServices::getInstance()->getParser();
-		$parser->mOptions = $parser->getOptions() ?? \ParserOptions::newFromUserAndLang(
+		$parser->setOptions( $parser->getOptions() ?? \ParserOptions::newFromUserAndLang(
 			\RequestContext::getMain()->getUser(),
 			\RequestContext::getMain()->getLanguage()
-		);
+		) );
 
 		$parser->setTitle( $parser->mTitle ?? Title::newMainPage() );
 		$parser->clearState();
