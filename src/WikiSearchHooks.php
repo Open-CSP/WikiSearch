@@ -112,7 +112,7 @@ abstract class WikiSearchHooks {
 			\RequestContext::getMain()->getLanguage()
 		);
 
-		$parser->setTitle( $parser->mTitle ?? Title::newMainPage() );
+		$parser->setTitle( $parser->getTitle() ?? Title::newMainPage() );
 		$parser->clearState();
 
 		// Reparse the wikitext upon safe with the parser
