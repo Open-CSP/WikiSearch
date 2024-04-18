@@ -2,7 +2,7 @@
 
 namespace WikiSearch\Factory;
 
-use WikiSearch\QueryEngine\Aggregation\Aggregation;
+use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Sort\Sort;
 use WikiSearch\SearchEngine;
@@ -23,7 +23,7 @@ class SearchEngineFactory {
      * @param int|null $from
      * @param int|null $limit
      * @param Filter[] $filters
-     * @param Aggregation[] $aggregations
+     * @param AbstractAggregation[] $aggregations
      * @param Sort[] $sorts
      *
      * @return SearchEngine

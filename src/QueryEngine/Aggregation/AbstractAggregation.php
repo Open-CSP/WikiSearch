@@ -2,7 +2,6 @@
 
 namespace WikiSearch\QueryEngine\Aggregation;
 
-use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use WikiSearch\QueryEngine\QueryConvertable;
 
 /**
@@ -10,11 +9,11 @@ use WikiSearch\QueryEngine\QueryConvertable;
  *
  * @package WikiSearch\QueryEngine\Aggregation
  */
-abstract class Aggregation implements QueryConvertable {
+abstract class AbstractAggregation implements QueryConvertable {
     /**
      * @param string $name The name of the aggregation
      */
-    public function __construct(protected string $name ) {}
+    public function __construct( protected string $name ) {}
 
 	/**
 	 * Returns the name of the aggregation.
@@ -28,5 +27,5 @@ abstract class Aggregation implements QueryConvertable {
 	/**
 	 * @inheritDoc
 	 */
-	abstract public function toQuery(): AbstractAggregation;
+	abstract public function toQuery(): \ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 }

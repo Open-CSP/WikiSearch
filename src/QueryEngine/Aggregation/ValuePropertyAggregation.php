@@ -12,7 +12,7 @@ use WikiSearch\SMW\PropertyFieldMapper;
  *
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
  */
-class PropertyValueAggregation extends PropertyAggregation {
+class ValuePropertyAggregation extends AbstractPropertyAggregation {
     /**
      * @inheritDoc
      * @param int|null $size The maximum number of term buckets to be returned

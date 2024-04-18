@@ -2,7 +2,7 @@
 
 namespace WikiSearch\Factory;
 
-use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
+use WikiSearch\QueryEngine\Aggregation\ValuePropertyAggregation;
 use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
@@ -26,7 +26,7 @@ class QueryEngineFactory {
         $aggregationSize = $config->getSearchParameter( "aggregation size" );
 
         foreach ( $config->getFacetProperties() as $field ) {
-            $aggregation = new PropertyValueAggregation( $field, $aggregationSize, null );
+            $aggregation = new ValuePropertyAggregation( $field, $aggregationSize, null );
             $queryEngine->addAggregation( $aggregation );
         }
 

@@ -11,8 +11,8 @@ use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
 use WikiMap;
 use WikiSearch\Logger;
-use WikiSearch\QueryEngine\Aggregation\Aggregation;
-use WikiSearch\QueryEngine\Aggregation\PropertyAggregation;
+use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
+use WikiSearch\QueryEngine\Aggregation\AbstractPropertyAggregation;
 use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\PropertyFilter;
 use WikiSearch\QueryEngine\Highlighter\Highlighter;
@@ -91,16 +91,16 @@ class QueryEngine {
     /**
      * Adds an aggregation to the query.
      *
-     * @param Aggregation $aggregation
+     * @param AbstractAggregation $aggregation
      * @return QueryEngine
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations.html
      */
-	public function addAggregation(Aggregation $aggregation ): self {
+	public function addAggregation(AbstractAggregation $aggregation ): self {
         $filterAggregation = new FilterAggregation( $aggregation->getName(), new BoolQuery() );
         $filterAggregation->addAggregation( $aggregation->toQuery() );
 
-        if ( $aggregation instanceof PropertyAggregation ) {
+        if ( $aggregation instanceof AbstractPropertyAggregation ) {
             // Store which property this aggregation affects
             $filterAggregation->{self::AGGREGATION_PROPERTY_PARAMETER} = $aggregation->getProperty();
         }

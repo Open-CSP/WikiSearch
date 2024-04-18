@@ -13,7 +13,7 @@ use WikiSearch\SMW\PropertyFieldMapper;
  *
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
  */
-class PropertyRangeAggregation extends PropertyAggregation {
+class RangePropertyAggregation extends AbstractPropertyAggregation {
 	/**
 	 * @inheritDoc
 	 * @param array $ranges

@@ -2,7 +2,6 @@
 
 namespace WikiSearch\QueryEngine\Aggregation;
 
-use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use WikiSearch\QueryEngine\Filter\Filter;
 
 /**
@@ -10,11 +9,11 @@ use WikiSearch\QueryEngine\Filter\Filter;
  *
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
  */
-class FilterAbstractAggregation extends AbstractAggregation {
+class FilterAggregation extends AbstractAggregation {
 	/**
      * @inheritDoc
 	 * @param Filter $filter
-	 * @param Aggregation[] $aggregations
+	 * @param AbstractAggregation[] $aggregations
 	 * @param string $name
 	 */
 	public function __construct(private Filter $filter, private array $aggregations, string $name ) {
@@ -24,7 +23,7 @@ class FilterAbstractAggregation extends AbstractAggregation {
 	/**
 	 * @inheritDoc
 	 */
-	public function toQuery(): AbstractAggregation {
+	public function toQuery(): \ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation {
 		$filterAggregation = new \ONGR\ElasticsearchDSL\Aggregation\Bucketing\FilterAggregation(
 			$this->name,
 			$this->filter->toQuery()

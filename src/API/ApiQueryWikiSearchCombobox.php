@@ -28,7 +28,7 @@ use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MWException;
 use Title;
 use WikiSearch\Factory\SearchEngineFactory;
-use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
+use WikiSearch\QueryEngine\Aggregation\ValuePropertyAggregation;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -138,7 +138,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 			[ new PropertyFieldMapper( $this->getParameter( "property" ) ) ]
 		) );
 		$engine->addAggregation(
-			new PropertyValueAggregation(
+			new ValuePropertyAggregation(
                 $this->getParameter( "property" ),
 				$this->getParameter( "limit" ),
                 self::AGGREGATION_NAME

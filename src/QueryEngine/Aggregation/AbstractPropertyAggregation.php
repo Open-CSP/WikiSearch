@@ -4,7 +4,7 @@ namespace WikiSearch\QueryEngine\Aggregation;
 
 use WikiSearch\SMW\PropertyFieldMapper;
 
-abstract class PropertyAggregation extends Aggregation {
+abstract class AbstractPropertyAggregation extends AbstractAggregation {
     /**
      * @var PropertyFieldMapper|string The property field mapper associated with this aggregation
      */
