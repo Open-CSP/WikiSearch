@@ -3,6 +3,7 @@
 use MediaWiki\MediaWikiServices;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
+use WikiSearch\Factory\QueryEngine\AggregationFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\WikiSearchServices;
 
@@ -19,6 +20,9 @@ return [
     },
     "WikiSearch.Factory.QueryCombinatorFactory" => static function (): QueryCombinatorFactory {
         return new QueryCombinatorFactory();
+    },
+    "WikiSearch.Factory.QueryEngine.AggregationFactory" => static function (): AggregationFactory {
+        return new AggregationFactory();
     },
     "WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
         return new QueryEngineFactory( $services->getMainConfig() );

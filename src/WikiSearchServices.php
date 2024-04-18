@@ -6,6 +6,7 @@ use MediaWiki\MediaWikiServices;
 use Wikimedia\Services\ServiceContainer;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
+use WikiSearch\Factory\QueryEngine\AggregationFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\Factory\SearchEngineFactory;
 
@@ -24,6 +25,10 @@ final class WikiSearchServices {
      * Disable the construction of this class by making the constructor private.
      */
     private function __construct() {
+    }
+
+    public static function getAggregationFactory( ?ServiceContainer $services = null ): AggregationFactory {
+        return self::getService( "Factory.QueryEngine.AggregationFactory", $services );
     }
 
     public static function getElasticsearchClientFactory( ?ServiceContainer $services = null ): ElasticsearchClientFactory {

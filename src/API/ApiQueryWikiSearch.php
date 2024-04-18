@@ -26,11 +26,14 @@ use ApiUsageException;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
+use WikiSearch\Exception\ParsingException;
 use WikiSearch\Factory\SearchEngineFactory;
 use WikiSearch\Logger;
+use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\SearchEngine;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SearchEngineException;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Class ApiQueryWikiSearch
@@ -142,30 +145,55 @@ class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 	/**
 	 * Creates the SearchEngine from the current request.
 	 *
-	 * @param SearchEngineConfig $engine_config
+	 * @param SearchEngineConfig $engineConfig
 	 * @return SearchEngine
 	 * @throws ApiUsageException
 	 */
-	private function getEngine( SearchEngineConfig $engine_config ): SearchEngine {
-		$search_engine_factory = new SearchEngineFactory( $engine_config );
-
-		try {
-			$search_engine = $search_engine_factory->fromAPIParameters(
-				$this->getParameter( "term" ),
-				$this->getParameter( "from" ),
-				$this->getParameter( "limit" ),
-				$this->getParameter( "filter" ),
-				$this->getParameter( "aggregations" ),
-				$this->getParameter( "sortings" )
-			);
-		} catch ( SearchEngineException $exception ) {
-			Logger::getLogger()->critical( 'Caught exception while trying to construct a SearchEngine: {e}', [
-				'e' => $exception
-			] );
-
-			$this->dieWithError( $exception->getMessage() );
-		}
-
-		return $search_engine;
+	private function getEngine( SearchEngineConfig $engineConfig ): SearchEngine {
+        return WikiSearchServices::getSearchEngineFactory()->newSearchEngine(
+            $engineConfig,
+            term: $this->getParameter( 'term' ),
+            from: $this->getParameter( 'from' ),
+            limit: $this->getParameter( 'limit' ),
+            filters: $this->getFilters(),
+            aggregations: $this->getAggregations(),
+            sorts: $this->getSorts()
+        );
 	}
+
+    /**
+     * @return array
+     */
+    private function getFilters(): array {
+        return []; // TODO
+    }
+
+    /**
+     * @throws ApiUsageException
+     * @throws SearchEngineException
+     * @throws ParsingException
+     */
+    private function getAggregations(): array {
+        $aggregationSpecs = $this->getParameter( 'aggregations' ) ?? "[]";
+        $aggregationSpecs = json_decode( $aggregationSpecs, true );
+
+        if ( !is_array( $aggregationSpecs ) ) {
+            // TODO: Improve this error
+            $message = wfMessage( "wikisearch-api-invalid-json", "aggregations", json_last_error_msg() );
+            throw new SearchEngineException( $message );
+        }
+
+        return array_map( function ( $spec ): AbstractAggregation {
+            if ( !is_array( $spec ) ) {
+                // TODO: Improve this error
+                throw new SearchEngineException( "Invalid aggregation." );
+            }
+
+            return WikiSearchServices::getAggregationFactory()->newAggregation( $spec );
+        }, $aggregationSpecs );
+    }
+
+    private function getSorts(): array {
+        return []; // TODO
+    }
 }

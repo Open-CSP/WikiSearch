@@ -2,12 +2,10 @@
 
 namespace WikiSearch\Factory\QueryEngine;
 
-use WikiSearch\Exception\AggregationParsingException;
-use WikiSearch\Logger;
+use WikiSearch\Exception\ParsingException;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\QueryEngine\Aggregation\RangePropertyAggregation;
 use WikiSearch\QueryEngine\Aggregation\ValuePropertyAggregation;
-use WikiSearch\SMW\PropertyFieldMapper;
 
 class AggregationFactory {
     /**
@@ -15,7 +13,7 @@ class AggregationFactory {
      *
      * @param array $spec
      * @return AbstractAggregation
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     public function newAggregation( array $spec ): AbstractAggregation {
         $path = [];
@@ -29,7 +27,7 @@ class AggregationFactory {
     /**
      * Parses the given spec as a range property aggregation.
      *
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parseSpecForRange( array $spec, array $path ): RangePropertyAggregation {
         $name = $this->parseNameForRange( $spec, $path );
@@ -42,7 +40,7 @@ class AggregationFactory {
     /**
      * Parses the given spec as a value property aggregation.
      *
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parseSpecForValue( array $spec, array $path ): ValuePropertyAggregation {
         $name = $this->parseNameForValue( $spec, $path );
@@ -52,102 +50,102 @@ class AggregationFactory {
     }
 
     /**
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parseType( array $spec, array $path ): string {
         $path[] = 'type';
 
         if ( !isset( $spec['type'] ) ) {
-            throw new AggregationParsingException( 'a type is required', $path );
+            throw new ParsingException( 'a type is required', $path );
         }
 
         if ( !in_array( $spec['type'], ['range', 'value', 'property'], true ) ) {
-            throw new AggregationParsingException( 'invalid type, must be either "range", "value" or "property"', $path );
+            throw new ParsingException( 'invalid type, must be either "range", "value" or "property"', $path );
         }
 
         return $spec['type'];
     }
 
     /**
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parseNameForRange( array $spec, array $path ): string {
         $path[] = 'name';
 
         if ( empty( $spec['name'] ) ) {
-            throw new AggregationParsingException( 'a name is required for type "range"', $path );
+            throw new ParsingException( 'a name is required for type "range"', $path );
         }
 
         if ( !is_string( $spec['name'] ) ) {
-            throw new AggregationParsingException( 'a name must be a string', $path );
+            throw new ParsingException( 'a name must be a string', $path );
         }
 
         return $spec['name'];
     }
 
     /**
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parseNameForValue(array $spec, array $path ): string {
         $path[] = 'name';
 
         if ( empty( $spec['name'] ) ) {
-            throw new AggregationParsingException( 'a name is required for type "value"/"property"', $path );
+            throw new ParsingException( 'a name is required for type "value"/"property"', $path );
         }
 
         if ( !is_string( $spec['name'] ) ) {
-            throw new AggregationParsingException( 'a name must be a string', $path );
+            throw new ParsingException( 'a name must be a string', $path );
         }
 
         return $spec['name'];
     }
 
     /**
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parsePropertyForRange( array $spec, array $path ): string {
         $path[] = 'property';
 
         if ( empty( $spec['property'] ) ) {
-            throw new AggregationParsingException( 'a property is required for type "range"', $path );
+            throw new ParsingException( 'a property is required for type "range"', $path );
         }
 
         if ( !is_string( $spec['property'] ) ) {
-            throw new AggregationParsingException( 'a property must be a string', $path );
+            throw new ParsingException( 'a property must be a string', $path );
         }
 
         return $spec['property'];
     }
 
     /**
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parsePropertyForValue( array $spec, array $path ): string {
         $path[] = 'property';
 
         if ( empty( $spec['property'] ) ) {
-            throw new AggregationParsingException( 'a property is required for type "value"/"property"', $path );
+            throw new ParsingException( 'a property is required for type "value"/"property"', $path );
         }
 
         if ( !is_string( $spec['property'] ) ) {
-            throw new AggregationParsingException( 'a property must be a string', $path );
+            throw new ParsingException( 'a property must be a string', $path );
         }
 
         return $spec['property'];
     }
 
     /**
-     * @throws AggregationParsingException
+     * @throws ParsingException
      */
     private function parseRanges( array $spec, array $path ): array {
         $path[] = 'ranges';
 
         if ( empty( $spec['ranges'] ) ) {
-            throw new AggregationParsingException( 'ranges are required for type "range"', $path );
+            throw new ParsingException( 'ranges are required for type "range"', $path );
         }
 
         if ( !is_array( $spec['ranges'] ) ) {
-            throw new AggregationParsingException( 'the ranges must a list', $path );
+            throw new ParsingException( 'the ranges must a list', $path );
         }
 
         return $spec['ranges'];

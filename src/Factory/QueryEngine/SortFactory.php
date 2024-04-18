@@ -2,12 +2,44 @@
 
 namespace WikiSearch\Factory\QueryEngine;
 
+use WikiSearch\Exception\ParsingException;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\QueryEngine\Sort\Sort;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 class SortFactory {
+    /**
+     * Constructs a new sort object from the given spec.
+     *
+     * @param array $spec
+     * @return Sort
+     */
+    public function newSort( array $spec ): Sort {
+        $path = [];
+
+        return match ( $this->parseType( $spec, $path ) ) {
+            "property" => $this->parseSpecForProperty( $spec, $path )
+        };
+    }
+
+    /**
+     * @throws ParsingException
+     */
+    private function parseType( array $spec, array $path ): string {
+        $path[] = 'type';
+
+        if ( !isset( $spec['type'] ) ) {
+            throw new AggregationParsingException( 'a type is required', $path );
+        }
+
+        if ( !in_array( $spec['type'], ['range', 'value', 'property'], true ) ) {
+            throw new AggregationParsingException( 'invalid type, must be either "range", "value" or "property"', $path );
+        }
+
+        return $spec['type'];
+    }
+
 	/**
 	 * Constructs a new Sort class from the given array. The given array directly corresponds to the array given by
 	 * the user through the API. Returns "null" on failure.

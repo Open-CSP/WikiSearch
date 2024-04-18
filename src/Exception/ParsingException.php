@@ -5,7 +5,7 @@ namespace WikiSearch\Exception;
 use MWException;
 use Throwable;
 
-class AggregationParsingException extends MWException
+class ParsingException extends MWException
 {
     public function __construct(string $message, array $path, int $code = 0, ?Throwable $previous = null)
     {
