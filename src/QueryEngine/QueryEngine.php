@@ -156,9 +156,9 @@ class QueryEngine {
 
         // Post filters are applied after aggregations have been calculated. This makes it possible to have facets
         // that do not change after the filter they control is applied. This is useful for facets that should act like
-        // a disjunction, where a should increase the number of results. However, this leaves us with the problem that
-        // other aggregations that should be affected by the added filter are no longer accurate. To solve this, we also
-        // add any post filter to the all other aggregations using a FilterAggregation.
+        // a disjunction, where adding a filter should increase the number of results. However, this leaves us with the
+        // problem that other aggregations that should be affected by the added filter are no longer accurate. To solve
+        // this, we also add any post filter to the all other aggregations using a FilterAggregation.
 
         if ( !$filter instanceof PropertyFilter ) {
             return;
@@ -169,7 +169,10 @@ class QueryEngine {
                 continue;
             }
 
-            if ( isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) && $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getField() ) {
+            if (
+                isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) &&
+                $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}->getPID() === $filter->getField()->getPID()
+            ) {
                 // This aggregation affects the same property
                 continue;
             }
