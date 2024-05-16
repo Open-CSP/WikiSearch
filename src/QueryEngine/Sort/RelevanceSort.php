@@ -18,10 +18,6 @@ class RelevanceSort implements Sort {
 	 * @inheritDoc
 	 */
 	public function toQuery(): BuilderInterface {
-        $parameters = [
-			'mode' => 'max'
-		];
-
-		return new FieldSort( self::SCORE_FIELD, 'desc', $parameters );
+		return new FieldSort( self::SCORE_FIELD, 'desc', [] );
 	}
 }
