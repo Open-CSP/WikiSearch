@@ -9,6 +9,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
+use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use WikiMap;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\Aggregation;
@@ -16,6 +17,7 @@ use WikiSearch\QueryEngine\Aggregation\PropertyAggregation;
 use WikiSearch\QueryEngine\Filter\AbstractFilter;
 use WikiSearch\QueryEngine\Filter\PropertyFilter;
 use WikiSearch\QueryEngine\Highlighter\Highlighter;
+use WikiSearch\QueryEngine\Sort\RelevanceSort;
 use WikiSearch\QueryEngine\Sort\Sort;
 use WikiSearch\SMW\SMWQueryProcessor;
 use WikiSearch\WikiSearchServices;
@@ -290,10 +292,7 @@ class QueryEngine {
         $this->search->setSource( $this->sources );
 
 		$newSearch = clone $this->search;
-
-		foreach ( $this->fallbackSorts as $fallbackSort ) {
-			$newSearch->addSort( $fallbackSort->toQuery() );
-		}
+		$this->addSortsToSearch( $newSearch );
 
         $query = [
             "index" => $this->index,
@@ -310,5 +309,23 @@ class QueryEngine {
         }
 
         return $query;
+	}
+
+	/**
+	 * Add the sorts to the Search object. Sorts are added in the following order (highest to lowest priority):
+	 *
+	 * - Sorts added by the frontend (already added)
+	 * - Relevance
+	 * - Fallback sorts
+	 *
+	 * @param Search $search
+	 * @return void
+	 */
+	private function addSortsToSearch( Search $search ): void {
+		$search->addSort( ( new RelevanceSort() )->toQuery() );
+
+		foreach ( $this->fallbackSorts as $fallbackSort ) {
+			$search->addSort( $fallbackSort->toQuery() );
+		}
 	}
 }
