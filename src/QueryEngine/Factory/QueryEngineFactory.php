@@ -56,6 +56,11 @@ class QueryEngineFactory {
         // Configure the highlighter
         $queryEngine->addHighlighter( new DefaultHighlighter( $config ) );
 
+		// Configure the fallback sorts
+		if ( $config->getSearchParameter( "fallback sorts" ) !== false ) {
+			$queryEngine->addFallbackSorts( $config->getSearchParameter( "fallback sorts" ) );
+		}
+
         return $queryEngine;
 	}
 }

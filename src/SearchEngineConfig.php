@@ -23,6 +23,7 @@ namespace WikiSearch;
 
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
+use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\SMW\SMWQueryProcessor;
 
@@ -41,7 +42,8 @@ class SearchEngineConfig {
 		"aggregation size" 		 =>	[ "type" => "integer" ],
 		"post filter properties" => [ "type" => "list" ],
 		"highlighter type"       => [ "type" => "string" ],
-		"result template"		 => [ "type" => "string" ]
+		"result template"		 => [ "type" => "string" ],
+		"fallback sorts"         => [ "type" => "sortlist" ],
 	];
 
 	/**
@@ -283,6 +285,35 @@ class SearchEngineConfig {
 					return ( new PropertyFieldMapper( $property ) );
 				}, $search_parameter_value );
 				break;
+			case "sortlist":
+				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
+				$search_parameter_value = array_map( function ( $sort ): PropertySort {
+					$sortParts = explode( ".", $sort );
+					$maybeOrder = array_pop( $sortParts );
+
+					switch ( $maybeOrder ) {
+						case 'asc':
+						case 'ascending':
+						case 'up':
+							$order = 'asc';
+							break;
+						case 'desc':
+						case 'descending':
+						case 'down':
+							$order = 'desc';
+							break;
+						default:
+							// Re-add the sort to the parts if it is invalid
+							$sortParts[] = $maybeOrder;
+							$order = null;
+							break;
+					}
+
+					$propertyName = implode( ".", $sortParts );
+
+					return new PropertySort( $propertyName, $order );
+				}, $search_parameter_value );
 			default:
 				// Interpret as string
 				$search_parameter_value = trim( $search_parameter_value_raw );

@@ -76,6 +76,11 @@ class QueryEngine {
 		'P:29.*'
 	];
 
+	/**
+	 * @var Sort[]
+	 */
+	private array $fallbackSorts;
+
 	public function __construct( string $index ) {
         // TODO: Create service for retrieving index
 		$this->index = $index;
@@ -206,6 +211,16 @@ class QueryEngine {
 	}
 
 	/**
+	 * Add fallback sorts. The first item in the list has the highest fallback priority, and the last item the lowest.
+	 *
+	 * @param Sort[] $sorts
+	 * @return void
+	 */
+	public function addFallbackSorts( array $sorts ): void {
+		$this->fallbackSorts = $sorts;
+	}
+
+	/**
 	 * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
 	 * be returned from a search query.
 	 *
@@ -274,9 +289,15 @@ class QueryEngine {
         // Add source filtering to the query
         $this->search->setSource( $this->sources );
 
+		$newSearch = clone $this->search;
+
+		foreach ( $this->fallbackSorts as $fallbackSort ) {
+			$newSearch->addSort( $fallbackSort->toQuery() );
+		}
+
         $query = [
             "index" => $this->index,
-            "body"  => $this->search->toArray()
+            "body"  => $newSearch->toArray()
         ];
 
         if ( isset( $this->baseQuery ) ) {
