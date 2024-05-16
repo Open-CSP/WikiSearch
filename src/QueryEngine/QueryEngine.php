@@ -79,7 +79,7 @@ class QueryEngine {
 	/**
 	 * @var Sort[]
 	 */
-	private array $fallbackSorts;
+	private array $fallbackSorts = [];
 
 	public function __construct( string $index ) {
         // TODO: Create service for retrieving index
