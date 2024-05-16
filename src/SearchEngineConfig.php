@@ -290,30 +290,35 @@ class SearchEngineConfig {
 				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
 				$search_parameter_value = array_map( function ( $sort ): PropertySort {
 					$sortParts = explode( ".", $sort );
-					$maybeOrder = array_pop( $sortParts );
 
-					switch ( $maybeOrder ) {
-						case 'asc':
-						case 'ascending':
-						case 'up':
-							$order = 'asc';
-							break;
-						case 'desc':
-						case 'descending':
-						case 'down':
-							$order = 'desc';
-							break;
-						default:
-							// Re-add the sort to the parts if it is invalid
-							$sortParts[] = $maybeOrder;
-							$order = null;
-							break;
+					if ( count( $sortParts ) === 1 ) {
+						$order = null;
+					} else {
+						$maybeOrder = array_pop( $sortParts );
+
+						switch ( $maybeOrder ) {
+							case 'asc':
+							case 'ascending':
+							case 'up':
+								$order = 'asc';
+								break;
+							case 'desc':
+							case 'descending':
+							case 'down':
+								$order = 'desc';
+								break;
+							default:
+								$order = null;
+								// Re-add the string to the parts if it is invalid, so we restore the original
+								// property name (e.g. Foo.Bar).
+								$sortParts[] = $maybeOrder;
+								break;
+						}
 					}
 
-					$propertyName = implode( ".", $sortParts );
-
-					return new PropertySort( $propertyName, $order );
+					return new PropertySort( implode( ".", $sortParts ), $order );
 				}, $search_parameter_value );
+				break;
 			default:
 				// Interpret as string
 				$search_parameter_value = trim( $search_parameter_value_raw );
