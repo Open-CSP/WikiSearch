@@ -15,6 +15,7 @@ use WikiSearch\QueryEngine\Filter\PropertyValuesFilter;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\WikiSearchServices;
 
 class FilterFactory {
 	use QueryPreparationTrait;
@@ -28,16 +29,16 @@ class FilterFactory {
 	 * @return Filter|null
 	 */
 	public static function fromArray( array $array, SearchEngineConfig $config ): ?Filter {
-		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Constructing Filter from array' );
+		WikiSearchServices::getLogger()->getLogger()->debug( 'Constructing Filter from array' );
 
 		if ( !isset( $array["key"] ) ) {
-			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing "key"' );
+			WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing "key"' );
 
 			return null;
 		}
 
 		if ( !is_string( $array["key"] ) && !( $array["key"] instanceof PropertyFieldMapper ) ) {
-			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "key"' );
+			WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "key"' );
 
 			return null;
 		}
@@ -87,7 +88,7 @@ class FilterFactory {
 
 		if ( isset( $array["type"] ) ) {
 			if ( !is_string( $array["type"] ) ) {
-				\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
+				WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
 
 				return null;
 			}
@@ -120,7 +121,7 @@ class FilterFactory {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $v ) {
 				if ( !in_array( gettype( $v ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
+					WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
 
 					return null;
 				}
@@ -130,7 +131,7 @@ class FilterFactory {
 		}
 
 		if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
+			WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
 
 			return null;
 		}
@@ -154,7 +155,7 @@ class FilterFactory {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
-					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+					WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
 
 					return null;
 				}
@@ -164,7 +165,7 @@ class FilterFactory {
 				return self::propertyTextFilterFromText( $array["value"], $default_operator, $property_field_mapper );
 			case "fuzzy":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
-					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+					WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
 
 					return null;
 				}
@@ -172,14 +173,14 @@ class FilterFactory {
 				$fuzziness = $array["fuzziness"] ?? "AUTO";
 
 				if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
-					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
+					WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
 
 					return null;
 				}
 
 				return self::propertyFuzzyValueFilterFromText( $array["value"], $fuzziness, $property_field_mapper );
 			default:
-				\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
+				WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
 
 				return null;
 		}

@@ -147,6 +147,8 @@ class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 	 * @param SearchEngineConfig $engineConfig
 	 * @return SearchEngine
 	 * @throws ApiUsageException
+	 * @throws SearchEngineException
+	 * @throws ParsingException
 	 */
 	private function getEngine( SearchEngineConfig $engineConfig ): SearchEngine {
 		return WikiSearchServices::getSearchEngineFactory()->newSearchEngine(

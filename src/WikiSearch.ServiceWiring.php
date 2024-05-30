@@ -4,6 +4,8 @@ use MediaWiki\MediaWikiServices;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngine\AggregationFactory;
+use WikiSearch\Factory\QueryEngine\FilterFactory;
+use WikiSearch\Factory\QueryEngine\SortFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\MediaWiki\HookRunner;
 use WikiSearch\MediaWiki\Logger;
@@ -26,6 +28,12 @@ return [
 	},
 	"WikiSearch.Factory.QueryEngine.AggregationFactory" => static function (): AggregationFactory {
 		return new AggregationFactory();
+	},
+	"WikiSearch.Factory.QueryEngine.FilterFactory" => static function (): FilterFactory {
+		return new FilterFactory();
+	},
+	"WikiSearch.Factory.QueryEngine.SortFactory" => static function (): SortFactory {
+		return new SortFactory();
 	},
 	"WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
 		return new QueryEngineFactory( $services->getMainConfig() );

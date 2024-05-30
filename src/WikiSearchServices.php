@@ -7,6 +7,8 @@ use Wikimedia\Services\ServiceContainer;
 use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngine\AggregationFactory;
+use WikiSearch\Factory\QueryEngine\FilterFactory;
+use WikiSearch\Factory\QueryEngine\SortFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\Factory\SearchEngineFactory;
 use WikiSearch\MediaWiki\HookRunner;
@@ -48,6 +50,16 @@ final class WikiSearchServices {
 		?ServiceContainer $services = null
 	): ElasticsearchClientFactory {
 		return self::getService( "Factory.ElasticsearchClientFactory", $services );
+	}
+
+	/**
+	 * Get the FilterFactory singleton.
+	 *
+	 * @param ServiceContainer|null $services
+	 * @return FilterFactory
+	 */
+	public static function getFilterFactory( ?ServiceContainer $services = null ): FilterFactory {
+		return self::getService( "Factory.QueryEngine.FilterFactory", $services );
 	}
 
 	/**
@@ -100,6 +112,16 @@ final class WikiSearchServices {
 	 */
 	public static function getSearchEngineFactory( ?ServiceContainer $services = null ): SearchEngineFactory {
 		return self::getService( "Factory.SearchEngineFactory", $services );
+	}
+
+	/**
+	 * Get the SortFactory singleton.
+	 *
+	 * @param ServiceContainer|null $services
+	 * @return SortFactory
+	 */
+	public static function getSortFactory( ?ServiceContainer $services = null ): SortFactory {
+		return self::getService( "Factory.QueryEngine.SortFactory", $services );
 	}
 
 	/**
