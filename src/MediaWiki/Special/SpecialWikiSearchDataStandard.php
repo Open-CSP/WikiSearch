@@ -1,6 +1,6 @@
 <?php
 
-namespace WikiSearch\Special;
+namespace WikiSearch\MediaWiki\Special;
 
 use HTMLForm;
 use PermissionsError;
