@@ -38,14 +38,13 @@ use Status;
 use Title;
 use User;
 use WikiPage;
+use WikiSearch\MediaWiki\ParserFunction\PropertyValuesParserFunction;
+use WikiSearch\MediaWiki\ParserFunction\WikiSearchConfigParserFunction;
+use WikiSearch\MediaWiki\ParserFunction\WikiSearchFrontParserFunction;
+use WikiSearch\MediaWiki\ParserHook\SMWNoIndexParserHook;
 use WikiSearch\Scribunto\ScribuntoLuaLibrary;
 use WikiSearch\SMW\PropertyInitializer;
 
-/**
- * Class SearchHooks
- *
- * @package WikiSearch
- */
 abstract class WikiSearchHooks {
 	/**
 	 * Occurs after the delete article request has been processed.
@@ -153,10 +152,9 @@ abstract class WikiSearchHooks {
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
 		try {
-			$parser->setFunctionHook( "wikisearchconfig", [ self::class, "searchConfigCallback" ] );
-			$parser->setFunctionHook( "wikisearchfrontend", [ self::class, "searchEngineFrontendCallback" ] );
+			$parser->setFunctionHook( "wikisearchconfig", [ new WikiSearchConfigParserFunction(), "execute" ] );
+			$parser->setFunctionHook( "wikisearchfrontend", [ new WikiSearchFrontParserFunction(), "execute" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
-
 			$parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );
 		} catch ( MWException $e ) {
 			Logger::getLogger()->alert( 'Unable to register parser hooks: {e}', [
@@ -276,70 +274,5 @@ abstract class WikiSearchHooks {
 			// Decorate the semantic data object with the annotation
 			$annotator::addAnnotation( $content, $output, $semanticData );
 		}
-	}
-
-	/**
-	 * Callback for the '#searchEngineConfig' parser function. Responsible for the creation of the
-	 * appropriate SearchEngineConfig object and for storing that object in the database.
-	 *
-	 * @param Parser $parser
-	 * @param string ...$parameters
-	 * @return string
-	 */
-	public static function searchConfigCallback( Parser $parser, string ...$parameters ): string {
-		try {
-			$config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $parameters );
-		} catch ( \InvalidArgumentException $exception ) {
-			Logger::getLogger()->alert( 'Caught exception while creating SearchEngineConfig: {e}', [
-				'e' => $exception
-			] );
-
-			return self::error( "wikisearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
-		}
-
-		$database = wfGetDB( DB_PRIMARY );
-
-		$config->update( $database );
-
-		return "";
-	}
-
-	/**
-	 * Callback for the '#loadSearchEngine' parser function. Responsible for loading the frontend
-	 * of the extension.
-	 *
-	 * @param Parser $parser
-	 * @param string ...$parameters
-	 *
-	 * @return string
-	 * @throws \Exception
-	 */
-	public static function searchEngineFrontendCallback( Parser $parser, string ...$parameters ): string {
-		$config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
-
-		if ( $config === null ) {
-			Logger::getLogger()->alert( 'Tried to load front-end with an invalid SearchEngineConfig' );
-
-			return self::error( "wikisearch-invalid-engine-config" );
-		}
-
-		$result = self::error( "wikisearch-missing-frontend" );
-
-		\Hooks::run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
-
-		return $result;
-	}
-
-	/**
-	 * Returns a formatted error message.
-	 *
-	 * @param string $message
-	 * @param array $params
-	 * @return string
-	 */
-	private static function error( string $message, array $params = [] ): string {
-		return \Html::rawElement(
-			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->text()
-		);
 	}
 }

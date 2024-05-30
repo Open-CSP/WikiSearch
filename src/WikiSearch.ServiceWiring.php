@@ -5,6 +5,7 @@ use WikiSearch\Factory\ElasticsearchClientFactory;
 use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngine\AggregationFactory;
 use WikiSearch\Factory\QueryEngineFactory;
+use WikiSearch\MediaWiki\HookRunner;
 use WikiSearch\WikiSearchServices;
 
 /**
@@ -15,8 +16,12 @@ use WikiSearch\WikiSearchServices;
  */
 
 return [
-	"WikiSearch.Factory.ElasticsearchClientFactory" => static function ( MediaWikiServices $services ): ElasticsearchClientFactory {
-		return new ElasticsearchClientFactory( $services->getMainConfig() );
+	"WikiSearch.Factory.ElasticsearchClientFactory" =>
+		static function ( MediaWikiServices $services ): ElasticsearchClientFactory {
+			return new ElasticsearchClientFactory( $services->getMainConfig() );
+		},
+	"WikiSearch.MediaWiki.HookRunner" => static function ( MediaWikiServices $services ): HookRunner {
+		return new HookRunner( $services->getHookContainer() );
 	},
 	"WikiSearch.Factory.QueryCombinatorFactory" => static function (): QueryCombinatorFactory {
 		return new QueryCombinatorFactory();
@@ -27,7 +32,10 @@ return [
 	"WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
 		return new QueryEngineFactory( $services->getMainConfig() );
 	},
-	"WikiSearch.Factory.SearchEngineFactory" => static function ( MediaWikiServices $services ): \WikiSearch\Factory\SearchEngineFactory {
-		return new \WikiSearch\Factory\SearchEngineFactory( WikiSearchServices::getQueryEngineFactory( $services ) );
-	}
+	"WikiSearch.Factory.SearchEngineFactory" =>
+		static function ( MediaWikiServices $services ): \WikiSearch\Factory\SearchEngineFactory {
+			return new \WikiSearch\Factory\SearchEngineFactory(
+				WikiSearchServices::getQueryEngineFactory( $services )
+			);
+		}
 ];

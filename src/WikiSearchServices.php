@@ -9,6 +9,7 @@ use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngine\AggregationFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\Factory\SearchEngineFactory;
+use WikiSearch\MediaWiki\HookRunner;
 
 /**
  * Getters for all WikiSearch services. This class reduces the risk of mistyping
@@ -46,6 +47,12 @@ final class WikiSearchServices {
 		?ServiceContainer $services = null
 	): ElasticsearchClientFactory {
 		return self::getService( "Factory.ElasticsearchClientFactory", $services );
+	}
+
+	public static function getHookRunner(
+		?ServiceContainer $services = null
+	): HookRunner {
+		return self::getService( "MediaWiki.HookRunner", $services );
 	}
 
 	/**

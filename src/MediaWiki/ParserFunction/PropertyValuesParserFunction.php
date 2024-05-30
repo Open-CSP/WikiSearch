@@ -1,6 +1,6 @@
 <?php
 
-namespace WikiSearch;
+namespace WikiSearch\MediaWiki\ParserFunction;
 
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
@@ -8,11 +8,9 @@ use Parser;
 use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\ValuePropertyAggregation;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
+use WikiSearch\WikiSearchServices;
 
 /**
- * Class PropertyValuesParserFunction
- *
- * @package WikiSearch
  * @deprecated Use Lua function instead
  */
 class PropertyValuesParserFunction {
