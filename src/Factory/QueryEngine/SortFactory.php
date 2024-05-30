@@ -3,7 +3,7 @@
 namespace WikiSearch\Factory\QueryEngine;
 
 use WikiSearch\Exception\ParsingException;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\QueryEngine\Sort\Sort;
 use WikiSearch\SMW\PropertyFieldMapper;
@@ -48,10 +48,10 @@ class SortFactory {
 	 * @return Sort|null
 	 */
 	public static function fromArray( array $array ): ?Sort {
-		Logger::getLogger()->debug( 'Constructing Sort from array' );
+		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Constructing Sort from array' );
 
 		if ( !isset( $array["type"] ) ) {
-			Logger::getLogger()->debug( 'Failed to construct Sort from array: missing "type"' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Sort from array: missing "type"' );
 			return null;
 		}
 
@@ -59,7 +59,7 @@ class SortFactory {
 			case "property":
 				return self::propertySortFromArray( $array );
 			default:
-				Logger::getLogger()->debug( 'Failed to construct Sort from array: invalid "type"' );
+				\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Sort from array: invalid "type"' );
 				return null;
 		}
 	}
@@ -72,14 +72,14 @@ class SortFactory {
 	 */
 	private static function propertySortFromArray( array $array ): ?PropertySort {
 		if ( !isset( $array["property"] ) ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: missing "property"' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct PropertySort from array: missing "property"' );
 			return null;
 		}
 
 		$property = $array["property"];
 
 		if ( !is_string( $property ) && !( $property instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->debug( 'Failed to construct PropertySort from array: invalid "property"' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct PropertySort from array: invalid "property"' );
 			return null;
 		}
 

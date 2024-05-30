@@ -3,7 +3,7 @@
 namespace WikiSearch\MediaWiki\ParserFunction;
 
 use Parser;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\WikiSearchServices;
 
@@ -19,7 +19,7 @@ class WikiSearchFrontParserFunction {
 		$config = SearchEngineConfig::newFromDatabase( $parser->getTitle() );
 
 		if ( $config === null ) {
-			Logger::getLogger()->alert( 'Tried to load front-end with an invalid SearchEngineConfig' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->alert( 'Tried to load front-end with an invalid SearchEngineConfig' );
 			return self::error( "wikisearch-invalid-engine-config" );
 		}
 

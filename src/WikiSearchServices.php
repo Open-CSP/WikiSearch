@@ -10,6 +10,7 @@ use WikiSearch\Factory\QueryEngine\AggregationFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\Factory\SearchEngineFactory;
 use WikiSearch\MediaWiki\HookRunner;
+use WikiSearch\MediaWiki\Logger;
 
 /**
  * Getters for all WikiSearch services. This class reduces the risk of mistyping
@@ -49,10 +50,26 @@ final class WikiSearchServices {
 		return self::getService( "Factory.ElasticsearchClientFactory", $services );
 	}
 
+	/**
+	 * Get the HookRunner singleton.
+	 *
+	 * @param ServiceContainer|null $services
+	 * @return HookRunner
+	 */
 	public static function getHookRunner(
 		?ServiceContainer $services = null
 	): HookRunner {
 		return self::getService( "MediaWiki.HookRunner", $services );
+	}
+
+	/**
+	 * Get the Logger singleton.
+	 *
+	 * @param ServiceContainer|null $services
+	 * @return Logger
+	 */
+	public static function getLogger( ?ServiceContainer $services = null ): Logger {
+		return self::getService( "MediaWiki.Logger", $services );
 	}
 
 	/**

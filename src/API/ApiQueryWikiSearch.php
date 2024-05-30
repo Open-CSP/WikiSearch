@@ -27,7 +27,7 @@ use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
 use WikiSearch\Exception\ParsingException;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\SearchEngine;
 use WikiSearch\SearchEngineConfig;
@@ -69,7 +69,7 @@ class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 
 			$this->getResult()->addValue( null, 'result', $result );
 		} catch ( \Exception $e ) {
-			Logger::getLogger()->critical( 'Caught exception while executing search query: {e}', [
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->critical( 'Caught exception while executing search query: {e}', [
 				'e' => $e
 			] );
 

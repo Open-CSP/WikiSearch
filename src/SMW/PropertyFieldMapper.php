@@ -25,7 +25,7 @@ use BadMethodCallException;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 
 /**
  * Class PropertyFieldMapper
@@ -125,7 +125,7 @@ class PropertyFieldMapper {
 		}
 
 		if ( !$store instanceof ElasticStore ) {
-			Logger::getLogger()->critical(
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->critical(
 				'Tried to construct PropertyFieldMapper for property {propertyName} without an ElasticStore',
 				[
 					'propertyName' => $property_name

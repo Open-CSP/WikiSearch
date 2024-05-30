@@ -3,7 +3,7 @@
 namespace WikiSearch\SMW;
 
 use SMW\PropertyRegistry;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 
 /**
  * Class PropertyLabelMapper
@@ -35,7 +35,7 @@ class PropertyAliasMapper {
 		);
 
 		if ( $property_key === false ) {
-			Logger::getLogger()->debug( 'Could not find property ID by label {label}', [
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Could not find property ID by label {label}', [
 				'label' => $property_label
 			] );
 

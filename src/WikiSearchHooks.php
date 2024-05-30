@@ -38,6 +38,7 @@ use Status;
 use Title;
 use User;
 use WikiPage;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\MediaWiki\ParserFunction\PropertyValuesParserFunction;
 use WikiSearch\MediaWiki\ParserFunction\WikiSearchConfigParserFunction;
 use WikiSearch\MediaWiki\ParserFunction\WikiSearchFrontParserFunction;
@@ -157,7 +158,7 @@ abstract class WikiSearchHooks {
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 			$parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );
 		} catch ( MWException $e ) {
-			Logger::getLogger()->alert( 'Unable to register parser hooks: {e}', [
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->alert( 'Unable to register parser hooks: {e}', [
 				'e' => $e
 			] );
 		}

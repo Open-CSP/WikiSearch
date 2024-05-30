@@ -23,7 +23,7 @@ namespace WikiSearch\API;
 
 use ApiQueryBase;
 use ApiUsageException;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 
 /**
  * Class ApiQueryWikiSearchBase
@@ -48,7 +48,7 @@ abstract class ApiQueryWikiSearchBase extends ApiQueryBase {
 			$required_rights = $this->getConfig()->get( "WikiSearchAPIRequiredRights" );
 			$this->checkUserRightsAny( $required_rights );
 		} catch ( \ConfigException $e ) {
-			Logger::getLogger()->critical(
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->critical(
 				'Caught exception while trying to get required rights for WikiSearch API: {e}',
 				[
 					'e' => $e

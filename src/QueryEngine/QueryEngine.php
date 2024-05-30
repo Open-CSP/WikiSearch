@@ -8,7 +8,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\QueryEngine\Aggregation\AbstractPropertyAggregation;
 use WikiSearch\QueryEngine\Filter\Filter;
@@ -294,7 +294,7 @@ class QueryEngine {
 			$query = $queryProcessor->toElasticSearchQuery();
 		} catch ( MWException ) {
 			// The query is invalid
-			Logger::getLogger()->critical( 'Tried to set invalid query as the base query' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->critical( 'Tried to set invalid query as the base query' );
 			return $this;
 		}
 

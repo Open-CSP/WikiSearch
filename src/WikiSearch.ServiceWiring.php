@@ -6,6 +6,7 @@ use WikiSearch\Factory\QueryCombinatorFactory;
 use WikiSearch\Factory\QueryEngine\AggregationFactory;
 use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\MediaWiki\HookRunner;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\WikiSearchServices;
 
 /**
@@ -20,9 +21,6 @@ return [
 		static function ( MediaWikiServices $services ): ElasticsearchClientFactory {
 			return new ElasticsearchClientFactory( $services->getMainConfig() );
 		},
-	"WikiSearch.MediaWiki.HookRunner" => static function ( MediaWikiServices $services ): HookRunner {
-		return new HookRunner( $services->getHookContainer() );
-	},
 	"WikiSearch.Factory.QueryCombinatorFactory" => static function (): QueryCombinatorFactory {
 		return new QueryCombinatorFactory();
 	},
@@ -37,5 +35,11 @@ return [
 			return new \WikiSearch\Factory\SearchEngineFactory(
 				WikiSearchServices::getQueryEngineFactory( $services )
 			);
-		}
+		},
+	"WikiSearch.MediaWiki.HookRunner" => static function ( MediaWikiServices $services ): HookRunner {
+		return new HookRunner( $services->getHookContainer() );
+	},
+	"WikiSearch.MediaWiki.Logger" => static function (): Logger {
+		return new Logger();
+	}
 ];

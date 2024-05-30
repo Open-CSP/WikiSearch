@@ -2,7 +2,7 @@
 
 namespace WikiSearch\Factory\QueryEngine;
 
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\HasPropertyFilter;
@@ -28,16 +28,16 @@ class FilterFactory {
 	 * @return Filter|null
 	 */
 	public static function fromArray( array $array, SearchEngineConfig $config ): ?Filter {
-		Logger::getLogger()->debug( 'Constructing Filter from array' );
+		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Constructing Filter from array' );
 
 		if ( !isset( $array["key"] ) ) {
-			Logger::getLogger()->debug( 'Failed to construct Filter from array: missing "key"' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing "key"' );
 
 			return null;
 		}
 
 		if ( !is_string( $array["key"] ) && !( $array["key"] instanceof PropertyFieldMapper ) ) {
-			Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "key"' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "key"' );
 
 			return null;
 		}
@@ -87,7 +87,7 @@ class FilterFactory {
 
 		if ( isset( $array["type"] ) ) {
 			if ( !is_string( $array["type"] ) ) {
-				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
+				\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
 
 				return null;
 			}
@@ -120,7 +120,7 @@ class FilterFactory {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $v ) {
 				if ( !in_array( gettype( $v ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-					Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
+					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
 
 					return null;
 				}
@@ -130,7 +130,7 @@ class FilterFactory {
 		}
 
 		if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-			Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "value"' );
 
 			return null;
 		}
@@ -154,7 +154,7 @@ class FilterFactory {
 		switch ( $type ) {
 			case "query":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
-					Logger::getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
 
 					return null;
 				}
@@ -164,7 +164,7 @@ class FilterFactory {
 				return self::propertyTextFilterFromText( $array["value"], $default_operator, $property_field_mapper );
 			case "fuzzy":
 				if ( !isset( $array["value"] ) || !is_string( $array["value"] ) ) {
-					Logger::getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
+					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: missing/invalid "value"' );
 
 					return null;
 				}
@@ -172,14 +172,14 @@ class FilterFactory {
 				$fuzziness = $array["fuzziness"] ?? "AUTO";
 
 				if ( $fuzziness !== "AUTO" && ( !is_int( $fuzziness ) || $fuzziness < 0 ) ) {
-					Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
+					\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "fuzziness"' );
 
 					return null;
 				}
 
 				return self::propertyFuzzyValueFilterFromText( $array["value"], $fuzziness, $property_field_mapper );
 			default:
-				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
+				\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
 
 				return null;
 		}

@@ -26,6 +26,7 @@ use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -86,7 +87,7 @@ class SearchEngine {
 		// Allow other extensions to modify the query
 		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query ] );
 
-		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
+		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
 		] );
 

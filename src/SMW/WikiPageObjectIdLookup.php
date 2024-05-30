@@ -6,7 +6,7 @@ use SMW\SQLStore\SQLStore;
 use SMW\Store;
 use Title;
 use Wikimedia\Rdbms\IResultWrapper;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 
 class WikiPageObjectIdLookup {
 	/**
@@ -16,7 +16,7 @@ class WikiPageObjectIdLookup {
 	 * @return string|null
 	 */
 	public static function getObjectIdForTitle( Title $title ): ?string {
-		Logger::getLogger()->debug( 'Fetching object ID for Title {title}', [
+		WikiSearch->debug( 'Fetching object ID for Title {title}', [
 			'title' => $title->getFullText()
 		] );
 
@@ -46,7 +46,7 @@ class WikiPageObjectIdLookup {
 
 		$object_id = $rows->current()->smw_id;
 
-		Logger::getLogger()->debug( 'Finished fetching object ID for Title {title}: {objectId}', [
+		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Finished fetching object ID for Title {title}: {objectId}', [
 			'title' => $title->getFullText(),
 			'objectId' => $object_id
 		] );

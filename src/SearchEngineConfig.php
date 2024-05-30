@@ -23,6 +23,7 @@ namespace WikiSearch;
 
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\SMW\SMWQueryProcessor;
@@ -130,7 +131,7 @@ class SearchEngineConfig {
 		try {
 			return new SearchEngineConfig( $page, $search_parameters, $facet_properties, $result_properties );
 		} catch ( \InvalidArgumentException $e ) {
-			Logger::getLogger()->alert( 'Exception caught while trying to construct a new SearchEngineConfig: {e}', [
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->alert( 'Exception caught while trying to construct a new SearchEngineConfig: {e}', [
 				'e' => $e
 			] );
 
@@ -219,7 +220,7 @@ class SearchEngineConfig {
 				$query_processor = new SMWQueryProcessor( $search_parameters["base query"] );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
-				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
+				\WikiSearch\WikiSearchServices::getLogger()->getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
 					'e' => $exception
 				] );
 
@@ -352,14 +353,14 @@ class SearchEngineConfig {
 	public function update( DBConnRef $database ): void {
 		$id = $this->title->getArticleID();
 
-		Logger::getLogger()->debug( 'Updating search engine configuration for page ID {id}', [
+		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Updating search engine configuration for page ID {id}', [
 			'id' => $id
 		] );
 
 		$this->delete( $database, $id );
 		$this->insert( $database );
 
-		Logger::getLogger()->debug( 'Finished updating search engine configuration for page ID {id}', [
+		\WikiSearch\WikiSearchServices::getLogger()->getLogger()->debug( 'Finished updating search engine configuration for page ID {id}', [
 			'id' => $id
 		] );
 	}

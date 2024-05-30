@@ -3,7 +3,7 @@
 namespace WikiSearch\MediaWiki\ParserFunction;
 
 use Parser;
-use WikiSearch\Logger;
+use WikiSearch\MediaWiki\Logger;
 use WikiSearch\SearchEngineConfig;
 
 class WikiSearchConfigParserFunction {
@@ -18,7 +18,7 @@ class WikiSearchConfigParserFunction {
 		try {
 			$config = SearchEngineConfig::newFromParameters( $parser->getTitle(), $args );
 		} catch ( \InvalidArgumentException $exception ) {
-			Logger::getLogger()->alert( 'Caught exception while creating SearchEngineConfig: {e}', [
+			\WikiSearch\WikiSearchServices::getLogger()->getLogger()->alert( 'Caught exception while creating SearchEngineConfig: {e}', [
 				'e' => $exception
 			] );
 
