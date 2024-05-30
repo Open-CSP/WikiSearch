@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WikiSearch\API;
+namespace WikiSearch\MediaWiki\API;
 
 use ApiBase;
 use ApiUsageException;
@@ -27,7 +27,6 @@ use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
 use WikiSearch\Exception\ParsingException;
-use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\SearchEngine;
 use WikiSearch\SearchEngineConfig;

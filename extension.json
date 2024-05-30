@@ -29,9 +29,9 @@
 		"WikiSearchMagic": "i18n/WikiSearch.i18n.php"
 	},
 	"APIMetaModules": {
-	  	"WikiSearch": "WikiSearch\\API\\ApiQueryWikiSearch",
-		"WikiSearchHighlight": "WikiSearch\\API\\ApiQueryWikiSearchHighlight",
-		"WikiSearchCombobox": "WikiSearch\\API\\ApiQueryWikiSearchCombobox"
+	  	"WikiSearch": "WikiSearch\\MediaWiki\\API\\ApiQueryWikiSearch",
+		"WikiSearchHighlight": "WikiSearch\\MediaWiki\\API\\ApiQueryWikiSearchHighlight",
+		"WikiSearchCombobox": "WikiSearch\\MediaWiki\\API\\ApiQueryWikiSearchCombobox"
   	},
 	"AvailableRights": [
 		"wikisearch-execute-api",

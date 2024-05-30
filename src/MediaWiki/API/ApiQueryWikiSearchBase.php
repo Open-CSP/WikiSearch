@@ -19,11 +19,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-namespace WikiSearch\API;
+namespace WikiSearch\MediaWiki\API;
 
 use ApiQueryBase;
 use ApiUsageException;
-use WikiSearch\MediaWiki\Logger;
 
 /**
  * Class ApiQueryWikiSearchBase
