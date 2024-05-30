@@ -41,6 +41,11 @@ class QueryEngineFactory {
             $queryEngine->setBaseQuery( $config->getSearchParameter( "base query" ) );
         }
 
+		// Configure the fallback sorts
+		if ( $config->getSearchParameter( "fallback sorts" ) !== false ) {
+			$queryEngine->addFallbackSorts( $config->getSearchParameter( "fallback sorts" ) );
+		}
+
         // Configure the highlighter
         $queryEngine->addHighlighter( new DefaultHighlighter( $config ) );
 

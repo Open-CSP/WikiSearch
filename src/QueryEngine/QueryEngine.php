@@ -9,6 +9,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
+use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use WikiMap;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
@@ -16,6 +17,7 @@ use WikiSearch\QueryEngine\Aggregation\AbstractPropertyAggregation;
 use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\PropertyFilter;
 use WikiSearch\QueryEngine\Highlighter\Highlighter;
+use WikiSearch\QueryEngine\Sort\RelevanceSort;
 use WikiSearch\QueryEngine\Sort\Sort;
 use WikiSearch\SMW\SMWQueryProcessor;
 use WikiSearch\WikiSearchServices;
@@ -75,6 +77,11 @@ class QueryEngine {
         // Modification date
 		'P:29.*'
 	];
+
+	/**
+	 * @var Sort[]
+	 */
+	private array $fallbackSorts = [];
 
 	public function __construct( string $index ) {
 		$this->index = $index;
@@ -165,9 +172,9 @@ class QueryEngine {
 
         // Post filters are applied after aggregations have been calculated. This makes it possible to have facets
         // that do not change after the filter they control is applied. This is useful for facets that should act like
-        // a disjunction, where a should increase the number of results. However, this leaves us with the problem that
-        // other aggregations that should be affected by the added filter are no longer accurate. To solve this, we also
-        // add any post filter to the all other aggregations using a FilterAggregation.
+        // a disjunction, where adding a filter should increase the number of results. However, this leaves us with the
+        // problem that other aggregations that should be affected by the added filter are no longer accurate. To solve
+        // this, we also add any post filter to the all other aggregations using a FilterAggregation.
 
         if ( !$filter instanceof PropertyFilter ) {
             return $this;
@@ -180,7 +187,7 @@ class QueryEngine {
 
             if (
                 isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) &&
-                $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} === $filter->getField()
+                $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}->getPID() === $filter->getField()->getPID()
             ) {
                 // This aggregation affects the same property
                 continue;
@@ -219,17 +226,29 @@ class QueryEngine {
         return $this;
 	}
 
-    /**
-     * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
-     * be returned from a search query.
-     *
-     * If no "_source" parameters are set, all fields are returned.
-     *
-     * @param string $source
-     * @return QueryEngine
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
-     */
+	/**
+	 * Add fallback sorts. The first item in the list has the highest fallback priority, and the last item the lowest.
+	 *
+	 * @param Sort[] $sorts
+	 * @return QueryEngine
+	 */
+	public function addFallbackSorts( array $sorts ): self {
+		$this->fallbackSorts = $sorts;
+
+		return $this;
+	}
+
+	/**
+	 * Adds an item to the "_source" parameter. This allows users to specify explicitly which fields should
+	 * be returned from a search query.
+	 *
+	 * If no "_source" parameters are set, all fields are returned.
+	 *
+	 * @param string $source
+	 * @return QueryEngine
+	 *
+	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/6.5/search-request-source-filtering.html
+	 */
 	public function addSource( string $source ): self {
 		$this->sources[] = $source;
 
@@ -290,9 +309,12 @@ class QueryEngine {
         // Add source filtering to the query
         $this->search->setSource( $this->sources );
 
+		$newSearch = clone $this->search;
+		$this->addSortsToSearch( $newSearch );
+
         $query = [
             "index" => $this->index,
-            "body"  => $this->search->toArray()
+            "body"  => $newSearch->toArray()
         ];
 
         if ( isset( $this->baseQuery ) ) {
@@ -305,5 +327,23 @@ class QueryEngine {
         }
 
         return $query;
+	}
+
+	/**
+	 * Add the sorts to the Search object. Sorts are added in the following order (highest to lowest priority):
+	 *
+	 * - Sorts added by the frontend (already added)
+	 * - Relevance
+	 * - Fallback sorts
+	 *
+	 * @param Search $search
+	 * @return void
+	 */
+	private function addSortsToSearch( Search $search ): void {
+		$search->addSort( ( new RelevanceSort() )->toQuery() );
+
+		foreach ( $this->fallbackSorts as $fallbackSort ) {
+			$search->addSort( $fallbackSort->toQuery() );
+		}
 	}
 }
