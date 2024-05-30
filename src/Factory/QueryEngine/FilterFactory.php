@@ -17,7 +17,7 @@ use WikiSearch\SearchEngineConfig;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 class FilterFactory {
-    use QueryPreparationTrait;
+	use QueryPreparationTrait;
 
 	/**
 	 * Constructs a new Filter class from the given array. The given array directly corresponds to the array given by
@@ -185,17 +185,17 @@ class FilterFactory {
 		}
 	}
 
-    /**
-     * Constructs a new range filter from the given range.
-     *
-     * @param int $from
-     * @param int $to
-     * @param PropertyFieldMapper $property_field_mapper
-     * @return PropertyRangeFilter
-     */
+	/**
+	 * Constructs a new range filter from the given range.
+	 *
+	 * @param int $from
+	 * @param int $to
+	 * @param PropertyFieldMapper $property_field_mapper
+	 * @return PropertyRangeFilter
+	 */
 	private static function rangeFilterFromRange(
 		int $from,
-        int $to,
+		int $to,
 		PropertyFieldMapper $property_field_mapper
 	): PropertyRangeFilter {
 		return new PropertyRangeFilter( $property_field_mapper, from: $from, to: $to );

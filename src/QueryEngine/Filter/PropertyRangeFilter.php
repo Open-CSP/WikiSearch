@@ -2,10 +2,8 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\RangeQuery;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -18,15 +16,15 @@ class PropertyRangeFilter extends PropertyFilter {
 	/**
 	 * @inheritDoc
 	 * @param int $from The lower end of the range
-     * @param int $to The upper end of the range
+	 * @param int $to The upper end of the range
 	 * @param float|null $boost
 	 */
 	public function __construct(
-        string|PropertyFieldMapper $field,
-        private int $from,
-        private int $to,
-        private float $boost = 1.0
-    ) {
+		string|PropertyFieldMapper $field,
+		private int $from,
+		private int $to,
+		private float $boost = 1.0
+	) {
 		parent::__construct( $field );
 	}
 
@@ -37,10 +35,10 @@ class PropertyRangeFilter extends PropertyFilter {
 		$rangeQuery = new RangeQuery(
 			$this->field->getPropertyField(),
 			[
-                "boost" => $this->boost,
-                "from" => $this->from,
-                "to" => $this->to,
-            ]
+				"boost" => $this->boost,
+				"from" => $this->from,
+				"to" => $this->to,
+			]
 		);
 
 		$boolQuery = new BoolQuery();

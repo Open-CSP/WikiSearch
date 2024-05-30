@@ -16,30 +16,30 @@ abstract class Filter implements QueryConvertable {
 	 */
 	private bool $isNegated = false;
 
-    /**
-     * Sets the filter to be a "post"-filter.
-     *
-     * @param bool $isPostFilter
-     * @return Filter
-     *
-     * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/filter-search-results.html#post-filter
-     */
+	/**
+	 * Sets the filter to be a "post"-filter.
+	 *
+	 * @param bool $isPostFilter
+	 * @return Filter
+	 *
+	 * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/filter-search-results.html#post-filter
+	 */
 	public function setPostFilter( bool $isPostFilter = true ): self {
 		$this->isPostFilter = $isPostFilter;
 
-        return $this;
+		return $this;
 	}
 
-    /**
-     * Negates this filter.
-     *
-     * @param bool $isNegated
-     * @return Filter
-     */
+	/**
+	 * Negates this filter.
+	 *
+	 * @param bool $isNegated
+	 * @return Filter
+	 */
 	public function setNegated( bool $isNegated = true ): self {
 		$this->isNegated = $isNegated;
 
-        return $this;
+		return $this;
 	}
 
 	/**

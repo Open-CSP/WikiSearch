@@ -4,7 +4,6 @@ namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\TermsAggregation;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -13,10 +12,10 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
  */
 class ValuePropertyAggregation extends AbstractPropertyAggregation {
-    /**
-     * @inheritDoc
-     * @param int|null $size The maximum number of term buckets to be returned
-     */
+	/**
+	 * @inheritDoc
+	 * @param int|null $size The maximum number of term buckets to be returned
+	 */
 	public function __construct( string|PropertyFieldMapper $field, private ?int $size = null, string $name = null ) {
 		parent::__construct( $field, $name );
 	}

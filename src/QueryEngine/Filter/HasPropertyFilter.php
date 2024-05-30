@@ -4,8 +4,6 @@ namespace WikiSearch\QueryEngine\Filter;
 
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\ExistsQuery;
-use WikiSearch\Logger;
-use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Filters pages based on whether they have the specified property.

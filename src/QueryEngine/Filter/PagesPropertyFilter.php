@@ -2,7 +2,6 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermsQuery;
 use WikiSearch\SMW\PropertyFieldMapper;

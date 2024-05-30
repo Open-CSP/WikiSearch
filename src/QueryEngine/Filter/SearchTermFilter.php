@@ -28,29 +28,29 @@ class SearchTermFilter extends Filter {
 
 	/**
 	 * @param string $searchTerm The search term to filter on
-	 * @param (string|PropertyFieldMapper)[] $properties
+	 * @param (string|PropertyFieldMapper)[]|null $properties
 	 * @param string $defaultOperator The default operator to use
 	 */
 	public function __construct( private string $searchTerm, ?array $properties = null, private string $defaultOperator = "or" ) {
-        if ( $properties === null ) {
-            return;
-        }
+		if ( $properties === null ) {
+			return;
+		}
 
-        $this->fields = [];
-        foreach ( $properties as $field ) {
-            if ( is_string( $field ) ) {
-                $field = new PropertyFieldMapper( $field );
-            }
+		$this->fields = [];
+		foreach ( $properties as $field ) {
+			if ( is_string( $field ) ) {
+				$field = new PropertyFieldMapper( $field );
+			}
 
-            if ( $field->isChained() ) {
-                $this->chainedFields[] = $field;
-            } else {
-                $this->fields[] = $field->getWeightedPropertyField();
-                if ( $field->hasSearchSubfield() ) {
-                    $this->fields[] = $field->getWeightedSearchField();
-                }
-            }
-        }
+			if ( $field->isChained() ) {
+				$this->chainedFields[] = $field;
+			} else {
+				$this->fields[] = $field->getWeightedPropertyField();
+				if ( $field->hasSearchSubfield() ) {
+					$this->fields[] = $field->getWeightedSearchField();
+				}
+			}
+		}
 	}
 
 	/**
@@ -59,7 +59,7 @@ class SearchTermFilter extends Filter {
 	public function filterToQuery(): BoolQuery {
 		$boolQuery = new BoolQuery();
 
-		foreach ($this->chainedFields as $property ) {
+		foreach ( $this->chainedFields as $property ) {
 			// Construct a new chained sub query for each chained property and add it to the bool query
 			$filter = new ChainedPropertyFilter( new PropertyTextFilter( $property, $this->searchTerm, $this->defaultOperator ) );
 			$boolQuery->add( $filter->toQuery(), BoolQuery::SHOULD );

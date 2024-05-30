@@ -2,30 +2,28 @@
 
 namespace WikiSearch\QueryEngine\Sort;
 
-use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Sorts based on the value of the given property.
  */
 class PropertySort implements Sort {
-    /**
-     * @var PropertyFieldMapper The field to sort on
-     */
-    private PropertyFieldMapper $field;
+	/**
+	 * @var PropertyFieldMapper The field to sort on
+	 */
+	private PropertyFieldMapper $field;
 
 	/**
 	 * @var string|null The order of the sort
 	 */
 	private ?string $order = null;
 
-    /**
-     * @var string|null The mode of the sort (either min, max or null)
-     */
-    private ?string $mode = null;
+	/**
+	 * @var string|null The mode of the sort (either min, max or null)
+	 */
+	private ?string $mode = null;
 
 	/**
 	 * FieldSort constructor.
@@ -35,10 +33,10 @@ class PropertySort implements Sort {
 	 */
 	public function __construct( string|PropertyFieldMapper $field, string $order = null ) {
 		if ( is_string( $field ) ) {
-            $this->field = new PropertyFieldMapper( $field );
+			$this->field = new PropertyFieldMapper( $field );
 		} else {
-            $this->field = $field;
-        }
+			$this->field = $field;
+		}
 
 		switch ( $order ) {
 			case "asc":
@@ -61,16 +59,16 @@ class PropertySort implements Sort {
 	 * @inheritDoc
 	 */
 	public function toQuery(): BuilderInterface {
-        $parameters = [];
+		$parameters = [];
 
-        if ( $this->mode !== null ) {
-            $parameters['mode'] = $this->mode;
-        }
+		if ( $this->mode !== null ) {
+			$parameters['mode'] = $this->mode;
+		}
 
-        $field = $this->field->hasKeywordSubfield() ?
-            $this->field->getKeywordField() :
-            $this->field->getPropertyField();
+		$field = $this->field->hasKeywordSubfield() ?
+			$this->field->getKeywordField() :
+			$this->field->getPropertyField();
 
-        return new FieldSort( $field, $this->order, $parameters );
+		return new FieldSort( $field, $this->order, $parameters );
 	}
 }

@@ -11,12 +11,12 @@ use WikiSearch\QueryEngine\Filter\Filter;
  */
 class FilterAggregation extends AbstractAggregation {
 	/**
-     * @inheritDoc
+	 * @inheritDoc
 	 * @param Filter $filter
 	 * @param AbstractAggregation[] $aggregations
 	 * @param string $name
 	 */
-	public function __construct(private Filter $filter, private array $aggregations, string $name ) {
+	public function __construct( private Filter $filter, private array $aggregations, string $name ) {
 		parent::__construct( $name );
 	}
 

@@ -23,17 +23,14 @@ namespace WikiSearch\API;
 
 use ApiBase;
 use ApiUsageException;
-use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MWException;
 use Title;
-use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PageFilter;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\Highlighter\FragmentHighlighter;
-use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 
@@ -43,7 +40,7 @@ use WikiSearch\WikiSearchServices;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
-    use QueryPreparationTrait;
+	use QueryPreparationTrait;
 
 	/**
 	 * @inheritDoc
@@ -67,7 +64,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		}
 
 		$properties = explode( ",", $properties );
-		$properties = array_map( function ( string $property ): PropertyFieldMapper {
+		$properties = array_map( static function ( string $property ): PropertyFieldMapper {
 			return new PropertyFieldMapper( $property );
 		}, $properties );
 
@@ -81,25 +78,25 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$searchTermFilter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
 		$pageFilter = new PageFilter( $title );
 
-        $query = WikiSearchServices::getQueryEngineFactory()
-            ->newQueryEngine()
-            ->addHighlighter( $highlighter )
-            ->addConstantScoreFilter( $pageFilter )
-            ->addConstantScoreFilter( $searchTermFilter )
-            ->toQuery();
+		$query = WikiSearchServices::getQueryEngineFactory()
+			->newQueryEngine()
+			->addHighlighter( $highlighter )
+			->addConstantScoreFilter( $pageFilter )
+			->addConstantScoreFilter( $searchTermFilter )
+			->toQuery();
 
-        try {
-            $result = WikiSearchServices::getElasticsearchClientFactory()
-                ->newElasticsearchClient()
-                ->search($query);
-        } catch (ClientResponseException|ServerResponseException) {
-            $result = [];
-        }
+		try {
+			$result = WikiSearchServices::getElasticsearchClientFactory()
+				->newElasticsearchClient()
+				->search( $query );
+		} catch ( ClientResponseException | ServerResponseException ) {
+			$result = [];
+		}
 
-        if ( !is_array( $result ) ) {
-            // Elasticsearch >= 8.x
-            $result = $result->asArray();
-        }
+		if ( !is_array( $result ) ) {
+			// Elasticsearch >= 8.x
+			$result = $result->asArray();
+		}
 
 		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $result ) );
 	}

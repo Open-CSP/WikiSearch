@@ -2,13 +2,11 @@
 
 namespace WikiSearch;
 
-use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Parser;
 use WikiSearch\QueryEngine\Aggregation\FilterAggregation;
 use WikiSearch\QueryEngine\Aggregation\ValuePropertyAggregation;
-use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 
 /**
@@ -20,13 +18,13 @@ use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 class PropertyValuesParserFunction {
 	/**
 	 * Callback for the parser function {{#prop_values}}.
-     *
-     * @deprecated Use the Lua function instead
+	 *
+	 * @deprecated Use the Lua function instead
 	 *
 	 * @param Parser $parser
 	 * @param string ...$args
 	 * @return string
-     */
+	 */
 	public function execute( Parser $parser, ...$args ): string {
 		if ( !class_exists( "\WSArrays" ) ) {
 			return "WSArrays must be installed.";
@@ -70,7 +68,7 @@ class PropertyValuesParserFunction {
 			return "The 'limit' parameter must be an integer between 1 and 10000";
 		}
 
-		list( $from, $to ) = $this->convertDates( $from, $to );
+		[ $from, $to ] = $this->convertDates( $from, $to );
 
 		$rangeFilter = new PropertyRangeFilter( $dateProperty, from: $from, to: $to );
 		$termsAggregation = new ValuePropertyAggregation( $property, $limit, "common_values" );
@@ -83,18 +81,18 @@ class PropertyValuesParserFunction {
 			$queryEngine->setBaseQuery( $baseQuery );
 		}
 
-        try {
-            $result = WikiSearchServices::getElasticsearchClientFactory()
-                ->newElasticsearchClient()
-                ->search($queryEngine->toQuery());
-        } catch (ClientResponseException|ServerResponseException) {
-            $result = [];
-        }
+		try {
+			$result = WikiSearchServices::getElasticsearchClientFactory()
+				->newElasticsearchClient()
+				->search( $queryEngine->toQuery() );
+		} catch ( ClientResponseException | ServerResponseException ) {
+			$result = [];
+		}
 
-        if ( !is_array( $result ) ) {
-            // Elasticsearch >= 8.x
-            $result = $result->asArray();
-        }
+		if ( !is_array( $result ) ) {
+			// Elasticsearch >= 8.x
+			$result = $result->asArray();
+		}
 
 		$buckets = $result["aggregations"]["property_values"]["property_values"]["common_values"]["buckets"] ?? null;
 

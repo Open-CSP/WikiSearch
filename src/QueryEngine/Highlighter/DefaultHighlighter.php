@@ -38,7 +38,7 @@ class DefaultHighlighter implements Highlighter {
 	 */
 	public function __construct( SearchEngineConfig $config, array $fields = null, array $fieldSettings = null ) {
 		$this->config = $config;
-        $this->fields = $fields ?? $this->getDefaultFields();
+		$this->fields = $fields ?? $this->getDefaultFields();
 
 		if ( $fieldSettings !== null ) {
 			$this->commonFieldSettings = $fieldSettings;
@@ -86,7 +86,7 @@ class DefaultHighlighter implements Highlighter {
 	private function getDefaultFields(): array {
 		$properties =
 			$this->config->getSearchParameter( "highlighted properties" ) ??
-			    $this->config->getSearchParameter( "search term properties" );
+				$this->config->getSearchParameter( "search term properties" );
 
 		if ( $properties !== false ) {
 			return $properties;

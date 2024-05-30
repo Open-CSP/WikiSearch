@@ -15,19 +15,19 @@ use WikiSearch\WikiSearchServices;
  */
 
 return [
-    "WikiSearch.Factory.ElasticsearchClientFactory" => static function ( MediaWikiServices $services ): ElasticsearchClientFactory {
-        return new ElasticsearchClientFactory( $services->getMainConfig() );
-    },
-    "WikiSearch.Factory.QueryCombinatorFactory" => static function (): QueryCombinatorFactory {
-        return new QueryCombinatorFactory();
-    },
-    "WikiSearch.Factory.QueryEngine.AggregationFactory" => static function (): AggregationFactory {
-        return new AggregationFactory();
-    },
-    "WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
-        return new QueryEngineFactory( $services->getMainConfig() );
-    },
-    "WikiSearch.Factory.SearchEngineFactory" => static function ( MediaWikiServices $services ): \WikiSearch\Factory\SearchEngineFactory {
-        return new \WikiSearch\Factory\SearchEngineFactory( WikiSearchServices::getQueryEngineFactory( $services ) );
-    }
+	"WikiSearch.Factory.ElasticsearchClientFactory" => static function ( MediaWikiServices $services ): ElasticsearchClientFactory {
+		return new ElasticsearchClientFactory( $services->getMainConfig() );
+	},
+	"WikiSearch.Factory.QueryCombinatorFactory" => static function (): QueryCombinatorFactory {
+		return new QueryCombinatorFactory();
+	},
+	"WikiSearch.Factory.QueryEngine.AggregationFactory" => static function (): AggregationFactory {
+		return new AggregationFactory();
+	},
+	"WikiSearch.Factory.QueryEngineFactory" => static function ( MediaWikiServices $services ): QueryEngineFactory {
+		return new QueryEngineFactory( $services->getMainConfig() );
+	},
+	"WikiSearch.Factory.SearchEngineFactory" => static function ( MediaWikiServices $services ): \WikiSearch\Factory\SearchEngineFactory {
+		return new \WikiSearch\Factory\SearchEngineFactory( WikiSearchServices::getQueryEngineFactory( $services ) );
+	}
 ];

@@ -43,7 +43,7 @@ use WikiSearch\WikiSearchServices;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
-    use QueryPreparationTrait;
+	use QueryPreparationTrait;
 
 	private const AGGREGATION_NAME = 'combobox_values';
 
@@ -60,18 +60,18 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		$engine_config = $this->getEngineConfigFromTitle( $title );
 		$engine = $this->getQueryEngine( $engine_config );
 
-        try {
-            $result = WikiSearchServices::getElasticsearchClientFactory()
-                ->newElasticsearchClient()
-                ->search( $engine->toQuery() );
-        } catch (ClientResponseException|ServerResponseException) {
-            $result = [];
-        }
+		try {
+			$result = WikiSearchServices::getElasticsearchClientFactory()
+				->newElasticsearchClient()
+				->search( $engine->toQuery() );
+		} catch ( ClientResponseException | ServerResponseException ) {
+			$result = [];
+		}
 
-        if ( !is_array( $result ) ) {
-            // Elasticsearch >= 8.x
-            $result = $result->asArray();
-        }
+		if ( !is_array( $result ) ) {
+			// Elasticsearch >= 8.x
+			$result = $result->asArray();
+		}
 
 		$this->getResult()->addValue(
 			null,
@@ -139,9 +139,9 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		) );
 		$engine->addAggregation(
 			new ValuePropertyAggregation(
-                $this->getParameter( "property" ),
+				$this->getParameter( "property" ),
 				$this->getParameter( "limit" ),
-                self::AGGREGATION_NAME
+				self::AGGREGATION_NAME
 			)
 		);
 

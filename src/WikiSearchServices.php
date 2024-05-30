@@ -21,33 +21,33 @@ use WikiSearch\Factory\SearchEngineFactory;
  */
 
 final class WikiSearchServices {
-    /**
-     * Disable the construction of this class by making the constructor private.
-     */
-    private function __construct() {
-    }
+	/**
+	 * Disable the construction of this class by making the constructor private.
+	 */
+	private function __construct() {
+	}
 
-    public static function getAggregationFactory( ?ServiceContainer $services = null ): AggregationFactory {
-        return self::getService( "Factory.QueryEngine.AggregationFactory", $services );
-    }
+	public static function getAggregationFactory( ?ServiceContainer $services = null ): AggregationFactory {
+		return self::getService( "Factory.QueryEngine.AggregationFactory", $services );
+	}
 
-    public static function getElasticsearchClientFactory( ?ServiceContainer $services = null ): ElasticsearchClientFactory {
-        return self::getService( "Factory.ElasticsearchClientFactory", $services );
-    }
+	public static function getElasticsearchClientFactory( ?ServiceContainer $services = null ): ElasticsearchClientFactory {
+		return self::getService( "Factory.ElasticsearchClientFactory", $services );
+	}
 
-    public static function getQueryCombinatorFactory( ?ServiceContainer $services = null ): QueryCombinatorFactory {
-        return self::getService( "Factory.QueryCombinatorFactory", $services );
-    }
+	public static function getQueryCombinatorFactory( ?ServiceContainer $services = null ): QueryCombinatorFactory {
+		return self::getService( "Factory.QueryCombinatorFactory", $services );
+	}
 
-    public static function getQueryEngineFactory( ?ServiceContainer $services = null ): QueryEngineFactory {
-        return self::getService( "Factory.QueryEngineFactory", $services );
-    }
+	public static function getQueryEngineFactory( ?ServiceContainer $services = null ): QueryEngineFactory {
+		return self::getService( "Factory.QueryEngineFactory", $services );
+	}
 
-    public static function getSearchEngineFactory( ?ServiceContainer $services = null ): SearchEngineFactory {
-        return self::getService( "Factory.SearchEngineFactory", $services );
-    }
+	public static function getSearchEngineFactory( ?ServiceContainer $services = null ): SearchEngineFactory {
+		return self::getService( "Factory.SearchEngineFactory", $services );
+	}
 
-    private static function getService( string $name, ?ServiceContainer $services ): object {
-        return ( $services ?? MediaWikiServices::getInstance() )->getService( "WikiSearch." . $name );
-    }
+	private static function getService( string $name, ?ServiceContainer $services ): object {
+		return ( $services ?? MediaWikiServices::getInstance() )->getService( "WikiSearch." . $name );
+	}
 }

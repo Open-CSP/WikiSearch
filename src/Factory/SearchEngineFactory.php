@@ -9,35 +9,35 @@ use WikiSearch\SearchEngine;
 use WikiSearch\SearchEngineConfig;
 
 class SearchEngineFactory {
-    private QueryEngineFactory $queryEngineFactory;
+	private QueryEngineFactory $queryEngineFactory;
 
-    public function __construct(QueryEngineFactory $queryEngineFactory ) {
-        $this->queryEngineFactory = $queryEngineFactory;
-    }
+	public function __construct( QueryEngineFactory $queryEngineFactory ) {
+		$this->queryEngineFactory = $queryEngineFactory;
+	}
 
-    /**
-     * Constructs a new QueryEngine from the API endpoint parameters.
-     *
-     * @param SearchEngineConfig $searchEngineConfig
-     * @param string|null $term
-     * @param int|null $from
-     * @param int|null $limit
-     * @param Filter[] $filters
-     * @param AbstractAggregation[] $aggregations
-     * @param Sort[] $sorts
-     *
-     * @return SearchEngine
-     */
+	/**
+	 * Constructs a new QueryEngine from the API endpoint parameters.
+	 *
+	 * @param SearchEngineConfig $searchEngineConfig
+	 * @param string|null $term
+	 * @param int|null $from
+	 * @param int|null $limit
+	 * @param Filter[] $filters
+	 * @param AbstractAggregation[] $aggregations
+	 * @param Sort[] $sorts
+	 *
+	 * @return SearchEngine
+	 */
 	public function newSearchEngine(
-        SearchEngineConfig $searchEngineConfig,
-        ?string $term,
-        ?int $from,
-        ?int $limit,
-        array $filters,
-        array $aggregations,
-        array $sorts
-    ): SearchEngine {
-        $queryEngine = $this->queryEngineFactory->newQueryEngine( $searchEngineConfig );
+		SearchEngineConfig $searchEngineConfig,
+		?string $term,
+		?int $from,
+		?int $limit,
+		array $filters,
+		array $aggregations,
+		array $sorts
+	): SearchEngine {
+		$queryEngine = $this->queryEngineFactory->newQueryEngine( $searchEngineConfig );
 
 		if ( $from !== null ) {
 			$queryEngine->setOffset( $from );
@@ -47,23 +47,23 @@ class SearchEngineFactory {
 			$queryEngine->setLimit( $limit );
 		}
 
-        foreach ( $filters as $filter ) {
-            $queryEngine->addConstantScoreFilter( $filter );
-        }
+		foreach ( $filters as $filter ) {
+			$queryEngine->addConstantScoreFilter( $filter );
+		}
 
-        foreach ( $aggregations as $aggregation ) {
-            $queryEngine->addAggregation( $aggregation );
-        }
+		foreach ( $aggregations as $aggregation ) {
+			$queryEngine->addAggregation( $aggregation );
+		}
 
-        foreach( $sorts as $sort ) {
-            $queryEngine->addSort( $sort );
-        }
+		foreach ( $sorts as $sort ) {
+			$queryEngine->addSort( $sort );
+		}
 
-        $searchEngine = new SearchEngine( $searchEngineConfig, $queryEngine );
+		$searchEngine = new SearchEngine( $searchEngineConfig, $queryEngine );
 
-        if ( $term !== null ) {
-            $searchEngine->addSearchTerm( $term );
-        }
+		if ( $term !== null ) {
+			$searchEngine->addSearchTerm( $term );
+		}
 
 		return $searchEngine;
 	}

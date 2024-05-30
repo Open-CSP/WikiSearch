@@ -5,10 +5,7 @@ namespace WikiSearch\QueryEngine\Filter;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MediaWiki\MediaWikiServices;
-use MWException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
-use WikiSearch\Factory\QueryEngineFactory;
-use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 
 /**
@@ -25,16 +22,16 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @param PropertyFilter $filter The initial filter to use to get the values for the to be constructed Terms filter
 	 */
 	public function __construct(
-        private PropertyFilter $filter
-    ) {
-        parent::__construct( $this->filter->getField()->getChainedPropertyFieldMapper() );
-    }
+		private PropertyFilter $filter
+	) {
+		parent::__construct( $this->filter->getField()->getChainedPropertyFieldMapper() );
+	}
 
 	/**
 	 * @inheritDoc
 	 *
 	 * @return BoolQuery
-     */
+	 */
 	public function filterToQuery(): BoolQuery {
 		$query = $this->constructSubqueryFromFilter( $this->filter );
 		$terms = $this->getTermsFromSubquery( $query );
@@ -54,8 +51,8 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 *
 	 * @param Filter $filter
 	 * @return array
-     */
-	private function constructSubqueryFromFilter(Filter $filter ): array {
+	 */
+	private function constructSubqueryFromFilter( Filter $filter ): array {
 		$queryEngine = WikiSearchServices::getQueryEngineFactory()->newQueryEngine();
 		$queryEngine->addConstantScoreFilter( $filter );
 
@@ -72,21 +69,21 @@ class ChainedPropertyFilter extends PropertyFilter {
 	 * @return array
 	 */
 	private function getTermsFromSubquery( array $query ): array {
-        try {
-            // FIXME: Don't use an actual search here
-            $results = WikiSearchServices::getElasticsearchClientFactory()
-                ->newElasticsearchClient()
-                ->search($query);
-        } catch (ClientResponseException|ServerResponseException) {
-            $results = [];
-        }
+		try {
+			// FIXME: Don't use an actual search here
+			$results = WikiSearchServices::getElasticsearchClientFactory()
+				->newElasticsearchClient()
+				->search( $query );
+		} catch ( ClientResponseException | ServerResponseException ) {
+			$results = [];
+		}
 
-        if ( !is_array( $results ) ) {
-            // Elasticsearch >= 8.x
-            $results = $results->asArray();
-        }
+		if ( !is_array( $results ) ) {
+			// Elasticsearch >= 8.x
+			$results = $results->asArray();
+		}
 
-		return array_map( function ( array $hit ): int {
+		return array_map( static function ( array $hit ): int {
 			return intval( $hit["_id"] );
 		}, $results["hits"]["hits"] );
 	}

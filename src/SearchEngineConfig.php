@@ -84,7 +84,7 @@ class SearchEngineConfig {
 	 * @return SearchEngineConfig|null
 	 */
 	public static function newFromDatabase( Title $page ) {
-		$database = wfGetDB( DB_MASTER );
+		$database = wfGetDB( DB_PRIMARY );
 		$page_id = $page->getArticleID();
 
 		$db_facets = $database->select(
@@ -149,7 +149,8 @@ class SearchEngineConfig {
 		$facet_properties = $result_properties = $search_parameters = [];
 
 		foreach ( $parameters as $parameter ) {
-			if ( strlen( $parameter ) === 0 ) { continue;
+			if ( strlen( $parameter ) === 0 ) {
+				continue;
 			}
 
 			if ( $parameter[0] === "?" ) {
@@ -193,11 +194,11 @@ class SearchEngineConfig {
 		$this->title = $title;
 		$this->search_parameters = $search_parameters;
 
-		$result_properties = array_filter( $result_properties, function ( string $property_name ) {
+		$result_properties = array_filter( $result_properties, static function ( string $property_name ) {
 			return !empty( $property_name );
 		} );
 
-		$this->result_properties = array_map( function ( string $property_name ): PropertyFieldMapper {
+		$this->result_properties = array_map( static function ( string $property_name ): PropertyFieldMapper {
 			return new PropertyFieldMapper( $property_name );
 		}, $result_properties );
 
@@ -270,14 +271,14 @@ class SearchEngineConfig {
 			case "propertylist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
 				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				return array_map( function ( $property ): PropertyFieldMapper {
+				return array_map( static function ( $property ): PropertyFieldMapper {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) );
 				}, $search_parameter_value );
 			case "sortlist":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
 				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
-				return array_map( function ( $sort ): PropertySort {
+				return array_map( static function ( $sort ): PropertySort {
 					$sortParts = explode( ".", $sort );
 
 					if ( count( $sortParts ) === 1 ) {
@@ -373,14 +374,14 @@ class SearchEngineConfig {
 	public function insert( DBConnRef $database ): void {
 		$page_id = $this->title->getArticleID();
 
-		$facet_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
+		$facet_properties = array_unique( array_map( static function ( PropertyFieldMapper $property ): string {
 			// Use 'getPropertyName' here to make sure that the value in the database corresponds directly to the
 			// value present in the parser function call (otherwise it might be translated to something else, causing
 			// several problems in the front-end)
 			return $property->getPropertyName();
 		}, $this->facet_properties ) );
 
-		$result_properties = array_unique( array_map( function ( PropertyFieldMapper $property ): string {
+		$result_properties = array_unique( array_map( static function ( PropertyFieldMapper $property ): string {
 			return $property->getPropertyName();
 		}, $this->result_properties ) );
 

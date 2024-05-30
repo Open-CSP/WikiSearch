@@ -27,7 +27,6 @@ use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
 use WikiSearch\Exception\ParsingException;
-use WikiSearch\Factory\SearchEngineFactory;
 use WikiSearch\Logger;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\SearchEngine;
@@ -150,50 +149,50 @@ class ApiQueryWikiSearch extends ApiQueryWikiSearchBase {
 	 * @throws ApiUsageException
 	 */
 	private function getEngine( SearchEngineConfig $engineConfig ): SearchEngine {
-        return WikiSearchServices::getSearchEngineFactory()->newSearchEngine(
-            $engineConfig,
-            term: $this->getParameter( 'term' ),
-            from: $this->getParameter( 'from' ),
-            limit: $this->getParameter( 'limit' ),
-            filters: $this->getFilters(),
-            aggregations: $this->getAggregations(),
-            sorts: $this->getSorts()
-        );
+		return WikiSearchServices::getSearchEngineFactory()->newSearchEngine(
+			$engineConfig,
+			term: $this->getParameter( 'term' ),
+			from: $this->getParameter( 'from' ),
+			limit: $this->getParameter( 'limit' ),
+			filters: $this->getFilters(),
+			aggregations: $this->getAggregations(),
+			sorts: $this->getSorts()
+		);
 	}
 
-    /**
-     * @return array
-     */
-    private function getFilters(): array {
-        return []; // TODO
-    }
+	/**
+	 * @return array
+	 */
+	private function getFilters(): array {
+		return []; // TODO
+	}
 
-    /**
-     * @throws ApiUsageException
-     * @throws SearchEngineException
-     * @throws ParsingException
-     */
-    private function getAggregations(): array {
-        $aggregationSpecs = $this->getParameter( 'aggregations' ) ?? "[]";
-        $aggregationSpecs = json_decode( $aggregationSpecs, true );
+	/**
+	 * @throws ApiUsageException
+	 * @throws SearchEngineException
+	 * @throws ParsingException
+	 */
+	private function getAggregations(): array {
+		$aggregationSpecs = $this->getParameter( 'aggregations' ) ?? "[]";
+		$aggregationSpecs = json_decode( $aggregationSpecs, true );
 
-        if ( !is_array( $aggregationSpecs ) ) {
-            // TODO: Improve this error
-            $message = wfMessage( "wikisearch-api-invalid-json", "aggregations", json_last_error_msg() );
-            throw new SearchEngineException( $message );
-        }
+		if ( !is_array( $aggregationSpecs ) ) {
+			// TODO: Improve this error
+			$message = wfMessage( "wikisearch-api-invalid-json", "aggregations", json_last_error_msg() );
+			throw new SearchEngineException( $message );
+		}
 
-        return array_map( function ( $spec ): AbstractAggregation {
-            if ( !is_array( $spec ) ) {
-                // TODO: Improve this error
-                throw new SearchEngineException( "Invalid aggregation." );
-            }
+		return array_map( static function ( $spec ): AbstractAggregation {
+			if ( !is_array( $spec ) ) {
+				// TODO: Improve this error
+				throw new SearchEngineException( "Invalid aggregation." );
+			}
 
-            return WikiSearchServices::getAggregationFactory()->newAggregation( $spec );
-        }, $aggregationSpecs );
-    }
+			return WikiSearchServices::getAggregationFactory()->newAggregation( $spec );
+		}, $aggregationSpecs );
+	}
 
-    private function getSorts(): array {
-        return []; // TODO
-    }
+	private function getSorts(): array {
+		return []; // TODO
+	}
 }

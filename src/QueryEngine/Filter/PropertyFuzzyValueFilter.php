@@ -2,10 +2,8 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\FuzzyQuery;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -21,11 +19,11 @@ class PropertyFuzzyValueFilter extends PropertyFilter {
 	 * @param int|string $fuzziness The fuzziness to use, or "AUTO"
 	 */
 	public function __construct(
-        string|PropertyFieldMapper $field,
-        private string $value,
-        private int|string $fuzziness = "AUTO"
-    ) {
-        parent::__construct( $field );
+		string|PropertyFieldMapper $field,
+		private string $value,
+		private int|string $fuzziness = "AUTO"
+	) {
+		parent::__construct( $field );
 	}
 
 	/**

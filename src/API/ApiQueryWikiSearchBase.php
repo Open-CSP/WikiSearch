@@ -23,7 +23,6 @@ namespace WikiSearch\API;
 
 use ApiQueryBase;
 use ApiUsageException;
-use MediaWiki\MediaWikiServices;
 use WikiSearch\Logger;
 
 /**

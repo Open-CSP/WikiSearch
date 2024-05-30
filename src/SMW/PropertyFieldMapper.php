@@ -135,8 +135,8 @@ class PropertyFieldMapper {
 			throw new BadMethodCallException( "WikiSearch requires ElasticSearch to be installed" );
 		}
 
-		list( $this->chained_property_field_mapper, $property_name ) = $this->parseChainedProperty( $property_name );
-		list( $this->property_weight, $property_name ) = $this->parsePropertyWeight( $property_name );
+		[ $this->chained_property_field_mapper, $property_name ] = $this->parseChainedProperty( $property_name );
+		[ $this->property_weight, $property_name ] = $this->parsePropertyWeight( $property_name );
 
 		$this->property_name = $property_name;
 

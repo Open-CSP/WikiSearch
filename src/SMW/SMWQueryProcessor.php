@@ -40,7 +40,7 @@ class SMWQueryProcessor {
 			'query' => $this->query
 		] );
 
-		list( $query_string, $parameters, $printouts ) = \SMWQueryProcessor::getComponentsFromFunctionParams(
+		[ $query_string, $parameters, $printouts ] = \SMWQueryProcessor::getComponentsFromFunctionParams(
 			[ $this->query ],
 			false
 		);

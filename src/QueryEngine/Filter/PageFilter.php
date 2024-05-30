@@ -5,7 +5,6 @@ namespace WikiSearch\QueryEngine\Filter;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use Title;
-use WikiSearch\Logger;
 use WikiSearch\SMW\WikiPageObjectIdLookup;
 
 /**
@@ -18,8 +17,9 @@ class PageFilter extends Filter {
 	 * @param Title $title
 	 */
 	public function __construct(
-        private Title $title
-    ) {}
+		private Title $title
+	) {
+	}
 
 	/**
 	 * Converts the object to a BuilderInterface for use in the QueryEngine.

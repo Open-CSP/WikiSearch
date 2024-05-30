@@ -4,7 +4,6 @@ namespace WikiSearch\QueryEngine\Aggregation;
 
 use ONGR\ElasticsearchDSL\Aggregation\AbstractAggregation;
 use ONGR\ElasticsearchDSL\Aggregation\Bucketing\RangeAggregation;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -19,7 +18,7 @@ class RangePropertyAggregation extends AbstractPropertyAggregation {
 	 * @param array $ranges
 	 */
 	public function __construct( string|PropertyFieldMapper $field, private array $ranges, string $name = null ) {
-        parent::__construct( $field, $name );
+		parent::__construct( $field, $name );
 	}
 
 	/**

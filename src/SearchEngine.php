@@ -21,16 +21,11 @@
 
 namespace WikiSearch;
 
-use Elastic\Elasticsearch\Client;
-use Elastic\Elasticsearch\ClientBuilder;
-use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Exception;
 use Hooks;
 use MediaWiki\MediaWikiServices;
-
-use WikiSearch\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -41,7 +36,7 @@ use WikiSearch\QueryEngine\QueryEngine;
  * @package WikiSearch
  */
 class SearchEngine {
-    use QueryPreparationTrait;
+	use QueryPreparationTrait;
 
 	/**
 	 * @var SearchEngineConfig
@@ -95,20 +90,20 @@ class SearchEngine {
 			'query' => $query
 		] );
 
-        try {
-            $result = WikiSearchServices::getElasticsearchClientFactory()
-                ->newElasticsearchClient()
-                ->search($query);
-        } catch (ClientResponseException|ServerResponseException) {
-            $result = [];
-        }
+		try {
+			$result = WikiSearchServices::getElasticsearchClientFactory()
+				->newElasticsearchClient()
+				->search( $query );
+		} catch ( ClientResponseException | ServerResponseException ) {
+			$result = [];
+		}
 
-        if ( !is_array( $result ) ) {
-            // Elasticsearch >= 8.x
-            $result = $result->asArray();
-        }
+		if ( !is_array( $result ) ) {
+			// Elasticsearch >= 8.x
+			$result = $result->asArray();
+		}
 
-        return $result;
+		return $result;
 	}
 
 	/**
@@ -160,7 +155,7 @@ class SearchEngine {
 		$properties = $this->config->getResultProperties();
 
 		// Allow other extensions to modify the result
-		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
+		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, $template, $properties ] );
 
 		return $results;
 	}

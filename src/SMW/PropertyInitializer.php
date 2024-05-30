@@ -43,7 +43,7 @@ class PropertyInitializer {
 	public static function getAnnotators(): array {
 		$disabledAnnotators = MediaWikiServices::getInstance()->getMainConfig()->get( "WikiSearchDisabledAnnotators" );
 
-		return array_filter( self::ANNOTATORS, function ( $class ) use ( $disabledAnnotators ): bool {
+		return array_filter( self::ANNOTATORS, static function ( $class ) use ( $disabledAnnotators ): bool {
 			return !in_array( $class::getId(), $disabledAnnotators, true );
 		} );
 	}

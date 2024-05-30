@@ -2,10 +2,8 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -21,10 +19,10 @@ class PropertyTextFilter extends PropertyFilter {
 	 * @param string $operator The default operator to insert between words
 	 */
 	public function __construct(
-        string|PropertyFieldMapper $field,
-        private string $query,
-        private string $defaultOperator
-    ) {
+		string|PropertyFieldMapper $field,
+		private string $query,
+		private string $defaultOperator
+	) {
 		parent::__construct( $field );
 	}
 

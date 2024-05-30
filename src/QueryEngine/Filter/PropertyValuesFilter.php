@@ -2,10 +2,8 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
-use InvalidArgumentException;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermsQuery;
-use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
@@ -20,9 +18,9 @@ class PropertyValuesFilter extends PropertyFilter {
 	 * @param array $values Values of the property
 	 */
 	public function __construct(
-        string|PropertyFieldMapper $field,
-        private array $values
-    ) {
+		string|PropertyFieldMapper $field,
+		private array $values
+	) {
 		parent::__construct( $field );
 	}
 

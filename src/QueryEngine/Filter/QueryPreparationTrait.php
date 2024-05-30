@@ -19,44 +19,44 @@ trait QueryPreparationTrait {
 			return "*";
 		}
 
-        $term = preg_replace( '/(:|\+|=|\/)/', '\\\\$1', $term );
+		$term = preg_replace( '/(:|\+|=|\/)/', '\\\\$1', $term );
 		$advancedQuery = array_reduce(
-            [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
-            function ( bool $carry, $char ) use ( $term ) {
-                return $carry ?: str_contains( $term, $char );
-            },
-            false
-        );
+			[ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
+			static function ( bool $carry, $char ) use ( $term ) {
+				return $carry ?: str_contains( $term, $char );
+			},
+			false
+		);
 
-        return $advancedQuery ? $term : self::insertWildcards( $term );
+		return $advancedQuery ? $term : self::insertWildcards( $term );
 	}
 
-    /**
-     * Inserts wild cards around each term in the provided search string.
-     *
-     * @param string $term
-     * @return string
-     */
+	/**
+	 * Inserts wild cards around each term in the provided search string.
+	 *
+	 * @param string $term
+	 * @return string
+	 */
 	public static function insertWildcards( string $term ): string {
-        if ( !$term ) {
-            return '*';
-        }
+		if ( !$term ) {
+			return '*';
+		}
 
-        $wordChars = 'a-zA-Z_\-0-9:\/\\\\';
-        $terms = preg_split(
-            '/((?<=[' . $wordChars . '])(?=$|[^' . $wordChars . '])\s*)/',
-            $term, -1, PREG_SPLIT_DELIM_CAPTURE
-        );
+		$wordChars = 'a-zA-Z_\-0-9:\/\\\\';
+		$terms = preg_split(
+			'/((?<=[' . $wordChars . '])(?=$|[^' . $wordChars . '])\s*)/',
+			$term, -1, PREG_SPLIT_DELIM_CAPTURE
+		);
 
-        $numTerms = count( $terms );
-        for ( $idx = 0; $idx < $numTerms; $idx++ ) {
-            if ( $idx % 2 !== 0 || empty( $terms[$idx] ) ) {
-                continue;
-            }
+		$numTerms = count( $terms );
+		for ( $idx = 0; $idx < $numTerms; $idx++ ) {
+			if ( $idx % 2 !== 0 || empty( $terms[$idx] ) ) {
+				continue;
+			}
 
-            $terms[$idx] = "*{$terms[$idx]}*";
-        }
+			$terms[$idx] = "*{$terms[$idx]}*";
+		}
 
-        return preg_replace('/\*+/', '*', '*' . implode( '', $terms ) . '*' );
+		return preg_replace( '/\*+/', '*', '*' . implode( '', $terms ) . '*' );
 	}
 }
