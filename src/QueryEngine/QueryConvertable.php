@@ -17,5 +17,5 @@ interface QueryConvertable {
 	 *
 	 * @return BuilderInterface
 	 */
-	public function toQuery();
+	public function toQuery(): BuilderInterface;
 }

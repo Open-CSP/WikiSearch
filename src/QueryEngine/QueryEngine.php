@@ -76,10 +76,15 @@ class QueryEngine {
 	];
 
 	/**
+	 * List of fallback sorts to apply.
+	 *
 	 * @var Sort[]
 	 */
 	private array $fallbackSorts = [];
 
+	/**
+	 * @param string $index The ElasticSearch index to query.
+	 */
 	public function __construct( string $index ) {
 		$this->index = $index;
 
