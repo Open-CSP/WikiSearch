@@ -37,15 +37,20 @@
 		"wikisearch-execute-api",
 		"wikisearch-edit-data-standard"
 	],
+	"HookHandlers": {
+		"main": {
+			"class": "WikiSearch\\MediaWiki\\HookHandlers\\MainHookHandler"
+		}
+	},
 	"Hooks": {
-		"ParserFirstCallInit": "WikiSearch\\WikiSearchHooks::onParserFirstCallInit",
-		"ArticleDeleteComplete": "WikiSearch\\WikiSearchHooks::onArticleDeleteComplete",
-		"PageContentSaveComplete": "WikiSearch\\WikiSearchHooks::onPageContentSaveComplete",
-		"LoadExtensionSchemaUpdates": "WikiSearch\\WikiSearchHooks::onLoadExtensionSchemaUpdates",
-		"BeforePageDisplay": "WikiSearch\\WikiSearchHooks::onBeforePageDisplay",
-		"SMW::Store::BeforeDataUpdateComplete": "WikiSearch\\WikiSearchHooks::onBeforeDataUpdateComplete",
-		"SMW::Property::initProperties": "WikiSearch\\WikiSearchHooks::onInitProperties",
-		"ScribuntoExternalLibraries": "WikiSearch\\WikiSearchHooks::onScribuntoExternalLibraries"
+		"ParserFirstCallInit": "main",
+		"ArticleDeleteComplete": "main",
+		"PageContentSaveComplete": "main",
+		"LoadExtensionSchemaUpdates": "main",
+		"BeforePageDisplay": "main",
+		"SMW::Store::BeforeDataUpdateComplete": "WikiSearch\\MediaWiki\\HookHandlers\\LegacyHookHandler::onBeforeDataUpdateComplete",
+		"SMW::Property::initProperties": "WikiSearch\\MediaWiki\\HookHandlers\\LegacyHookHandler::onInitProperties",
+		"ScribuntoExternalLibraries": "WikiSearch\\MediaWiki\\HookHandlers\\LegacyHookHandler::onScribuntoExternalLibraries"
 	},
 	"ServiceWiringFiles": [
 		"src/WikiSearch.ServiceWiring.php"
