@@ -27,6 +27,11 @@ class AggregationFactory {
 	/**
 	 * Parses the given spec as a range property aggregation.
 	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return RangePropertyAggregation
+	 *
 	 * @throws ParsingException
 	 */
 	private function parseSpecForRange( array $spec, array $path ): RangePropertyAggregation {
@@ -40,6 +45,11 @@ class AggregationFactory {
 	/**
 	 * Parses the given spec as a value property aggregation.
 	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return ValuePropertyAggregation
+	 *
 	 * @throws ParsingException
 	 */
 	private function parseSpecForValue( array $spec, array $path ): ValuePropertyAggregation {
@@ -50,6 +60,13 @@ class AggregationFactory {
 	}
 
 	/**
+	 * Parses the "type" value of the given spec.
+	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return string The "type" of the spec.
+	 *
 	 * @throws ParsingException
 	 */
 	private function parseType( array $spec, array $path ): string {
@@ -67,6 +84,13 @@ class AggregationFactory {
 	}
 
 	/**
+	 * Parses the "name" value of the given spec for a range.
+	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return string The "name" of the spec.
+	 *
 	 * @throws ParsingException
 	 */
 	private function parseNameForRange( array $spec, array $path ): string {
@@ -84,6 +108,13 @@ class AggregationFactory {
 	}
 
 	/**
+	 * Parses the "name" value of the given spec for a value.
+	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return string The "name" of the spec.
+	 *
 	 * @throws ParsingException
 	 */
 	private function parseNameForValue( array $spec, array $path ): string {
@@ -101,6 +132,13 @@ class AggregationFactory {
 	}
 
 	/**
+	 * Parses the "property" value of the given spec for a range.
+	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return string The "property" of the spec.
+	 *
 	 * @throws ParsingException
 	 */
 	private function parsePropertyForRange( array $spec, array $path ): string {
@@ -118,6 +156,13 @@ class AggregationFactory {
 	}
 
 	/**
+	 * Parses the "property" value of the given spec for a value.
+	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return string The "property" of the spec.
+	 *
 	 * @throws ParsingException
 	 */
 	private function parsePropertyForValue( array $spec, array $path ): string {
@@ -135,6 +180,13 @@ class AggregationFactory {
 	}
 
 	/**
+	 * Parses the "ranges" value of the given spec.
+	 *
+	 * @param array $spec The spec to parse.
+	 * @param array $path The current path.
+	 *
+	 * @return array The "ranges" of the spec.
+	 *
 	 * @throws ParsingException
 	 */
 	private function parseRanges( array $spec, array $path ): array {
