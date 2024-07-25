@@ -2,6 +2,7 @@
 
 namespace WikiSearch\Factory\QueryEngine;
 
+use WikiSearch\Exception\ParsingException;
 use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\HasPropertyFilter;
@@ -11,13 +12,209 @@ use WikiSearch\QueryEngine\Filter\PropertyRangeFilter;
 use WikiSearch\QueryEngine\Filter\PropertyTextFilter;
 use WikiSearch\QueryEngine\Filter\PropertyValueFilter;
 use WikiSearch\QueryEngine\Filter\PropertyValuesFilter;
-use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 
 class FilterFactory {
-	use QueryPreparationTrait;
+    /**
+     * Constructs a new filter object from the given spec.
+     *
+     * @param array $spec
+     * @return Filter
+     *
+     * @throws ParsingException
+     */
+    public function newFilter( array $spec ): Filter {
+        $path = [];
+
+        if ( isset( $spec['value'] ) ) {
+            $filter = $this->parseSpecForValue( $spec, $path );
+        } else if ( isset( $spec['range'] ) ) {
+            $filter = $this->parseSpecForRange( $spec, $path );
+        } else {
+            throw new ParsingException( 'either a value or a range is required', $path );
+        }
+
+        if ( !empty( $spec["negate"] ) ) {
+            $filter->setNegated();
+        }
+
+        return $filter;
+    }
+
+    /**
+     * Parses the given spec as a range property filter.
+     *
+     * @param array $spec The spec to parse.
+     * @param array $path The current path.
+     *
+     * @return PropertyRangeFilter
+     *
+     * @throws ParsingException
+     */
+    private function parseSpecForRange( array $spec, array $path ): PropertyRangeFilter {
+        $key = $this->parseKeyForRange( $spec, $path );
+        $range = $this->parseRangeForRange( $spec, $path );
+
+        return new PropertyRangeFilter( $key, $range['from'], $range['to'] );
+    }
+
+    /**
+     * Parses the "key" value of the given spec for a range.
+     *
+     * @param array $spec The spec to parse.
+     * @param array $path The current path.
+     *
+     * @return string The "key" of the spec.
+     *
+     * @throws ParsingException
+     */
+    private function parseKeyForRange( array $spec, array $path ): string {
+        $path[] = 'key';
+
+        if ( empty( $spec['key'] ) ) {
+            throw new ParsingException( 'a key is required for a range filter', $path );
+        }
+
+        if ( !is_string( $spec['key'] ) ) {
+            throw new ParsingException( 'a key must be a string', $path );
+        }
+
+        return $spec['key'];
+    }
+
+    /**
+     * Parses the "range" value of the given spec for a range.
+     *
+     * @param array $spec The spec to parse.
+     * @param array $path The current path.
+     *
+     * @return array{from: int, to: int} The "range" of the spec.
+     *
+     * @throws ParsingException
+     */
+    private function parseRangeForRange( array $spec, array $path ): array {
+        $path[] = 'range';
+
+        if ( empty( $spec['range'] ) ) {
+            throw new ParsingException( 'a range is required for a range filter', $path );
+        }
+
+        if ( !is_array( $spec['range'] ) ) {
+            throw new ParsingException( 'a range must be an array', $path );
+        }
+
+        $lower = $this->parseLowerRangeForRange( $spec['range'], $path );
+        $upper = $this->parseUpperRangeForRange( $spec['range'], $path );
+
+        return [
+            'from' => $lower,
+            'to' => $upper,
+        ];
+    }
+
+    /**
+     * Parses the "from" value of the given range.
+     *
+     * @param array $range The range to parse.
+     * @param array $path The current path.
+     *
+     * @return int The "from" of the range.
+     *
+     * @throws ParsingException
+     */
+    private function parseLowerRangeForRange( array $range, array $path ): int {
+        $path[] = 'from';
+
+        if ( empty( $range['from'] ) ) {
+            throw new ParsingException( 'a lower bound (from) is required for a range', $path );
+        }
+
+        if ( !is_int( $range['from'] ) ) {
+            throw new ParsingException( 'a lower bound (from) must be an integer', $path );
+        }
+
+        return $range['from'];
+    }
+
+    /**
+     * Parses the "to" value of the given range.
+     *
+     * @param array $range The range to parse.
+     * @param array $path The current path.
+     *
+     * @return int The "to" of the range.
+     *
+     * @throws ParsingException
+     */
+    private function parseUpperRangeForRange( array $range, array $path ): int {
+        $path[] = 'to';
+
+        if ( empty( $range['to'] ) ) {
+            throw new ParsingException( 'an upper bound (to) is required for a range', $path );
+        }
+
+        if ( !is_int( $range['to'] ) ) {
+            throw new ParsingException( 'an upper bound (to) must be an integer', $path );
+        }
+
+        return $range['to'];
+    }
+
+    /**
+     * Parses the given spec as a value property filter.
+     *
+     * @param array $spec The spec to parse.
+     * @param array $path The current path.
+     *
+     * @return Filter
+     *
+     * @throws ParsingException
+     */
+    private function parseSpecForValue( array $spec, array $path ): Filter {
+        return match ( $this->parseTypeForValue( $spec, $path ) ) {
+            null => $this->parseSpecForValueWithoutType( $spec, $path ),
+            "query" => $this->parseSpecForQueryValue( $spec, $path ),
+            "fuzzy" => $this->parseSpecForFuzzyValue( $spec, $path )
+        };
+    }
+
+    /**
+     * Parses the "type" value of the given spec for a value property filter.
+     *
+     * @param array $spec The spec to parse.
+     * @param array $path The current path.
+     *
+     * @return string|null The "type" of the value property filter, or NULL if it has no type.
+     *
+     * @throws ParsingException
+     */
+    private function parseTypeForValue( array $spec, array $path ): ?string {
+        $path[] = 'type';
+
+        if ( empty( $spec['type'] ) ) {
+            return null;
+        }
+
+        if ( !in_array( $spec['type'], [ 'query', 'fuzzy' ] ) ) {
+            throw new ParsingException( 'invalid type, must be either "query" or "fuzzy"', $path );
+        }
+
+        return $spec['type'];
+    }
+
+    private function parseSpecForValueWithoutType( array $spec, array $path ): PropertyValuesFilter|PropertyValueFilter {
+
+    }
+
+    private function parseSpecForQueryValue( array $spec, array $path ): PropertyTextFilter {
+
+    }
+
+    private function parseSpecForFuzzyValue( array $spec, array $path ): PropertyFuzzyValueFilter {
+
+    }
 
 	/**
 	 * Constructs a new Filter class from the given array. The given array directly corresponds to the array given by
