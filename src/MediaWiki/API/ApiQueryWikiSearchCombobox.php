@@ -27,13 +27,13 @@ use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use MWException;
 use Title;
+use WikiSearch\Exception\SearchEngineException;
 use WikiSearch\Factory\SearchEngineFactory;
 use WikiSearch\QueryEngine\Aggregation\ValuePropertyAggregation;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
-use WikiSearch\SearchEngineException;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 

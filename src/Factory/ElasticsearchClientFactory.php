@@ -20,11 +20,9 @@ class ElasticsearchClientFactory {
 	 * @return \Elastic\Elasticsearch\Client|\Elasticsearch\Client
 	 */
 	public function newElasticsearchClient() {
-		if ( class_exists( "\Elastic\Elasticsearch\ClientBuilder" ) ) {
-			$clientBuilder = \Elastic\Elasticsearch\ClientBuilder::create();
-		} else {
-			$clientBuilder = \Elasticsearch\ClientBuilder::create();
-		}
+        $clientBuilder = class_exists("\Elastic\Elasticsearch\ClientBuilder") ?
+            \Elastic\Elasticsearch\ClientBuilder::create() :
+            \Elasticsearch\ClientBuilder::create();
 
 		$this->addHosts( $clientBuilder );
 		$this->addBasicAuthentication( $clientBuilder );

@@ -27,10 +27,10 @@ use MediaWiki\MediaWikiServices;
 use MWException;
 use Title;
 use WikiSearch\Exception\ParsingException;
+use WikiSearch\Exception\SearchEngineException;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\SearchEngine;
 use WikiSearch\SearchEngineConfig;
-use WikiSearch\SearchEngineException;
 use WikiSearch\WikiSearchServices;
 
 /**
