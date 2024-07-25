@@ -3,7 +3,6 @@
 namespace WikiSearch\MediaWiki\ParserFunction;
 
 use Parser;
-use WikiSearch\MediaWiki\Logger;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\WikiSearchServices;
 

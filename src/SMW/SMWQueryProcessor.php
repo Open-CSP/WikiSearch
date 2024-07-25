@@ -3,7 +3,6 @@
 namespace WikiSearch\SMW;
 
 use SMW\Elastic\ElasticFactory;
-use WikiSearch\MediaWiki\Logger;
 
 class SMWQueryProcessor {
 	/**

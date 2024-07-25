@@ -23,7 +23,6 @@ namespace WikiSearch;
 
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
-use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\SMW\SMWQueryProcessor;

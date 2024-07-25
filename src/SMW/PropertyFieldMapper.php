@@ -25,7 +25,6 @@ use BadMethodCallException;
 use SMW\DataTypeRegistry;
 use SMW\DIProperty;
 use SMW\Elastic\ElasticStore;
-use WikiSearch\MediaWiki\Logger;
 
 /**
  * Class PropertyFieldMapper

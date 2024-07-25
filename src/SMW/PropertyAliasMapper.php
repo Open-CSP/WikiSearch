@@ -3,7 +3,6 @@
 namespace WikiSearch\SMW;
 
 use SMW\PropertyRegistry;
-use WikiSearch\MediaWiki\Logger;
 
 /**
  * Class PropertyLabelMapper

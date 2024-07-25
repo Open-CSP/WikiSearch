@@ -8,7 +8,6 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\ConstantScoreQuery;
 use ONGR\ElasticsearchDSL\Query\Compound\FunctionScoreQuery;
 use ONGR\ElasticsearchDSL\Search;
-use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Aggregation\AbstractAggregation;
 use WikiSearch\QueryEngine\Aggregation\AbstractPropertyAggregation;
 use WikiSearch\QueryEngine\Filter\Filter;

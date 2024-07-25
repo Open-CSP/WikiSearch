@@ -6,7 +6,6 @@ use SMW\SQLStore\SQLStore;
 use SMW\Store;
 use Title;
 use Wikimedia\Rdbms\IResultWrapper;
-use WikiSearch\MediaWiki\Logger;
 
 class WikiPageObjectIdLookup {
 	/**

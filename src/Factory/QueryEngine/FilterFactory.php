@@ -2,7 +2,6 @@
 
 namespace WikiSearch\Factory\QueryEngine;
 
-use WikiSearch\MediaWiki\Logger;
 use WikiSearch\QueryEngine\Filter\ChainedPropertyFilter;
 use WikiSearch\QueryEngine\Filter\Filter;
 use WikiSearch\QueryEngine\Filter\HasPropertyFilter;

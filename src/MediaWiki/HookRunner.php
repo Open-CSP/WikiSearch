@@ -35,5 +35,3 @@ class HookRunner implements WikiSearchOnLoadFrontend {
 		$this->hookContainer->run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $args ] );
 	}
 }
-
-
