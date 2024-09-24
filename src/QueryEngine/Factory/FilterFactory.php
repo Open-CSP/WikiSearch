@@ -92,6 +92,10 @@ class FilterFactory {
 			return self::rangeFilterFromRange( $array["range"]["from"], $array["range"]["to"], $property_field_mapper );
 		}
 
+        if ( isset( $array["range"]["gte"] ) && isset( $array["range"]["lte"] ) ) {
+            return self::rangeFilterFromRange( $array["range"]["gte"], $array["range"]["lte"], $property_field_mapper );
+        }
+
 		if ( isset( $array["type"] ) ) {
 			if ( !is_string( $array["type"] ) ) {
 				Logger::getLogger()->debug( 'Failed to construct Filter from array: invalid "type"' );
