@@ -102,9 +102,13 @@ class PropertyRangeAggregation implements PropertyAggregation {
 	 * @inheritDoc
 	 */
 	public function toQuery(): AbstractAggregation {
+        $field = $this->property->hasKeywordSubfield() ?
+            $this->property->getKeywordField() :
+            $this->property->getPropertyField();
+
 		return new RangeAggregation(
 			$this->aggregation_name,
-			$this->property->getPropertyField(),
+			$field,
 			$this->ranges,
 			true
 		);
