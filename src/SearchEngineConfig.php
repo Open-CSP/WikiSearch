@@ -82,7 +82,7 @@ class SearchEngineConfig {
 	 * @return SearchEngineConfig|null
 	 */
 	public static function newFromDatabase( Title $page ) {
-		$database = wfGetDB( DB_MASTER );
+		$database = wfGetDB( DB_PRIMARY );
 		$page_id = $page->getArticleID();
 
 		$db_facets = $database->select(
