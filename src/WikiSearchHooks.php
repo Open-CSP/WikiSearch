@@ -67,7 +67,7 @@ abstract class WikiSearchHooks {
 		LogEntry $log_entry,
 		int $archived_revision_count
 	) {
-		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $id );
+		SearchEngineConfig::delete( wfGetDB( DB_PRIMARY ), $id );
 	}
 
 	/**
@@ -103,7 +103,7 @@ abstract class WikiSearchHooks {
 		$undid_revision_id
 	) {
 		// Delete any "searchEngineConfig"'s on this page
-		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $article->getId() );
+		SearchEngineConfig::delete( wfGetDB( DB_PRIMARY ), $article->getId() );
 
 		// Create an appropriate parser
 		$parser = MediaWikiServices::getInstance()->getParser();
