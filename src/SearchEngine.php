@@ -94,10 +94,15 @@ class SearchEngine {
 			'query' => $query
 		] );
 
-		return WikiSearchServices::getElasticsearchClientFactory()
+        $result = WikiSearchServices::getElasticsearchClientFactory()
             ->newElasticsearchClient()
-            ->search( $query )
-            ->asArray();
+            ->search( $query );
+
+        if ( is_array( $result ) ) {
+            return $result;
+        } else {
+            return $result->asArray();
+        }
 	}
 
 	/**
