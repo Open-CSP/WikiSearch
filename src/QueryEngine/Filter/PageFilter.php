@@ -9,35 +9,17 @@ use WikiSearch\Logger;
 use WikiSearch\SMW\WikiPageObjectIdLookup;
 
 /**
- * Class PageFilter
- *
- * Filters out everything except for the specified page.
- *
- * @package WikiSearch\QueryEngine\Filter
+ * Filters out everything except for the specified title.
  */
 class PageFilter extends AbstractFilter {
-	/**
-	 * @var Title
-	 */
-	private Title $title;
-
 	/**
 	 * PageFilter constructor.
 	 *
 	 * @param Title $title
 	 */
-	public function __construct( Title $title ) {
-		$this->title = $title;
-	}
-
-	/**
-	 * Sets the page to filter on.
-	 *
-	 * @param Title $title
-	 */
-	public function setPage( Title $title ): void {
-		$this->title = $title;
-	}
+	public function __construct(
+        private Title $title
+    ) {}
 
 	/**
 	 * Converts the object to a BuilderInterface for use in the QueryEngine.
@@ -45,36 +27,13 @@ class PageFilter extends AbstractFilter {
 	 * @return BoolQuery
 	 */
 	public function filterToQuery(): BoolQuery {
-		$object_id = WikiPageObjectIdLookup::getObjectIdForTitle( $this->title );
+		$objectId = WikiPageObjectIdLookup::getObjectIdForTitle( $this->title ) ?? -1;
 
-		if ( $object_id === null ) {
-			$object_id = -1;
+		$termQuery = new TermQuery( "_id", $objectId );
 
-			Logger::getLogger()->alert( 'Failed to lookup object ID for Title {title}, falling back to -1', [
-				'title' => $this->title->getFullText()
-			] );
-		}
+		$boolQuery = new BoolQuery();
+		$boolQuery->add( $termQuery, BoolQuery::FILTER );
 
-		$term_query = new TermQuery(
-			"_id",
-			$object_id
-		);
-
-		$bool_query = new BoolQuery();
-		$bool_query->add( $term_query, BoolQuery::FILTER );
-
-		/*
-		 * Example of such a query:
-		 *
-		 *  "bool": {
-		 *      "filter": {
-		 *          "term": {
-		 *              "P:0.wpgID": 0
-		 *          }
-		 *      }
-		 *  }
-		 */
-
-		return $bool_query;
+		return $boolQuery;
 	}
 }

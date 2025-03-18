@@ -6,23 +6,16 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
 use WikiSearch\SMW\PropertyFieldMapper;
 
-/**
- * Class SearchTermFilter
- *
- * @package WikiSearch\QueryEngine\Filter
- */
 class SearchTermFilter extends AbstractFilter {
-	use QueryPreparationTrait;
-
 	/**
 	 * @var PropertyFieldMapper[]
 	 */
-	private array $chained_properties = [];
+	private array $chainedFields = [];
 
 	/**
 	 * @var string[]|PropertyFieldMapper[]
 	 */
-	private array $property_fields = [
+	private array $fields = [
 		"subject.title.search^8",
 		"subject.title^8",
 		"text_copy.search^5",
@@ -34,78 +27,57 @@ class SearchTermFilter extends AbstractFilter {
 	];
 
 	/**
-	 * @var string The search term to filter on
+	 * @param string $searchTerm The search term to filter on
+	 * @param (string|PropertyFieldMapper)[] $properties
+	 * @param string $defaultOperator The default operator to use
 	 */
-	private string $search_term;
+	public function __construct( private string $searchTerm, ?array $properties = null, private string $defaultOperator = "or" ) {
+        if ( $properties === null ) {
+            return;
+        }
 
-	/**
-	 * @var string The default operator to use
-	 */
-	private string $default_operator;
+        $this->fields = [];
+        foreach ( $properties as $field ) {
+            if ( is_string( $field ) ) {
+                $field = new PropertyFieldMapper( $field );
+            }
 
-	/**
-	 * SearchTermFilter constructor.
-	 *
-	 * @param string $search_term
-	 * @param PropertyFieldMapper[] $properties
-	 * @param string $default_operator
-	 */
-	public function __construct( string $search_term, array $properties = [], string $default_operator = "or" ) {
-		$this->search_term = $search_term;
-		$this->default_operator = $default_operator;
-
-		if ( $properties !== [] ) {
-			$this->property_fields = [];
-			foreach ( $properties as $mapper ) {
-				if ( $mapper->isChained() ) {
-					// Chained properties need to be handled differently, see filterToQuery
-					$this->chained_properties[] = $mapper;
-				} else {
-					$this->property_fields[] = $mapper->getWeightedPropertyField();
-
-					if ( $mapper->hasSearchSubfield() ) {
-						$this->property_fields[] = $mapper->getWeightedSearchField();
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Sets the search term to filter on.
-	 *
-	 * @param string $search_term
-	 */
-	public function setSearchTerm( string $search_term ): void {
-		$this->search_term = $search_term;
+            if ( $field->isChained() ) {
+                $this->chainedFields[] = $field;
+            } else {
+                $this->fields[] = $field->getWeightedPropertyField();
+                if ( $field->hasSearchSubfield() ) {
+                    $this->fields[] = $field->getWeightedSearchField();
+                }
+            }
+        }
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function filterToQuery(): BoolQuery {
-		$search_term = $this->prepareQuery( $this->search_term );
-		$bool_query = new BoolQuery();
+		$boolQuery = new BoolQuery();
 
-		foreach ( $this->chained_properties as $property ) {
+		foreach ($this->chainedFields as $property ) {
 			// Construct a new chained sub query for each chained property and add it to the bool query
-			$filter = new ChainedPropertyFilter( new PropertyTextFilter( $property, $search_term, $this->default_operator ) );
-			$bool_query->add( $filter->toQuery(), BoolQuery::SHOULD );
+			$filter = new ChainedPropertyFilter( new PropertyTextFilter( $property, $this->searchTerm, $this->defaultOperator ) );
+			$boolQuery->add( $filter->toQuery(), BoolQuery::SHOULD );
 		}
 
-		if ( $this->property_fields !== [] ) {
-			$query_string_query = new QueryStringQuery( $search_term );
-			$query_string_query->setParameters( [
-				"fields" => $this->property_fields,
-				"default_operator" => $this->default_operator,
+		if ( $this->fields !== [] ) {
+			$queryStringQuery = new QueryStringQuery( $this->searchTerm );
+			$queryStringQuery->setParameters( [
+				"fields" => $this->fields,
+				"default_operator" => $this->defaultOperator,
 				"analyze_wildcard" => true,
 				"tie_breaker" => 1,
 				"lenient" => true
 			] );
 
-			$bool_query->add( $query_string_query, BoolQuery::SHOULD );
+			$boolQuery->add( $queryStringQuery, BoolQuery::SHOULD );
 		}
 
-		return $bool_query;
+		return $boolQuery;
 	}
 }

@@ -13,80 +13,49 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch\QueryEngine\Highlighter
  */
 class FragmentHighlighter implements Highlighter {
-	/**
-	 * @var array The fields to apply the highlight to
-	 */
-	private array $fields;
+    public const HIGHLIGHT_TAG_LEFT = '{@@_HIGHLIGHT_@@';
+    public const HIGHLIGHT_TAG_RIGHT = '@@_HIGHLIGHT_@@}';
 
-	/**
-	 * @var int The maximum number of words to return
-	 */
-	private int $limit;
-
-	/**
-	 * @var int The fragment size
-	 */
-	private int $size;
-
-	/**
-	 * @var string
-	 */
-	private string $tag_left;
-
-	/**
-	 * @var string
-	 */
-	private string $tag_right;
-
-	/**
-	 * @var string|null
-	 */
-	private ?string $highlighter_type;
-
-	/**
-	 * FieldHighlighter constructor.
-	 *
-	 * @param PropertyFieldMapper[] $properties The fields to apply the highlight to
-	 * @param int|null $size The fragment size
-	 * @param int $limit The maximum number of words to return
-	 */
+    /**
+     * @param PropertyFieldMapper[] $fields The fields to apply the highlight to
+     * @param string $type The type of the highlighter, should be one of the Highlighter::TYPE_* constants
+     * @param int $size The fragment size
+     * @param int $limit The maximum number of words to return
+     */
 	public function __construct(
-		array $properties,
-		?string $highlighter_type = null,
-		int $size = 1,
-		int $limit = 128
-	) {
-		$this->highlighter_type = $highlighter_type;
-		$this->size = $size;
-		$this->limit = $limit;
-		$this->fields = $properties;
-	}
+		private array $fields,
+        private string $type = self::TYPE_UNIFIED,
+        private int $size = 1,
+        private int $limit = 128
+	) {}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function toQuery(): Highlight {
 		$highlight = new Highlight();
-		$highlight->setTags( [ '{@@_HIGHLIGHT_@@' ], [ "@@_HIGHLIGHT_@@}" ] );
+		$highlight->setTags( [ self::HIGHLIGHT_TAG_LEFT ], [ self::HIGHLIGHT_TAG_RIGHT ] );
 
-		$common_field_settings = [
+		$commonFieldSettings = [
 			"fragment_size" => $this->size,
-			"number_of_fragments" => $this->limit
+			"number_of_fragments" => $this->limit,
+            "type" => $this->type
 		];
 
 		foreach ( $this->fields as $field ) {
-			$field_settings = $common_field_settings;
+			$fieldSettings = $commonFieldSettings;
 
-			if ( $this->highlighter_type === "fvh" && $field->supportsFVH() ) {
-				// TODO: Support different highlighter types
-				$field_settings['type'] = $this->highlighter_type;
+			if ( $this->type === self::TYPE_FVH && !$field->supportsFVH() ) {
+                // Fast vector highlighting is not always supported. If FVH is enabled, but it is not supported,
+                // revert back to "unified".
+                $fieldSettings["type"] = self::TYPE_UNIFIED;
 			}
 
 			if ( $field->hasSearchSubfield() ) {
-				$field_settings['matched_fields'] = [ $field->getPropertyField(), $field->getSearchField() ];
+				$fieldSettings['matched_fields'] = [ $field->getPropertyField(), $field->getSearchField() ];
 			}
 
-			$highlight->addField( $field->getPropertyField(), $field_settings );
+			$highlight->addField( $field->getPropertyField(), $fieldSettings );
 		}
 
 		return $highlight;

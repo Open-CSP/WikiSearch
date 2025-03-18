@@ -23,17 +23,19 @@ namespace WikiSearch\API;
 
 use ApiBase;
 use ApiUsageException;
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\ClientBuilder;
 use MWException;
 use Title;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
 use WikiSearch\SearchEngineException;
 use WikiSearch\SearchEngineFactory;
 use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Class ApiQueryWikiSearchCombobox
@@ -41,6 +43,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
+    use QueryPreparationTrait;
+
 	private const AGGREGATION_NAME = 'combobox_values';
 
 	/**
@@ -56,10 +60,10 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		$engine_config = $this->getEngineConfigFromTitle( $title );
 		$engine = $this->getQueryEngine( $engine_config );
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $engine->toArray() );
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $engine->toQuery() )
+            ->asArray();
 
 		$this->getResult()->addValue(
 			null,
@@ -122,7 +126,7 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 		)->getQueryEngine();
 
 		$engine->addConstantScoreFilter( new SearchTermFilter(
-			$this->getParameter( "term" ),
+			$this->prepareQuery( $this->getParameter( "term" ) ),
 			[ new PropertyFieldMapper( $this->getParameter( "property" ) ) ]
 		) );
 		$engine->addAggregation(

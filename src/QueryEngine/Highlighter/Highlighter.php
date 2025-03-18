@@ -13,6 +13,10 @@ use WikiSearch\QueryEngine\QueryConvertable;
  * @package WikiSearch\QueryEngine\Highlighter
  */
 interface Highlighter extends QueryConvertable {
+    public const TYPE_UNIFIED = 'unified';
+    public const TYPE_PLAIN = 'plain';
+    public const TYPE_FVH = 'fvh';
+
 	/**
 	 * @inheritDoc
 	 */
