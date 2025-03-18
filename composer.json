@@ -10,7 +10,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">= 8.0 < 8.4",
-        "paquettg/php-html-parser": ">=3.0"
+        "voku/simple_html_dom": "^4.8"
     },
     "require-dev": {
         "mediawiki/mediawiki-codesniffer": "34.0.0",
