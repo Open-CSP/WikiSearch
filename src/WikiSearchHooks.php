@@ -67,7 +67,7 @@ abstract class WikiSearchHooks {
 		LogEntry $log_entry,
 		int $archived_revision_count
 	) {
-		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $id );
+        SearchEngineConfig::delete( self::getPrimaryDB(), $id );
 	}
 
 	/**
@@ -103,7 +103,7 @@ abstract class WikiSearchHooks {
 		$undid_revision_id
 	) {
 		// Delete any "searchEngineConfig"'s on this page
-		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $article->getId() );
+		SearchEngineConfig::delete( self::getPrimaryDB(), $article->getId() );
 
 		// Create an appropriate parser
 		$parser = MediaWikiServices::getInstance()->getParser();
@@ -297,9 +297,7 @@ abstract class WikiSearchHooks {
 			return self::error( "wikisearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
 		}
 
-		$database = wfGetDB( DB_PRIMARY );
-
-		$config->update( $database );
+		$config->update( self::getPrimaryDB() );
 
 		return "";
 	}
@@ -342,4 +340,16 @@ abstract class WikiSearchHooks {
 			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->text()
 		);
 	}
+
+    private static function getPrimaryDB() {
+        if (defined('DB_PRIMARY')) {
+            $ref = DB_PRIMARY;
+        } else {
+            $ref = DB_MASTER;
+        }
+
+        return MediaWikiServices::getInstance()
+            ->getDBLoadBalancer()
+            ->getMaintenanceConnectionRef( $ref );
+    }
 }

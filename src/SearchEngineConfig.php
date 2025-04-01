@@ -21,6 +21,7 @@
 
 namespace WikiSearch;
 
+use MediaWiki\MediaWikiServices;
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
 use WikiSearch\QueryEngine\Sort\PropertySort;
@@ -84,7 +85,16 @@ class SearchEngineConfig {
 	 * @return SearchEngineConfig|null
 	 */
 	public static function newFromDatabase( Title $page ) {
-		$database = wfGetDB( DB_MASTER );
+        if ( defined( 'DB_PRIMARY' ) ) {
+            $database = MediaWikiServices::getInstance()
+                ->getDBLoadBalancer()
+                ->getMaintenanceConnectionRef( DB_PRIMARY );
+        } else {
+            $database = MediaWikiServices::getInstance()
+                ->getDBLoadBalancer()
+                ->getMaintenanceConnectionRef( DB_MASTER );
+        }
+
 		$page_id = $page->getArticleID();
 
 		$db_facets = $database->select(
