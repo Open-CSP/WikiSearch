@@ -25,7 +25,7 @@ use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Exception;
-use Hooks;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
@@ -88,7 +88,7 @@ class SearchEngine {
 	 */
 	public function doQuery( array $query ): array {
 		// Allow other extensions to modify the query
-		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query ] );
+        HookContainer::run( "WikiSearchBeforeElasticQuery", [ &$query ] );
 
 		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
@@ -154,7 +154,7 @@ class SearchEngine {
 		$properties = $this->config->getResultProperties();
 
 		// Allow other extensions to modify the result
-		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
+        HookContainer::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
 
 		return $results;
 	}
