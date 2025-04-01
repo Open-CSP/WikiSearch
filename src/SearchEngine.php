@@ -88,7 +88,8 @@ class SearchEngine {
 	 */
 	public function doQuery( array $query ): array {
 		// Allow other extensions to modify the query
-        HookContainer::run( "WikiSearchBeforeElasticQuery", [ &$query ] );
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( "WikiSearchBeforeElasticQuery", [ &$query ] );
 
 		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
@@ -154,7 +155,8 @@ class SearchEngine {
 		$properties = $this->config->getResultProperties();
 
 		// Allow other extensions to modify the result
-        HookContainer::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
 
 		return $results;
 	}

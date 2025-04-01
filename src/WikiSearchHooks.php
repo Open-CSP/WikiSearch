@@ -324,7 +324,8 @@ abstract class WikiSearchHooks {
 
 		$result = self::error( "wikisearch-missing-frontend" );
 
-		HookContainer::run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
 
 		return $result;
 	}
