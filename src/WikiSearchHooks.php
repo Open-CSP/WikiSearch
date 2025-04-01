@@ -253,7 +253,7 @@ abstract class WikiSearchHooks {
 			return;
 		}
 
-		$page = WikiPage::factory( $subjectTitle );
+        $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $subjectTitle );
 
 		if ( $page === null ) {
 			return;
