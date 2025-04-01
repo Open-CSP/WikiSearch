@@ -25,6 +25,7 @@ use Content;
 use ContentHandler;
 use DatabaseUpdater;
 use LogEntry;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MWException;
@@ -323,7 +324,7 @@ abstract class WikiSearchHooks {
 
 		$result = self::error( "wikisearch-missing-frontend" );
 
-		\Hooks::run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
+		HookContainer::run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
 
 		return $result;
 	}
