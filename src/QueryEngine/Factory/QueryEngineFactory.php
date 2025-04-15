@@ -71,42 +71,46 @@ class QueryEngineFactory {
 	 *
 	 * @return array
 	 */
-	private static function getElasticSearchHosts(): array {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
+    private static function getElasticSearchHosts(): array {
+        $config = MediaWikiServices::getInstance()->getMainConfig();
 
-		try {
-			$hosts = $config->get( "WikiSearchElasticSearchHosts" );
-		} catch ( \ConfigException $e ) {
-			$hosts = [];
-		}
+        $hosts = $config->get( 'WikiSearchElasticSearchHosts' );
+        $credentials = $config->get( 'WikiSearchElasticSearchCredentials' );
 
-		if ( $hosts !== [] ) {
-			return $hosts;
-		}
+        $transformedHosts = [];
 
-		// phpcs:ignore
-		global $smwgElasticsearchEndpoints;
+        foreach ( $hosts as $hostEntry ) {
+            if ( is_string( $hostEntry ) ) {
+                // Parse an entry like "es01.juggel.dev:9200"
+                $parts = explode(':', $hostEntry, 2);
+                $host = $parts[0];
+                $port = $parts[1] ?? 9200;
+                $transformedHosts[] = [
+                    'host'   => $host,
+                    'port'   => (int)$port,
+                    'scheme' => 'http',
+                    'user'   => $credentials['user'] ?? '',
+                    'pass'   => $credentials['pass'] ?? '',
+                ];
+            } elseif ( is_array( $hostEntry ) ) {
+                // Merge defaults and credentials into the host array.
+                $transformedHosts[] = array_merge(
+                    [
+                        'scheme' => 'http',
+                        'port'   => 9200,
+                    ],
+                    $hostEntry,
+                    isset( $credentials )
+                        ? [
+                        'user' => $credentials['user'],
+                        'pass' => $credentials['pass'],
+                    ]
+                        : []
+                );
+            }
+        }
 
-		if ( !isset( $smwgElasticsearchEndpoints ) || $smwgElasticsearchEndpoints === [] ) {
-			Logger::getLogger()->alert( 'Missing or empty $smwgElasticsearchEndpoints, fallback to "localhost:9200"' );
+        return $transformedHosts;
+    }
 
-			return [ "localhost:9200" ];
-		}
-
-		// @see https://doc.semantic-mediawiki.org/md_content_extensions_SemanticMediaWiki_src_Elastic_docs_config.html
-		foreach ( $smwgElasticsearchEndpoints as $endpoint ) {
-			if ( is_string( $endpoint ) ) {
-				$hosts[] = $endpoint;
-				continue;
-			}
-
-			$scheme = $endpoint["scheme"];
-			$host = $endpoint["host"];
-			$port = $endpoint["port"];
-
-			$hosts[] = implode( ":", [ $scheme, "//$host", $port ] );
-		}
-
-		return $hosts;
-	}
 }
