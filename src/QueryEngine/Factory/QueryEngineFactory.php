@@ -72,20 +72,25 @@ class QueryEngineFactory {
 	 * @return array
 	 */
     private static function getElasticSearchHosts(): array {
-        global $wgWikiSearchElasticSearchHosts, $wgWikiSearchElasticSearchCredentials;
+        $config = MediaWikiServices::getInstance()->getMainConfig();
+
+        $hosts = $config->get( 'WikiSearchElasticSearchHosts' );
+        $credentials = $config->get( 'WikiSearchElasticSearchCredentials' );
 
         $transformedHosts = [];
 
-        foreach ( $wgWikiSearchElasticSearchHosts as $hostEntry ) {
+        foreach ( $hosts as $hostEntry ) {
             if ( is_string( $hostEntry ) ) {
                 // Parse an entry like "es01.juggel.dev:9200"
-                list($host, $port) = array_pad( explode( ":", $hostEntry, 2 ), 2, 9200 );
+                $parts = explode(':', $hostEntry, 2);
+                $host = $parts[0];
+                $port = $parts[1] ?? 9200;
                 $transformedHosts[] = [
                     'host'   => $host,
                     'port'   => (int)$port,
                     'scheme' => 'http',
-                    'user'   => $wgWikiSearchElasticSearchCredentials['user'] ?? '',
-                    'pass'   => $wgWikiSearchElasticSearchCredentials['pass'] ?? '',
+                    'user'   => $credentials['user'] ?? '',
+                    'pass'   => $credentials['pass'] ?? '',
                 ];
             } elseif ( is_array( $hostEntry ) ) {
                 // Merge defaults and credentials into the host array.
@@ -95,10 +100,10 @@ class QueryEngineFactory {
                         'port'   => 9200,
                     ],
                     $hostEntry,
-                    isset( $wgWikiSearchElasticSearchCredentials )
+                    isset( $credentials )
                         ? [
-                        'user' => $wgWikiSearchElasticSearchCredentials['user'],
-                        'pass' => $wgWikiSearchElasticSearchCredentials['pass'],
+                        'user' => $credentials['user'],
+                        'pass' => $credentials['pass'],
                     ]
                         : []
                 );
