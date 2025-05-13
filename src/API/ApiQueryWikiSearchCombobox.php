@@ -62,8 +62,11 @@ class ApiQueryWikiSearchCombobox extends ApiQueryWikiSearchBase {
 
 		$results = WikiSearchServices::getElasticsearchClientFactory()
             ->newElasticsearchClient()
-			->search( $engine->toQuery() )
-            ->asArray();
+			->search( $engine->toQuery() );
+
+        if ( !is_array( $results ) ) {
+            $results = $results->asArray();
+        }
 
 		$this->getResult()->addValue(
 			null,

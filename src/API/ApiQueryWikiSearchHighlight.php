@@ -87,8 +87,11 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 
 		$results = WikiSearchServices::getElasticsearchClientFactory()
             ->newElasticsearchClient()
-			->search( $query_engine->toQuery() )
-            ->asArray();
+			->search( $query_engine->toQuery() );
+
+        if ( !is_array( $results ) ) {
+            $results = $results->asArray();
+        }
 
 		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $results ) );
 	}
