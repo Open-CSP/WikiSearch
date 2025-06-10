@@ -5,6 +5,7 @@ namespace WikiSearch;
 use WikiSearch\QueryEngine\Factory\AggregationFactory;
 use WikiSearch\QueryEngine\Factory\FilterFactory;
 use WikiSearch\QueryEngine\Factory\SortFactory;
+use WikiSearch\QueryEngine\Sort\RelevanceSort;
 
 class SearchEngineFactory {
 	/**

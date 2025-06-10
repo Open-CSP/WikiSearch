@@ -19,407 +19,6 @@ ElasticSearch query that was used to perform the search.
 | `aggregations` | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
 | `sorting`      | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
 
-### Example request
-
-Example request (cURL):
-```
-curl https://wiki.example.org/api.php \
--d action=query \
--d format=json \
--d meta=WikiSearch \
--d filter=[{"value":"5","key":"Average rating","range":{"gte":5,"lte":6}}] \
--d from=0 \
--d limit=10 \
--d pageid=698 \
--d aggregations=[
-    {"type":"range","ranges":[
-        {"from":1,"to":6,"key":"1"},
-        {"from":2,"to":6,"key":"2"},
-        {"from":3,"to":6,"key":"3"},
-        {"from":4,"to":6,"key":"4"},
-        {"from":5,"to":6,"key":"5"}
-    ],"property":"Average rating"}
-]
-```
-
-Example response:
-```
-{
-    "batchcomplete": "",
-    "result": {
-        "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
-        "total": 1,
-        "aggs": {
-            "Average rating": {
-                "meta": [],
-                "doc_count": 1,
-                "Average rating": {
-                    "buckets": {
-                        "1": {
-                            "from": 1,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "2": {
-                            "from": 2,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "3": {
-                            "from": 3,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "4": {
-                            "from": 4,
-                            "to": 6,
-                            "doc_count": 1
-                        },
-                        "5": {
-                            "from": 5,
-                            "to": 6,
-                            "doc_count": 1
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-### Parsing the response
-
-This section assumes you have successfully made a request to the API using PHP and have stored the raw API result in the
-variable `$response`.
-
-The `$response` object is a JSON encoded string, and needs to be decoded before it can be used:
-
-```php
-$response = json_decode($response, true);
-```
-
-After having decoded the `$response` object, the response usually contains two keys (three if debug mode is enabled):
-
-| Field           | Type     | Description                                                                                                       |
-|-----------------|----------|-------------------------------------------------------------------------------------------------------------------|
-| `batchcomplete` | `string` | Added by MediaWiki and not relevant for API users.                                                                |
-| `result`        | `object` | Contains the result object of the performed search.                                                               |
-| `query`         | `object` | The raw ElasticSearch query used to perform this search. This field is only available when debug mode is enabled. |
-
-Generally, we are only interested in the API result object, so we can create a new variable only containing that field:
-
-```php
-$result = $response["result"];
-```
-
-This `$result` field will look something like this:
-
-```json
-{
-    "hits": "[<TRUNCATED, SEE BELOW FOR PARSING>]",
-    "total": 1,
-    "aggs": {
-        "Average rating": {
-            "meta": [],
-            "doc_count": 1,
-            "Average rating": {
-                "buckets": {
-                    "1": {
-                        "from": 1,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "2": {
-                        "from": 2,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "3": {
-                        "from": 3,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "4": {
-                        "from": 4,
-                        "to": 6,
-                        "doc_count": 1
-                    },
-                    "5": {
-                        "from": 5,
-                        "to": 6,
-                        "doc_count": 1
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-#### The `hits` field
-
-The `hits` field contains a JSON-encoded string of the ElasticSearch search results. This field needs to be decoded
-using `json_decode` before it can be used. The field directly corresponds to the `hits.hits` field from the
-ElasticSearch response. See the
-[ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/master/search-your-data.html#run-an-es-search)
-for very detailed documentation about what this field looks like.
-
-To get the associated page name of any search result, the `subject.namespacename` and `subject.title` hit-field in the 
-`hits` field may be concatenated using a colon, like so:
-
-```php
-$hits = json_decode($result["hits"], true);
-
-foreach ($hits as $hit) {
-    $namespace_name = $hit["subject"]["namespacename"];
-    $page_title = $hit["subject"]["title"];
-
-    $page_name = sprintf("%s:%s", $namespace_name, $page_title);
-
-    echo $page_name;
-}
-```
-
-The `subject.namespacename` hit-field contains the name of the namespace in which the search result lives, and the `subject.title` hit-field contains the name of the page that matched the search (without a namespace prefix). To get the full URL for this page, you can prepend `http://<wikiurl>/index.php/` to the page name.
-
-The `hits` field also contains the generated highlighted snippets, if they are available. These can be accessed through the `highlight` hit-field, like so:
-
-```php
-$hits = json_decode($result["hits"], true);
-
-foreach ($hits as $hit) {
-    $highlights = $hit["highlight"];
-    
-    foreach ($highlights as $highlight) {
-        // $highlight is an array of highlighted snippets
-
-        $highlight_string = implode("", $highlight);
-    
-        echo $highlight_string;
-    }
-}
-```
-
-See also the [ElasticSearch Highlighting documentation](https://www.elastic.co/guide/en/elasticsearch/reference/7.12/highlighting.html).
-
-#### The `aggs` field
-
-The `aggs` field directly corresponds to the `aggregations` field from the ElasticSearch response. See the [ElasticSearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html) for further details.
-
-#### The `total` field
-
-The `total` field contains the total number of results found by ElasticSearch. This field is not influenced by the `limit` and always displays the total number of results available, regardsless of how many were actually returned.
-
-### Filters syntax
-
-The `filter` parameter takes a list of objects. These objects have the following form:
-
-#### PropertyRangeFilter
-
-This filter only returns pages that have the specified property with a value in the specified range.
-
-```
-{
-    "key": "Age",
-    "range": {
-        "gte": 0,
-        "lt": 100
-    }
-}
-```
-
-The above filter only includes pages where property `Age` has a value that is greater than
-or equal to `0`, but strictly less than `100`.
-
-The `range` parameter takes an object that allows the following properties:
-
-- `gte`: Greater-than or equal to
-- `gt`: Strictly greater-than
-- `lte`: Less-than or equal to
-- `lt`: Strictly less-than
-
-#### PropertyValueFilter
-
-This filter only returns pages that have the specified property with the specified value.
-
-```
-{
-    "key": "Class",
-    "value": "Manual"
-}
-```
-
-The above filter only includes pages where the property `Class` has the value `Manual`. The `value` may
-by any of the following data types:
-
-* string
-* boolean
-* integer
-* float
-* double
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-range-query.html
-
-#### PropertyValuesFilter
-
-This filter only returns pages that have the specified property with any of the specified values.
-
-```
-{
-    "key": "Class",
-    "value": ["foo", "bar"]
-}
-```
-
-The above filter only includes pages where the property `Class` has the value `foo` or `bar`.
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/6.8//query-dsl-terms-query.html
-
-#### HasPropertyFilter
-
-This filter only returns pages that have the specified property with any value.
-
-```
-{
-    "key": "Class",
-    "value": "+"
-}
-```
-
-The above filter only includes pages that have the property `Class`. It does not take the value of the property into account.
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
-
-#### PropertyTextFilter
-
-This filter only returns pages that have the specified property with a value that matches the given search query string.
-
-```
-{
-    "key": "Class",
-    "value": "Foo | (Bar + Quz)",
-    "type": "query"
-}
-```
-
-The above filter executes the given query and only includes pages that matched the executed query. The query syntax is identical to the simple query syntax used by ElasticSearch.
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
-
-#### PropertyFuzzyValueFilter
-
-This filter only returns pages that have the specified property with approximately the specified value.
-
-```
-{
-    "key": "Class",
-    "value": "Manual",
-    "type": "fuzzy"
-}
-```
-
-The above filter only includes pages where the property `Class` has a value similar to `Manual`. The `value` must be
-a string.
-
-Additionally, the maximum edit distance can be specified through the `fuzziness` parameter:
-
-```
-{
-    "key": "Class",
-    "value": "Manual",
-    "type": "fuzzy",
-    "fuzziness": 6
-}
-```
-
-`fuzziness` must either be the string "AUTO" to automatically determine the appropriate fuzziness (default), or
-a positive integer specifying the maximum edit distance.
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/query-dsl-fuzzy-query.html
-
-### Aggregations syntax
-
-The `aggregations` parameter takes a list of objects. These objects have the following form:
-
-#### PropertyRangeAggregation
-
-```
-{
-    "type": "range",
-    "ranges": [
-        { "to": 50 },
-        { "from": 50, "to": 100 },
-        { "from": 100 }
-    ],
-    "property": "Price",
-    "name": "Prices" # Optional, property name when empty
-}
-```
-
-> **Note:** The `from` parameter is inclusive, and the `to` parameter is
-> exclusive. This means that for an aggregation from (and including) `1` up to and
-> including `5`, the `from` and `to` parameters should be `1` and `6` (!) respectively.
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-range-aggregation.html
-
-#### PropertyAggregation
-
-```
-{
-    "type": "property",
-    "property": "Genre",
-    "name": "Genres" # Optional, property name when empty
-}
-```
-
-See also: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-aggregations-bucket-terms-aggregation.html
-
-### Sortings syntax
-
-The `sortings` parameter takes a list of objects. These objects have the following form:
-
-#### PropertySort
-
-```
-{
-    "type": "property",
-    "property": "Genre",
-    "order": "asc" # Optional, undefined when empty
-}
-```
-
-The above filter sorts the results based on the value of the property `Genre` in an `asc`ending order. It is also possible to sort in a `desc`ending order.
-
-> **Note:** Sorting on a property that does not exist will result in an error.
-
-### Highlight API
-
-> **Note:** This API is mostly for internal use.
-
-The highlight API has the following properties:
-
-* `query`: The query to generate highlighted terms from
-* `properties`: The properties over which the highlights need to be calculated
-* `page_id`: The page ID of the page on which the highlights need to be calculated
-* `limit`: The number of highlighted terms to calculate; this does not always correspond directly with the number of terms returned, since duplicates are removed after the query to ElasticSearch
-* `size`: The (approximate) size of snippets to generate, leave blank to highlight individual words
-
-## Chained properties
-
-WikiSearch provides support for creating filters with chained properties. Chained properties can be used in any filter. They can also be used as a search term property.
-
-```
-{
-    "key": "Subpage.Foobar",
-    "value": "+"
-}
-```
-
-For instance, the above filter matches any page for which the value of the property "Subpage" is a page that contains the property "Foobar".
-
-See also: https://www.semantic-mediawiki.org/wiki/Help:Subqueries_and_property_chains
-
 ## Special properties
 
 There are a number of special properties defined by Semantic MediaWiki that are worth pointing out. These properties act just like regular properties, but do not appear in Special:Browse.
@@ -509,20 +108,20 @@ To enable debug mode, set `$wgWikiSearchEnableDebugMode` to `true`.
 
 WikiSearch defines two parser functions.
 
-### `#WikiSearchConfig` (case-sensitive)
+### `#wikisearchconfig`
 
-The `#WikiSearchConfig` parser function is used to set several configuration variables that cannot be passed to the API for security
+The `#wikisearchconfig` parser function is used to set several configuration variables that cannot be passed to the API for security
 reasons. It sets the search condition for that page, the list of facet properties, and the list of result properties.
 
 ```
-{{#WikiSearchConfig:
+{{#wikisearchconfig:
   |<facet property>
   |?<result property>
 }}
 ```
 
 ```
-{{#WikiSearchConfig:
+{{#wikisearchconfig:
   |Version
   |Tag
   |Space
@@ -531,7 +130,8 @@ reasons. It sets the search condition for that page, the list of facet propertie
 }}
 ```
 
-Note: Only one call to `#WikiSearchConfig` is allowed per page. Multiple calls will result in unexpected behaviour.
+> [!CAUTION]
+> Only one call to `#wikisearchconfig` is allowed per page. Multiple calls will result in unexpected behaviour.
 
 #### Search parameters
 
@@ -573,27 +173,19 @@ of a regular filter. This parameter takes a comma-separated list of property nam
 will be added as a post filter. The difference between post filters and regular filters is explained [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-post-filter.html).
 This configuration parameter is especially useful when you have disjunct checkbox properties.
 
-### `#WikiSearchFrontend` (case-sensitive)
+### `#wikisearchfrontend` (case-sensitive)
 
-The `#WikiSearchFrontend` parser function is used to load the frontend. The parameters and return value of this parser function
+The `#wikisearchfrontend` parser function is used to load the frontend. The parameters and return value of this parser function
 depend completely on the frontend.
 
 ## Installation
 
-* Download and place the file(s) in a directory called WikiSearch in your extensions/ folder.
-* Add the following code at the bottom of your LocalSettings.php:
-  * wfLoadExtension( 'WikiSearch' );
+* Download and place the file(s) in a directory called `WikiSearch` in your `extensions/` folder.
+* Add the following code at the bottom of your `LocalSettings.php`:
+  * `wfLoadExtension( 'WikiSearch' );`
 * Run the update script which will automatically create the necessary database tables that this extension needs.
-* Run Composer.
-* Navigate to Special:Version on your wiki to verify that the extension is successfully installed.
-
-## Copyright
-
-Faceted search for MediaWiki.
-Copyright (C) 2021- Marijn van Wezel, Robis Koopmans
-
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+* Add the following dependencies to your `composer.local.json`:
+  * [`elasticsearch/elasticsearch`](https://packagist.org/packages/ongr/elasticsearch-dsl), with a version constraint matching your ElasticSearch version.
+  * [`handcraftedinthealps/elasticsearch-dsl`](https://packagist.org/packages/handcraftedinthealps/elasticsearch-dsl), with a version constraint matching your ElasticSearch version
+* Run `composer update --no-dev` in the root of your MediaWiki installation.
+* Navigate to `Special:Version` on your wiki to verify that the extension is successfully installed.

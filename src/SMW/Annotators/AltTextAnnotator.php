@@ -5,10 +5,10 @@ namespace WikiSearch\SMW\Annotators;
 use Content;
 use Exception;
 use ParserOutput;
-use PHPHtmlParser\Dom;
 use SMW\DIProperty;
 use SMW\SemanticData;
 use SMWDIBlob;
+use voku\helper\HtmlDomParser;
 
 /**
  * This annotator contains information about images "alt" attributes.
@@ -64,10 +64,9 @@ class AltTextAnnotator implements Annotator {
 	 */
 	private static function getAltTexts( string $html ): array {
 		// Parse the DOM
-		$dom = new Dom();
+		$dom = HtmlDomParser::str_get_html( $html );
 
 		try {
-			$dom->loadStr( $html );
 			$imgElements = $dom->find( 'img' );
 		} catch ( Exception $exception ) {
 			return [];

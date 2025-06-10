@@ -21,12 +21,15 @@
 
 namespace WikiSearch;
 
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Client;
+use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Exception;
-use Hooks;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
 
@@ -36,6 +39,8 @@ use WikiSearch\QueryEngine\QueryEngine;
  * @package WikiSearch
  */
 class SearchEngine {
+    use QueryPreparationTrait;
+
 	/**
 	 * @var SearchEngineConfig
 	 */
@@ -53,7 +58,7 @@ class SearchEngine {
 	 */
 	public function __construct( SearchEngineConfig $config ) {
 		$this->config = $config;
-		$this->query_engine = QueryEngineFactory::fromSearchEngineConfig( $config );
+		$this->query_engine = QueryEngineFactory::newQueryEngine( $config );
 	}
 
 	/**
@@ -78,19 +83,27 @@ class SearchEngine {
 	 * Executes the given ElasticSearch query and returns the result.
 	 *
 	 * @param array $query
-	 * @param array $hosts
 	 * @return array
 	 * @throws Exception
 	 */
-	public function doQuery( array $query, array $hosts ): array {
+	public function doQuery( array $query ): array {
 		// Allow other extensions to modify the query
-		Hooks::run( "WikiSearchBeforeElasticQuery", [ &$query, &$hosts ] );
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( "WikiSearchBeforeElasticQuery", [ &$query ] );
 
 		Logger::getLogger()->debug( 'Executing ElasticSearch query: {query}', [
 			'query' => $query
 		] );
 
-		return ClientBuilder::create()->setHosts( $hosts )->build()->search( $query );
+        $result = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+            ->search( $query );
+
+        if ( is_array( $result ) ) {
+            return $result;
+        } else {
+            return $result->asArray();
+        }
 	}
 
 	/**
@@ -100,8 +113,8 @@ class SearchEngine {
 	 */
 	public function addSearchTerm( string $search_term ) {
 		$search_term_filter = new SearchTermFilter(
-			$search_term,
-			$this->config->getSearchParameter( "search term properties" ) ?: [],
+			$this->prepareQuery( $search_term ),
+			$this->config->getSearchParameter( "search term properties" ) ?: null,
 			$this->config->getSearchParameter( "default operator" ) ?: "or"
 		);
 
@@ -116,9 +129,9 @@ class SearchEngine {
 	 * @throws Exception
 	 */
 	public function doSearch(): array {
-		$elastic_query = $this->query_engine->toArray();
+		$elastic_query = $this->query_engine->toQuery();
 
-		$results = $this->doQuery( $elastic_query, $this->query_engine->getElasticHosts() );
+		$results = $this->doQuery( $elastic_query );
 		$results = $this->applyResultTranslations( $results );
 
 		return [
@@ -142,7 +155,8 @@ class SearchEngine {
 		$properties = $this->config->getResultProperties();
 
 		// Allow other extensions to modify the result
-		Hooks::run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( "WikiSearchApplyResultTranslations", [ &$results, $template ,$properties ] );
 
 		return $results;
 	}

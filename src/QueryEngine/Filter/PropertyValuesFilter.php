@@ -9,93 +9,21 @@ use WikiSearch\Logger;
 use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
- * Class PropertyPagesFilter
- *
  * Filters pages based on whether the specified property has any of the values as its
  * value. This filter does not take property chains into account.
  *
- * @see ChainedPropertyFilter for a filter that takes property chains into account
- *
- * @package WikiSearch\QueryEngine\Filter
  * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html
  */
 class PropertyValuesFilter extends PropertyFilter {
 	/**
-	 * @var PropertyFieldMapper
+	 * @inheritDoc
+	 * @param array $values Values of the property
 	 */
-	private PropertyFieldMapper $property;
-
-	/**
-	 * @var mixed[]
-	 */
-	private array $property_values;
-
-	/**
-	 * PropertyTermsFilter constructor.
-	 *
-	 * @param PropertyFieldMapper $property The property that should match the given page IDs
-	 * @param array $property_values Values of the property
-	 */
-	public function __construct( PropertyFieldMapper $property, array $property_values ) {
-		foreach ( $property_values as $value ) {
-			if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-				Logger::getLogger()->critical(
-					'Tried to construct a PropertyValuesFilter with an invalid property value: {propertyValue}',
-					[
-						'propertyValue' => $value
-					]
-				);
-
-				throw new InvalidArgumentException(
-					'$value must be a of type boolean, string, integer, double or float'
-				);
-			}
-		}
-
-		$this->property = $property;
-		$this->property_values = $property_values;
-	}
-
-	/**
-	 * Returns the property field mapper corresponding to this filter.
-	 *
-	 * @return PropertyFieldMapper
-	 */
-	public function getProperty(): PropertyFieldMapper {
-		return $this->property;
-	}
-
-	/**
-	 * Sets the property this filter will filter on.
-	 *
-	 * @param PropertyFieldMapper $property
-	 */
-	public function setPropertyName( PropertyFieldMapper $property ): void {
-		$this->property = $property;
-	}
-
-	/**
-	 * Sets the values the given property should have.
-	 *
-	 * @param mixed[] $property_values
-	 */
-	public function setPropertyValues( array $property_values ): void {
-		foreach ( $property_values as $value ) {
-			if ( !in_array( gettype( $value ), [ "boolean", "string", "integer", "double", "float" ] ) ) {
-				Logger::getLogger()->critical(
-					'Tried to set an invalid property value: {propertyValue}',
-					[
-						'propertyValue' => $value
-					]
-				);
-
-				throw new InvalidArgumentException(
-					'$value must be a of type boolean, string, integer, double or float'
-				);
-			}
-		}
-
-		$this->property_values = $property_values;
+	public function __construct(
+        string|PropertyFieldMapper $field,
+        private array $values
+    ) {
+		parent::__construct( $field );
 	}
 
 	/**
@@ -104,18 +32,18 @@ class PropertyValuesFilter extends PropertyFilter {
 	 * @return BoolQuery
 	 */
 	public function filterToQuery(): BoolQuery {
-		$field = $this->property->hasKeywordSubfield() ?
-			$this->property->getKeywordField() :
-			$this->property->getPropertyField();
+		$field = $this->field->hasKeywordSubfield() ?
+			$this->field->getKeywordField() :
+			$this->field->getPropertyField();
 
-		$terms_query = new TermsQuery(
+		$termsQuery = new TermsQuery(
 			$field,
-			$this->property_values
+			$this->values
 		);
 
-		$bool_query = new BoolQuery();
-		$bool_query->add( $terms_query, BoolQuery::FILTER );
+		$boolQuery = new BoolQuery();
+		$boolQuery->add( $termsQuery, BoolQuery::FILTER );
 
-		return $bool_query;
+		return $boolQuery;
 	}
 }

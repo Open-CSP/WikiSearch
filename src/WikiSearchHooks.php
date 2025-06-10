@@ -25,6 +25,7 @@ use Content;
 use ContentHandler;
 use DatabaseUpdater;
 use LogEntry;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MWException;
@@ -67,7 +68,7 @@ abstract class WikiSearchHooks {
 		LogEntry $log_entry,
 		int $archived_revision_count
 	) {
-		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $id );
+        SearchEngineConfig::delete( self::getPrimaryDB(), $id );
 	}
 
 	/**
@@ -103,7 +104,7 @@ abstract class WikiSearchHooks {
 		$undid_revision_id
 	) {
 		// Delete any "searchEngineConfig"'s on this page
-		SearchEngineConfig::delete( wfGetDB( DB_MASTER ), $article->getId() );
+		SearchEngineConfig::delete( self::getPrimaryDB(), $article->getId() );
 
 		// Create an appropriate parser
 		$parser = MediaWikiServices::getInstance()->getParser();
@@ -153,8 +154,8 @@ abstract class WikiSearchHooks {
 	 */
 	public static function onParserFirstCallInit( Parser $parser ) {
 		try {
-			$parser->setFunctionHook( "WikiSearchConfig", [ self::class, "searchConfigCallback" ] );
-			$parser->setFunctionHook( "WikiSearchFrontend", [ self::class, "searchEngineFrontendCallback" ] );
+			$parser->setFunctionHook( "wikisearchconfig", [ self::class, "searchConfigCallback" ] );
+			$parser->setFunctionHook( "wikisearchfrontend", [ self::class, "searchEngineFrontendCallback" ] );
 			$parser->setFunctionHook( "prop_values", [ new PropertyValuesParserFunction(), "execute" ] );
 
 			$parser->setHook( "smwnoindex", [ new SMWNoIndexParserHook(), "execute" ] );
@@ -252,7 +253,7 @@ abstract class WikiSearchHooks {
 			return;
 		}
 
-		$page = WikiPage::factory( $subjectTitle );
+        $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $subjectTitle );
 
 		if ( $page === null ) {
 			return;
@@ -297,9 +298,7 @@ abstract class WikiSearchHooks {
 			return self::error( "wikisearch-invalid-engine-config-detailed", [ $exception->getMessage() ] );
 		}
 
-		$database = wfGetDB( DB_PRIMARY );
-
-		$config->update( $database );
+		$config->update( self::getPrimaryDB() );
 
 		return "";
 	}
@@ -325,7 +324,8 @@ abstract class WikiSearchHooks {
 
 		$result = self::error( "wikisearch-missing-frontend" );
 
-		\Hooks::run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
+        $hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+        $hookContainer->run( "WikiSearchOnLoadFrontend", [ &$result, $config, $parser, $parameters ] );
 
 		return $result;
 	}
@@ -342,4 +342,16 @@ abstract class WikiSearchHooks {
 			'span', [ 'class' => 'error' ], wfMessage( $message, $params )->text()
 		);
 	}
+
+    private static function getPrimaryDB() {
+        if (defined('DB_PRIMARY')) {
+            $ref = DB_PRIMARY;
+        } else {
+            $ref = DB_MASTER;
+        }
+
+        return MediaWikiServices::getInstance()
+            ->getDBLoadBalancer()
+            ->getMaintenanceConnectionRef( $ref );
+    }
 }

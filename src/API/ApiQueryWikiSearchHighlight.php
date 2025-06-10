@@ -23,15 +23,17 @@ namespace WikiSearch\API;
 
 use ApiBase;
 use ApiUsageException;
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\ClientBuilder;
 use MWException;
 use Title;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\PageFilter;
+use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\Highlighter\FragmentHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SMW\PropertyFieldMapper;
+use WikiSearch\WikiSearchServices;
 
 /**
  * Class ApiQueryWikiSearchHighlight
@@ -39,6 +41,8 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * @package WikiSearch
  */
 class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
+    use QueryPreparationTrait;
+
 	/**
 	 * @inheritDoc
 	 *
@@ -72,7 +76,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		}
 
 		$highlighter = new FragmentHighlighter( $properties, $highlighter_type, $size, $limit );
-		$search_term_filter = new SearchTermFilter( $query, $properties );
+		$search_term_filter = new SearchTermFilter( $this->prepareQuery( $query ), $properties ?: null );
 		$page_filter = new PageFilter( $title );
 
 		$query_engine = $this->getEngine();
@@ -81,10 +85,13 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 		$query_engine->addConstantScoreFilter( $page_filter );
 		$query_engine->addConstantScoreFilter( $search_term_filter );
 
-		$results = ClientBuilder::create()
-			->setHosts( QueryEngineFactory::fromNull()->getElasticHosts() )
-			->build()
-			->search( $query_engine->toArray() );
+		$results = WikiSearchServices::getElasticsearchClientFactory()
+            ->newElasticsearchClient()
+			->search( $query_engine->toQuery() );
+
+        if ( !is_array( $results ) ) {
+            $results = $results->asArray();
+        }
 
 		$this->getResult()->addValue( null, 'words', $this->wordsFromResult( $results ) );
 	}
@@ -127,7 +134,7 @@ class ApiQueryWikiSearchHighlight extends ApiQueryWikiSearchBase {
 	 * @return QueryEngine
 	 */
 	private function getEngine(): QueryEngine {
-		return QueryEngineFactory::fromNull();
+		return QueryEngineFactory::newQueryEngine();
 	}
 
 	/**

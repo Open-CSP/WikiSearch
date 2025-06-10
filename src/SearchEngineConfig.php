@@ -21,8 +21,10 @@
 
 namespace WikiSearch;
 
+use MediaWiki\MediaWikiServices;
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
+use WikiSearch\QueryEngine\Sort\PropertySort;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\SMW\SMWQueryProcessor;
 
@@ -41,7 +43,8 @@ class SearchEngineConfig {
 		"aggregation size" 		 =>	[ "type" => "integer" ],
 		"post filter properties" => [ "type" => "list" ],
 		"highlighter type"       => [ "type" => "string" ],
-		"result template"		 => [ "type" => "string" ]
+		"result template"		 => [ "type" => "string" ],
+		"fallback sorts"         => [ "type" => "sortlist" ],
 	];
 
 	/**
@@ -82,7 +85,16 @@ class SearchEngineConfig {
 	 * @return SearchEngineConfig|null
 	 */
 	public static function newFromDatabase( Title $page ) {
-		$database = wfGetDB( DB_MASTER );
+        if ( defined( 'DB_PRIMARY' ) ) {
+            $database = MediaWikiServices::getInstance()
+                ->getDBLoadBalancer()
+                ->getMaintenanceConnectionRef( DB_PRIMARY );
+        } else {
+            $database = MediaWikiServices::getInstance()
+                ->getDBLoadBalancer()
+                ->getMaintenanceConnectionRef( DB_MASTER );
+        }
+
 		$page_id = $page->getArticleID();
 
 		$db_facets = $database->select(
@@ -281,6 +293,40 @@ class SearchEngineConfig {
 				$search_parameter_value = array_map( function ( $property ): PropertyFieldMapper {
 					// Map the property name to its field
 					return ( new PropertyFieldMapper( $property ) );
+				}, $search_parameter_value );
+				break;
+			case "sortlist":
+				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
+				$search_parameter_value = array_filter( $search_parameter_value, fn ( string $value ): bool => !empty( $value ) );
+				$search_parameter_value = array_map( function ( $sort ): PropertySort {
+					$sortParts = explode( ".", $sort );
+
+					if ( count( $sortParts ) === 1 ) {
+						$order = null;
+					} else {
+						$maybeOrder = array_pop( $sortParts );
+
+						switch ( $maybeOrder ) {
+							case 'asc':
+							case 'ascending':
+							case 'up':
+								$order = 'asc';
+								break;
+							case 'desc':
+							case 'descending':
+							case 'down':
+								$order = 'desc';
+								break;
+							default:
+								$order = null;
+								// Re-add the string to the parts if it is invalid, so we restore the original
+								// property name (e.g. Foo.Bar).
+								$sortParts[] = $maybeOrder;
+								break;
+						}
+					}
+
+					return new PropertySort( implode( ".", $sortParts ), $order );
 				}, $search_parameter_value );
 				break;
 			default:

@@ -47,12 +47,12 @@
 		"SMW::Property::initProperties": "WikiSearch\\WikiSearchHooks::onInitProperties",
 		"ScribuntoExternalLibraries": "WikiSearch\\WikiSearchHooks::onScribuntoExternalLibraries"
 	},
+	"ServiceWiringFiles": [
+		"src/WikiSearch.ServiceWiring.php"
+	],
 	"config": {
 		"WikiSearchElasticStoreIndex": {
 			"value": false
-		},
-		"WikiSearchDefaultResultLimit": {
-			"value": 10
 		},
 		"WikiSearchHighlightFragmentSize": {
 			"value": 250
@@ -61,7 +61,7 @@
 			"value": 1
 		},
 		"WikiSearchElasticSearchHosts": {
-			"value": []
+			"value": null
 		},
 		"WikiSearchAPIRequiredRights": {
 			"value": [
@@ -81,6 +81,12 @@
 		},
 		"WikiSearchDisabledAnnotators": {
 			"value": []
+		},
+		"WikiSearchBasicAuthenticationUsername": {
+			"value": null
+		},
+		"WikiSearchBasicAuthenticationPassword": {
+			"value": null
 		}
 	},
 	"SpecialPages": {
