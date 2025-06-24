@@ -495,16 +495,7 @@ class SearchEngineConfig {
 			$query = str_replace( $match[0], '__WSUNIQ__' . $key . '__WSQINU__', $query );
 		}
 
-		$parser = MediaWikiServices::getInstance()->getParser();
-
-		if ( $parser->getOptions() === null ) {
-			$options = \ParserOptions::newFromUser( \RequestContext::getMain()->getUser() );
-			$parser->setOptions( $options );
-		}
-
-		if ( $parser->getOutput() === null ) {
-			$parser->resetOutput();
-		}
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 
 		// Now we parse the query
 		$query = $parser->recursiveTagParse( $query );
