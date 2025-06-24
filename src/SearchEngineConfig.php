@@ -23,7 +23,9 @@ namespace WikiSearch;
 
 use MediaWiki\MediaWikiServices;
 use Parser;
+use ParserOptions;
 use PPFrame;
+use RequestContext;
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
 use WikiSearch\QueryEngine\Sort\PropertySort;
@@ -496,6 +498,7 @@ class SearchEngineConfig {
 		}
 
 		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
+		$parser->setOptions( ParserOptions::newFromUser( RequestContext::getMain()->getUser() ) );
 
 		// Now we parse the query
 		$query = $parser->recursiveTagParse( $query );
