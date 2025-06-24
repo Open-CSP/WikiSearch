@@ -488,7 +488,7 @@ class SearchEngineConfig {
 		preg_match_all('/\[\[[^:\]]+::[^:\]]+]]/', $query, $matches, PREG_SET_ORDER);
 
 		foreach ( $matches as $key => $match ) {
-			$query = str_replace( $match[0], '__UNIQ__' . $key . '__QINU__', $query );
+			$query = str_replace( $match[0], '__WSUNIQ__' . $key . '__WSQINU__', $query );
 		}
 
 		// Now we parse the query
@@ -496,7 +496,7 @@ class SearchEngineConfig {
 
 		// And now we replace the substitutions again
 		foreach ( $matches as $key => $match ) {
-			$query = str_replace( '__UNIQ__' . $key . '__QINU__', $match[0], $query );
+			$query = str_replace( '__WSUNIQ__' . $key . '__WSQINU__', $match[0], $query );
 		}
 
 		return $query;
