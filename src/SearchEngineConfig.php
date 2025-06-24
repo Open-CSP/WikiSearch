@@ -233,6 +233,20 @@ class SearchEngineConfig {
 				$this->translations[$property_name] = $translation_pair[1];
 			}
 		}
+
+		if ( isset( $search_parameters["base query"] ) ) {
+			try {
+				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"] ) );
+				$query_processor->toElasticSearchQuery();
+			} catch ( \MWException $exception ) {
+				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
+					'e' => $exception
+				] );
+
+				// The query is invalid
+				throw new \InvalidArgumentException( "Invalid base query" );
+			}
+		}
 	}
 
 	/**
@@ -469,6 +483,10 @@ class SearchEngineConfig {
 		);
 	}
 
+	/**
+	 * @param string $query
+	 * @return array|string|string[]
+	 */
 	private function parseQuery( string $query ) {
 		// First, we escape some special characters that may cause confusion in an SMW query
 		preg_match_all('/\[\[[^:\]]+::[^:\]]+]]/', $query, $matches, PREG_SET_ORDER);
@@ -477,8 +495,15 @@ class SearchEngineConfig {
 			$query = str_replace( $match[0], '__WSUNIQ__' . $key . '__WSQINU__', $query );
 		}
 
+		$parser = MediaWikiServices::getInstance()->getParser();
+
+		if ( $parser->getOptions() === null ) {
+			$options = \ParserOptions::newFromUser( \RequestContext::getMain()->getUser() );
+			$parser->setOptions( $options );
+		}
+
 		// Now we parse the query
-		$query = MediaWikiServices::getInstance()->getParser()->recursiveTagParse( $query );
+		$query = $parser->recursiveTagParse( $query );
 
 		// And now we replace the substitutions again
 		foreach ( $matches as $key => $match ) {
