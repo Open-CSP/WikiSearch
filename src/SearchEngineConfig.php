@@ -499,6 +499,7 @@ class SearchEngineConfig {
 
 		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 		$parser->setOptions( ParserOptions::newFromUser( RequestContext::getMain()->getUser() ) );
+		$parser->resetOutput();
 
 		// Now we parse the query
 		$query = $parser->recursiveTagParse( $query );
