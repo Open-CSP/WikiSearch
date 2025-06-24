@@ -498,6 +498,7 @@ class SearchEngineConfig {
 		}
 
 		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
+		$parser->clearState();
 		$parser->setOptions( ParserOptions::newFromUser( RequestContext::getMain()->getUser() ) );
 		$parser->resetOutput();
 
