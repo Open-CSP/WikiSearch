@@ -502,6 +502,10 @@ class SearchEngineConfig {
 			$parser->setOptions( $options );
 		}
 
+		if ( $parser->getOutput() === null ) {
+			$parser->resetOutput();
+		}
+
 		// Now we parse the query
 		$query = $parser->recursiveTagParse( $query );
 
