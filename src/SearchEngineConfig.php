@@ -233,20 +233,6 @@ class SearchEngineConfig {
 				$this->translations[$property_name] = $translation_pair[1];
 			}
 		}
-
-		if ( isset( $search_parameters["base query"] ) ) {
-			try {
-				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"] ) );
-				$query_processor->toElasticSearchQuery();
-			} catch ( \MWException $exception ) {
-				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
-					'e' => $exception
-				] );
-
-				// The query is invalid
-				throw new \InvalidArgumentException( "Invalid base query" );
-			}
-		}
 	}
 
 	/**
