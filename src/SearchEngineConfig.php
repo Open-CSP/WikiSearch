@@ -38,14 +38,14 @@ use WikiSearch\SMW\SMWQueryProcessor;
 class SearchEngineConfig {
 	// phpcs:ignore
 	const SEARCH_PARAMETER_KEYS = [
-		"base query" 			 =>	[ "type" => "wikitext" ],
+		"base query" 			 =>	[ "type" => "query" ],
 		"highlighted properties" => [ "type" => "propertylist" ],
 		"search term properties" => [ "type" => "propertylist" ],
-		"default operator" 		 => [ "type" => "wikitext" ],
+		"default operator" 		 => [ "type" => "string" ],
 		"aggregation size" 		 =>	[ "type" => "integer" ],
 		"post filter properties" => [ "type" => "list" ],
-		"highlighter type"       => [ "type" => "wikitext" ],
-		"result template"		 => [ "type" => "wikitext" ],
+		"highlighter type"       => [ "type" => "string" ],
+		"result template"		 => [ "type" => "string" ],
 		"fallback sorts"         => [ "type" => "sortlist" ],
 	];
 
@@ -162,7 +162,7 @@ class SearchEngineConfig {
 		$facet_properties = $result_properties = $search_parameters = [];
 
 		foreach ( $parameters as $parameter ) {
-			$parameter_value = $frame->expand( $parameter, PPFrame::RECOVER_ORIG );
+			$parameter_value = $frame->expand( $parameter );
 
 			if ( strlen( $parameter_value ) === 0 ) {
 				continue;
@@ -170,7 +170,7 @@ class SearchEngineConfig {
 
 			if ( $parameter_value[0] === "?" ) {
 				// This is a "result property"
-				$result_properties[] = ltrim( $frame->expand( $parameter ), "?" );
+				$result_properties[] = ltrim( $parameter_value, "?" );
 				continue;
 			}
 
@@ -179,7 +179,12 @@ class SearchEngineConfig {
 
 			if ( !array_key_exists( $key, self::SEARCH_PARAMETER_KEYS ) ) {
 				// This is a "facet property", since its key is not a valid search parameter
-				$facet_properties[] = $frame->expand( $parameter );
+				$facet_properties[] = $parameter_value;
+			} elseif ( $key === "base query" ) {
+				// The "base query" needs special handling, because it may contain wikitext that should only be parsed
+				// when the search is loaded.
+				$expanded_value = $frame->expand( $parameter, PPFrame::RECOVER_ORIG );
+				$search_parameters["base query"] = explode( '=', $expanded_value, 2 )[1] ?? '';
 			} else {
 				// This is a "search term parameter"
 				$search_parameters[$key] = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
@@ -230,10 +235,8 @@ class SearchEngineConfig {
 		}
 
 		if ( isset( $search_parameters["base query"] ) ) {
-			$base_query = self::parseWikitext( $search_parameters["base query"] );
-
 			try {
-				$query_processor = new SMWQueryProcessor( $base_query );
+				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"] ) );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
 				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
@@ -284,17 +287,15 @@ class SearchEngineConfig {
 			return false;
 		}
 
-		if ( $search_parameter_type !== "string" ) {
-			$search_parameter_value_raw = self::parseWikitext( $search_parameter_value_raw );
-		}
-
 		switch ( $search_parameter_type ) {
 			case "integer":
 				$search_parameter_value = intval( trim( $search_parameter_value_raw ) );
 				break;
 			case "string":
-			case "wikitext": // wikitext is handled differently, because it gets parsed before this switch
 				$search_parameter_value = trim( $search_parameter_value_raw );
+				break;
+			case "query":
+				$search_parameter_value = trim( self::parseQuery( $search_parameter_value_raw ) );
 				break;
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
@@ -482,13 +483,22 @@ class SearchEngineConfig {
 		);
 	}
 
-	/**
-	 * @param string $wikitext
-	 * @return string
-	 */
-	private static function parseWikitext( string $wikitext ): string {
-		$parser = MediaWikiServices::getInstance()->getParser();
+	private function parseQuery( string $query ) {
+		// First, we escape some special characters that may cause confusion in an SMW query
+		preg_match_all('/\[\[[^:\]]+::[^:\]]+]]/', $query, $matches, PREG_SET_ORDER);
 
-		return $parser->recursiveTagParse( $wikitext );
+		foreach ( $matches as $key => $match ) {
+			$query = str_replace( $match[0], '__UNIQ__' . $key . '__QINU__', $query );
+		}
+
+		// Now we parse the query
+		$query = MediaWikiServices::getInstance()->getParser()->recursiveTagParse( $query );
+
+		// And now we replace the substitutions again
+		foreach ( $matches as $key => $match ) {
+			$query = str_replace( '__UNIQ__' . $key . '__QINU__', $match[0], $query );
+		}
+
+		return $query;
 	}
 }
