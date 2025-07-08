@@ -22,6 +22,10 @@
 namespace WikiSearch;
 
 use MediaWiki\MediaWikiServices;
+use Parser;
+use ParserOptions;
+use PPFrame;
+use RequestContext;
 use Title;
 use Wikimedia\Rdbms\DBConnRef;
 use WikiSearch\QueryEngine\Sort\PropertySort;
@@ -36,7 +40,7 @@ use WikiSearch\SMW\SMWQueryProcessor;
 class SearchEngineConfig {
 	// phpcs:ignore
 	const SEARCH_PARAMETER_KEYS = [
-		"base query" 			 =>	[ "type" => "string" ],
+		"base query" 			 =>	[ "type" => "query" ],
 		"highlighted properties" => [ "type" => "propertylist" ],
 		"search term properties" => [ "type" => "propertylist" ],
 		"default operator" 		 => [ "type" => "string" ],
@@ -151,29 +155,38 @@ class SearchEngineConfig {
 	/**
 	 * Returns a new SearchEngineConfig from the given parser function parameters, or null on failure.
 	 *
-	 * @param Title $title
+	 * @param Parser $parser
+	 * @param PPFrame $frame
 	 * @param array $parameters
 	 * @return SearchEngineConfig
 	 */
-	public static function newFromParameters( Title $title, array $parameters ): SearchEngineConfig {
+	public static function newFromParameters( Parser $parser, PPFrame $frame, array $parameters ): SearchEngineConfig {
 		$facet_properties = $result_properties = $search_parameters = [];
 
 		foreach ( $parameters as $parameter ) {
-			if ( strlen( $parameter ) === 0 ) { continue;
-			}
+			$parameter_value = $frame->expand( $parameter );
 
-			if ( $parameter[0] === "?" ) {
-				// This is a "result property"
-				$result_properties[] = ltrim( $parameter, "?" );
+			if ( strlen( $parameter_value ) === 0 ) {
 				continue;
 			}
 
-			$key_value_pair = explode( "=", $parameter );
+			if ( $parameter_value[0] === "?" ) {
+				// This is a "result property"
+				$result_properties[] = ltrim( $parameter_value, "?" );
+				continue;
+			}
+
+			$key_value_pair = explode( "=", $parameter_value );
 			$key = trim( $key_value_pair[0] );
 
 			if ( !array_key_exists( $key, self::SEARCH_PARAMETER_KEYS ) ) {
 				// This is a "facet property", since its key is not a valid search parameter
-				$facet_properties[] = $parameter;
+				$facet_properties[] = $parameter_value;
+			} elseif ( $key === "base query" ) {
+				// The "base query" needs special handling, because it may contain wikitext that should only be parsed
+				// when the search is loaded.
+				$expanded_value = $frame->expand( $parameter, PPFrame::RECOVER_ORIG );
+				$search_parameters["base query"] = explode( '=', $expanded_value, 2 )[1] ?? '';
 			} else {
 				// This is a "search term parameter"
 				$search_parameters[$key] = isset( $key_value_pair[1] ) ? $key_value_pair[1] : true;
@@ -183,7 +196,7 @@ class SearchEngineConfig {
 		$facet_properties = array_unique( $facet_properties );
 		$result_properties = array_unique( $result_properties );
 
-		return new SearchEngineConfig( $title, $search_parameters, $facet_properties, $result_properties );
+		return new SearchEngineConfig( $parser->getTitle(), $search_parameters, $facet_properties, $result_properties );
 	}
 
 	/**
@@ -225,7 +238,7 @@ class SearchEngineConfig {
 
 		if ( isset( $search_parameters["base query"] ) ) {
 			try {
-				$query_processor = new SMWQueryProcessor( $search_parameters["base query"] );
+				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"], $title ) );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
 				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
@@ -282,6 +295,9 @@ class SearchEngineConfig {
 				break;
 			case "string":
 				$search_parameter_value = trim( $search_parameter_value_raw );
+				break;
+			case "query":
+				$search_parameter_value = trim( self::parseQuery( $search_parameter_value_raw ) );
 				break;
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
@@ -467,5 +483,21 @@ class SearchEngineConfig {
 			"search_parameters",
 			[ "page_id" => $page_id ]
 		);
+	}
+
+	/**
+	 * @param string $query
+	 * @param Title|null $title
+	 * @param PPFrame|null $frame
+	 * @return string
+	 */
+	private function parseQuery( string $query, ?Title $title = null, ?PPFrame $frame = null ) {
+		$options = ParserOptions::newFromContext( RequestContext::getMain() );
+
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->getInstance();
+		$parser->startExternalParse( $title, $options, \Parser::OT_PREPROCESS );
+		$frame = $frame ?? $parser->getPreprocessor()->newFrame();
+
+		return $parser->preprocess( $query, $title, $options, null, $frame );
 	}
 }
