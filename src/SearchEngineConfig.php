@@ -487,29 +487,15 @@ class SearchEngineConfig {
 
 	/**
 	 * @param string $query
-	 * @return array|string|string[]
+	 * @param PPFrame|null $frame
+	 * @return string
 	 */
-	private function parseQuery( string $query ) {
-		// First, we escape some special characters that may cause confusion in an SMW query
-		preg_match_all('/\[\[[^:\]]+::[^:\]]+]]/', $query, $matches, PREG_SET_ORDER);
-
-		foreach ( $matches as $key => $match ) {
-			$query = str_replace( $match[0], '__WSUNIQ__' . $key . '__WSQINU__', $query );
-		}
-
+	private function parseQuery( string $query, ?PPFrame $frame = null ) {
 		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 		$parser->clearState();
 		$parser->setOptions( ParserOptions::newFromUser( RequestContext::getMain()->getUser() ) );
 		$parser->resetOutput();
 
-		// Now we parse the query
-		$query = $parser->recursiveTagParse( $query );
-
-		// And now we replace the substitutions again
-		foreach ( $matches as $key => $match ) {
-			$query = str_replace( '__WSUNIQ__' . $key . '__WSQINU__', $match[0], $query );
-		}
-
-		return $query;
+		return $parser->recursivePreprocess( $query, $frame );
 	}
 }
