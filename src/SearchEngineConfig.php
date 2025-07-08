@@ -495,7 +495,7 @@ class SearchEngineConfig {
 		$options = ParserOptions::newFromContext( RequestContext::getMain() );
 
 		$parser = MediaWikiServices::getInstance()->getParserFactory()->getInstance();
-		$parser->startExternalParse( $title, $options, \MediaWiki\Parser\Parser::OT_PREPROCESS );
+		$parser->startExternalParse( $title, $options, \Parser::OT_PREPROCESS );
 		$frame = $frame ?? $parser->getPreprocessor()->newFrame();
 
 		return $parser->preprocess( $query, $title, $options, null, $frame );
