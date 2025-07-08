@@ -238,7 +238,7 @@ class SearchEngineConfig {
 
 		if ( isset( $search_parameters["base query"] ) ) {
 			try {
-				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"] ) );
+				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"], $title ) );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
 				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
@@ -487,15 +487,17 @@ class SearchEngineConfig {
 
 	/**
 	 * @param string $query
+	 * @param Title|null $title
 	 * @param PPFrame|null $frame
 	 * @return string
 	 */
-	private function parseQuery( string $query, ?PPFrame $frame = null ) {
-		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
-		$parser->clearState();
-		$parser->setOptions( ParserOptions::newFromUser( RequestContext::getMain()->getUser() ) );
-		$parser->resetOutput();
+	private function parseQuery( string $query, ?Title $title = null, ?PPFrame $frame = null ) {
+		$options = ParserOptions::newFromContext( RequestContext::getMain() );
 
-		return $parser->recursivePreprocess( $query, $frame );
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->getInstance();
+		$parser->startExternalParse( $title, $options, \MediaWiki\Parser\Parser::OT_PREPROCESS );
+		$frame = $frame ?? $parser->getPreprocessor()->newFrame();
+
+		return $parser->preprocess( $query, $title, $options, null, $frame );
 	}
 }
