@@ -164,7 +164,7 @@ class SearchEngineConfig {
 		$facet_properties = $result_properties = $search_parameters = [];
 
 		foreach ( $parameters as $parameter ) {
-			$parameter_value = $frame->expand( $parameter );
+			$parameter_value = trim( $frame->expand( $parameter ) );
 
 			if ( strlen( $parameter_value ) === 0 ) {
 				continue;
