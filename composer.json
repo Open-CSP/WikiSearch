@@ -10,7 +10,8 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">= 8.0 < 8.4",
-        "voku/simple_html_dom": "^4.8"
+        "voku/simple_html_dom": "^4.8",
+        "ongr/elasticsearch-dsl": "^7.2"
     },
     "require-dev": {
         "mediawiki/mediawiki-codesniffer": "34.0.0",
