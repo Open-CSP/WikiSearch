@@ -31,12 +31,20 @@ class SearchTermFilter extends AbstractFilter {
 	 * @param (string|PropertyFieldMapper)[] $properties
 	 * @param string $defaultOperator The default operator to use
 	 */
-	public function __construct( private string $searchTerm, ?array $properties = null, private string $defaultOperator = "or" ) {
+	public function __construct(
+        private string $searchTerm,
+        ?array         $properties = null,
+        private string $defaultOperator = "or",
+        bool           $includeDefaultSearchTermProperties = false,
+    ) {
         if ( $properties === null ) {
             return;
         }
 
-        $this->fields = [];
+        if ( !$includeDefaultSearchTermProperties ) {
+            $this->fields = [];
+        }
+
         foreach ( $properties as $field ) {
             if ( is_string( $field ) ) {
                 $field = new PropertyFieldMapper( $field );
