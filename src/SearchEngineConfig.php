@@ -40,15 +40,16 @@ use WikiSearch\SMW\SMWQueryProcessor;
 class SearchEngineConfig {
 	// phpcs:ignore
 	const SEARCH_PARAMETER_KEYS = [
-		"base query" 			 =>	[ "type" => "query" ],
-		"highlighted properties" => [ "type" => "propertylist" ],
-		"search term properties" => [ "type" => "propertylist" ],
-		"default operator" 		 => [ "type" => "string" ],
-		"aggregation size" 		 =>	[ "type" => "integer" ],
-		"post filter properties" => [ "type" => "list" ],
-		"highlighter type"       => [ "type" => "string" ],
-		"result template"		 => [ "type" => "string" ],
-		"fallback sorts"         => [ "type" => "sortlist" ],
+		"base query" 			                 =>	[ "type" => "query" ],
+		"highlighted properties"                 => [ "type" => "propertylist" ],
+		"search term properties"                 => [ "type" => "propertylist" ],
+		"default operator" 		                 => [ "type" => "string" ],
+		"aggregation size" 		                 =>	[ "type" => "integer" ],
+		"post filter properties"                 => [ "type" => "list" ],
+		"highlighter type"                       => [ "type" => "string" ],
+		"result template"		                 => [ "type" => "string" ],
+		"fallback sorts"                         => [ "type" => "sortlist" ],
+        "include default search term properties" => [ "type" => "boolean" ],
 	];
 
 	/**
@@ -290,6 +291,12 @@ class SearchEngineConfig {
 		}
 
 		switch ( $search_parameter_type ) {
+            case "boolean":
+                $search_parameter_value = filter_var( $search_parameter_value_raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                if ( $search_parameter_value === null ) {
+                    $search_parameter_value = false;
+                }
+                break;
 			case "integer":
 				$search_parameter_value = intval( trim( $search_parameter_value_raw ) );
 				break;

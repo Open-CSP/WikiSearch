@@ -115,7 +115,8 @@ class SearchEngine {
 		$search_term_filter = new SearchTermFilter(
 			$this->prepareQuery( $search_term ),
 			$this->config->getSearchParameter( "search term properties" ) ?: null,
-			$this->config->getSearchParameter( "default operator" ) ?: "or"
+			$this->config->getSearchParameter( "default operator" ) ?: "or",
+            $this->config->getSearchParameter( "include default search term properties" ) ?: false
 		);
 
 		$this->query_engine->addFunctionScoreFilter( $search_term_filter );

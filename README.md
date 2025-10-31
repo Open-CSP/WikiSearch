@@ -161,6 +161,15 @@ A weight can be added to each field in the search term properties by using the `
 
 The weight determines the ranking when sorting on relevance. A match in a field with a higher weight will count more towards the relevance score than a match in a field with a lower weight. When no weight is given, the weight is set to `1`.
 
+##### `include default search term properties`
+
+The `include default search term properties` configuration parameter can be used to specify whether the default search term properties should still
+be included even when `search term properties` is given.
+
+```
+|include default search term properties=true
+```
+
 ##### `default operator`
 
 The `default operator` configuration parameter can be used to change the default operator of the free-text search. The default operator inserted between
