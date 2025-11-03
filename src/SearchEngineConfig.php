@@ -501,7 +501,8 @@ class SearchEngineConfig {
 	private function parseQuery( string $query, ?Title $title = null, ?PPFrame $frame = null ) {
 		$options = ParserOptions::newFromContext( RequestContext::getMain() );
 
-		$parser = MediaWikiServices::getInstance()->getParserFactory()->getInstance();
+		// Use a fresh parser instance to avoid race conditions with the singleton parser
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 		$parser->startExternalParse( $title, $options, \Parser::OT_PREPROCESS );
 		$frame = $frame ?? $parser->getPreprocessor()->newFrame();
 
