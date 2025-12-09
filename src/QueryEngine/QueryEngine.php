@@ -84,6 +84,11 @@ class QueryEngine {
 	 */
 	private array $fallbackSorts = [];
 
+    /**
+     * @var array{AbstractFilter, string}[]
+     */
+    private array $postFilters = [];
+
 	public function __construct( string $index ) {
         // TODO: Create service for retrieving index
 		$this->index = $index;
@@ -159,14 +164,7 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-request-post-filter.html
      */
     public function addPostFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
-        $filterQuery = $filter->toQuery();
-
-        if ( $filter instanceof PropertyFilter ) {
-            // Store which field this filter affects
-            $filter->{self::FILTER_FIELD_PARAMETER} = $filter->getField();
-        }
-
-        $this->search->addPostFilter( $filterQuery, $occur );
+        $this->postFilters[] = [$filter, $occur];
     }
 
 	/**
@@ -319,7 +317,17 @@ class QueryEngine {
      * @return void
      */
     private function addPostFiltersToAggregations( Search $search ): void {
-        foreach ( $search->getPostFilters() as $filter ) {
+        foreach ( $this->postFilters as [$filter, $occur] ) {
+            /** @var AbstractFilter $filter */
+            /** @var string $occur */
+
+            $filterQuery = $filter->toQuery();
+            $this->search->addPostFilter( $filterQuery, $occur );
+
+            if ( !$filter instanceof PropertyFilter ) {
+                continue;
+            }
+
             foreach ( $search->getAggregations() as $aggregation ) {
                 if ( !$aggregation instanceof FilterAggregation ) {
                     continue;
@@ -327,7 +335,7 @@ class QueryEngine {
 
                 if (
                     isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}) &&
-                    $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}->getPID() === $filter->{self::FILTER_FIELD_PARAMETER}->getPID()
+                    $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}->getPID() === $filter->getField()->getPID()
                 ) {
                     // This aggregation affects the same property
                     continue;
@@ -339,7 +347,7 @@ class QueryEngine {
                     continue;
                 }
 
-                $aggregationFilter->add( $filter );
+                $aggregationFilter->add( $filterQuery );
             }
         }
     }
