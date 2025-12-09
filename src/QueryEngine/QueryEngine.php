@@ -266,8 +266,8 @@ class QueryEngine {
 
 		$newSearch = clone $this->search;
 
-        $this->addPostFiltersToAggregations( $newSearch );
-		$this->addSortsToSearch( $newSearch );
+        $this->addPostFiltersToAggregations( $newSearch, $this->postFilters );
+		$this->addSortsToSearch( $newSearch, $this->fallbackSorts );
 
         $query = [
             "index" => $this->index,
@@ -296,10 +296,10 @@ class QueryEngine {
 	 * @param Search $search
 	 * @return void
 	 */
-	private function addSortsToSearch( Search $search ): void {
+	private static function addSortsToSearch( Search $search, array $fallbackSorts ): void {
 		$search->addSort( ( new RelevanceSort() )->toQuery() );
 
-		foreach ( $this->fallbackSorts as $fallbackSort ) {
+		foreach ( $fallbackSorts as $fallbackSort ) {
 			$search->addSort( $fallbackSort->toQuery() );
 		}
 	}
@@ -314,15 +314,13 @@ class QueryEngine {
      * this, we also add any post filter to the all other aggregations using a FilterAggregation.
      *
      * @param Search $search
+     * @param array{AbstractFilter, string}[] $postFilters
      * @return void
      */
-    private function addPostFiltersToAggregations( Search $search ): void {
-        foreach ( $this->postFilters as [$filter, $occur] ) {
-            /** @var AbstractFilter $filter */
-            /** @var string $occur */
-
+    private static function addPostFiltersToAggregations( Search $search, array $postFilters ): void {
+        foreach ( $postFilters as [$filter, $occur] ) {
             $filterQuery = $filter->toQuery();
-            $this->search->addPostFilter( $filterQuery, $occur );
+            $search->addPostFilter( $filterQuery, $occur );
 
             if ( !$filter instanceof PropertyFilter ) {
                 continue;
