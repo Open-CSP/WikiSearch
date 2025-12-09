@@ -163,7 +163,7 @@ class QueryEngine {
 
         if ( $filter instanceof PropertyFilter ) {
             // Store which field this filter affects
-            $filter->{self::FILTER_PROPERTY_PARAMETER} = $filter->getField();
+            $filter->{self::FILTER_FIELD_PARAMETER} = $filter->getField();
         }
 
         $this->search->addPostFilter( $filterQuery, $occur );
