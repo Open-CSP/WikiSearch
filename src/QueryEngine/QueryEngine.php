@@ -30,6 +30,7 @@ use WikiSearch\WikiSearchServices;
 class QueryEngine {
     private const DEFAULT_RESULT_LIMIT = 10;
     private const AGGREGATION_PROPERTY_PARAMETER = '_wikisearch_aggregation_property';
+    private const FILTER_FIELD_PARAMETER = '_wikisearch_filter_field';
 
 	/**
 	 * @var Search
@@ -82,6 +83,11 @@ class QueryEngine {
 	 * @var Sort[]
 	 */
 	private array $fallbackSorts = [];
+
+    /**
+     * @var array{AbstractFilter, string}[]
+     */
+    private array $postFilters = [];
 
 	public function __construct( string $index ) {
         // TODO: Create service for retrieving index
@@ -158,40 +164,7 @@ class QueryEngine {
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/5.6/search-request-post-filter.html
      */
     public function addPostFilter( AbstractFilter $filter, string $occur = BoolQuery::MUST ): void {
-        $filterQuery = $filter->toQuery();
-        $this->search->addPostFilter( $filterQuery, $occur );
-
-        // Post filters are applied after aggregations have been calculated. This makes it possible to have facets
-        // that do not change after the filter they control is applied. This is useful for facets that should act like
-        // a disjunction, where adding a filter should increase the number of results. However, this leaves us with the
-        // problem that other aggregations that should be affected by the added filter are no longer accurate. To solve
-        // this, we also add any post filter to the all other aggregations using a FilterAggregation.
-
-        if ( !$filter instanceof PropertyFilter ) {
-            return;
-        }
-
-        foreach ( $this->search->getAggregations() as $aggregation ) {
-            if ( !$aggregation instanceof FilterAggregation ) {
-                continue;
-            }
-
-            if (
-                isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER} ) &&
-                $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}->getPID() === $filter->getField()->getPID()
-            ) {
-                // This aggregation affects the same property
-                continue;
-            }
-
-            $aggregationFilter = $aggregation->getFilter();
-
-            if ( !$aggregationFilter instanceof BoolQuery ) {
-                continue;
-            }
-
-            $aggregationFilter->add( $filterQuery );
-        }
+        $this->postFilters[] = [$filter, $occur];
     }
 
 	/**
@@ -292,7 +265,9 @@ class QueryEngine {
         $this->search->setSource( $this->sources );
 
 		$newSearch = clone $this->search;
-		$this->addSortsToSearch( $newSearch );
+
+        $this->addPostFiltersToAggregations( $newSearch, $this->postFilters );
+		$this->addSortsToSearch( $newSearch, $this->fallbackSorts );
 
         $query = [
             "index" => $this->index,
@@ -321,11 +296,57 @@ class QueryEngine {
 	 * @param Search $search
 	 * @return void
 	 */
-	private function addSortsToSearch( Search $search ): void {
+	private static function addSortsToSearch( Search $search, array $fallbackSorts ): void {
 		$search->addSort( ( new RelevanceSort() )->toQuery() );
 
-		foreach ( $this->fallbackSorts as $fallbackSort ) {
+		foreach ( $fallbackSorts as $fallbackSort ) {
 			$search->addSort( $fallbackSort->toQuery() );
 		}
 	}
+
+    /**
+     * Add the post filters to the aggregations in the given Search object.
+     *
+     * Post filters are applied after aggregations have been calculated. This makes it possible to have facets
+     * that do not change after the filter they control is applied. This is useful for facets that should act like
+     * a disjunction, where adding a filter should increase the number of results. However, this leaves us with the
+     * problem that other aggregations that should be affected by the added filter are no longer accurate. To solve
+     * this, we also add any post filter to the all other aggregations using a FilterAggregation.
+     *
+     * @param Search $search
+     * @param array{AbstractFilter, string}[] $postFilters
+     * @return void
+     */
+    private static function addPostFiltersToAggregations( Search $search, array $postFilters ): void {
+        foreach ( $postFilters as [$filter, $occur] ) {
+            $filterQuery = $filter->toQuery();
+            $search->addPostFilter( $filterQuery, $occur );
+
+            if ( !$filter instanceof PropertyFilter ) {
+                continue;
+            }
+
+            foreach ( $search->getAggregations() as $aggregation ) {
+                if ( !$aggregation instanceof FilterAggregation ) {
+                    continue;
+                }
+
+                if (
+                    isset( $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}) &&
+                    $aggregation->{self::AGGREGATION_PROPERTY_PARAMETER}->getPID() === $filter->getField()->getPID()
+                ) {
+                    // This aggregation affects the same property
+                    continue;
+                }
+
+                $aggregationFilter = $aggregation->getFilter();
+
+                if (!$aggregationFilter instanceof BoolQuery) {
+                    continue;
+                }
+
+                $aggregationFilter->add( $filterQuery );
+            }
+        }
+    }
 }
