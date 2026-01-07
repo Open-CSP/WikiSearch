@@ -49,13 +49,18 @@ class SearchEngineConfig {
 		"highlighter type"                       => [ "type" => "string" ],
 		"result template"		                 => [ "type" => "string" ],
 		"fallback sorts"                         => [ "type" => "sortlist" ],
-        "include default search term properties" => [ "type" => "boolean" ],
+		"include default search term properties" => [ "type" => "boolean" ],
 	];
 
 	/**
 	 * @var Title
 	 */
 	private Title $title;
+
+	/**
+	 * @var PPFrame|null
+	 */
+	private PPFrame $frame;
 
 	/**
 	 * @var array
@@ -90,15 +95,15 @@ class SearchEngineConfig {
 	 * @return SearchEngineConfig|null
 	 */
 	public static function newFromDatabase( Title $page ) {
-        if ( defined( 'DB_PRIMARY' ) ) {
-            $database = MediaWikiServices::getInstance()
-                ->getDBLoadBalancer()
-                ->getMaintenanceConnectionRef( DB_PRIMARY );
-        } else {
-            $database = MediaWikiServices::getInstance()
-                ->getDBLoadBalancer()
-                ->getMaintenanceConnectionRef( DB_MASTER );
-        }
+		if ( defined( 'DB_PRIMARY' ) ) {
+			$database = MediaWikiServices::getInstance()
+				->getDBLoadBalancer()
+				->getMaintenanceConnectionRef( DB_PRIMARY );
+		} else {
+			$database = MediaWikiServices::getInstance()
+				->getDBLoadBalancer()
+				->getMaintenanceConnectionRef( DB_MASTER );
+		}
 
 		$page_id = $page->getArticleID();
 
@@ -197,7 +202,7 @@ class SearchEngineConfig {
 		$facet_properties = array_unique( $facet_properties );
 		$result_properties = array_unique( $result_properties );
 
-		return new SearchEngineConfig( $parser->getTitle(), $search_parameters, $facet_properties, $result_properties );
+		return new SearchEngineConfig( $parser->getTitle(), $search_parameters, $facet_properties, $result_properties, $frame );
 	}
 
 	/**
@@ -212,9 +217,11 @@ class SearchEngineConfig {
 		Title $title,
 		array $search_parameters,
 		array $facet_properties,
-		array $result_properties
+		array $result_properties,
+		?PPFrame $frame = null
 	) {
 		$this->title = $title;
+		$this->frame = $frame;
 		$this->search_parameters = $search_parameters;
 
 		$result_properties = array_filter( $result_properties, function ( string $property_name ) {
@@ -239,7 +246,7 @@ class SearchEngineConfig {
 
 		if ( isset( $search_parameters["base query"] ) ) {
 			try {
-				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"], $title ) );
+				$query_processor = new SMWQueryProcessor( self::parseQuery( $search_parameters["base query"], $title, $frame ) );
 				$query_processor->toElasticSearchQuery();
 			} catch ( \MWException $exception ) {
 				Logger::getLogger()->alert( 'Exception caught while trying to parse a base query: {e}', [
@@ -291,12 +298,12 @@ class SearchEngineConfig {
 		}
 
 		switch ( $search_parameter_type ) {
-            case "boolean":
-                $search_parameter_value = filter_var( $search_parameter_value_raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                if ( $search_parameter_value === null ) {
-                    $search_parameter_value = false;
-                }
-                break;
+			case "boolean":
+				$search_parameter_value = filter_var( $search_parameter_value_raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				if ( $search_parameter_value === null ) {
+					$search_parameter_value = false;
+				}
+				break;
 			case "integer":
 				$search_parameter_value = intval( trim( $search_parameter_value_raw ) );
 				break;
@@ -304,7 +311,7 @@ class SearchEngineConfig {
 				$search_parameter_value = trim( $search_parameter_value_raw );
 				break;
 			case "query":
-				$search_parameter_value = trim( self::parseQuery( $search_parameter_value_raw, $this->getTitle() ) );
+				$search_parameter_value = trim( self::parseQuery( $search_parameter_value_raw, $this->title, $this->frame ) );
 				break;
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
