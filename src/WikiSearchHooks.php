@@ -108,16 +108,16 @@ abstract class WikiSearchHooks {
 		SearchEngineConfig::delete( self::getPrimaryDB(), $article->getId() );
 
 		// Create an appropriate parser
-		$parser = MediaWikiServices::getInstance()->getParser();
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 		$parser->mOptions = $parser->getOptions() ?? \ParserOptions::newFromUserAndLang(
 			\RequestContext::getMain()->getUser(),
 			\RequestContext::getMain()->getLanguage()
 		);
 
-		$parser->setTitle( $parser->mTitle ?? Title::newMainPage() );
+		$parser->setTitle( $article->getTitle() );
 		$parser->clearState();
 
-		// Reparse the wikitext upon safe with the parser
+		// Reparse the wikitext upon save with the parser
 		$parser->recursiveTagParse( ContentHandler::getContentText( $main_content ) );
 	}
 

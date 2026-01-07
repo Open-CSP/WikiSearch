@@ -151,7 +151,8 @@ class ParsedTextAnnotator implements Annotator {
 
 		// Create the new ParserOptions from the current user and the language
 		$parserOptions = ParserOptions::newFromUserAndLang( $user, $lang );
-		$parser = MediaWikiServices::getInstance()->getParser();
+		// Use a fresh parser instance to avoid race conditions with the singleton parser
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->create();
 
 		return $parser->parse( $magicWords . $content->getNativeData(), $title, $parserOptions, true, true );
 	}

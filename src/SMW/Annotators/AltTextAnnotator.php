@@ -18,8 +18,21 @@ class AltTextAnnotator implements Annotator {
 	 * @inheritDoc
 	 */
 	public static function addAnnotation( Content $content, ParserOutput $parserOutput, SemanticData $semanticData ): void {
-		// Get the HTML
-		$text = $parserOutput->getText();
+		// Get the HTML. Protect against transformation errors (e.g. malformed
+		// titles during output transform) which may be thrown while running the
+		// output transform pipeline. If that happens, skip this annotator so that
+		// it doesn't abort the whole SMW update/job.
+		try {
+			$text = $parserOutput->getText();
+		} catch ( \Throwable $e ) {
+			// Log and bail out gracefully; annotator is best-effort.
+			\WikiSearch\Logger::getLogger()->warning(
+				'WikiSearch: Failed to retrieve parser output text for AltTextAnnotator: {e}',
+				[ 'e' => $e ]
+			);
+			return;
+		}
+
 		$altTexts = self::getAltTexts( $text );
 
 		foreach ( $altTexts as $altText ) {
