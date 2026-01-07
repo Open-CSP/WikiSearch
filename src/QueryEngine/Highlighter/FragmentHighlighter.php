@@ -18,16 +18,20 @@ class FragmentHighlighter implements Highlighter {
 
     /**
      * @param PropertyFieldMapper[] $fields The fields to apply the highlight to
-     * @param string $type The type of the highlighter, should be one of the Highlighter::TYPE_* constants
+     * @param string|null $type The type of the highlighter, should be one of the Highlighter::TYPE_* constants
      * @param int $size The fragment size
      * @param int $limit The maximum number of words to return
      */
 	public function __construct(
 		private array $fields,
-        private string $type = self::TYPE_UNIFIED,
+        private ?string $type = self::TYPE_UNIFIED,
         private int $size = 1,
         private int $limit = 128
-	) {}
+	) {
+        if ($type === null) {
+            $this->type = self::TYPE_UNIFIED;
+        }
+    }
 
 	/**
 	 * @inheritDoc
