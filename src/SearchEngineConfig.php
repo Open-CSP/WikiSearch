@@ -304,7 +304,7 @@ class SearchEngineConfig {
 				$search_parameter_value = trim( $search_parameter_value_raw );
 				break;
 			case "query":
-				$search_parameter_value = trim( self::parseQuery( $search_parameter_value_raw ) );
+				$search_parameter_value = trim( self::parseQuery( $search_parameter_value_raw, $this->getTitle() ) );
 				break;
 			case "list":
 				$search_parameter_value = array_map( "trim", explode( ",", $search_parameter_value_raw ) );
@@ -503,6 +503,7 @@ class SearchEngineConfig {
 
 		$parser = MediaWikiServices::getInstance()->getParserFactory()->getInstance();
 		$parser->startExternalParse( $title, $options, \Parser::OT_PREPROCESS );
+
 		$frame = $frame ?? $parser->getPreprocessor()->newFrame();
 
 		return $parser->preprocess( $query, $title, $options, null, $frame );
