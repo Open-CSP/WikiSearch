@@ -60,7 +60,7 @@ class SearchEngineConfig {
 	/**
 	 * @var PPFrame|null
 	 */
-	private PPFrame $frame;
+	private ?PPFrame $frame;
 
 	/**
 	 * @var array
