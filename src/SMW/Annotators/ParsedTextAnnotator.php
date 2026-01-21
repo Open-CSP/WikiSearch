@@ -105,6 +105,7 @@ class ParsedTextAnnotator implements Annotator {
 		}
 
 		$html = $dom->saveHTML();
+		$html = html_entity_decode( $html );
 
 		return str_replace( "<", " <", $html );
 	}
