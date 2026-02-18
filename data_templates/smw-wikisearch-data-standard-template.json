@@ -32,7 +32,7 @@
 				"search": {
 					"type": "custom",
 					"tokenizer": "whitespace",
-					"filter": [ "synonym", "lowercase" ]
+					"filter": [ "synonym", "lowercase", "asciifolding" ]
 				},
 				"uri_lowercase_with_stopwords": {
 					"type": "custom",
