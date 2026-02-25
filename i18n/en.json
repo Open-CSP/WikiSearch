@@ -25,9 +25,14 @@
   "wikisearch-special-data-standard-write-failed": "Failed to save the data standard. Is it writable?",
   "wikisearch-special-data-standard-save-only-success": "The data standard has been saved. To update the data standard and rebuild the ElasticSearch indices, run <code>rebuildElasticIndex.php</code> or resubmit the form with \"{{int:wikisearch-special-data-standard-update-text}}\" checked.<br/><br/>Return to [[Special:WikiSearchDataStandard]].",
   "wikisearch-special-data-standard-save-and-update-success": "The data standard has been saved and the ElasticSearch indices will be rebuilt shortly. To monitor the progress, you can use the PID of the spawned process: <b>$1</b>. For your convenience, you can find the first 10 seconds of the script's execution log below:<br/><pre>$2</pre><br/><br/>Return to [[Special:WikiSearchDataStandard]].",
+  "wikisearch-view-history-intro": "This table shows global searches, and the number of times that search occurred.",
+  "wikisearch-history-aggregation-query-column": "Search query",
+  "wikisearch-history-aggregation-occurrences-column": "Number of searches",
+  "wikisearch-empty-string": "empty string",
   "right-wikisearch-execute-api": "Query the WikiSearch API",
   "action-wikisearch-execute-api": "query the WikiSearch API",
   "action-wikisearch-edit-data-standard": "edit the WikiSearch data standard",
+  "action-wikisearch-view-history": "view the WikiSearch global history",
   "apihelp-query+WikiSearch-summary": "Perform advanced search queries against an ElasticSearch backend",
   "apihelp-query+WikiSearch-param-pageid": "The page ID of the page that contains the search engine config for the current request",
   "apihelp-query+WikiSearch-param-term": "The search query term used for full-text search",
@@ -46,5 +51,6 @@
   "apihelp-query+WikiSearchCombobox-param-property": "The property to create the combobox aggregation for",
   "apihelp-query+WikiSearchCombobox-param-limit": "The maximum number of aggregations to return",
   "apihelp-query+WikiSearchCombobox-param-term": "The term to filter on",
-  "wikisearchdatastandard": "WikiSearchDataStandard"
+  "wikisearchdatastandard": "WikiSearchDataStandard",
+  "wikisearchhistory": "Global search history"
 }
