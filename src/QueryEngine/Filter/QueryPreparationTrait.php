@@ -20,6 +20,7 @@ trait QueryPreparationTrait {
 		}
 
         $term = preg_replace( '/(:|\+|=|\/)/', '\\\\$1', $term );
+        $term = preg_replace( '/(\.)/', '*', $term );
 		$advancedQuery = array_reduce(
             [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
             function ( bool $carry, $char ) use ( $term ) {
@@ -42,7 +43,7 @@ trait QueryPreparationTrait {
             return '*';
         }
 
-        $wordChars = 'a-zA-Z_\-0-9:\/\\\\';
+        $wordChars = 'a-zA-Z_\.\-0-9:\/\\\\';
         $terms = preg_split(
             '/((?<=[' . $wordChars . '])(?=$|[^' . $wordChars . '])\s*)/',
             $term, -1, PREG_SPLIT_DELIM_CAPTURE
