@@ -110,7 +110,8 @@ class SearchEngineConfig {
 		$db_facets = $database->select(
 			"search_facets",
 			[ "property" ],
-			[ "page_id" => $page_id ]
+			[ "page_id" => $page_id ],
+            __METHOD__,
 		);
 
 		$facet_properties = [];
@@ -121,7 +122,8 @@ class SearchEngineConfig {
 		$db_result_properties = $database->select(
 			"search_properties",
 			[ "property" ],
-			[ "page_id" => $page_id ]
+			[ "page_id" => $page_id ],
+            __METHOD__,
 		);
 
 		$result_properties = [];
@@ -132,7 +134,8 @@ class SearchEngineConfig {
 		$db_search_parameters = $database->select(
 			"search_parameters",
 			[ "parameter_key", "parameter_value" ],
-			[ "page_id" => $page_id ]
+			[ "page_id" => $page_id ],
+            __METHOD__,
 		);
 
 		$search_parameters = [];

@@ -51,6 +51,11 @@ class SearchEngine {
 	 */
 	private QueryEngine $query_engine;
 
+    /**
+     * @var string[]
+     */
+    private array $search_terms = [];
+
 	/**
 	 * Search constructor.
 	 *
@@ -112,6 +117,8 @@ class SearchEngine {
 	 * @param string $search_term
 	 */
 	public function addSearchTerm( string $search_term ) {
+        $this->search_terms[] = $search_term;
+
 		$search_term_filter = new SearchTermFilter(
 			$this->prepareQuery( $search_term ),
 			$this->config->getSearchParameter( "search term properties" ) ?: null,
@@ -134,6 +141,14 @@ class SearchEngine {
 
 		$results = $this->doQuery( $elastic_query );
 		$results = $this->applyResultTranslations( $results );
+
+        $enableSearchHistory = MediaWikiServices::getInstance()->getMainConfig()->get( 'WikiSearchEnableSearchHistory' );
+
+        if ( $enableSearchHistory ) {
+            foreach ( $this->search_terms as $search_term ) {
+                WikiSearchServices::getSearchHistoryStore()->pushHistory( $search_term );
+            }
+        }
 
 		return [
 			"hits"  => json_encode( $results["hits"]["hits"] ?? [] ),

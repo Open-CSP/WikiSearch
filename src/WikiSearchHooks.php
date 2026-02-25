@@ -132,9 +132,11 @@ abstract class WikiSearchHooks {
 		$type = $updater->getDB()->getType();
 
 		$tables = [
-			"search_facets"         => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
-			"search_properties"     => sprintf( "%s/%s/table_search_properties.sql", $directory, $type ),
-			"search_parameters"     => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type )
+			"search_facets"             => sprintf( "%s/%s/table_search_facets.sql", $directory, $type ),
+			"search_properties"         => sprintf( "%s/%s/table_search_properties.sql", $directory, $type ),
+			"search_parameters"         => sprintf( "%s/%s/table_search_parameters.sql", $directory, $type ),
+            "search_history"            => sprintf( "%s/%s/table_search_history.sql", $directory, $type ),
+            "search_history_aggregates" => sprintf( "%s/%s/table_search_history_aggregates.sql", $directory, $type ),
 		];
 
 		foreach ( $tables as $table ) {

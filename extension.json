@@ -87,6 +87,9 @@
 		},
 		"WikiSearchBasicAuthenticationPassword": {
 			"value": null
+		},
+		"WikiSearchEnableSearchHistory": {
+			"value": false
 		}
 	},
 	"SpecialPages": {

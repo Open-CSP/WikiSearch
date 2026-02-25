@@ -32,6 +32,10 @@ final class WikiSearchServices {
         return self::getService( "Factory.QueryCombinatorFactory", $services );
     }
 
+    public static function getSearchHistoryStore( ?ServiceContainer $services = null ): SearchHistoryStore {
+        return self::getService( "SearchHistoryStore", $services );
+    }
+
     private static function getService( string $name, ?ServiceContainer $services ): object {
         return ( $services ?? MediaWikiServices::getInstance() )->getService( "WikiSearch." . $name );
     }
