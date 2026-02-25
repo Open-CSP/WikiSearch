@@ -93,7 +93,8 @@
 		}
 	},
 	"SpecialPages": {
-		"WikiSearchDataStandard": "WikiSearch\\Special\\SpecialWikiSearchDataStandard"
+		"WikiSearchDataStandard": "WikiSearch\\Special\\SpecialWikiSearchDataStandard",
+		"WikiSearchHistory": "WikiSearch\\Special\\SpecialWikiSearchHistory"
 	},
 	"load_composer_autoloader": true,
 	"manifest_version": 2
