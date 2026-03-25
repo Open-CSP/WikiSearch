@@ -40,6 +40,8 @@ use Status;
 use Title;
 use User;
 use WikiPage;
+use WikiSearch\Factory\ElasticsearchClientFactory;
+use WikiSearch\NeuralSearch\OpenSearchNeuralSearchBackend;
 use WikiSearch\Scribunto\ScribuntoLuaLibrary;
 use WikiSearch\SMW\PropertyInitializer;
 
@@ -49,6 +51,57 @@ use WikiSearch\SMW\PropertyInitializer;
  * @package WikiSearch
  */
 abstract class WikiSearchHooks {
+	/**
+	 * Fires early in the MediaWiki bootstrap (including CLI maintenance scripts).
+	 * Ensures the OpenSearch index template that pre-applies "index.knn: true" and
+	 * the knn_vector embedding field exists before SMW creates or recreates an index.
+	 *
+	 * This must happen at bootstrap time rather than at search time because
+	 * index.knn is a creation-only setting: it cannot be applied via the settings
+	 * update that SMW issues on an existing index. By installing an OpenSearch index
+	 * template that matches "smw-data-*", any new index SMW creates will automatically
+	 * receive knn: true before SMW's own settings/mappings update runs.
+	 */
+	public static function onSetupAfterCache(): void {
+		$services = MediaWikiServices::getInstance();
+		$config = $services->getMainConfig();
+
+		if ( !$config->get( 'WikiSearchNaturalLanguageSearch' ) ) {
+			return;
+		}
+
+		$modelId = $config->get( 'WikiSearchNeuralSearchModelId' );
+		if ( $modelId === null ) {
+			return;
+		}
+
+		$dimension = (int)$config->get( 'WikiSearchNeuralSearchDimension' );
+
+		$cache = $services->getMainObjectStash();
+		$cacheKey = $cache->makeKey( 'wikisearch', 'neural-index-template', md5( $modelId . $dimension ) );
+
+		if ( $cache->get( $cacheKey ) ) {
+			return;
+		}
+
+		try {
+			$clientFactory = new ElasticsearchClientFactory( $config );
+			$backend = new OpenSearchNeuralSearchBackend(
+				$modelId,
+				$clientFactory->getHosts(),
+				$config->get( 'WikiSearchBasicAuthenticationUsername' ),
+				$config->get( 'WikiSearchBasicAuthenticationPassword' )
+			);
+			$backend->ensureIndexTemplate( 'smw-data-*', $dimension );
+			$cache->set( $cacheKey, true, \BagOStuff::TTL_DAY );
+		} catch ( \Exception $e ) {
+			Logger::getLogger()->warning(
+				'WikiSearch: failed to create neural search index template: {message}',
+				[ 'message' => $e->getMessage() ]
+			);
+		}
+	}
+
 	/**
 	 * Occurs after the delete article request has been processed.
 	 *

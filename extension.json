@@ -38,6 +38,7 @@
 		"wikisearch-edit-data-standard"
 	],
 	"Hooks": {
+		"SetupAfterCache": "WikiSearch\\WikiSearchHooks::onSetupAfterCache",
 		"ParserFirstCallInit": "WikiSearch\\WikiSearchHooks::onParserFirstCallInit",
 		"ArticleDeleteComplete": "WikiSearch\\WikiSearchHooks::onArticleDeleteComplete",
 		"PageContentSaveComplete": "WikiSearch\\WikiSearchHooks::onPageContentSaveComplete",
@@ -90,11 +91,23 @@
 		},
 		"WikiSearchEnableSearchHistory": {
 			"value": false
+		},
+		"WikiSearchNaturalLanguageSearch": {
+			"value": false
+		},
+		"WikiSearchNeuralSearchModelId": {
+			"value": null
+		},
+		"WikiSearchNeuralSearchDimension": {
+			"value": 384
 		}
 	},
 	"SpecialPages": {
 		"WikiSearchDataStandard": "WikiSearch\\Special\\SpecialWikiSearchDataStandard",
 		"WikiSearchHistory": "WikiSearch\\Special\\SpecialWikiSearchHistory"
+	},
+	"MaintenanceScripts": {
+		"WikiSearch:SetupNeuralSearch": "maintenance/SetupNeuralSearch.php"
 	},
 	"load_composer_autoloader": true,
 	"manifest_version": 2

@@ -2,7 +2,7 @@
 	"settings": {
 		"number_of_shards": 2,
 		"number_of_replicas": 2,
-		"refresh_interval" : "1s",
+		"refresh_interval": "1s",
 		"index.mapping.total_fields.limit": "9000",
 		"index.max_result_window": "50000",
 		"analysis": {
@@ -15,7 +15,12 @@
 				},
 				"uri_stopwords_filter": {
 					"type": "stop",
-					"stopwords": [ "http", "https", "ftp", "www" ]
+					"stopwords": [
+						"http",
+						"https",
+						"ftp",
+						"www"
+					]
 				}
 			},
 			"char_filter": {
@@ -32,37 +37,57 @@
 				"search": {
 					"type": "custom",
 					"tokenizer": "whitespace",
-					"filter": [ "synonym", "lowercase", "asciifolding" ]
+					"filter": [
+						"synonym",
+						"lowercase",
+						"asciifolding"
+					]
 				},
 				"uri_lowercase_with_stopwords": {
 					"type": "custom",
 					"tokenizer": "lowercase",
-					"filter": [ "uri_stopwords_filter" ]
+					"filter": [
+						"uri_stopwords_filter"
+					]
 				},
 				"exact_text_lowercase": {
 					"type": "custom",
 					"tokenizer": "keyword",
-					"filter": [ "lowercase", "asciifolding" ]
+					"filter": [
+						"lowercase",
+						"asciifolding"
+					]
 				}
 			},
 			"normalizer": {
 				"standard_sort_normalizer": {
 					"type": "custom",
-					"char_filter": [ "wiki_char_filter" ]
+					"char_filter": [
+						"wiki_char_filter"
+					]
 				},
 				"char_normalizer": {
 					"type": "custom",
-					"char_filter": [ "wiki_char_filter" ]
+					"char_filter": [
+						"wiki_char_filter"
+					]
 				},
 				"lowercase_normalizer": {
 					"type": "custom",
 					"char_filter": [],
-					"filter": [ "lowercase" ]
+					"filter": [
+						"lowercase"
+					]
 				},
 				"case_insensitive_sort_normalizer": {
 					"type": "custom",
-					"char_filter": [ "wiki_char_filter" ],
-					"filter": [ "lowercase", "asciifolding" ]
+					"char_filter": [
+						"wiki_char_filter"
+					],
+					"filter": [
+						"lowercase",
+						"asciifolding"
+					]
 				}
 			}
 		}
@@ -117,7 +142,7 @@
 								"ignore_above": 2000
 							},
 							"lowercase": {
-								"type":     "text",
+								"type": "text",
 								"analyzer": "uri_lowercase_with_stopwords"
 							}
 						}

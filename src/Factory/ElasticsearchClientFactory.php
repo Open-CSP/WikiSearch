@@ -58,6 +58,15 @@ class ElasticsearchClientFactory {
     }
 
     /**
+     * Returns the configured OpenSearch/Elasticsearch host URLs as strings.
+     *
+     * @return string[]
+     */
+    public function getHosts(): array {
+        return $this->getElasticsearchHosts();
+    }
+
+    /**
      * Returns the hosts.
      *
      * @return string[]

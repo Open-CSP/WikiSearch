@@ -50,6 +50,7 @@ class SearchEngineConfig {
 		"result template"		                 => [ "type" => "string" ],
 		"fallback sorts"                         => [ "type" => "sortlist" ],
 		"include default search term properties" => [ "type" => "boolean" ],
+		"natural language search"                => [ "type" => "boolean" ],
 	];
 
 	/**
