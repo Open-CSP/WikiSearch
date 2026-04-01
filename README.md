@@ -210,7 +210,7 @@ Special page that tracks all searches that are performed, and how often they are
   * `wfLoadExtension( 'WikiSearch' );`
 * Run the update script which will automatically create the necessary database tables that this extension needs.
 * Add the following dependencies to your `composer.local.json`:
-  * [`elasticsearch/elasticsearch`](https://packagist.org/packages/elasticsearch/elasticsearch), with a version constraint matching your ElasticSearch version.
+  * [`elasticsearch/elasticsearch`](https://packagist.org/packages/elasticsearch/elasticsearch) OR [`opensearch-project/opensearch-php`](https://packagist.org/packages/opensearch-project/opensearch-php), with a version constraint matching your ElasticSearch version.
   * [`handcraftedinthealps/elasticsearch-dsl`](https://packagist.org/packages/handcraftedinthealps/elasticsearch-dsl), with a version constraint matching your ElasticSearch version
 * Run `composer update --no-dev` in the root of your MediaWiki installation.
 * Navigate to `Special:Version` on your wiki to verify that the extension is successfully installed.

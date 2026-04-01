@@ -20,7 +20,9 @@ class ElasticsearchClientFactory {
      * @return \Elastic\Elasticsearch\Client|\Elasticsearch\Client
      */
     public function newElasticsearchClient() {
-        if ( class_exists( "\Elastic\Elasticsearch\ClientBuilder" ) ) {
+        if ( class_exists( "\\OpenSearch\\ClientBuilder" ) ) {
+            $clientBuilder = \OpenSearch\ClientBuilder::create();
+        } elseif ( class_exists( "\\Elastic\\Elasticsearch\\ClientBuilder" ) ) {
             $clientBuilder = \Elastic\Elasticsearch\ClientBuilder::create();
         } else {
             $clientBuilder = \Elasticsearch\ClientBuilder::create();

@@ -4,6 +4,7 @@ namespace WikiSearch\Maintenance;
 
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Maintenance\MaintenanceFatalError;
 use WikiSearch\WikiSearchServices;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
@@ -14,10 +15,12 @@ if ( $IP === false ) {
 require_once "$IP/maintenance/Maintenance.php";
 
 class setupNeuralSearch extends Maintenance {
+    private const MODEL_NAME = "huggingface/sentence-transformers/all-MiniLM-L6-v2";
+    private const MODEL_VERSION = "1.0.1";
     private const PIPELINE_NAME = "wsns-pipeline";
 
     /**
-     * @var \Elastic\Elasticsearch\Client|\Elasticsearch\Client The ElasticSearch/OpenSearch client
+     * @var \Elastic\Elasticsearch\Client|\Elasticsearch\Client|\OpenSearch\Client The ElasticSearch/OpenSearch client
      */
     private $client;
 
@@ -28,35 +31,109 @@ class setupNeuralSearch extends Maintenance {
 		);
 
 		$this->requireExtension( 'WikiSearch' );
-
-        $this->client = WikiSearchServices::getElasticsearchClientFactory()
-            ->newElasticsearchClient();
 	}
 
 	public function execute() {
-        $this->ensureOpenSearch();
+        $this->client = WikiSearchServices::getElasticsearchClientFactory()->newElasticsearchClient();
 
-		$config = $this->getServiceContainer()->getMainConfig();
-		$modelId = $config->get( 'WikiSearchNeuralSearchModelId' );
+        $this->output( "Checking distribution ...\n" );
+        $distribution = $this->getDistribution();
 
-		if ( $modelId === null ) {
-			$this->fatalError(
-				'$wgWikiSearchNeuralSearchModelId is not set. ' .
-				'Configure it in LocalSettings.php before running this script.'
-			);
-		}
+        if ( $distribution !== 'opensearch' ) {
+            $this->fatalError( "\n\nERROR: Distribution must be 'opensearch', got '$distribution'.\n");
+        } else {
+            $this->output( "\t... confirmed OpenSearch ...\n");
+            $this->output( "\t... done.\n" );
+        }
 
-        $this->putEmbeddingPipeline( $modelId );
+        $this->output( "\n" );
 
-        $this->output( "Done.\n");
+        $this->client->cluster()->putSettings( [
+            "body" => [
+                "persistent" => [
+                    "plugins.ml_commons.only_run_on_ml_node" => false
+                ]
+            ]
+
+        ] );
+
+        $config = $this->getServiceContainer()->getMainConfig();
+        $modelId = $config->get( "WikiSearchNeuralSearchModelId" );
+
+        $this->output( "Model registration ...\n" );
+        $this->output( "\t... checking for existing model ...\n" );
+        if ( !isset( $modelId ) ) {
+            try {
+                $this->output( "\t... registering model (may take some time) ...\n");
+
+                $response = $this->registerModel();
+                $modelId = $response['modelId'];
+
+                $this->output( "\t... deploying model ...\n" );
+                $this->deployModel( $modelId );
+
+                // TODO: Store model ID in database
+                $this->output( "\t... done.\n");
+            } catch ( \Exception $e ) {
+                $this->fatalError( "\n\nERROR: Failed to register model: " . $e->getMessage() . "\n" );
+            }
+        } else {
+            $this->output( "\t... model already exists, skipping ...\n" );
+            $this->output( "\t... done.\n");
+        }
+
+        $this->output( "\n" );
+
+        try {
+            $this->output( "Embedding pipeline ...\n");
+            $this->output( "\t... (re)creating embedding pipeline ...\n" );
+            $this->putEmbeddingPipeline( $modelId );
+            $this->output( "\t... embedding pipeline (re)created ...\n");
+            $this->output( "\t... done.\n");
+        } catch ( \Exception $e ) {
+            $this->fatalError( "\n\nERROR: Failed to create embedding pipeline: " . $e->getMessage() . "\n" );
+        }
 	}
 
+    public function registerModel(): array {
+        $response = $this->client->ml()->registerModel( [
+            'body' => [
+                'name' => self::MODEL_NAME,
+                'version' => self::MODEL_VERSION,
+                'model_format' => 'TORCH_SCRIPT'
+            ]
+        ] );
+
+        $taskResponse = $this->awaitTask( $response['task_id'] );
+        $modelId = $taskResponse['model_id'];
+
+        return [
+            'created' => true,
+            'modelId' => $modelId,
+        ];
+    }
+
+    public function deployModel( string $modelId ): void {
+        $response = $this->client->ml()->getModel(['id' => $modelId]);
+        $state = $response['model_state'] ?? null;
+
+        if ( !in_array( $state, ['REGISTERED', 'UNDEPLOYED'], strict: true ) ) {
+            throw new \Exception(
+                "Model '$modelId' cannot be deployed from state: '$state'."
+            );
+        }
+
+        $this->client->ml()->deployModel(['id' => $modelId]);
+    }
+
     /**
+     * Creates the embedding pipeline, if it does not yet exist.
+     *
      * @param string $modelId
-     * @return void
-     * @throws \MediaWiki\Maintenance\MaintenanceFatalError
+     * @return array{created: bool}
+     * @throws \Exception When the creation of the pipeline failed
      */
-    private function putEmbeddingPipeline( string $modelId ) {
+    private function putEmbeddingPipeline( string $modelId ): array {
         $body = [
             'description' => 'WikiSearch neural embedding generation',
             'processors' => [
@@ -71,16 +148,23 @@ class setupNeuralSearch extends Maintenance {
             ],
         ];
 
-        try {
-            $result = $this->putPipelineIfNotExists( [
-                'id' => self::PIPELINE_NAME,
-                'body' => $body,
-            ] );
+        $this->client->ingest()->deletePipeline( ['id' => self::PIPELINE_NAME] );
+        $response = $this->client->ingest()->putPipeline( [
+            'id' => self::PIPELINE_NAME,
+            'body' => $body,
+        ] );
 
-            $this->output( $result['message'] . "\n" );
-        } catch ( \Exception $e ) {
-            $this->fatalError( 'ERROR: Failed to create pipeline: ' . $e->getMessage() . "\n" );
+        if ( !is_array( $response ) ) {
+            $response = $response->asArray();
         }
+
+        $acknowledged = $response['acknowledged'] ?? false;
+
+        if ( !$acknowledged ) {
+            throw new \Exception( 'Pipeline not acknowledged' );
+        }
+
+        return ['created' => true];
     }
 
     /**
@@ -88,58 +172,27 @@ class setupNeuralSearch extends Maintenance {
      * @return array
      * @throws \Exception
      */
-    private function putPipelineIfNotExists( array $pipeline ): array {
-        try {
-            $this->client->ingest()->getPipeline(['id' => $pipeline['id']]);
+    private function awaitTask( string $taskId ): array {
+        do {
+            $task = $this->client->ml()->getTask( ['id' => $taskId] );
+            usleep( 2.5 * 1000 * 1000 );
+        } while ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' );
 
-            return [
-                'success' => true,
-                'created' => false,
-                'message' => "Embedding pipeline already exists, skipping...",
-            ];
-        } catch (\Exception $e) {
-            if ( method_exists( 'getResponse', $e ) && $e->getResponse()->getStatusCode() !== 404 ) {
-                throw $e;
-            }
-
-            if ( !$e instanceof Missing404Exception && !$e instanceof \OpenSearch\Common\Exceptions\Missing404Exception ) {
-                throw $e;
-            }
+        if ( $task['state'] !== 'COMPLETED' ) {
+            throw new \Exception( 'Task failed to complete: ' . json_encode( $task ) );
         }
 
-        $response = $this->client->ingest()->putPipeline( $pipeline );
-        if ( !is_array( $response ) ) {
-            $response = $response->asArray();
-        }
-
-        $acknowledged = $response['acknowledged'] ?? false;
-
-        if (!$acknowledged) {
-            throw new \Exception( 'Pipeline not acknowledged' );
-        }
-
-        return [
-            'created' => true,
-            'message' => "Pipeline '{$pipeline['id']}' created successfully...",
-        ];
+        return $task;
     }
 
-    private function ensureOpenSearch(): void {
-        try {
-            $info = $this->client->info();
-        } catch ( \Exception $e ) {
-            $this->fatalError( 'ERROR: Failed to connect to OpenSearch: ' . $e->getMessage() );
-        }
+    private function getDistribution(): string {
+        $info = $this->client->info();
 
         if ( !is_array( $info ) ) {
             $info = $info->asArray();
         }
 
-        $distribution = $info['version']['distribution'] ?? 'unknown';
-
-        if ($distribution !== 'opensearch') {
-            $this->fatalError( 'ERROR: Neural search is only supported with OpenSearch. You are running ' . $distribution . '.');
-        }
+        return $info['version']['distribution'] ?? 'unknown';
     }
 }
 

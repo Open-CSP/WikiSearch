@@ -11,11 +11,10 @@ use WikiSearch\QueryEngine\Query\RawQuery;
  *
  * Instead of a QueryStringQuery, this filter emits an OpenSearch "neural" query
  * that generates a vector embedding for the query text at search time and
- * performs an approximate kNN lookup against the knn_vector field that was
- * populated by the text_embedding ingest pipeline.
+ * performs an approximate kNN lookup against the knn_vector field.
  */
 class NeuralSearchTermFilter extends AbstractFilter {
-	private const DEFAULT_K = 20;
+	private const DEFAULT_K = 5;
 
     /**
      * @var string
