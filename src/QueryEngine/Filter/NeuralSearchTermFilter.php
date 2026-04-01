@@ -2,6 +2,7 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
+use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WikiSearch\QueryEngine\Query\RawQuery;
 
@@ -14,23 +15,26 @@ use WikiSearch\QueryEngine\Query\RawQuery;
  * populated by the text_embedding ingest pipeline.
  */
 class NeuralSearchTermFilter extends AbstractFilter {
-	/**
-	 * Number of nearest neighbours to retrieve before other filters reduce the
-	 * result set. Should be at least as large as the largest configured result
-	 * page size to avoid prematurely cutting off relevant results.
-	 */
-	private const DEFAULT_K = 100;
+	private const DEFAULT_K = 20;
 
-	/**
-	 * @param string $queryText  The raw natural language query text.
-	 * @param string $modelId    The ML Commons model ID of the deployed embedding model.
-	 * @param string $field      The knn_vector field to search (e.g. 'wikisearch_embedding').
+    /**
+     * @var string
+     */
+    private $queryText;
+
+    /**
+     * @var string
+     */
+    private $modelId;
+
+    /**
+	 * @param string $queryText The raw natural language query text
 	 */
-	public function __construct(
-		private string $queryText,
-		private string $modelId,
-		private string $field
-	) {
+	public function __construct( string $queryText ) {
+        $this->queryText = $queryText;
+        $this->modelId = MediaWikiServices::getInstance()
+            ->getMainConfig()
+            ->get( 'WikiSearchNeuralSearchModelId' );
 	}
 
 	/**
@@ -39,7 +43,7 @@ class NeuralSearchTermFilter extends AbstractFilter {
 	protected function filterToQuery(): BoolQuery {
 		$neuralQuery = new RawQuery( [
 			'neural' => [
-				$this->field => [
+				'text_raw_embedding' => [
 					'query_text' => $this->queryText,
 					'model_id'   => $this->modelId,
 					'k'          => self::DEFAULT_K,

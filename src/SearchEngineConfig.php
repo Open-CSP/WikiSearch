@@ -404,6 +404,42 @@ class SearchEngineConfig {
 		return $this->result_properties;
 	}
 
+    /**
+     * Returns whether natural language search is enabled for this request.
+     *
+     * Evaluation order:
+     *  1. If $wgWikiSearchNaturalLanguageSearch is false → disabled globally.
+     *  2. If $wgWikiSearchNeuralSearchModelId is not set → disabled (logs a warning).
+     *  3. The per-page "natural language search" parameter overrides the global
+     *     default when explicitly set to true or false.
+     *
+     * @return bool
+     */
+    public function isNaturalLanguageSearchEnabled(): bool {
+        $mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+
+        if ( !$mainConfig->get( 'WikiSearchNaturalLanguageSearch' ) ) {
+            return false;
+        }
+
+        $modelId = $mainConfig->get( 'WikiSearchNeuralSearchModelId' );
+
+        if ( empty( $modelId ) ) {
+            Logger::getLogger()->warning(
+                'WikiSearch: WikiSearchNaturalLanguageSearch is enabled but WikiSearchNeuralSearchModelId is not set.'
+            );
+            return false;
+        }
+
+        $perPage = $this->getSearchParameter( 'natural language search' );
+
+        if ( $perPage !== false ) {
+            return (bool)$perPage;
+        }
+
+        return true;
+    }
+
 	/**
 	 * Updates/adds this SearchEngineConfig object in the database with the current values.
 	 *

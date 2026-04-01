@@ -26,10 +26,9 @@ use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Exception;
 use MediaWiki\MediaWikiServices;
+use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use RequestContext;
 use WikiMap;
-use WikiSearch\NeuralSearch\NeuralSearchBackend;
-use WikiSearch\NeuralSearch\OpenSearchNeuralSearchBackend;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
 use WikiSearch\QueryEngine\Filter\NeuralSearchTermFilter;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
@@ -60,15 +59,6 @@ class SearchEngine {
      * @var string[]
      */
     private array $search_terms = [];
-
-    /**
-     * Whether the neural search ingest pipeline has been confirmed ready
-     * during this request. Set after the first successful ensureIngestPipeline()
-     * call so we do not repeat it for subsequent addSearchTerm() calls.
-     *
-     * @var bool
-     */
-    private bool $neuralPipelineReady = false;
 
 	/**
 	 * Search constructor.
@@ -133,35 +123,23 @@ class SearchEngine {
 	public function addSearchTerm( string $search_term ) {
         $this->search_terms[] = $search_term;
 
-        if ( $this->isNaturalLanguageSearchEnabled() ) {
-            // Ensure the ingest pipeline is in place so newly indexed documents
-            // receive embeddings. Falls back to keyword search on failure.
-            if ( !$this->neuralPipelineReady ) {
-                $backend = $this->createNeuralSearchBackend();
-                $this->neuralPipelineReady = $backend->ensureIngestPipeline( $this->getIndex() );
-            }
-
-            if ( $this->neuralPipelineReady ) {
-                $backend = $this->createNeuralSearchBackend();
-                $filter = new NeuralSearchTermFilter(
-                    $search_term,
-                    $backend->getModelId(),
-                    $backend->getEmbeddingField()
-                );
-                $this->query_engine->addFunctionScoreFilter( $filter );
-                return;
-            }
+        if ( $search_term === '' ) {
+            return;
         }
 
-        // Keyword search (default or NL fallback).
-		$search_term_filter = new SearchTermFilter(
-			$this->prepareQuery( $search_term ),
-			$this->config->getSearchParameter( "search term properties" ) ?: null,
-			$this->config->getSearchParameter( "default operator" ) ?: "or",
-            $this->config->getSearchParameter( "include default search term properties" ) ?: false
-		);
+        if ( $this->getConfig()->isNaturalLanguageSearchEnabled() ) {
+            $filter = new NeuralSearchTermFilter( $search_term );
+            $this->query_engine->addFunctionScoreFilter( $filter );
+        } else {
+            $search_term_filter = new SearchTermFilter(
+                $this->prepareQuery( $search_term ),
+                $this->config->getSearchParameter( "search term properties" ) ?: null,
+                $this->config->getSearchParameter( "default operator" ) ?: "or",
+                $this->config->getSearchParameter( "include default search term properties" ) ?: false
+            );
 
-		$this->query_engine->addFunctionScoreFilter( $search_term_filter );
+            $this->query_engine->addFunctionScoreFilter( $search_term_filter );
+        }
 	}
 
 	/**
@@ -261,42 +239,6 @@ class SearchEngine {
 	}
 
 	/**
-	 * Returns whether natural language search is enabled for this request.
-	 *
-	 * Evaluation order:
-	 *  1. If $wgWikiSearchNaturalLanguageSearch is false → disabled globally.
-	 *  2. If $wgWikiSearchNeuralSearchModelId is not set → disabled (logs a warning).
-	 *  3. The per-page "natural language search" parameter overrides the global
-	 *     default when explicitly set to true or false.
-	 *
-	 * @return bool
-	 */
-	private function isNaturalLanguageSearchEnabled(): bool {
-		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
-
-		if ( !$mainConfig->get( 'WikiSearchNaturalLanguageSearch' ) ) {
-			return false;
-		}
-
-		$modelId = $mainConfig->get( 'WikiSearchNeuralSearchModelId' );
-
-		if ( empty( $modelId ) ) {
-			Logger::getLogger()->warning(
-				'WikiSearch: WikiSearchNaturalLanguageSearch is enabled but WikiSearchNeuralSearchModelId is not set.'
-			);
-			return false;
-		}
-
-		$perPage = $this->config->getSearchParameter( 'natural language search' );
-
-		if ( $perPage !== false ) {
-			return (bool)$perPage;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Returns the OpenSearch index name, using the same logic as QueryEngineFactory.
 	 *
 	 * @return string
@@ -305,23 +247,6 @@ class SearchEngine {
 		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
 		return $mainConfig->get( 'WikiSearchElasticStoreIndex' )
 			?: 'smw-data-' . strtolower( WikiMap::getCurrentWikiId() );
-	}
-
-	/**
-	 * Creates and returns the NeuralSearchBackend for this configuration.
-	 *
-	 * @return NeuralSearchBackend
-	 */
-	private function createNeuralSearchBackend(): NeuralSearchBackend {
-		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
-		$modelId = (string)$mainConfig->get( 'WikiSearchNeuralSearchModelId' );
-
-		$clientFactory = WikiSearchServices::getElasticsearchClientFactory();
-		$hosts = $clientFactory->getHosts();
-		$username = $mainConfig->get( 'WikiSearchBasicAuthenticationUsername' );
-		$password = $mainConfig->get( 'WikiSearchBasicAuthenticationPassword' );
-
-		return new OpenSearchNeuralSearchBackend( $modelId, $hosts, $username, $password );
 	}
 
 	/**

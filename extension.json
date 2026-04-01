@@ -92,14 +92,14 @@
 		"WikiSearchEnableSearchHistory": {
 			"value": false
 		},
-		"WikiSearchNaturalLanguageSearch": {
+		"WikiSearchEnableNeuralSearch": {
 			"value": false
 		},
 		"WikiSearchNeuralSearchModelId": {
 			"value": null
 		},
-		"WikiSearchNeuralSearchDimension": {
-			"value": 384
+		"WikiSearchNeuralSearchHighlightingModelId": {
+			"value": null
 		}
 	},
 	"SpecialPages": {
