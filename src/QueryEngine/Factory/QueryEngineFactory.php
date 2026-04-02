@@ -7,7 +7,6 @@ use MediaWiki\MediaWikiServices;
 use WikiMap;
 use WikiSearch\QueryEngine\Aggregation\PropertyValueAggregation;
 use WikiSearch\QueryEngine\Highlighter\DefaultHighlighter;
-use WikiSearch\QueryEngine\Highlighter\SemanticHighlighter;
 use WikiSearch\QueryEngine\QueryEngine;
 use WikiSearch\SearchEngineConfig;
 
@@ -55,8 +54,7 @@ class QueryEngineFactory {
         }
 
         // Configure the highlighter
-        // $queryEngine->addHighlighter( new DefaultHighlighter( $config ) );
-        $queryEngine->addHighlighter( new SemanticHighlighter() );
+        $queryEngine->addHighlighter( new DefaultHighlighter( $config ) );
 
 		// Configure the fallback sorts
 		if ( $config->getSearchParameter( "fallback sorts" ) !== false ) {

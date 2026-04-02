@@ -5,6 +5,7 @@ namespace WikiSearch\Maintenance;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\Maintenance\MaintenanceFatalError;
+use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
@@ -20,11 +21,12 @@ class setupNeuralSearch extends Maintenance {
             "name" => "huggingface/sentence-transformers/all-MiniLM-L6-v2",
             "version" => "1.0.1",
         ],
-        "highlighting" => [
-            "name" => "amazon/sentence-highlighting/opensearch-semantic-highlighter-v1",
-            "version" => "1.0.0",
-            "function_name" => "QUESTION_ANSWERING"
-        ]
+        // Highlighting is currently not supported
+        //        "highlighting" => [
+        //            "name" => "amazon/sentence-highlighting/opensearch-semantic-highlighter-v1",
+        //            "version" => "1.0.0",
+        //            "function_name" => "QUESTION_ANSWERING"
+        //        ]
     ];
 
     private const PIPELINE_NAME = "wsns-pipeline";
@@ -101,10 +103,12 @@ class setupNeuralSearch extends Maintenance {
 
         $this->output( "\t... done.\n\n" );
 
+        $embeddedProperties = $config->get( "WikiSearchNeuralEmbeddedProperties" );
+
         try {
             $this->output( "Embedding pipeline ...\n");
             $this->output( "\t... (re)creating embedding pipeline ...\n" );
-            $this->putEmbeddingPipeline( $embeddingModelId );
+            $this->putEmbeddingPipeline( $embeddingModelId, $embeddedProperties );
             $this->output( "\t... embedding pipeline (re)created ...\n");
             $this->output( "\t... done.\n");
         } catch ( \Exception $e ) {
@@ -113,15 +117,14 @@ class setupNeuralSearch extends Maintenance {
 	}
 
     public function registerModel( string $modelName, string $modelVersion, ?string $functionName ): array {
-        $response = $this->client->ml()->registerModel( [
-            'body' => [
-                'name' => $modelName,
-                'version' => $modelVersion,
-                'model_format' => 'TORCH_SCRIPT',
-                'function_name' => $functionName,
-            ]
+        $body = array_filter( [
+            'name' => $modelName,
+            'version' => $modelVersion,
+            'model_format' => 'TORCH_SCRIPT',
+            'function_name' => $functionName,
         ] );
 
+        $response = $this->client->ml()->registerModel( [ 'body' => $body ] );
         $taskResponse = $this->awaitTask( $response['task_id'] );
         $modelId = $taskResponse['model_id'];
 
@@ -148,19 +151,24 @@ class setupNeuralSearch extends Maintenance {
      * Creates the embedding pipeline, if it does not yet exist.
      *
      * @param string $modelId
+     * @param array $properties
      * @return array{created: bool}
      * @throws \Exception When the creation of the pipeline failed
      */
-    private function putEmbeddingPipeline( string $modelId ): array {
+    private function putEmbeddingPipeline( string $modelId, array $properties ): array {
+        $fieldMap = [];
+        foreach ( $properties as $property ) {
+            $propertyFieldMapper = new PropertyFieldMapper( $property );
+            $fieldMap[$property] = $propertyFieldMapper->getEmbeddingField();
+        }
+
         $body = [
             'description' => 'WikiSearch neural embedding generation',
             'processors' => [
                 [
                     'text_embedding' => [
                         'model_id'  => $modelId,
-                        'field_map' => [
-                            'text_raw' => 'text_raw_embedding',
-                        ],
+                        'field_map' => $fieldMap,
                     ],
                 ],
             ],

@@ -2,6 +2,7 @@
 
 namespace WikiSearch\QueryEngine\Filter;
 
+use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use WikiSearch\QueryEngine\QueryConvertable;
 
@@ -64,7 +65,7 @@ abstract class AbstractFilter implements QueryConvertable {
 	/**
 	 * Returns the filter as an ElasticSearch query.
 	 *
-	 * @return BoolQuery
+	 * @return BuilderInterface
 	 */
-	abstract protected function filterToQuery(): BoolQuery;
+	abstract protected function filterToQuery(): BuilderInterface;
 }

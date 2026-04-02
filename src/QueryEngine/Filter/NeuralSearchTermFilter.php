@@ -3,8 +3,11 @@
 namespace WikiSearch\QueryEngine\Filter;
 
 use MediaWiki\MediaWikiServices;
+use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use WikibaseSolutions\CypherDSL\Expressions\Procedures\Raw;
 use WikiSearch\QueryEngine\Query\RawQuery;
+use WikiSearch\SMW\PropertyFieldMapper;
 
 /**
  * Replaces SearchTermFilter when natural language search is active.
@@ -27,6 +30,11 @@ class NeuralSearchTermFilter extends AbstractFilter {
     private $embeddingModelId;
 
     /**
+     * @var array
+     */
+    private array $embeddedProperties;
+
+    /**
      * @var SearchTermFilter
      */
     private $searchTermFilter;
@@ -40,33 +48,40 @@ class NeuralSearchTermFilter extends AbstractFilter {
         $this->embeddingModelId = MediaWikiServices::getInstance()
             ->getMainConfig()
             ->get( 'WikiSearchNeuralModels' )['embedding'] ?? null;
+        $this->embeddedProperties = MediaWikiServices::getInstance()
+            ->getMainConfig()
+            ->get( 'WikiSearchNeuralEmbeddedProperties' ) ?? [];
         $this->searchTermFilter = $searchTermFilter;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	protected function filterToQuery(): BoolQuery {
-        $hybridQuery = new RawQuery( [
+	public function filterToQuery(): BuilderInterface {
+        $neuralBoolQuery = new BoolQuery();
+
+        foreach ( $this->embeddedProperties as $embeddedProperty ) {
+            $propertyFieldMapper = new PropertyFieldMapper( $embeddedProperty );
+            $neuralQuery = new RawQuery( [
+                'neural' => [
+                    $propertyFieldMapper->getEmbeddingField() => [
+                        'query_text' => $this->queryText,
+                        'model_id'   => $this->embeddingModelId,
+                        'k'          => self::DEFAULT_K,
+                        'boost'      => $propertyFieldMapper->getPropertyWeight()
+                    ],
+                ]
+            ] );
+            $neuralBoolQuery->add( $neuralQuery, BoolQuery::SHOULD );
+        }
+
+        return new RawQuery( [
             "hybrid" => [
                 "queries" => [
                     $this->searchTermFilter->filterToQuery()->toArray(),
-                    [
-                        'neural' => [
-                            'text_raw_embedding' => [
-                                'query_text' => $this->queryText,
-                                'model_id'   => $this->embeddingModelId,
-                                'k'          => self::DEFAULT_K,
-                            ],
-                        ]
-                    ]
+                    $neuralBoolQuery->toArray(),
                 ]
             ]
         ] );
-
-		$boolQuery = new BoolQuery();
-		$boolQuery->add( $hybridQuery );
-
-		return $boolQuery;
 	}
 }

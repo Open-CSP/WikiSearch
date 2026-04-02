@@ -125,6 +125,21 @@
 				}
 			},
 			{
+				"text_embedding_fields": {
+					"path_match": "P:*.txtField:embedding",
+					"match_mapping_type": "*",
+					"mapping": {
+						"type": "knn_vector",
+						"dimension": 384,
+						"method": {
+							"name": "hnsw",
+							"space_type": "cosinesimil",
+							"engine": "lucene"
+						}
+					}
+				}
+			},
+			{
 				"uri_fields": {
 					"path_match": "P:*.uriField",
 					"match_mapping_type": "*",
@@ -265,15 +280,6 @@
 					}
 				}
 			},
-			"text_raw_embedding": {
-				"type": "knn_vector",
-				"dimension": 384,
-				"method": {
-					"name": "hnsw",
-					"space_type": "cosinesimil",
-					"engine": "lucene"
-				}
-			},
 			"text_raw": {
 				"type": "text",
 				"term_vector": "with_positions_offsets",
@@ -283,6 +289,15 @@
 						"analyzer": "search",
 						"term_vector": "with_positions_offsets"
 					}
+				}
+			},
+			"text_raw:embedding": {
+				"type": "knn_vector",
+				"dimension": 384,
+				"method": {
+					"name": "hnsw",
+					"space_type": "cosinesimil",
+					"engine": "lucene"
 				}
 			},
 			"subject.title": {
@@ -303,6 +318,15 @@
 						"analyzer": "search",
 						"term_vector": "with_positions_offsets"
 					}
+				}
+			},
+			"subject.title:embedding": {
+				"type": "knn_vector",
+				"dimension": 384,
+				"method": {
+					"name": "hnsw",
+					"space_type": "cosinesimil",
+					"engine": "lucene"
 				}
 			},
 			"subject.interwiki": {
@@ -347,6 +371,15 @@
 			},
 			"subject.rev_id": {
 				"type": "integer"
+			},
+			"attachment.content:embedding": {
+				"type": "knn_vector",
+				"dimension": 384,
+				"method": {
+					"name": "hnsw",
+					"space_type": "cosinesimil",
+					"engine": "lucene"
+				}
 			}
 		}
 	}
