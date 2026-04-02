@@ -95,10 +95,7 @@
 		"WikiSearchEnableNeuralSearch": {
 			"value": false
 		},
-		"WikiSearchNeuralSearchModelId": {
-			"value": null
-		},
-		"WikiSearchNeuralSearchHighlightingModelId": {
+		"WikiSearchNeuralModels": {
 			"value": null
 		}
 	},

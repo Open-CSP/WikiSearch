@@ -15,8 +15,18 @@ if ( $IP === false ) {
 require_once "$IP/maintenance/Maintenance.php";
 
 class setupNeuralSearch extends Maintenance {
-    private const MODEL_NAME = "huggingface/sentence-transformers/all-MiniLM-L6-v2";
-    private const MODEL_VERSION = "1.0.1";
+    private const MODELS = [
+        "embedding" => [
+            "name" => "huggingface/sentence-transformers/all-MiniLM-L6-v2",
+            "version" => "1.0.1",
+        ],
+        "highlighting" => [
+            "name" => "amazon/sentence-highlighting/opensearch-semantic-highlighter-v1",
+            "version" => "1.0.0",
+            "function_name" => "QUESTION_ANSWERING"
+        ]
+    ];
+
     private const PIPELINE_NAME = "wsns-pipeline";
 
     /**
@@ -58,36 +68,43 @@ class setupNeuralSearch extends Maintenance {
         ] );
 
         $config = $this->getServiceContainer()->getMainConfig();
-        $modelId = $config->get( "WikiSearchNeuralSearchModelId" );
+        $models = $config->get( "WikiSearchNeuralModels" );
+
+        $embeddingModelId = $models['embedding'] ?? null;
 
         $this->output( "Model registration ...\n" );
-        $this->output( "\t... checking for existing model ...\n" );
-        if ( !isset( $modelId ) ) {
-            try {
-                $this->output( "\t... registering model (may take some time) ...\n");
 
-                $response = $this->registerModel();
+        foreach ( self::MODELS as $modelKey => $modelSpec ) {
+            if ( isset( $models[$modelKey] ) ) {
+                $this->output( "\t... `$modelKey` model already deployed, skipping ...\n");
+                continue;
+            }
+
+            try {
+                $this->output( "\t... registering `$modelKey` model (may take some time) ...\n");
+                $response = $this->registerModel( $modelSpec['name'], $modelSpec['version'], $modelSpec['function_name'] ?? null );
                 $modelId = $response['modelId'];
 
-                $this->output( "\t... deploying model ...\n" );
+                $this->output( "\t... deploying `$modelKey` model ...\n" );
                 $this->deployModel( $modelId );
 
-                // TODO: Store model ID in database
-                $this->output( "\t... done.\n");
+                $this->output( "\t... `$modelKey` model deployed ...\n" );
+                $this->output( "\t... IMPORTANT: add `\$wgWikiSearchNeuralModels['$modelKey'] = '$modelId';` to your LocalSettings.php ...\n" );
+
+                if ( $modelKey === 'embedding' ) {
+                    $embeddingModelId = $modelId;
+                }
             } catch ( \Exception $e ) {
-                $this->fatalError( "\n\nERROR: Failed to register model: " . $e->getMessage() . "\n" );
+                $this->fatalError( "\n\nERROR: Failed to deploy `$modelKey` model: " . $e->getMessage() . "\n" );
             }
-        } else {
-            $this->output( "\t... model already exists, skipping ...\n" );
-            $this->output( "\t... done.\n");
         }
 
-        $this->output( "\n" );
+        $this->output( "\t... done.\n\n" );
 
         try {
             $this->output( "Embedding pipeline ...\n");
             $this->output( "\t... (re)creating embedding pipeline ...\n" );
-            $this->putEmbeddingPipeline( $modelId );
+            $this->putEmbeddingPipeline( $embeddingModelId );
             $this->output( "\t... embedding pipeline (re)created ...\n");
             $this->output( "\t... done.\n");
         } catch ( \Exception $e ) {
@@ -95,12 +112,13 @@ class setupNeuralSearch extends Maintenance {
         }
 	}
 
-    public function registerModel(): array {
+    public function registerModel( string $modelName, string $modelVersion, ?string $functionName ): array {
         $response = $this->client->ml()->registerModel( [
             'body' => [
-                'name' => self::MODEL_NAME,
-                'version' => self::MODEL_VERSION,
-                'model_format' => 'TORCH_SCRIPT'
+                'name' => $modelName,
+                'version' => $modelVersion,
+                'model_format' => 'TORCH_SCRIPT',
+                'function_name' => $functionName,
             ]
         ] );
 
@@ -173,10 +191,12 @@ class setupNeuralSearch extends Maintenance {
      * @throws \Exception
      */
     private function awaitTask( string $taskId ): array {
+        $i = 0;
+
         do {
             $task = $this->client->ml()->getTask( ['id' => $taskId] );
-            usleep( 2.5 * 1000 * 1000 );
-        } while ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' );
+            sleep( 3 );
+        } while ( ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' ) && $i++ < 50 );
 
         if ( $task['state'] !== 'COMPLETED' ) {
             throw new \Exception( 'Task failed to complete: ' . json_encode( $task ) );
