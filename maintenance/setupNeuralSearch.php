@@ -48,11 +48,13 @@ class setupNeuralSearch extends Maintenance {
 	public function execute() {
         $this->client = WikiSearchServices::getElasticsearchClientFactory()->newElasticsearchClient();
 
-        $this->output( "Checking distribution ...\n" );
-        $distribution = $this->getDistribution();
+        $this->output( "Checking distribution and version ...\n" );
+        $version = $this->getVersion();
 
-        if ( $distribution !== 'opensearch' ) {
-            $this->fatalError( "\n\nERROR: Distribution must be 'opensearch', got '$distribution'.\n");
+        if ( $version['distribution'] !== 'opensearch' ) {
+            $this->fatalError( "\n\nERROR: Distribution must be 'opensearch', got '{$version['distribution']}'.\n");
+        } else if ( version_compare( $version['number'], '2.4.0', '<' ) ) {
+            $this->fatalError( "\n\nERROR: Version must be 2.4.0 or greater, got '{$version['number']}'.\n");
         } else {
             $this->output( "\t... confirmed OpenSearch ...\n");
             $this->output( "\t... done.\n" );
@@ -66,7 +68,6 @@ class setupNeuralSearch extends Maintenance {
                     "plugins.ml_commons.only_run_on_ml_node" => false
                 ]
             ]
-
         ] );
 
         $config = $this->getServiceContainer()->getMainConfig();
@@ -213,14 +214,14 @@ class setupNeuralSearch extends Maintenance {
         return $task;
     }
 
-    private function getDistribution(): string {
+    private function getVersion(): array {
         $info = $this->client->info();
 
         if ( !is_array( $info ) ) {
             $info = $info->asArray();
         }
 
-        return $info['version']['distribution'] ?? 'unknown';
+        return $info['version'];
     }
 }
 

@@ -19,9 +19,16 @@ Run the initialization script:
 php maintenance/run.php ./extensions/WikiSearch/maintenance/setupNeuralSearch
 ```
 
+This initialization script does the following:
+
+- It ensures you are running a compatible version of OpenSearch.
+- It configures OpenSearch to run machine learning algorithms on non-ML nodes.
+- It creates and deploys a new embedding model, if none is already configured.
+- It (re)creates an embedding pipeline for document ingestion.
+
 The initialization script will return the ID of the model to use for embedding, if no model has yet been configured.
-Write down the returned model ID. You may reuse this ID for multiple wikis that connect to the same ElasticSearch
-instance.
+**Write down the returned model ID, you will need it in step 3.** You may reuse this ID for multiple wikis that connect
+to the same OpenSearch instance.
 
 ## Step 2 - Configure the data standard
 
