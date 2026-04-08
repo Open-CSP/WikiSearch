@@ -167,9 +167,10 @@ class setupNeuralSearch extends Maintenance {
             if ( str_contains( $propertyField, '.' ) ) {
                 $newPropertyField = 'ws_' . str_replace( '.', '-', $property );
                 $processors[] = [
-                    'copy_value' => [
-                        'source' => $propertyField,
-                        'target' => $newPropertyField,
+                    'copy' => [
+                        'source_field' => $propertyField,
+                        'target_field' => $newPropertyField,
+                        'ignore_missing' => true
                     ]
                 ];
 
