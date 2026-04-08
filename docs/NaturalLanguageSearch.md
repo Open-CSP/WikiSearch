@@ -94,6 +94,18 @@ The neural search currently has a few limitations:
 
 ---
 
+## Step 0 - Configure the embedding properties
+
+You must first configure which properties you want to use for embedding. These are the properties for which embeddings
+will be generated, and which will be used by the neural search. By default, only `text_raw`, `subject.title` and
+`attachment.content` are used.
+
+```php
+$wgWikiSearchNeuralEmbeddedProperties = ['Parsed text'];
+```
+
+In step 2b, you must also add these properties to the data standard.
+
 ## Step 1 - Run the initialization script
 
 Run the initialization script:
@@ -127,10 +139,37 @@ Feel free to modify the data standard template to better suit your needs.
 ## Step 2b - Tweak the data standard
 
 The default embeddings data standard template of WikiSearch adds embedding fields for `text_raw`, `subject.title` and
-`attachment.content`. If you want to use other properties than those three in your neural search, you must manually add
-them to the data standard.
+`attachment.content` (see step 0). If you want to use other properties than those three in your neural search, you must
+manually add them to the data standard.
 
+For example, to generate embeddings for `Parsed text`, you must first look up the ID of the `Parsed text` property:
 
+```bash
+php maintenance/run.php ./extensions/WikiSearch/maintenance/propertyLookup.php --property="Parsed text"
+```
+
+Copy this ID, and add an entry under `mappings` then `properties` in the data standard:
+
+```json
+{
+  "settings": "...",
+  "mappings": {
+    "...":  "...",
+    "properties": {
+      "...":  "...",
+      "P:<ID>.txtField:embedding": {
+        "type": "knn_vector",
+        "dimension": 384,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "lucene"
+        }
+      }
+    }
+  }
+}
+```
 
 ## Step 3 - Configure WikiSearch
 
