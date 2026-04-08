@@ -100,7 +100,7 @@
 		},
 		"WikiSearchNeuralEmbeddedProperties": {
 			"value": [ "subject-title^10", "text_raw", "attachment-content" ],
-			"_merge_strategy": "provide_default"
+			"merge_strategy": "provide_default"
 		}
 	},
 	"SpecialPages": {

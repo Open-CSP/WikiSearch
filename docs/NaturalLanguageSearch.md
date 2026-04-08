@@ -90,6 +90,7 @@ The neural search currently has a few limitations:
 ## Requirements
 
 - **OpenSearch 2.4 or higher** (not plain Elasticsearch — the `neural` query type and ML Commons are OpenSearch-specific)
+- The **OpenSearch PHP Client** ([`opensearch-project/opensearch-php`](https://packagist.org/packages/opensearch-project/opensearch-php)), not the ElasticSearch client
 - The **ML Commons** and **Neural Search** plugins, which are bundled with OpenSearch by default
 
 ---
@@ -145,7 +146,7 @@ manually add them to the data standard.
 For example, to generate embeddings for `Parsed text`, you must first look up the ID of the `Parsed text` property:
 
 ```bash
-php maintenance/run.php ./extensions/WikiSearch/maintenance/propertyLookup.php --property="Parsed text"
+php maintenance/run.php ./extensions/WikiSearch/maintenance/propertyLookup --property="Parsed text"
 ```
 
 Copy this ID, and add an entry under `mappings` then `properties` in the data standard:
@@ -157,6 +158,7 @@ Copy this ID, and add an entry under `mappings` then `properties` in the data st
     "...":  "...",
     "properties": {
       "...":  "...",
+      // Add this to the data standard
       "P:<ID>.txtField:embedding": {
         "type": "knn_vector",
         "dimension": 384,
@@ -188,6 +190,8 @@ Apply the `smw.patch` (located in this directory) to Semantic MediaWiki:
 cd extensions/SemanticMediaWiki
 git apply ../WikiSearch/docs/smw.patch
 ```
+
+> Note: This requires Semantic MediaWiki to be installed using Git. Look at the source of the patch to do it manually.
 
 ## Step 5 - Run maintenance scripts
 
