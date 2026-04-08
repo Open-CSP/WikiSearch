@@ -412,7 +412,7 @@ class SearchEngineConfig {
     public function isNaturalLanguageSearchEnabled(): bool {
         $mainConfig = MediaWikiServices::getInstance()->getMainConfig();
 
-        if ( !$mainConfig->get( 'WikiSearchNaturalLanguageSearch' ) ) {
+        if ( !$mainConfig->get( 'WikiSearchEnableNeuralSearch' ) ) {
             return false;
         }
 
