@@ -157,14 +157,11 @@ class setupNeuralSearch extends Maintenance {
      * @throws \Exception When the creation of the pipeline failed
      */
     private function putEmbeddingPipeline( string $modelId, array $embeddedProperties ): array {
-        $fieldMap = [
-            'text_raw' => ( new PropertyFieldMapper( 'text_raw' ) )->getEmbeddingField(),
-            'subject.title' => ( new PropertyFieldMapper( 'subject.title' ) )->getEmbeddingField(),
-        ];
+        $fieldMap = [];
 
         foreach ( $embeddedProperties as $property ) {
             $propertyFieldMapper = new PropertyFieldMapper( $property );
-            $fieldMap[$property] = $propertyFieldMapper->getEmbeddingField();
+            $fieldMap[$propertyFieldMapper->getPropertyField()] = $propertyFieldMapper->getEmbeddingField();
         }
 
         $body = [
