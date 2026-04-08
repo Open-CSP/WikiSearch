@@ -158,15 +158,31 @@ class setupNeuralSearch extends Maintenance {
      */
     private function putEmbeddingPipeline( string $modelId, array $embeddedProperties ): array {
         $fieldMap = [];
+        $processors = [];
 
         foreach ( $embeddedProperties as $property ) {
             $propertyFieldMapper = new PropertyFieldMapper( $property );
-            $fieldMap[$propertyFieldMapper->getPropertyField()] = $propertyFieldMapper->getEmbeddingField();
+            $propertyField = $propertyFieldMapper->getPropertyField();
+
+            if ( str_contains( $propertyField, '.' ) ) {
+                $newPropertyField = 'ws_' . str_replace( '.', '-', $property );
+                $processors[] = [
+                    'copy_value' => [
+                        'source' => $propertyField,
+                        'target' => $newPropertyField,
+                    ]
+                ];
+
+                $propertyField = $newPropertyField;
+            }
+
+            $fieldMap[$propertyField] = $propertyFieldMapper->getEmbeddingField();
         }
 
         $body = [
             'description' => 'WikiSearch neural embedding generation',
             'processors' => [
+                ...$processors,
                 [
                     'text_embedding' => [
                         'model_id'  => $modelId,
