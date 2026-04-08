@@ -169,8 +169,7 @@ class setupNeuralSearch extends Maintenance {
                 $processors[] = [
                     'copy' => [
                         'source_field' => $propertyField,
-                        'target_field' => $newPropertyField,
-                        'ignore_missing' => true
+                        'target_field' => $newPropertyField
                     ]
                 ];
 
