@@ -159,6 +159,7 @@ class setupNeuralSearch extends Maintenance {
     private function putEmbeddingPipeline( string $modelId, array $embeddedProperties ): array {
         $fieldMap = [];
         $processors = [];
+        $remove = [];
 
         foreach ( $embeddedProperties as $property ) {
             $propertyFieldMapper = new PropertyFieldMapper( $property );
@@ -174,6 +175,7 @@ class setupNeuralSearch extends Maintenance {
                 ];
 
                 $propertyField = $newPropertyField;
+                $remove[] = $newPropertyField;
             }
 
             $fieldMap[$propertyField] = $propertyFieldMapper->getEmbeddingField();
@@ -189,6 +191,11 @@ class setupNeuralSearch extends Maintenance {
                         'field_map' => $fieldMap,
                     ],
                 ],
+                [
+                    'remove' => [
+                        'field' => $remove,
+                    ]
+                ]
             ],
         ];
 
