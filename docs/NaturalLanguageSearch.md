@@ -4,9 +4,92 @@ WikiSearch supports natural language (semantic) search powered by OpenSearch's N
 Instead of matching keywords, it converts queries and document content into vector embeddings and finds semantically
 similar results.
 
+WikiSearch uses a hybrid search approach for natural language search, using the
+[`hybrid`](https://docs.opensearch.org/latest/vector-search/ai-search/hybrid-search/index/) search strategy from
+OpenSearch. This means that it combines both the results of a regular search term query with one or more natural language
+search queries.
+
+For example, it may generate a query like so:
+
+```json
+{
+  "hybrid": {
+    "queries": [
+      {
+        "bool": {
+          "should": [
+            {
+              "query_string": {
+                "query": "*homebrew*",
+                "fields": [
+                  "subject.title.search^8",
+                  "subject.title^8",
+                  "text_copy.search^5",
+                  "text_copy^5",
+                  "text_raw.search",
+                  "text_raw",
+                  "attachment.title^3",
+                  "attachment.content"
+                ],
+                "default_operator": "or",
+                "analyze_wildcard": true,
+                "tie_breaker": 1,
+                "lenient": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "bool": {
+          "should": [
+            {
+              "neural": {
+                "subject.title:embedding": {
+                  "query_text": "homebrew",
+                  "model_id": "cLpTT50BXjmMqUCTslRr",
+                  "k": 50
+                }
+              }
+            },
+            {
+              "neural": {
+                "text_raw:embedding": {
+                  "query_text": "homebrew",
+                  "model_id": "cLpTT50BXjmMqUCTslRr",
+                  "k": 50
+                }
+              }
+            },
+            {
+              "neural": {
+                "attachment.content:embedding": {
+                  "query_text": "homebrew",
+                  "model_id": "cLpTT50BXjmMqUCTslRr",
+                  "k": 50
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+## Limitations
+
+The neural search currently has a few limitations:
+
+- When a document is only matched by the neural search query, no highlights will be generated.
+- It is not possible to boost the relevance of certain fields.
+- It is only possible to use fields that have an `<fieldname>:embedding` variant (as specified in the data standard).
+- You can only use the neural search on certain properties (see step 2b).
+
 ## Requirements
 
-- **OpenSearch 2.4+** (not plain Elasticsearch — the `neural` query type and ML Commons are OpenSearch-specific)
+- **OpenSearch 2.4 or higher** (not plain Elasticsearch — the `neural` query type and ML Commons are OpenSearch-specific)
 - The **ML Commons** and **Neural Search** plugins, which are bundled with OpenSearch by default
 
 ---
@@ -40,6 +123,14 @@ $smwgElasticsearchConfig['index_def']['data'] = '/path/to/smw-wikisearch-data-ve
 ```
 
 Feel free to modify the data standard template to better suit your needs.
+
+## Step 2b - Tweak the data standard
+
+The default embeddings data standard template of WikiSearch adds embedding fields for `text_raw`, `subject.title` and
+`attachment.content`. If you want to use other properties than those three in your neural search, you must manually add
+them to the data standard.
+
+
 
 ## Step 3 - Configure WikiSearch
 

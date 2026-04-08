@@ -134,7 +134,7 @@ class SearchEngine {
             $this->config->getSearchParameter( "include default search term properties" ) ?: false
         );
 
-        if ( $this->getConfig()->isNaturalLanguageSearchEnabled() ) {
+        if ( $this->getConfig()->isNaturalLanguageSearchEnabled() && !$this->isAdvancedQuery( $search_term ) ) {
             $filter = new NeuralSearchTermFilter( $search_term, $search_term_filter );
             $this->query_engine->addFunctionScoreFilter( $filter );
         } else {

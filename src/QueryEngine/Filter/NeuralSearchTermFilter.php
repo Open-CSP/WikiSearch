@@ -5,6 +5,7 @@ namespace WikiSearch\QueryEngine\Filter;
 use MediaWiki\MediaWikiServices;
 use ONGR\ElasticsearchDSL\BuilderInterface;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use ONGR\ElasticsearchDSL\Query\Compound\BoostingQuery;
 use WikibaseSolutions\CypherDSL\Expressions\Procedures\Raw;
 use WikiSearch\QueryEngine\Query\RawQuery;
 use WikiSearch\SMW\PropertyFieldMapper;
@@ -17,7 +18,7 @@ use WikiSearch\SMW\PropertyFieldMapper;
  * performs an approximate kNN lookup against the knn_vector field.
  */
 class NeuralSearchTermFilter extends AbstractFilter {
-	private const DEFAULT_K = 25;
+	private const DEFAULT_K = 50;
 
     /**
      * @var string
@@ -58,30 +59,49 @@ class NeuralSearchTermFilter extends AbstractFilter {
 	 * @inheritDoc
 	 */
 	public function filterToQuery(): BuilderInterface {
-        $neuralBoolQuery = new BoolQuery();
+        $queries = [
+            $this->searchTermFilter->filterToQuery()->toArray(),
+            $this->generateEmbeddedPropertiesQuery()->toArray(),
+        ];
+
+        $query = [
+            "hybrid" => [
+                "queries" => $queries
+            ]
+        ];
+
+        return new RawQuery( $query );
+	}
+
+    /**
+     * @return BoolQuery
+     */
+    private function generateEmbeddedPropertiesQuery(): BoolQuery {
+        $query = new BoolQuery();
 
         foreach ( $this->embeddedProperties as $embeddedProperty ) {
-            $propertyFieldMapper = new PropertyFieldMapper( $embeddedProperty );
-            $neuralQuery = new RawQuery( [
-                'neural' => [
-                    $propertyFieldMapper->getEmbeddingField() => [
-                        'query_text' => $this->queryText,
-                        'model_id'   => $this->embeddingModelId,
-                        'k'          => self::DEFAULT_K,
-                        'boost'      => $propertyFieldMapper->getPropertyWeight()
-                    ],
-                ]
-            ] );
-            $neuralBoolQuery->add( $neuralQuery, BoolQuery::SHOULD );
+            $neuralQuery = new RawQuery( $this->generateNeuralQuery( $embeddedProperty ));
+            $query->add( $neuralQuery, BoolQuery::SHOULD );
         }
 
-        return new RawQuery( [
-            "hybrid" => [
-                "queries" => [
-                    $this->searchTermFilter->filterToQuery()->toArray(),
-                    $neuralBoolQuery->toArray(),
-                ]
+        return $query;
+    }
+
+    /**
+     * @param string $property
+     * @return \array[][]
+     */
+    private function generateNeuralQuery( string $property ): array {
+        $propertyFieldMapper = new PropertyFieldMapper( $property );
+
+        return [
+            'neural' => [
+                $propertyFieldMapper->getEmbeddingField() => [
+                    'query_text' => $this->queryText,
+                    'model_id'   => $this->embeddingModelId,
+                    'k'          => self::DEFAULT_K
+                ],
             ]
-        ] );
-	}
+        ];
+    }
 }

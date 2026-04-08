@@ -125,21 +125,6 @@
 				}
 			},
 			{
-				"text_embedding_fields": {
-					"path_match": "P:*.txtField:embedding",
-					"match_mapping_type": "*",
-					"mapping": {
-						"type": "knn_vector",
-						"dimension": 384,
-						"method": {
-							"name": "hnsw",
-							"space_type": "cosinesimil",
-							"engine": "lucene"
-						}
-					}
-				}
-			},
-			{
 				"uri_fields": {
 					"path_match": "P:*.uriField",
 					"match_mapping_type": "*",

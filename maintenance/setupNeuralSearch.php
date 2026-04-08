@@ -29,7 +29,7 @@ class setupNeuralSearch extends Maintenance {
         //        ]
     ];
 
-    private const PIPELINE_NAME = "wsns-pipeline";
+    private const EMBEDDING_PIPELINE_NAME = "wsns-pipeline";
 
     /**
      * @var \Elastic\Elasticsearch\Client|\Elasticsearch\Client|\OpenSearch\Client The ElasticSearch/OpenSearch client
@@ -156,9 +156,13 @@ class setupNeuralSearch extends Maintenance {
      * @return array{created: bool}
      * @throws \Exception When the creation of the pipeline failed
      */
-    private function putEmbeddingPipeline( string $modelId, array $properties ): array {
-        $fieldMap = [];
-        foreach ( $properties as $property ) {
+    private function putEmbeddingPipeline( string $modelId, array $embeddedProperties ): array {
+        $fieldMap = [
+            'text_raw' => ( new PropertyFieldMapper( 'text_raw' ) )->getEmbeddingField(),
+            'subject.title' => ( new PropertyFieldMapper( 'subject.title' ) )->getEmbeddingField(),
+        ];
+
+        foreach ( $embeddedProperties as $property ) {
             $propertyFieldMapper = new PropertyFieldMapper( $property );
             $fieldMap[$property] = $propertyFieldMapper->getEmbeddingField();
         }
@@ -175,9 +179,12 @@ class setupNeuralSearch extends Maintenance {
             ],
         ];
 
-        $this->client->ingest()->deletePipeline( ['id' => self::PIPELINE_NAME] );
+        if ( $this->ingestPipelineExists( self::EMBEDDING_PIPELINE_NAME ) ) {
+            $this->client->ingest()->deletePipeline( ['id' => self::EMBEDDING_PIPELINE_NAME] );
+        }
+
         $response = $this->client->ingest()->putPipeline( [
-            'id' => self::PIPELINE_NAME,
+            'id' => self::EMBEDDING_PIPELINE_NAME,
             'body' => $body,
         ] );
 
@@ -192,6 +199,30 @@ class setupNeuralSearch extends Maintenance {
         }
 
         return ['created' => true];
+    }
+
+    /**
+     * Whether the specified ingest pipeline exists.
+     *
+     * @param string $pipelineId
+     * @return bool
+     * @throws \Exception
+     */
+    private function ingestPipelineExists( string $pipelineId ): bool {
+        try {
+            $this->client->ingest()->getPipeline( ['id' => $pipelineId ] );
+            return true;
+        } catch ( \Exception $e ) {
+            if (
+                $e instanceof \OpenSearch\Common\Exceptions\Missing404Exception
+                || $e instanceof \Elasticsearch\Common\Exceptions\Missing404Exception
+                || ($e instanceof \Elastic\Elasticsearch\Exception\ClientResponseException && $e->getResponse()->getStatusCode() === 404 )
+            ) {
+                return false;
+            }
+
+            throw $e;
+        }
     }
 
     /**
