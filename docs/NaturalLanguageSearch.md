@@ -160,7 +160,7 @@ Copy this ID, and add an entry under `mappings` then `properties` in the data st
     "properties": {
       "...":  "...",
       // Add this to the data standard
-      "P:<ID>.txtField:embedding": {
+      "P:<ID>:embedding": {
         "type": "knn_vector",
         "dimension": 384,
         "method": {

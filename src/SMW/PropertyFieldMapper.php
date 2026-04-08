@@ -230,7 +230,7 @@ class PropertyFieldMapper {
      * @return string
      */
     public function getEmbeddingField(): string {
-        return sprintf( "%s:embedding", $this->getPropertyField() );
+        return sprintf( "%s:embedding", $this->getPID() );
     }
 
 	/**
