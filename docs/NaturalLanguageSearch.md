@@ -126,13 +126,14 @@ The initialization script will return the ID of the model to use for embedding, 
 **Write down the returned model ID, you will need it in step 3.** You may reuse this ID for multiple wikis that connect
 to the same OpenSearch instance.
 
-## Step 2 - Configure the data standard
+## Step 2 - Configure the data standard and enable raw text
 
 Copy the data standard template `smw-wikisearch-data-vector-embeddings-template.json` from the `data_templates` folder
 to somewhere else, and add the following to your `LocalSettings.php`:
 
 ```php
 $smwgElasticsearchConfig['index_def']['data'] = '/path/to/smw-wikisearch-data-vector-embeddings.json';
+$smwgElasticsearchConfig['indexer']['raw.text'] = true;
 ```
 
 Feel free to modify the data standard template to better suit your needs.
