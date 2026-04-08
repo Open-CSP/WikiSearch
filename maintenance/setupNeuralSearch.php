@@ -166,7 +166,7 @@ class setupNeuralSearch extends Maintenance {
             $propertyField = $propertyFieldMapper->getPropertyField();
 
             if ( str_contains( $propertyField, '.' ) ) {
-                $newPropertyField = $propertyFieldMapper->getPID() . ':embedding_source';
+                $newPropertyField = 'tmp_' . sha1( $property );
                 $processors[] = [
                     'copy' => [
                         'source_field' => $propertyField,
