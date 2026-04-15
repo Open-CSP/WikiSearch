@@ -93,13 +93,15 @@ class NeuralSearchTermFilter extends AbstractFilter {
      */
     private function generateNeuralQuery( string $property ): array {
         $propertyFieldMapper = new PropertyFieldMapper( $property );
+        $boost = $propertyFieldMapper->getPropertyWeight();
 
         return [
             'neural' => [
                 $propertyFieldMapper->getEmbeddingField() => [
                     'query_text' => $this->queryText,
                     'model_id'   => $this->embeddingModelId,
-                    'k'          => self::DEFAULT_K
+                    'k'          => self::DEFAULT_K,
+                    'boost'      => $boost,
                 ],
             ]
         ];

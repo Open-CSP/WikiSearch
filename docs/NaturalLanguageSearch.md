@@ -105,7 +105,14 @@ will be generated, and which will be used by the neural search. By default, only
 $wgWikiSearchNeuralEmbeddedProperties = ['Parsed text'];
 ```
 
-In step 2b, you must also add these properties to the data standard.
+In step 2b, you must also add these properties to the data standard. Each time you update these properties, you should
+follow the steps in this guide again.
+
+You may also specify the weight of the properties using this configuration option, for example:
+
+```php
+$wgWikiSearchNeuralEmbeddedProperties = ['subject-title^50', 'Parsed text'];
+```
 
 ## Step 1 - Run the initialization script
 
@@ -136,7 +143,8 @@ $smwgElasticsearchConfig['index_def']['data'] = '/path/to/smw-wikisearch-data-ve
 $smwgElasticsearchConfig['indexer']['raw.text'] = true;
 ```
 
-Feel free to modify the data standard template to better suit your needs.
+Feel free to modify the data standard template to better suit your needs. This is necessary if you are using custom
+embedding properties (see step 2b below).
 
 ## Step 2b - Tweak the data standard
 

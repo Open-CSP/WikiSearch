@@ -19,6 +19,10 @@ ElasticSearch query that was used to perform the search.
 | `aggregations` | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
 | `sorting`      | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
 
+## Natural language search
+
+For documentation about using and setting-up natural language search, please see `docs/NaturalLanguageSearch.md`.
+
 ## Special properties
 
 There are a number of special properties defined by Semantic MediaWiki that are worth pointing out. These properties act just like regular properties, but do not appear in Special:Browse.
