@@ -18,7 +18,7 @@ require_once "$IP/maintenance/Maintenance.php";
 class setupNeuralSearch extends Maintenance {
     private const MODELS = [
         "embedding" => [
-            "name" => "huggingface/sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
+            "name" => "huggingface/sentence-transformers/all-MiniLM-L6-v2",
             "version" => "1.0.1",
         ],
         // Highlighting is currently not supported

@@ -133,6 +133,12 @@ The initialization script will return the ID of the model to use for embedding, 
 **Write down the returned model ID, you will need it in step 3.** You may reuse this ID for multiple wikis that connect
 to the same OpenSearch instance.
 
+If you get an error like the one below, please wait a short while and try again.
+
+```
+ERROR: Failed to deploy `embedding` model: Task failed to complete: {"task_type":"REGISTER_MODEL","function_name":"TEXT_EMBEDDING","state":"FAILED","worker_node":["2h_fiX9IQoWtkhvD4Vw8Gg"],"create_time":1776251193461,"last_update_time":1776251193510,"error":"Memory Circuit Breaker is open, please check your resources!","is_async":true}
+```
+
 ## Step 2 - Configure the data standard and enable raw text
 
 Copy the data standard template `smw-wikisearch-data-vector-embeddings-template.json` from the `data_templates` folder
