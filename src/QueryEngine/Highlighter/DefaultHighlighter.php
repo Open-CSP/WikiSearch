@@ -46,7 +46,8 @@ class DefaultHighlighter implements Highlighter {
 			$main_config = MediaWikiServices::getInstance()->getMainConfig();
 			$this->commonFieldSettings = [
 				"fragment_size" => $main_config->get( "WikiSearchHighlightFragmentSize" ),
-				"number_of_fragments" => $main_config->get( "WikiSearchHighlightNumberOfFragments" )
+				"number_of_fragments" => $main_config->get( "WikiSearchHighlightNumberOfFragments" ),
+                "max_analyzer_offset" => 1000000,
 			];
 		}
 	}
