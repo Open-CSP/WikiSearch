@@ -18,7 +18,7 @@ require_once "$IP/maintenance/Maintenance.php";
 class setupNeuralSearch extends Maintenance {
     private const MODELS = [
         "embedding" => [
-            "name" => "huggingface/sentence-transformers/all-MiniLM-L6-v2",
+            "name" => "huggingface/sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
             "version" => "1.0.1",
         ],
         // Highlighting is currently not supported
@@ -149,7 +149,8 @@ class setupNeuralSearch extends Maintenance {
             );
         }
 
-        $this->client->ml()->deployModel(['id' => $modelId]);
+        $response = $this->client->ml()->deployModel(['id' => $modelId]);
+        $this->awaitTask( $response['task_id'] );
     }
 
     /**
@@ -243,6 +244,7 @@ class setupNeuralSearch extends Maintenance {
         } catch ( \Exception $e ) {
             if (
                 $e instanceof \OpenSearch\Common\Exceptions\Missing404Exception
+                || $e instanceof \OpenSearch\Common\Exceptions\ServerErrorResponseException
                 || $e instanceof \Elasticsearch\Common\Exceptions\Missing404Exception
                 || ($e instanceof \Elastic\Elasticsearch\Exception\ClientResponseException && $e->getResponse()->getStatusCode() === 404 )
             ) {
@@ -288,7 +290,7 @@ class setupNeuralSearch extends Maintenance {
         do {
             $task = $this->client->ml()->getTask( ['id' => $taskId] );
             sleep( 3 );
-        } while ( ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' ) && $i++ < 50 );
+        } while ( ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' ) && $i++ < 500 );
 
         if ( $task['state'] !== 'COMPLETED' ) {
             throw new \Exception( 'Task failed to complete: ' . json_encode( $task ) );

@@ -204,4 +204,20 @@ git apply ../WikiSearch/docs/smw.patch
 
 ## Step 5 - Run maintenance scripts
 
-Run the `extensions/SemanticMediaWiki/maintenance/rebuildElasticIndex.php` maintenance script.
+Run the `extensions/SemanticMediaWiki/maintenance/rebuildElasticIndex.php` maintenance script:
+
+```bash
+php maintenance/run.php ./extensions/SemanticMediaWiki/maintenance/rebuildElasticIndex.php
+```
+
+## Disabling natural language search per page
+
+You can disable natural language search for a specific search page by setting `natural language search` to false in your `WikiSearchConfig`:
+
+```
+{{#WikiSearchConfig:
+|...
+|natural language search=false
+|...
+}}
+```
