@@ -79,8 +79,12 @@ class setupNeuralSearch extends Maintenance {
 
         foreach ( self::MODELS as $modelKey => $modelSpec ) {
             if ( isset( $models[$modelKey] ) ) {
-                $this->output( "\t... `$modelKey` model already deployed, skipping ...\n");
-                continue;
+                if ( $this->modelExists( $models[$modelKey] ) ) {
+                    $this->output( "\t... `$modelKey` model already deployed, skipping ...\n" );
+                    continue;
+                }
+
+                $this->output( "\t... WARNING: `$modelKey` model is registered in config (ID: {$models[$modelKey]}) but does not exist in OpenSearch, redeploying ...\n" );
             }
 
             try {
@@ -159,26 +163,35 @@ class setupNeuralSearch extends Maintenance {
     private function putEmbeddingPipeline( string $modelId, array $embeddedProperties ): array {
         $fieldMap = [];
         $processors = [];
-        $remove = [];
 
         foreach ( $embeddedProperties as $property ) {
             $propertyFieldMapper = new PropertyFieldMapper( $property );
-            $propertyField = $propertyFieldMapper->getPropertyField();
 
-            if ( str_contains( $propertyField, '.' ) ) {
-                $newPropertyField = 'tmp_' . sha1( $property );
+            $sourceFieldName = $propertyFieldMapper->getPropertyField();
+            $embeddingFieldName = $propertyFieldMapper->getEmbeddingField();
+
+            if ( str_contains( $sourceFieldName, '.' ) ) {
+                // This is required since neural search does not work well with nested fields
+                $tmpFieldName = 'WSP:tmp_' . sha1( $property );
+                $accessExpr = self::buildAccessExpression( $sourceFieldName );
                 $processors[] = [
-                    'copy' => [
-                        'source_field' => $propertyField,
-                        'target_field' => $newPropertyField
-                    ]
+                    'script' => [
+                        'if' => self::buildIfCondition( $sourceFieldName ),
+                        'source' => <<<SCRIPT
+                        def val = {$accessExpr};
+                        if (val instanceof List) {
+                          ctx['{$tmpFieldName}'] = val.stream().collect(Collectors.joining(' '));
+                        } else if (val instanceof String) {
+                          ctx['{$tmpFieldName}'] = val;
+                        }
+                        SCRIPT
+                    ],
                 ];
 
-                $propertyField = $newPropertyField;
-                $remove[] = $newPropertyField;
+                $sourceFieldName = $tmpFieldName;
             }
 
-            $fieldMap[$propertyField] = $propertyFieldMapper->getEmbeddingField();
+            $fieldMap[$sourceFieldName] = $embeddingFieldName;
         }
 
         $body = [
@@ -191,11 +204,6 @@ class setupNeuralSearch extends Maintenance {
                         'field_map' => $fieldMap,
                     ],
                 ],
-                [
-                    'remove' => [
-                        'field' => $remove,
-                    ]
-                ]
             ],
         ];
 
@@ -219,6 +227,30 @@ class setupNeuralSearch extends Maintenance {
         }
 
         return ['created' => true];
+    }
+
+    /**
+     * Whether the specified ML model exists in OpenSearch.
+     *
+     * @param string $modelId
+     * @return bool
+     * @throws \Exception
+     */
+    private function modelExists( string $modelId ): bool {
+        try {
+            $this->client->ml()->getModel( ['id' => $modelId] );
+            return true;
+        } catch ( \Exception $e ) {
+            if (
+                $e instanceof \OpenSearch\Common\Exceptions\Missing404Exception
+                || $e instanceof \Elasticsearch\Common\Exceptions\Missing404Exception
+                || ($e instanceof \Elastic\Elasticsearch\Exception\ClientResponseException && $e->getResponse()->getStatusCode() === 404 )
+            ) {
+                return false;
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -273,6 +305,42 @@ class setupNeuralSearch extends Maintenance {
         }
 
         return $info['version'];
+    }
+
+    /**
+     * Builds a field access expression using bracket notation.
+     *
+     * E.g. "P:507.txtField" becomes "ctx['P:507']['txtField']"
+     */
+    private static function buildAccessExpression( string $fieldName ): string {
+        $parts = explode( '.', $fieldName );
+        $expr = 'ctx';
+
+        foreach ( $parts as $part ) {
+            $expr .= "['{$part}']";
+        }
+
+        return $expr;
+    }
+
+    /**
+     * Builds a Painless `if` condition that safely checks each level of a
+     * dot-notation field path using bracket notation, which is required for
+     * field names containing special characters such as colons.
+     *
+     * E.g. "P:507.txtField" => "ctx.containsKey('P:507') && ctx['P:507'].containsKey('txtField')"
+     */
+    private static function buildIfCondition( string $fieldPath ): string {
+        $parts = explode( '.', $fieldPath );
+        $conditions = [];
+        $current = 'ctx';
+
+        foreach ( $parts as $part ) {
+            $conditions[] = "{$current}.containsKey('{$part}')";
+            $current .= "['{$part}']";
+        }
+
+        return implode( ' && ', $conditions );
     }
 }
 
