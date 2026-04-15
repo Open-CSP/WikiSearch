@@ -139,6 +139,8 @@ If you get an error like the one below, please wait a short while and try again.
 ERROR: Failed to deploy `embedding` model: Task failed to complete: {"task_type":"REGISTER_MODEL","function_name":"TEXT_EMBEDDING","state":"FAILED","worker_node":["2h_fiX9IQoWtkhvD4Vw8Gg"],"create_time":1776251193461,"last_update_time":1776251193510,"error":"Memory Circuit Breaker is open, please check your resources!","is_async":true}
 ```
 
+> **IMPORTANT NOTE:** It is not recommended to use a separate deployed model for each index. Deploy the model once, and re-use the deployed model ID for multiple indices.
+
 ## Step 2 - Configure the data standard and enable raw text
 
 Copy the data standard template `smw-wikisearch-data-vector-embeddings-template.json` from the `data_templates` folder
