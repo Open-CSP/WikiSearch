@@ -128,7 +128,7 @@ This initialization script does the following:
 
 - It ensures you are running a compatible version of OpenSearch.
 - It configures OpenSearch to run machine learning algorithms on non-ML nodes.
-- It creates and deploys a new embedding model, if none is already configured.
+- It creates and deploys a new embedding model, **if none is already configured.** See the **IMPORTANT NOTE** above for more information.
 - It (re)creates an embedding pipeline for document ingestion.
 
 The initialization script will return the ID of the model to use for embedding, if no model has yet been configured.
