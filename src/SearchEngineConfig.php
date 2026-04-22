@@ -50,6 +50,7 @@ class SearchEngineConfig {
 		"result template"		                 => [ "type" => "string" ],
 		"fallback sorts"                         => [ "type" => "sortlist" ],
 		"include default search term properties" => [ "type" => "boolean" ],
+		"natural language search"                => [ "type" => "boolean" ],
 	];
 
 	/**
@@ -402,6 +403,31 @@ class SearchEngineConfig {
 	public function getResultProperties(): array {
 		return $this->result_properties;
 	}
+
+    /**
+     * Returns whether natural language search is enabled for this request.
+     *
+     * @return bool
+     */
+    public function isNaturalLanguageSearchEnabled(): bool {
+        $mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+
+        if ( !$mainConfig->get( 'WikiSearchEnableNeuralSearch' ) ) {
+            return false;
+        }
+
+        $models = $mainConfig->get( 'WikiSearchNeuralModels' );
+        if ( !is_array( $models ) || empty( $models['embedding'] ) ) {
+            return false;
+        }
+
+        $perPage = $this->getSearchParameter( 'natural language search' );
+        if ( $perPage !== false ) {
+            return (bool)$perPage;
+        }
+
+        return true;
+    }
 
 	/**
 	 * Updates/adds this SearchEngineConfig object in the database with the current values.

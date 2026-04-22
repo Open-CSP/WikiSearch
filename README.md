@@ -19,6 +19,10 @@ ElasticSearch query that was used to perform the search.
 | `aggregations` | `list`    | The aggregations to generate from the search. Defaults to the empty list. See below for additional information and how to specify the aggregations.                                                      |
 | `sorting`      | `list`    | The sortings to apply to the search. Defaults to the empty list. See below for additional information about and how to specify the sortings.                                                             |
 
+## Natural language search
+
+For documentation about using and setting-up natural language search, please see `docs/NaturalLanguageSearch.md`.
+
 ## Special properties
 
 There are a number of special properties defined by Semantic MediaWiki that are worth pointing out. These properties act just like regular properties, but do not appear in Special:Browse.
@@ -210,7 +214,7 @@ Special page that tracks all searches that are performed, and how often they are
   * `wfLoadExtension( 'WikiSearch' );`
 * Run the update script which will automatically create the necessary database tables that this extension needs.
 * Add the following dependencies to your `composer.local.json`:
-  * [`elasticsearch/elasticsearch`](https://packagist.org/packages/elasticsearch/elasticsearch), with a version constraint matching your ElasticSearch version.
+  * [`elasticsearch/elasticsearch`](https://packagist.org/packages/elasticsearch/elasticsearch) OR [`opensearch-project/opensearch-php`](https://packagist.org/packages/opensearch-project/opensearch-php), with a version constraint matching your ElasticSearch version.
   * [`handcraftedinthealps/elasticsearch-dsl`](https://packagist.org/packages/handcraftedinthealps/elasticsearch-dsl), with a version constraint matching your ElasticSearch version
 * Run `composer update --no-dev` in the root of your MediaWiki installation.
 * Navigate to `Special:Version` on your wiki to verify that the extension is successfully installed.

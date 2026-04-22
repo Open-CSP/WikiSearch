@@ -3,13 +3,13 @@
 	"author": [
 		"Marijn van Wezel"
 	],
-	"version": "8.1.5",
+	"version": "9.0.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiSearch",
 	"descriptionmsg": "wikisearch-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.35.0",
+		"MediaWiki": ">= 1.39.0",
 		"extensions": {
 			"SemanticMediaWiki": ">= 3.0"
 		},
@@ -90,11 +90,24 @@
 		},
 		"WikiSearchEnableSearchHistory": {
 			"value": false
+		},
+		"WikiSearchEnableNeuralSearch": {
+			"value": false
+		},
+		"WikiSearchNeuralModels": {
+			"value": null
+		},
+		"WikiSearchNeuralEmbeddedProperties": {
+			"value": [ "subject-title^10", "text_raw", "attachment-content" ],
+			"merge_strategy": "provide_default"
 		}
 	},
 	"SpecialPages": {
 		"WikiSearchDataStandard": "WikiSearch\\Special\\SpecialWikiSearchDataStandard",
 		"WikiSearchHistory": "WikiSearch\\Special\\SpecialWikiSearchHistory"
+	},
+	"MaintenanceScripts": {
+		"WikiSearch:SetupNeuralSearch": "maintenance/SetupNeuralSearch.php"
 	},
 	"load_composer_autoloader": true,
 	"manifest_version": 2

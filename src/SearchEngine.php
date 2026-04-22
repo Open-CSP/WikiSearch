@@ -26,8 +26,11 @@ use Elastic\Elasticsearch\ClientBuilder;
 use Elastic\Elasticsearch\Exception\AuthenticationException;
 use Exception;
 use MediaWiki\MediaWikiServices;
+use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use RequestContext;
+use WikiMap;
 use WikiSearch\QueryEngine\Factory\QueryEngineFactory;
+use WikiSearch\QueryEngine\Filter\NeuralSearchTermFilter;
 use WikiSearch\QueryEngine\Filter\QueryPreparationTrait;
 use WikiSearch\QueryEngine\Filter\SearchTermFilter;
 use WikiSearch\QueryEngine\QueryEngine;
@@ -120,14 +123,23 @@ class SearchEngine {
 	public function addSearchTerm( string $search_term ) {
         $this->search_terms[] = $search_term;
 
-		$search_term_filter = new SearchTermFilter(
-			$this->prepareQuery( $search_term ),
-			$this->config->getSearchParameter( "search term properties" ) ?: null,
-			$this->config->getSearchParameter( "default operator" ) ?: "or",
-            $this->config->getSearchParameter( "include default search term properties" ) ?: false
-		);
+        if ( $search_term === '' ) {
+            return;
+        }
 
-		$this->query_engine->addFunctionScoreFilter( $search_term_filter );
+        $search_term_filter = new SearchTermFilter(
+            $this->prepareQuery( $search_term ),
+            $this->config->getSearchParameter( "search term properties" ) ?: null,
+            $this->config->getSearchParameter( "default operator" ) ?: "or",
+            $this->config->getSearchParameter( "include default search term properties" ) ?: false
+        );
+
+        if ( $this->getConfig()->isNaturalLanguageSearchEnabled() && !$this->isAdvancedQuery( $search_term ) ) {
+            $filter = new NeuralSearchTermFilter( $search_term, $search_term_filter );
+            $this->query_engine->addFunctionScoreFilter( $filter );
+        } else {
+            $this->query_engine->addFunctionScoreFilter( $search_term_filter );
+        }
 	}
 
 	/**
@@ -224,6 +236,17 @@ class SearchEngine {
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Returns the OpenSearch index name, using the same logic as QueryEngineFactory.
+	 *
+	 * @return string
+	 */
+	private function getIndex(): string {
+		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+		return $mainConfig->get( 'WikiSearchElasticStoreIndex' )
+			?: 'smw-data-' . strtolower( WikiMap::getCurrentWikiId() );
 	}
 
 	/**

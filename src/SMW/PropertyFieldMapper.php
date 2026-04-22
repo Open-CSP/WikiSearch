@@ -224,6 +224,19 @@ class PropertyFieldMapper {
 		return sprintf( "%s.%sField", $this->getPID(), $this->property_field_type );
 	}
 
+    /**
+     * Returns the name of the embedding field for this property.
+     *
+     * @return string
+     */
+    public function getEmbeddingField(): string {
+        $key = $this->isInternalProperty() ?
+            $this->property_key :
+            $this->getPID();
+
+        return sprintf( "%s:embedding", $key );
+    }
+
 	/**
 	 * Returns the keyword field associated with this property. The caller is responsible for checking if this field
 	 * exists.
@@ -253,6 +266,15 @@ class PropertyFieldMapper {
 	public function getWeightedPropertyField(): string {
 		return sprintf( "%s^%d", $this->getPropertyField(), $this->property_weight );
 	}
+
+    /**
+     * Returns the weight of this property.
+     *
+     * @return int
+     */
+    public function getPropertyWeight(): int {
+        return $this->property_weight;
+    }
 
 	/**
 	 * Returns the search subfield associated with this property, if it exists, with the weight. The caller is

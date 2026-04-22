@@ -5,6 +5,8 @@
 		"refresh_interval": "1s",
 		"index.mapping.total_fields.limit": "9000",
 		"index.max_result_window": "50000",
+		"index.knn": true,
+		"default_pipeline": "wsns-pipeline",
 		"analysis": {
 			"filter": {
 				"synonym": {
@@ -274,6 +276,15 @@
 					}
 				}
 			},
+			"text_raw:embedding": {
+				"type": "knn_vector",
+				"dimension": 384,
+				"method": {
+					"name": "hnsw",
+					"space_type": "cosinesimil",
+					"engine": "lucene"
+				}
+			},
 			"subject.title": {
 				"type": "text",
 				"term_vector": "with_positions_offsets",
@@ -292,6 +303,15 @@
 						"analyzer": "search",
 						"term_vector": "with_positions_offsets"
 					}
+				}
+			},
+			"subject.title:embedding": {
+				"type": "knn_vector",
+				"dimension": 384,
+				"method": {
+					"name": "hnsw",
+					"space_type": "cosinesimil",
+					"engine": "lucene"
 				}
 			},
 			"subject.interwiki": {
@@ -336,6 +356,15 @@
 			},
 			"subject.rev_id": {
 				"type": "integer"
+			},
+			"attachment.content:embedding": {
+				"type": "knn_vector",
+				"dimension": 384,
+				"method": {
+					"name": "hnsw",
+					"space_type": "cosinesimil",
+					"engine": "lucene"
+				}
 			}
 		}
 	}

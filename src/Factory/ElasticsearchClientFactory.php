@@ -20,7 +20,9 @@ class ElasticsearchClientFactory {
      * @return \Elastic\Elasticsearch\Client|\Elasticsearch\Client
      */
     public function newElasticsearchClient() {
-        if ( class_exists( "\Elastic\Elasticsearch\ClientBuilder" ) ) {
+        if ( class_exists( "\\OpenSearch\\ClientBuilder" ) ) {
+            $clientBuilder = \OpenSearch\ClientBuilder::create();
+        } elseif ( class_exists( "\\Elastic\\Elasticsearch\\ClientBuilder" ) ) {
             $clientBuilder = \Elastic\Elasticsearch\ClientBuilder::create();
         } else {
             $clientBuilder = \Elasticsearch\ClientBuilder::create();
@@ -55,6 +57,15 @@ class ElasticsearchClientFactory {
         if ( $username !== null && $password !== null ) {
             $builder->setBasicAuthentication( $username, $password );
         }
+    }
+
+    /**
+     * Returns the configured OpenSearch/Elasticsearch host URLs as strings.
+     *
+     * @return string[]
+     */
+    public function getHosts(): array {
+        return $this->getElasticsearchHosts();
     }
 
     /**

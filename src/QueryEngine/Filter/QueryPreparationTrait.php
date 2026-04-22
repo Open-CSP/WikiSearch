@@ -21,15 +21,8 @@ trait QueryPreparationTrait {
 
         $term = preg_replace( '/(:|\+|=|\/)/', '\\\\$1', $term );
         $term = preg_replace( '/(\.)/', '*', $term );
-		$advancedQuery = array_reduce(
-            [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
-            function ( bool $carry, $char ) use ( $term ) {
-                return $carry ?: str_contains( $term, $char );
-            },
-            false
-        );
 
-        return $advancedQuery ? $term : self::insertWildcards( $term );
+        return self::isAdvancedQuery( $term ) ? $term : self::insertWildcards( $term );
 	}
 
     /**
@@ -60,4 +53,22 @@ trait QueryPreparationTrait {
 
         return preg_replace('/\*+/', '*', '*' . implode( '', $terms ) . '*' );
 	}
+
+    /**
+     * Whether $term is an "advanced query".
+     *
+     * @param string $term
+     * @return bool
+     */
+    public static function isAdvancedQuery( string $term ): bool {
+        $term = preg_replace( '/(:|\+|=|\/)/', '\\\\$1', $term );
+        $term = preg_replace( '/(\.)/', '*', $term );
+        return array_reduce(
+            [ "\"", "'", "AND", "NOT", "OR", "~", "(", ")", "?", "*", " -" ],
+            function ( bool $carry, $char ) use ( $term ) {
+                return $carry ?: str_contains( $term, $char );
+            },
+            false
+        );
+    }
 }
