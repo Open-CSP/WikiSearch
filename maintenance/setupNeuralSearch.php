@@ -2,9 +2,7 @@
 
 namespace WikiSearch\Maintenance;
 
-use Elasticsearch\Common\Exceptions\Missing404Exception;
 use MediaWiki\Maintenance\Maintenance;
-use MediaWiki\Maintenance\MaintenanceFatalError;
 use WikiSearch\SMW\PropertyFieldMapper;
 use WikiSearch\WikiSearchServices;
 
@@ -157,7 +155,7 @@ class setupNeuralSearch extends Maintenance {
      * Creates the embedding pipeline, if it does not yet exist.
      *
      * @param string $modelId
-     * @param array $properties
+     * @param string[] $embeddedProperties The list of properties to use for embedding
      * @return array{created: bool}
      * @throws \Exception When the creation of the pipeline failed
      */
@@ -280,17 +278,26 @@ class setupNeuralSearch extends Maintenance {
     }
 
     /**
-     * @param array $pipeline
-     * @return array
-     * @throws \Exception
+     * Busy-wait for a task with the given ID to be completed. Throws in case the task fails to complete.
+     *
+     * Waits for at most $timeout seconds.
+     *
+     * @param string $taskId The ID of the task to busy-wait for
+     * @param int $timeout The maximum number of seconds to wait for a task to complete
+     *
+     * @return array The details of the completed task
+     *
+     * @throws \Exception If the task fails to complete, either because of the timeout or because it failed
      */
-    private function awaitTask( string $taskId ): array {
-        $i = 0;
+    private function awaitTask( string $taskId, int $timeout = 1600 ): array {
+        $time = time();
 
         do {
             $task = $this->client->ml()->getTask( ['id' => $taskId] );
             sleep( 3 );
-        } while ( ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' ) && $i++ < 500 );
+
+            $timeDelta = time() - $time;
+        } while ( ( $task['state'] === 'CREATED' || $task['state'] === 'RUNNING' ) && $timeDelta < $timeout );
 
         if ( $task['state'] !== 'COMPLETED' ) {
             throw new \Exception( 'Task failed to complete: ' . json_encode( $task ) );
@@ -299,6 +306,11 @@ class setupNeuralSearch extends Maintenance {
         return $task;
     }
 
+    /**
+     * Returns information about the OpenSearch/ElasticSearch version.
+     *
+     * @return array
+     */
     private function getVersion(): array {
         $info = $this->client->info();
 

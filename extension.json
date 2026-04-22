@@ -38,7 +38,6 @@
 		"wikisearch-edit-data-standard"
 	],
 	"Hooks": {
-		"SetupAfterCache": "WikiSearch\\WikiSearchHooks::onSetupAfterCache",
 		"ParserFirstCallInit": "WikiSearch\\WikiSearchHooks::onParserFirstCallInit",
 		"ArticleDeleteComplete": "WikiSearch\\WikiSearchHooks::onArticleDeleteComplete",
 		"PageContentSaveComplete": "WikiSearch\\WikiSearchHooks::onPageContentSaveComplete",
