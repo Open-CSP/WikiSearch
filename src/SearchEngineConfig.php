@@ -192,9 +192,9 @@ class SearchEngineConfig {
 				// This is a "facet property", since its key is not a valid search parameter
 				$facet_properties[] = $parameter_value;
 			} elseif ( $key === "base query" ) {
-				// The "base query" needs special handling, because it may contain wikitext that should only be parsed
-				// when the search is loaded.
-				$expanded_value = $frame->expand( $parameter, PPFrame::RECOVER_ORIG );
+				// The "base query" is fully expanded at config-store time so that template arguments
+				// (e.g. {{{Query|default}}}) are resolved to their actual passed values.
+				$expanded_value = $frame->expand( $parameter );
 				$search_parameters["base query"] = explode( '=', $expanded_value, 2 )[1] ?? '';
 			} else {
 				// This is a "search term parameter"
