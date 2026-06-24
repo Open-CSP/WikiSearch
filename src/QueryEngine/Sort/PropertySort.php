@@ -67,7 +67,12 @@ class PropertySort implements Sort {
             $parameters['mode'] = $this->mode;
         }
 
-        $field = $this->field->hasKeywordSubfield() ?
+        // Numeric and date fields must sort on the base field (numField/datField),
+        // not on the .keyword subfield (which is text and gives alphanumeric order).
+        $fieldType = $this->field->getPropertyFieldType();
+        $isNumericType = ( $fieldType === 'num' || $fieldType === 'dat' );
+
+        $field = ( !$isNumericType && $this->field->hasKeywordSubfield() ) ?
             $this->field->getKeywordField() :
             $this->field->getPropertyField();
 
