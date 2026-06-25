@@ -47,7 +47,7 @@ class DefaultHighlighter implements Highlighter {
 			$this->commonFieldSettings = [
 				"fragment_size" => $main_config->get( "WikiSearchHighlightFragmentSize" ),
 				"number_of_fragments" => $main_config->get( "WikiSearchHighlightNumberOfFragments" ),
-                "max_analyzer_offset" => 1000000,
+                "max_analyzed_offset" => 1000000,
 			];
 		}
 	}
